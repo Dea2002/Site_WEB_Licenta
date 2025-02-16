@@ -1,0 +1,34 @@
+[{
+        "_id": "672cb7f3a7c42746c479f24a",
+        "name": "Grigorescu Maria",
+        "email": "grigorescu@maria.com",
+        "photoUrl": "adresa_poza",
+        "role": "proprietar",
+        "gender": "feminin",
+        "address": "Str Calomfirescu, nr 5",
+        "phoneNumber": "0798100237",
+        "totalProperties": 1
+    },
+    {
+        "_id": "672cbd16db247d771eaaa8f8",
+        "name": "Serban Marian",
+        "email": "serban@marian.com",
+        "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJREWu6wmpe6lhZAMcQUWk77DU2RIVQ5M8aTi1Vdwag=s96-c",
+        "role": "proprietar",
+        "gender": "masculin",
+        "address": "Str Crisan, nr 40",
+        "phoneNumber": "0725987360",
+        "totalProperties": 1
+    },
+    {
+        "_id": "672cb89ca7c42746c479f24c",
+        "name": "Popescu Alexandru",
+        "email": "popescu@alex.com",
+        "photoUrl": "poza_link",
+        "role": "proprietar",
+        "gender": "masculin",
+        "address": "Str Cicero, nr 2",
+        "phoneNumber": "0774996851",
+        "totalProperties": 1
+    }
+]

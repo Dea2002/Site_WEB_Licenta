@@ -1,0 +1,249 @@
+/* frontend/src/AdminUsersList.css */
+
+.admin-users-container {
+    padding: 80px 20px 20px 20px;
+    /* padding-top pentru a evita suprapunerea cu navbar-ul fix */
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.admin-users-container h1 {
+    color: #800080;
+    margin-bottom: 40px;
+}
+
+.users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+
+/* .user-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    width: 90%;
+    min-height: 100px;
+    overflow-y: auto;
+    padding: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    -webkit-border-radius: 16px;
+    -moz-border-radius: 16px;
+    -ms-border-radius: 16px;
+    -o-border-radius: 16px;
+    -webkit-transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    -moz-transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    -ms-transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    -o-transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+} */
+
+
+/* .user-card {
+    display: flex;
+    align-items: center;
+    
+    justify-content: flex-start;
+    
+    background-color: rgba(255, 255, 255, 0.9);
+    
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    
+    max-width: 800px;
+    min-width: 700px;
+    padding: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+} */
+
+
+/* .user-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+} */
+
+.user-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.user-card h2 {
+    font-size: 1.5rem;
+    color: #800080;
+    margin-bottom: 10px;
+}
+
+.user-card p {
+    font-size: 1rem;
+    color: #060606;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+.user-card p strong {
+    color: #333333;
+}
+
+
+/* pentru stergere*/
+
+
+/* .delete-button {
+    background-color: #800080;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+} */
+
+
+/* .delete-button {
+    background-color: #800080;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    height: fit-content;
+
+margin-left: 50px;
+
+
+
+}
+.delete-button:hover {
+    background-color: #b4498b;
+}
+*/
+
+.user-card {
+    display: grid;
+    grid-template-areas: "name name" "info button";
+    grid-template-columns: 1fr auto;
+    grid-gap: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    max-width: 800px;
+    min-width: 700px;
+    padding: 20px;
+    /* Mareste padding-ul pentru spatiere */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.user-name {
+    grid-area: name;
+    text-align: center;
+    margin: 0;
+}
+
+.user-name h2 {
+    margin: 0;
+}
+
+.user-info {
+    grid-area: info;
+}
+
+.user-info p {
+    margin: 4px 0;
+}
+
+.delete-button {
+    grid-area: button;
+    align-self: start;
+    /* Aliniaza butonul la inceputul celulei */
+    background-color: #800080;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    height: fit-content;
+}
+
+.delete-button:hover {
+    background-color: #b4498b;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+}
+
+.add-user-form {
+    margin-bottom: 30px;
+}
+
+.add-user-form form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+}
+
+.add-user-form form div {
+    margin-bottom: 10px;
+}
+
+.add-user-form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.add-user-form input,
+.add-user-form select {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.add-user-form button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-user-form button:hover {
+    background-color: #218838;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+}

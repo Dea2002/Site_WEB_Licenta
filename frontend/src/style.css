@@ -1,0 +1,384 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+
+
+/* Pseudo-elementul pentru fundal */
+
+body::before {
+    content: "";
+    position: fixed;
+    /*Fixeazăpseudo-elementulpetotecranul*/
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /*Seteazăfundalul:;
+    gradient+imagine*/
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/Poze_apartamente/landing_pagev2.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    filter: blur(4px);
+    /*Asigură-tecăpseudo-elementulesteînspateleconținutului*/
+    z-index: -1;
+    -webkit-filter: blur(4px);
+}
+
+.apartments-list {
+    display: grid;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.apartment {
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 12px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(201, 81, 153, 0.908);
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.apartment:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.apartment img {
+    width: 90%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    margin: 0 auto;
+    display: block;
+}
+
+.apartment h2 {
+    font-size: 1.8rem;
+    color: #800080;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.apartment p {
+    margin-bottom: 4px;
+    font-size: 1rem;
+    color: #060606;
+    line-height: 1;
+}
+
+.apartment p strong {
+    color: #333333;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #659287;
+    color: #E8EFCF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    border-color: #659287;
+    border-width: 2px;
+    border-style: solid;
+    display: inline-block;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    font-size: 1rem;
+    margin-top: 20px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    -webkit-transition: background-color 0.3s ease;
+    -moz-transition: background-color 0.3s ease;
+    -ms-transition: background-color 0.3s ease;
+    -o-transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    /* background-color: #DBA979; */
+    background-color: #E8EFCF;
+    color: #659287;
+    border-color: #659287;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.login-form,
+.register-form {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-form div,
+.register-form div {
+    margin-bottom: 15px;
+}
+
+.login-form label,
+.register-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333333;
+}
+
+.login-form input,
+.register-form input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.error {
+    color: red;
+}
+
+.success {
+    color: green;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    position: relative;
+    width: 400px;
+    max-width: 90%;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+
+/* Containerul principal al paginii de landing */
+
+.landing-page {
+    /* Sa se intinda pe toata latimea si inaltimea ecranului */
+    width: 100%;
+    height: 100vh;
+    /* position: relative; */
+    /* Imaginea de fundal, cea principala */
+    background-image: url('/Poze_apartamente/landing_pagev2.png');
+    /* Proprietati pentru a acoperi toata suprafata (fara repetare) */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* Daca vrei sa center pe verticala continutul */
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.landing-content {
+    margin-top: 5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+
+/* Card-ul (overlay) care va contine doar titlul */
+
+.card_titlu {
+    /* background-color: #d2b48c; */
+    /*position: absolute;
+    */
+    /*top: 5%;
+    */
+    padding: 12px 30px;
+    border-radius: 30px;
+    /* box-shadow: 0 0 10px 2px #583927; */
+    color: #fff;
+    text-align: center;
+    /*spatiuldintretitlusibaradecautare*/
+    margin-bottom: 3rem;
+    /*Ajusteazaaceastavaloarepentrua-lridicamaisus*/
+    /*Spatiuintretitlusiformular*/
+    -webkit-border-radius: 1px;
+    -moz-border-radius: 30px;
+    -ms-border-radius: 30px;
+    -o-border-radius: 30px;
+    -webkit-border-radius: 30px;
+}
+
+
+/* Stil pentru titlu (h1) */
+
+.landing-page h1 {
+    font-size: 2.5rem;
+    /* color: #583.927; */
+    color: #8b5e30;
+    /* mix-blend-mode: exclusion; */
+    font-weight: 700;
+    margin: 0;
+    /* Elimina marginile implicite ale h1 */
+}
+
+
+/* Stil pentru formular (bara de cautare) */
+
+.landing-page form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+
+/* Stilul pentru input (casuta de cautare) */
+
+.landing-page input[type="text"] {
+    width: 250px;
+    padding: 1rem 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    font-size: 1rem;
+    /* sau orice valoare dorești, de ex. 16px, 18px etc. */
+}
+
+
+/* Stilul pentru butonul de cautare */
+
+.landing-page button[type="submit"] {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    background-color: #d8ac70;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #76471e;
+    border-color: #d8ac70;
+    border-width: 2px;
+    border-style: solid;
+}
+
+
+/* Schimbam culoarea butonului la hover */
+
+.landing-page button[type="submit"]:hover {
+    border-color: #E0E0E0;
+    border-style: solid;
+}
+
+
+/* Stilul pentru butonul "Lista cu apartamentele" */
+
+.list-all-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 25px;
+    background-color: #d8ac70;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    -ms-border-radius: 25px;
+    -o-border-radius: 25px;
+    color: #76471e;
+    border-color: #d8ac70;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.list-all-button:hover {
+    border-color: #E0E0E0;
+    border-style: solid;
+}
+
+
+/* Adauga spatiu intre elemente fara a include titlul in overlay */
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+
+/* Containerul pentru textul wave (daca vrei sa il pozitionezi cumva special) */
+
+.wave-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Poti pune margin, padding etc. daca vrei */
+}
+
+
+/* Stil de baza pentru textul wave */
+
+.wave-text {
+    font-size: 2.5rem;
+    /* ajusteaza cum vrei */
+    color: #583927;
+    /* sau alta culoare; poti pastra ce aveai */
+    font-weight: 700;
+    /* daca vrei bold */
+    display: inline-block;
+    /* ca sa nu se rupa accidental */
+    margin: 0;
+    /* elimina marginile implicite de la h1 */
+}
+
+
+/* Animatia se aplica fiecarui <span> din wave-text */
+
+.wave-text span {
+    display: inline-block;
+    animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+        /* cat “salt” vrei */
+    }
+}
