@@ -46,13 +46,16 @@ const LandingPage: React.FC = () => {
                 </div>
                 <form onSubmit={handleSubmit}>
                     {/* <label htmlFor="location">Cauta dupa locatie:</label> */}
-                    <input
-                        type="text"
-                        id="location"
-                        placeholder="Cauta dupa locatie"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            id="location"
+                            placeholder="Cauta dupa locatie"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                        <i className="fa-solid fa-magnifying-glass"></i>
+                    </div>
                     <button type="submit">Cauta</button>
                 </form>
                 {/* Buton suplimentar pentru afisarea tuturor apartamentelor */}

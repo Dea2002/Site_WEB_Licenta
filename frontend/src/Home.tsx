@@ -9,6 +9,7 @@ import LoginModal from './LoginModal';
 import { AuthContext } from './AuthContext';
 import { Apartment } from './types';
 import './style.css';
+// import './Home.css';
 
 // Definim o interfata pentru filtre (poti adauga si alte filtre dupa nevoie)
 interface Filters {
@@ -138,26 +139,47 @@ const Home: React.FC = () => {
                                 key={apartment._id}
                                 className={`apartment ${apartment.status === 'indisponibil' ? 'unavailable' : ''}`}
                             >
-                                <h2>{apartment.name}</h2>
-                                <p><strong>Descriere:</strong> {apartment.description}</p>
-                                <p><strong>Numar de camere:</strong> {apartment.numberofrooms}</p>
-                                <p><strong>Pret:</strong> {apartment.price} RON</p>
-                                <p><strong>Locatie:</strong> {apartment.location}</p>
-                                <p><strong>Proprietar:</strong> {apartment.ownername}</p>
-                                <p><strong>Email proprietar:</strong> {apartment.owneremail}</p>
-                                <p><strong>Status:</strong> {apartment.status === 'disponibil' ? 'Disponibil' : 'Indisponibil'}</p>
-                                {apartment.status === 'indisponibil' && apartment.reason && (
-                                    <p><strong>Motiv indisponibilitate:</strong> {apartment.reason}</p>
-                                )}
-                                <p><strong>Total rezervari:</strong> {apartment.totalbooked}</p>
+                                {/* <h2>{apartment.name}</h2> */}
+                                {/* <p><strong>Descriere:</strong> {apartment.description}</p> */}
+                                {/* <p><strong>Numar de camere:</strong> {apartment.numberofrooms}</p> */}
+
                                 {apartment.image && (
                                     <img src={`/Poze_apartamente/${apartment.image}`} alt={`Imagine pentru ${apartment.name}`} width="300" />
                                 )}
+                                {/* <p><strong>Pret:</strong> {apartment.price} RON</p> */}
+                                <p style={{ marginTop: '15px' }}>
+
+                                    <i className="fa-solid fa-location-dot" style={{ marginRight: '9px' }}></i>
+                                    <strong>: </strong>
+                                    {apartment.location}
+                                </p>
+
+                                <p>
+                                    <i className="fa-solid fa-house-user" style={{ marginRight: '4px' }}></i>
+                                    <strong>: </strong>
+                                    {apartment.numberofrooms}
+                                    <> camere</>
+                                </p>
+
+                                <p><strong>Pret :</strong> {apartment.price} RON</p>
+
+                                {/* <p><strong>Proprietar:</strong> {apartment.ownername}</p> */}
+                                {/* <p><strong>Email proprietar:</strong> {apartment.owneremail}</p> */}
+                                {/* <p><strong>Status:</strong> {apartment.status === 'disponibil' ? 'Disponibil' : 'Indisponibil'}</p> */}
+                                {/* {apartment.status === 'indisponibil' && apartment.reason && (
+                                        <p><strong>Motiv indisponibilitate:</strong> {apartment.reason}</p>
+                                    )} */}
+                                {/* <p><strong>Total rezervari:</strong> {apartment.totalbooked}</p> */}
+                                {/* {apartment.image && (
+                                        <img src={`/Poze_apartamente/${apartment.image}`} alt={`Imagine pentru ${apartment.name}`} width="300" />
+                                    )} */}
+
                                 <button
                                     onClick={() => handleMoreDetails(apartment._id)}
                                     className="button"
                                     disabled={apartment.status === 'indisponibil'}
                                 >
+                                    {/* {apartment.price} RON */}
                                     Mai multe detalii
                                 </button>
                             </div>
@@ -173,5 +195,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
 
