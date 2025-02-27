@@ -66,7 +66,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
-import './UserListAdmin.css'
+import './UserListAdmin.css';
 
 interface User {
     _id: string;

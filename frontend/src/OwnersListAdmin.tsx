@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
-import './OwnersListAdmin.css'
+import './OwnersListAdmin.css';
 
 interface Owner {
     _id: string;

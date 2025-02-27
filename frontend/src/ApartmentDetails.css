@@ -1,0 +1,140 @@
+.apartment-details-page {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Titlul principal */
+/* .apartment-details-page h1 {
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 30px;
+    color: #FAC67A;
+    font-size: 40px; 
+} */
+
+/* Container pentru secțiunea stânga (imagine + info) și secțiunea dreapta (card proprietar) */
+.details-container {
+    display: flex;
+    justify-content: space-between; /* spațiu între stânga și dreapta */
+    align-items: flex-start;       /* aliniere sus */
+    max-width: 1800px;            /* lățime maximă a paginii */
+    margin: 0 auto;               /* centrează orizontal */
+    padding: 0 20px;              /* un pic de spațiu lateral */
+  }
+
+  /* Partea stânga */
+.left-section {
+    flex: 2; /* ocupă mai mult spațiu față de right-section */
+    margin-right: 20px;
+  }
+  
+  /* Container pentru imagine */
+  .image-container {
+    text-align: left; /* ca imaginea să fie pe mijloc */
+    margin-bottom: 20px;
+    
+    margin: 25px 0 25px 40px; /* top, right, bottom, left */
+
+  }
+  
+  /* Imaginea apartamentului */
+  .image-container img {
+    /*max-width: 100%;
+    height: auto; */
+    width: 830px;
+    height: 450px;
+    /* margin: 25px; */
+    
+    /*object-fit: cover;*/
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+  
+  /* Informațiile despre apartament */
+  .info-container p {
+    font-size: 1rem;
+    margin: 8px 0;
+    color:rgb(214, 210, 210);
+  }
+  
+  /* ----- Partea dreapta ----- */
+  .right-section {
+    flex: 1; /* mai îngustă decât left-section */
+    display: flex;
+    height: auto; 
+    flex-direction: column;
+    align-items: center; /* center dacă vrei cardul centrat orizontal */
+  }
+  
+  /* Card Proprietar */
+  .owner-card {
+    position: relative; 
+    /* width: 100%; */
+    /* max-width: 250px;  */
+    width: 20px;
+    height: 225px;
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin-bottom: 20px; /* spațiu între card și butonul de rezervare */
+    text-align: center;  /* text centrat */
+}
+  
+  /* Titlul din card (Proprietar) */
+  .owner-card h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  /* Numele proprietarului */
+  .owner-card p {
+    margin: 10px 0;
+    font-weight: bold;
+  }
+  
+  /* Butoanele din colțurile de jos ale cardului */
+  .owner-card-button {
+    position: absolute;
+    bottom: 10px;
+    padding: 8px 12px;
+    background-color: #659287;
+    color: #E8EFCF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .owner-card-button:hover {
+    background-color: #4a716b;
+  }
+  
+  /* Buton "Detalii" în stânga jos */
+  .details-btn {
+    left: 10px;
+  }
+  
+  /* Buton "Chat" în dreapta jos */
+  .chat-btn {
+    right: 10px;
+  }
+  
+  /* Butonul "Rezerva acum" sub card */
+  .reserve-btn {
+    padding: 10px 20px;
+    background-color: #659287;
+    color: #E8EFCF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .reserve-btn:hover {
+    background-color: #4a716b;
+  }
+  
