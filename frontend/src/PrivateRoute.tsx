@@ -1,7 +1,7 @@
 // frontend/src/PrivateRoute.tsx
-import React, { useContext } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
+import React, { useContext } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { AuthContext } from "./AuthContext";
 
 interface PrivateRouteProps {
     children: JSX.Element;

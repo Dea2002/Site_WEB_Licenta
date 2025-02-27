@@ -44,9 +44,9 @@
 
 // frontend/src/AuthContext.tsx
 
-import React, { createContext, useState, useEffect } from 'react';
-import jwt_decode from 'jwt-decode';
-import axios from 'axios';
+import React, { createContext, useState, useEffect } from "react";
+import jwt_decode from "jwt-decode";
+import axios from "axios";
 
 interface User {
     _id: string;
@@ -70,9 +70,9 @@ export const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
     user: null,
     token: null,
-    setUser: () => { },
-    login: () => { }, // Adaugat
-    logout: () => { },
+    setUser: () => {},
+    login: () => {}, // Adaugat
+    logout: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedToken = localStorage.getItem('token');
+        const storedToken = localStorage.getItem("token");
         if (storedToken) {
             setToken(storedToken);
             setIsAuthenticated(true);
@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const login = (token: string) => {
-        localStorage.setItem('token', token);
+        localStorage.setItem("token", token);
         setToken(token);
         setIsAuthenticated(true);
         const decoded: any = jwt_decode(token);
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(false);
         setUser(null);
         setToken(null);
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
     };
 
     return (

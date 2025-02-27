@@ -21,8 +21,7 @@
 }
 
 .apartment-card {
-    background-color: rgba(255, 255, 255, 0.9);
-    /* Fundal semi-transparent */
+    background-color: rgba(255, 255, 255, 0.9); /* Fundal semi-transparent */
     border: 1px solid #ccc;
     border-radius: 12px;
     width: 300px;

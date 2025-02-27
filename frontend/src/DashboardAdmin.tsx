@@ -1,10 +1,8 @@
-
-import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
-import { AuthContext } from './AuthContext';
-import { useNavigate } from 'react-router-dom';
-import './DashboardAdmin.css';
-
+import React, { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
+import "./DashboardAdmin.css";
 
 interface Stats {
     totalApartments: number;
@@ -19,7 +17,7 @@ const DashboardAdmin: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get('http://localhost:5000/admin/stats', {
+            .get("http://localhost:5000/admin/stats", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -28,7 +26,7 @@ const DashboardAdmin: React.FC = () => {
                 setStats(response.data);
             })
             .catch((error) => {
-                console.error('Eroare la obtinerea statisticilor:', error);
+                console.error("Eroare la obtinerea statisticilor:", error);
             });
     }, [token]);
 
@@ -41,15 +39,15 @@ const DashboardAdmin: React.FC = () => {
             <h1>Panou de Control Admin</h1>
             {stats ? (
                 <div className="cards-container">
-                    <div className="card" onClick={() => handleCardClick('/admin/apartments')}>
+                    <div className="card" onClick={() => handleCardClick("/admin/apartments")}>
                         <h2>Total Apartamente</h2>
                         <p>{stats.totalApartments}</p>
                     </div>
-                    <div className="card" onClick={() => handleCardClick('/admin/users')}>
+                    <div className="card" onClick={() => handleCardClick("/admin/users")}>
                         <h2>Total Utilizatori</h2>
                         <p>{stats.totalUsers}</p>
                     </div>
-                    <div className="card" onClick={() => handleCardClick('/admin/owners')}>
+                    <div className="card" onClick={() => handleCardClick("/admin/owners")}>
                         <h2>Total Proprietari</h2>
                         <p>{stats.totalOwners}</p>
                     </div>

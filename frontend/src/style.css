@@ -5,7 +5,6 @@ body {
     position: relative;
 }
 
-
 /* Pseudo-elementul pentru fundal */
 
 body::before {
@@ -18,7 +17,8 @@ body::before {
     height: 100%;
     /*Seteazăfundalul:;
     gradient+imagine*/
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/Poze_apartamente/landing_pagev2.png');
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("/Poze_apartamente/landing_pagev2.png");
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -30,38 +30,32 @@ body::before {
 }
 
 .home-container {
-   
-  display: flex;
-  gap: 20px;
-  max-width: 1470px;
-  margin: 20px auto;
-  padding: 0 0px;
-  align-items: flex-start;
-     
+    display: flex;
+    gap: 20px;
+    max-width: 1470px;
+    margin: 20px auto;
+    padding: 0 0px;
+    align-items: flex-start;
 }
 
 /* Sidebar-ul cu filtre */
 .filters-sidebar {
     width: 320px; /* marimea latimii */
-    background-color: #E8EFCF;
+    background-color: #e8efcf;
     min-height: 650px; /* inaltimea minima */
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .apartments-list {
-
     flex: 1;
     display: flex;
-    flex-wrap: wrap;  /* permite cardurilor să treacă pe rândul următor */
+    flex-wrap: wrap; /* permite cardurilor să treacă pe rândul următor */
     gap: 20px;
     /* justify-content: center; */
     /* sau justify-content: space-between; dacă vrei spațiere specială */
 }
-    
-  
 
 .apartment {
     position: relative;
@@ -69,7 +63,8 @@ body::before {
     height: 400px;
     flex: 0 0 calc(50% - 55px);
     box-sizing: border-box;
-    /*importantpentrucalculecorecte*/border: 1px solid #ccc;
+    /*importantpentrucalculecorecte*/
+    border: 1px solid #ccc;
     padding: 16px;
     margin: 7px; /* distanta dintre carduri, vezi ca daca pui prea mult vei avea un singur card pe orizontala <3 */
     border-radius: 12px;
@@ -126,7 +121,7 @@ body::before {
     right: 35px;
     padding: 10px 20px;
     background-color: #659287;
-    color: #E8EFCF;
+    color: #e8efcf;
     border: none;
     cursor: pointer;
     border-radius: 4px;
@@ -151,7 +146,7 @@ body::before {
 
 .button:hover {
     /* background-color: #DBA979; */
-    background-color: #E8EFCF;
+    background-color: #e8efcf;
     color: #659287;
     border-color: #659287;
     border-width: 2px;
@@ -230,7 +225,6 @@ body::before {
     cursor: pointer;
 }
 
-
 /* Containerul principal al paginii de landing */
 
 .landing-page {
@@ -239,7 +233,7 @@ body::before {
     height: 100vh;
     /* position: relative; */
     /* Imaginea de fundal, cea principala */
-    background-image: url('/Poze_apartamente/landing_pagev2.png');
+    background-image: url("/Poze_apartamente/landing_pagev2.png");
     /* Proprietati pentru a acoperi toata suprafata (fara repetare) */
     background-repeat: no-repeat;
     background-position: center;
@@ -258,7 +252,6 @@ body::before {
     align-items: center;
     width: 100%;
 }
-
 
 /* Card-ul (overlay) care va contine doar titlul */
 
@@ -284,7 +277,6 @@ body::before {
     -webkit-border-radius: 30px;
 }
 
-
 /* Stil pentru titlu (h1) */
 
 .landing-page h1 {
@@ -297,7 +289,6 @@ body::before {
     /* Elimina marginile implicite ale h1 */
 }
 
-
 /* Stil pentru formular (bara de cautare) */
 
 .landing-page form {
@@ -306,7 +297,6 @@ body::before {
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
-
 
 /* Stilul pentru input (casuta de cautare) */
 
@@ -319,7 +309,6 @@ body::before {
     font-size: 1rem;
     /* sau orice valoare dorești, de ex. 16px, 18px etc. */
 }
-
 
 /* Stilul pentru butonul de cautare */
 
@@ -337,14 +326,12 @@ body::before {
     border-style: solid;
 }
 
-
 /* Schimbam culoarea butonului la hover */
 
 .landing-page button[type="submit"]:hover {
-    border-color: #E0E0E0;
+    border-color: #e0e0e0;
     border-style: solid;
 }
-
 
 /* Stilul pentru butonul "Lista cu apartamentele" */
 
@@ -367,10 +354,9 @@ body::before {
 }
 
 .list-all-button:hover {
-    border-color: #E0E0E0;
+    border-color: #e0e0e0;
     border-style: solid;
 }
-
 
 /* Adauga spatiu intre elemente fara a include titlul in overlay */
 
@@ -381,7 +367,6 @@ body::before {
     gap: 1rem;
 }
 
-
 /* Containerul pentru textul wave (daca vrei sa il pozitionezi cumva special) */
 
 .wave-container {
@@ -390,7 +375,6 @@ body::before {
     align-items: center;
     /* Poti pune margin, padding etc. daca vrei */
 }
-
 
 /* Stil de baza pentru textul wave */
 
@@ -406,7 +390,6 @@ body::before {
     margin: 0;
     /* elimina marginile implicite de la h1 */
 }
-
 
 /* Animatia se aplica fiecarui <span> din wave-text */
 
@@ -430,19 +413,17 @@ body::before {
 .search-container {
     position: relative;
     display: inline-block; /* sau block, depinde de layout */
-  }
-
+}
 
 .search-container input {
     padding-right: 40px; /* spațiu pentru iconiță */
-  }
-  
-  .search-container i {
+}
+
+.search-container i {
     position: absolute;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
     color: #888; /* culoarea iconiței, modifică după preferințe */
     cursor: pointer;
-  }
-  
+}

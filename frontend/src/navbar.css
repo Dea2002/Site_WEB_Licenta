@@ -1,6 +1,5 @@
 /* navbar.css */
 
-
 /* Stilizarea containerului navbar */
 
 .custom-navbar {
@@ -10,11 +9,10 @@
     background: #659287;
 }
 
-
 /* Stilizarea link-urilor din navbar */
 
 .custom-navbar .nav-link {
-    color: #FAC67A !important;
+    color: #fac67a !important;
     /* folosește !important dacă vrei să suprascrii stilurile Bootstrap */
     font-size: 1.2rem;
     /* font-weight: 350; */
@@ -22,22 +20,21 @@
 }
 
 .custom-navbar .nav-link:hover {
-    color: #E8EFCF !important;
+    color: #e8efcf !important;
     /* DE AICI SE SCHIMBA DIMENSIUNEA ICONITELOR LA CLICK */
     /* de exemplu, o nuanță de galben la hover */
 }
 
-
 /* Stilizarea meniului dropdown */
 
 .custom-navbar .dropdown-menu {
-    background-color: #E8EFCF;
+    background-color: #e8efcf;
     font-size: 1.2rem;
     border: none;
 }
 
 .custom-navbar .dropdown-item {
-    color: #DEAA79;
+    color: #deaa79;
     font-size: 1.1rem;
     transition: background-color 0.2s ease;
     -webkit-transition: background-color 0.2s ease;
@@ -51,11 +48,10 @@
     color: #efeded;
 }
 
-
 /* Stilizarea iconițelor dacă dorești să le modifici dimensiunea sau culoarea */
 
 .custom-navbar i {
-    color: #DBA979;
+    color: #dba979;
     font-size: 1.2rem;
     /* poți ajusta dimensiunea după preferință */
     transition: transform 0.2s ease;

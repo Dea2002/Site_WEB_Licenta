@@ -1,4 +1,3 @@
-
 // import React, { useEffect, useState, useContext } from 'react';
 // import axios from 'axios';
 // import { AuthContext } from './AuthContext';
@@ -17,7 +16,6 @@
 //     const { token } = useContext(AuthContext);
 //     const [users, setUsers] = useState<User[]>([]);
 //     const [loading, setLoading] = useState<boolean>(true);
-
 
 //     useEffect(() => {
 //         axios
@@ -60,13 +58,10 @@
 
 // export default UserListAdmin;
 
-
-
-
-import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
-import { AuthContext } from './AuthContext';
-import './UserListAdmin.css';
+import React, { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "./AuthContext";
+import "./UserListAdmin.css";
 
 interface User {
     _id: string;
@@ -86,30 +81,24 @@ interface NewUserFormState {
     createdAt: Date;
 }
 
-
-
-
-
 const UserListAdmin: React.FC = () => {
     const { token } = useContext(AuthContext);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>(''); // Pentru a gestiona erorile
-    const [successMessage, setSuccessMessage] = useState<string>(''); // Pentru mesaje de succes
+    const [error, setError] = useState<string>(""); // Pentru a gestiona erorile
+    const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
     const [newUserForm, setNewUserForm] = useState<NewUserFormState>({
-        email: '',
-        fullName: '',
-        phoneNumber: '',
-        role: 'client',
-        password: '',
+        email: "",
+        fullName: "",
+        phoneNumber: "",
+        role: "client",
+        password: "",
         createdAt: new Date(),
     });
 
-
-
     useEffect(() => {
         axios
-            .get('http://localhost:5000/admin/users', {
+            .get("http://localhost:5000/admin/users", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -117,17 +106,15 @@ const UserListAdmin: React.FC = () => {
             .then((response) => {
                 setUsers(response.data);
                 setLoading(false);
-
             })
             .catch((error) => {
-                console.error('Eroare la obtinerea utilizatorilor:', error);
+                console.error("Eroare la obtinerea utilizatorilor:", error);
                 setLoading(false);
             });
     }, [token]);
 
-
     const handleDeleteUser = (userId: string) => {
-        if (window.confirm('Esti sigur ca vrei sa stergi acest utilizator?')) {
+        if (window.confirm("Esti sigur ca vrei sa stergi acest utilizator?")) {
             axios
                 .delete(`http://localhost:5000/admin/users/${userId}`, {
                     headers: {
@@ -135,60 +122,54 @@ const UserListAdmin: React.FC = () => {
                     },
                 })
                 .then((response) => {
-                    setSuccessMessage('Utilizatorul a fost sters cu succes.');
+                    setSuccessMessage("Utilizatorul a fost sters cu succes.");
                     setUsers(users.filter((user) => user._id !== userId));
-                    setTimeout(() => setSuccessMessage(''), 3000);
+                    setTimeout(() => setSuccessMessage(""), 3000);
                 })
                 .catch((error) => {
-                    console.error('Eroare la stergerea utilizatorului:', error);
-                    setError('Nu s-a putut sterge utilizatorul.');
+                    console.error("Eroare la stergerea utilizatorului:", error);
+                    setError("Nu s-a putut sterge utilizatorul.");
                 });
         }
     };
 
-
-
     const handleNewUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setNewUserForm(prevState => ({
+        setNewUserForm((prevState) => ({
             ...prevState,
             [name]: value,
         }));
     };
 
-
     // Pentru adaugarea de useri
     const handleAddUser = (e: React.FormEvent) => {
         e.preventDefault();
         axios
-            .post('http://localhost:5000/admin/users', newUserForm, {
+            .post("http://localhost:5000/admin/users", newUserForm, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
             .then((response) => {
-                setSuccessMessage('Utilizatorul a fost adaugat cu succes.');
+                setSuccessMessage("Utilizatorul a fost adaugat cu succes.");
                 // Adauga noul utilizator in starea users
                 setUsers((prevUsers) => [...prevUsers, response.data]);
                 // Reseteaza formularul
                 setNewUserForm({
-                    email: '',
-                    fullName: '',
-                    phoneNumber: '',
-                    role: 'client',
-                    password: '',
+                    email: "",
+                    fullName: "",
+                    phoneNumber: "",
+                    role: "client",
+                    password: "",
                     createdAt: new Date(),
                 });
-                setTimeout(() => setSuccessMessage(''), 3000);
+                setTimeout(() => setSuccessMessage(""), 3000);
             })
             .catch((error) => {
-                console.error('Eroare la adaugarea utilizatorului:', error);
-                setError('Nu s-a putut adauga utilizatorul.');
+                console.error("Eroare la adaugarea utilizatorului:", error);
+                setError("Nu s-a putut adauga utilizatorul.");
             });
     };
-
-
-
 
     if (loading) {
         return <p>Se incarca utilizatorii...</p>;
@@ -263,7 +244,6 @@ const UserListAdmin: React.FC = () => {
             </div>
 
             <div className="users-list">
-
                 {users.map((user) => (
                     <div key={user._id} className="user-card">
                         <div className="user-name">
@@ -271,9 +251,15 @@ const UserListAdmin: React.FC = () => {
                         </div>
                         <div className="user-info">
                             {/* <h2>{user.fullName}</h2> */}
-                            <p><strong>Email:</strong> {user.email}</p>
-                            <p><strong>Telefon:</strong> {user.phoneNumber}</p>
-                            <p><strong>Rol:</strong> {user.role}</p>
+                            <p>
+                                <strong>Email:</strong> {user.email}
+                            </p>
+                            <p>
+                                <strong>Telefon:</strong> {user.phoneNumber}
+                            </p>
+                            <p>
+                                <strong>Rol:</strong> {user.role}
+                            </p>
                         </div>
                         <button
                             className="delete-button"
@@ -283,7 +269,6 @@ const UserListAdmin: React.FC = () => {
                         </button>
                     </div>
                 ))}
-
             </div>
 
             {/* <div className="users-list">
@@ -302,14 +287,8 @@ const UserListAdmin: React.FC = () => {
                     </div>
                 ))}
             </div> */}
-        </div >
+        </div>
     );
 };
 
 export default UserListAdmin;
-
-
-
-
-
-

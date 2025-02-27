@@ -1,10 +1,10 @@
 // frontend/src/Profile.tsx
 
-import React, { useContext, useState } from 'react';
-import { AuthContext } from './AuthContext';
-import axios from 'axios';
-import './profile.css';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useState } from "react";
+import { AuthContext } from "./AuthContext";
+import axios from "axios";
+import "./profile.css";
+import { useNavigate } from "react-router-dom";
 
 const Profile: React.FC = () => {
     const { user, setUser, token } = useContext(AuthContext);
@@ -12,25 +12,23 @@ const Profile: React.FC = () => {
 
     // Initializeaza starea formularului cu datele utilizatorului
     const [formData, setFormData] = useState({
-        fullName: user?.fullName || '',
-        email: user?.email || '',
-        password: '',
-        phoneNumber: user?.phoneNumber || '',
+        fullName: user?.fullName || "",
+        email: user?.email || "",
+        password: "",
+        phoneNumber: user?.phoneNumber || "",
     });
 
-
     // Mesaj pentru feedback-ul utilizatorului
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState("");
 
     // Handle pentru schimbarea valorilor din formular
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prevData => ({
+        setFormData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
     };
-
 
     // Handle pentru trimiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
@@ -43,26 +41,26 @@ const Profile: React.FC = () => {
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
-                }
+                },
             );
 
             // Actualizeaza contextul cu datele actualizate ale utilizatorului
             setUser(response.data);
 
             // Afiseaza mesajul de succes
-            setMessage('Profil actualizat cu succes!');
+            setMessage("Profil actualizat cu succes!");
         } catch (error: any) {
-            console.error('Eroare la actualizarea profilului:', error);
+            console.error("Eroare la actualizarea profilului:", error);
             // Afiseaza mesajul de eroare
-            setMessage(error.response?.data?.message || 'Eroare la actualizarea profilului.');
+            setMessage(error.response?.data?.message || "Eroare la actualizarea profilului.");
         }
     };
 
     // Handle pentru revenirea la pagina de Acasa
     const handleReturn = () => {
-        navigate('/');
+        navigate("/");
     };
 
     return (
@@ -83,7 +81,7 @@ const Profile: React.FC = () => {
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
-                    //required
+                        //required
                     />
                 </div>
 
@@ -96,7 +94,7 @@ const Profile: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                    //required
+                        //required
                     />
                 </div>
 
@@ -122,16 +120,20 @@ const Profile: React.FC = () => {
                         name="phoneNumber"
                         value={formData.phoneNumber}
                         onChange={handleChange}
-                    //required
+                        //required
                     />
                 </div>
 
                 {/* Butonul de actualizare */}
-                <button type="submit" className="update-button">Actualizeaza Profil</button>
+                <button type="submit" className="update-button">
+                    Actualizeaza Profil
+                </button>
             </form>
 
             {/* Butonul de revenire la Acasa */}
-            <button onClick={handleReturn} className="return-button">Revenire Acasa</button>
+            <button onClick={handleReturn} className="return-button">
+                Revenire Acasa
+            </button>
         </div>
     );
 };

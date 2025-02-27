@@ -1,8 +1,8 @@
 // frontend/src/Register.tsx
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
-import Bara_navigatie from './Bara_navigatie';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import Bara_navigatie from "./Bara_navigatie";
 
 interface RegisterFormState {
     email: string;
@@ -15,20 +15,20 @@ interface RegisterFormState {
 
 const Register: React.FC = () => {
     const [formState, setFormState] = useState<RegisterFormState>({
-        email: '',
-        fullName: '',
-        phoneNumber: '',
-        gender: '',
-        password: '',
-        confirmPassword: '',
+        email: "",
+        fullName: "",
+        phoneNumber: "",
+        gender: "",
+        password: "",
+        confirmPassword: "",
     });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormState(prevState => ({
+        setFormState((prevState) => ({
             ...prevState,
             [name]: value,
         }));
@@ -40,30 +40,30 @@ const Register: React.FC = () => {
 
         // Validare client-side
         if (password !== confirmPassword) {
-            setError('Parolele nu se potrivesc');
+            setError("Parolele nu se potrivesc");
             return;
         }
 
         if (!email || !fullName || !phoneNumber || !gender) {
-            setError('Toate campurile sunt obligatorii');
+            setError("Toate campurile sunt obligatorii");
             return;
         }
 
         try {
-            await axios.post('http://localhost:5000/auth/register', {
+            await axios.post("http://localhost:5000/auth/register", {
                 email,
                 fullName,
                 phoneNumber,
                 gender,
                 password,
             });
-            setSuccess('inregistrare reusita! Te poti loga acum.');
-            setTimeout(() => navigate('/login'), 2000); // Redirectioneaza dupa 2 secunde
+            setSuccess("inregistrare reusita! Te poti loga acum.");
+            setTimeout(() => navigate("/login"), 2000); // Redirectioneaza dupa 2 secunde
         } catch (err: any) {
             if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);
             } else {
-                setError('Eroare la inregistrare. Poate utilizatorul exista deja.');
+                setError("Eroare la inregistrare. Poate utilizatorul exista deja.");
             }
         }
     };
@@ -107,12 +107,7 @@ const Register: React.FC = () => {
                 </div>
                 <div>
                     <label>Gen:</label>
-                    <select
-                        name="gender"
-                        value={formState.gender}
-                        onChange={handleChange}
-                        required
-                    >
+                    <select name="gender" value={formState.gender} onChange={handleChange} required>
                         <option value="">Selecteaza genul</option>
                         <option value="male">Masculin</option>
                         <option value="female">Feminin</option>
@@ -144,10 +139,11 @@ const Register: React.FC = () => {
                 {success && <p className="success">{success}</p>}
                 <button type="submit">inregistreaza-te</button>
             </form>
-            <p>Ai deja un cont? <Link to="/login">Autentifica-te</Link></p>
+            <p>
+                Ai deja un cont? <Link to="/login">Autentifica-te</Link>
+            </p>
         </div>
     );
 };
 
 export default Register;
-

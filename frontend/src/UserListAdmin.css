@@ -20,7 +20,6 @@
     align-items: center;
 }
 
-
 /* .user-card {
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid #ccc;
@@ -41,7 +40,6 @@
     -o-transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 } */
 
-
 /* .user-card {
     display: flex;
     align-items: center;
@@ -59,7 +57,6 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 } */
-
 
 /* .user-info {
     display: flex;
@@ -89,9 +86,7 @@
     color: #333333;
 }
 
-
 /* pentru stergere*/
-
 
 /* .delete-button {
     background-color: #800080;
@@ -102,7 +97,6 @@
     cursor: pointer;
     margin-top: 10px;
 } */
-
 
 /* .delete-button {
     background-color: #800080;
@@ -125,7 +119,7 @@ margin-left: 50px;
 
 .user-card {
     display: grid;
-    grid-template-areas: "name name" "info button";
+    grid-template-areas: "name name" "info button"; /* test */
     grid-template-columns: 1fr auto;
     grid-gap: 10px;
     background-color: rgba(255, 255, 255, 0.9);

@@ -69,14 +69,13 @@
 
 // export default LandingPage;
 
-
 // frontend/src/LandingPage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './style.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./style.css";
 
 const LandingPage: React.FC = () => {
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState("");
     const navigate = useNavigate();
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -87,7 +86,7 @@ const LandingPage: React.FC = () => {
 
     // Handler pentru butonul "Lista cu apartamentele" (navigheaza fara filtre)
     const handleListAll = () => {
-        navigate('/home');
+        navigate("/home");
     };
 
     return (
@@ -106,12 +105,13 @@ const LandingPage: React.FC = () => {
                                 return (
                                     <span
                                         key={index}
-                                        style={{ animationDelay: `${index * 0.1}s` }}
+                                        style={{
+                                            animationDelay: `${index * 0.1}s`,
+                                        }}
                                     >
                                         {char}
                                     </span>
                                 );
-
                             }
                         })}
                     </h1>

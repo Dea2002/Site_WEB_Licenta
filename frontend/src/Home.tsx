@@ -1,14 +1,12 @@
-
-
 // frontend/src/Home.tsx
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { useNavigate, useSearchParams } from 'react-router-dom'; // Importam useSearchParams
-import Bara_navigatie from './Bara_navigatie';
-import LoginModal from './LoginModal';
-import { AuthContext } from './AuthContext';
-import { Apartment } from './types';
-import './style.css';
+import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import { useNavigate, useSearchParams } from "react-router-dom"; // Importam useSearchParams
+import Bara_navigatie from "./Bara_navigatie";
+import LoginModal from "./LoginModal";
+import { AuthContext } from "./AuthContext";
+import { Apartment } from "./types";
+import "./style.css";
 // import './Home.css';
 
 // Definim o interfata pentru filtre (poti adauga si alte filtre dupa nevoie)
@@ -27,7 +25,7 @@ const Home: React.FC = () => {
     // Folosim useSearchParams pentru a prelua query-urile din URL
     const [searchParams] = useSearchParams();
     // Daca URL-ul are ?location=Bucuresti, atunci locationParam va fi "Bucuresti"
-    const locationParam = searchParams.get('location') || '';
+    const locationParam = searchParams.get("location") || "";
 
     // Initializam starea filtrelor; folosim locationParam pentru filtrul de locatie
     const [filters, setFilters] = useState<Filters>({
@@ -37,44 +35,42 @@ const Home: React.FC = () => {
 
     // Preluam toate apartamentele de pe server
     useEffect(() => {
-        axios.get<Apartment[]>('http://localhost:5000/apartments')
-            .then(response => {
+        axios
+            .get<Apartment[]>("http://localhost:5000/apartments")
+            .then((response) => {
                 setApartments(response.data);
                 // Initial afisam toate apartamentele
                 setFilteredApartments(response.data);
             })
-            .catch(error => {
-                console.error('Eroare la preluarea datelor:', error);
+            .catch((error) => {
+                console.error("Eroare la preluarea datelor:", error);
             });
     }, []);
-
 
     // Variante de aplicare automata a filtrului //! cu aceasta bucata de cod se aplica filtrul automat cand accesezi linkul cu un query in el
     // ca sa fie mai clar: cand in landing page pui o locatie si dai sa cauti dupa acea locatie, se deschide un link cu un query de filtrare dupa locatie si astfel fortez sa se aplice automat acest filtru din query ❤
     useEffect(() => {
-        if (apartments.length > 0 && filters.location.trim() !== '') {
+        if (apartments.length > 0 && filters.location.trim() !== "") {
             handleRefreshFilters();
         } else {
             setFilteredApartments(apartments);
         }
     }, [apartments]);
 
-
     // Functie pentru aplicarea filtrelor
     const handleRefreshFilters = () => {
         let filtered = apartments;
 
-
         // Filtram dupa locatie daca nu este sir gol
-        if (filters.location.trim() !== '') {
-            filtered = filtered.filter(apartment =>
-                apartment.location.toLowerCase().includes(filters.location.toLowerCase())
+        if (filters.location.trim() !== "") {
+            filtered = filtered.filter((apartment) =>
+                apartment.location.toLowerCase().includes(filters.location.toLowerCase()),
             );
         }
 
         // Filtru pentru apartamente disponibile
         if (filters.available) {
-            filtered = filtered.filter(apartment => apartment.status === 'disponibil');
+            filtered = filtered.filter((apartment) => apartment.status === "disponibil");
         }
 
         setFilteredApartments(filtered);
@@ -101,11 +97,9 @@ const Home: React.FC = () => {
                             id="filter-location"
                             placeholder="Ex: Bucuresti"
                             value={filters.location}
-                            onChange={(e) =>
-                                setFilters({ ...filters, location: e.target.value })
-                            }
+                            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
+                                if (e.key === "Enter") {
                                     e.preventDefault(); // Previne comportamentul implicit
                                     handleRefreshFilters(); // Apeleaza functia de filtrare
                                 }
@@ -137,31 +131,44 @@ const Home: React.FC = () => {
                         filteredApartments.map((apartment) => (
                             <div
                                 key={apartment._id}
-                                className={`apartment ${apartment.status === 'indisponibil' ? 'unavailable' : ''}`}
+                                className={`apartment ${
+                                    apartment.status === "indisponibil" ? "unavailable" : ""
+                                }`}
                             >
                                 {/* <h2>{apartment.name}</h2> */}
                                 {/* <p><strong>Descriere:</strong> {apartment.description}</p> */}
                                 {/* <p><strong>Numar de camere:</strong> {apartment.numberofrooms}</p> */}
 
                                 {apartment.image && (
-                                    <img src={`/Poze_apartamente/${apartment.image}`} alt={`Imagine pentru ${apartment.name}`} width="300" />
+                                    <img
+                                        src={`/Poze_apartamente/${apartment.image}`}
+                                        alt={`Imagine pentru ${apartment.name}`}
+                                        width="300"
+                                    />
                                 )}
                                 {/* <p><strong>Pret:</strong> {apartment.price} RON</p> */}
-                                <p style={{ marginTop: '15px' }}>
-
-                                    <i className="fa-solid fa-location-dot" style={{ marginRight: '9px' }}></i>
+                                <p style={{ marginTop: "15px" }}>
+                                    <i
+                                        className="fa-solid fa-location-dot"
+                                        style={{ marginRight: "9px" }}
+                                    ></i>
                                     <strong>: </strong>
                                     {apartment.location}
                                 </p>
 
                                 <p>
-                                    <i className="fa-solid fa-house-user" style={{ marginRight: '4px' }}></i>
+                                    <i
+                                        className="fa-solid fa-house-user"
+                                        style={{ marginRight: "4px" }}
+                                    ></i>
                                     <strong>: </strong>
                                     {apartment.numberofrooms}
                                     <> camere</>
                                 </p>
 
-                                <p><strong>Pret :</strong> {apartment.price} RON</p>
+                                <p>
+                                    <strong>Pret :</strong> {apartment.price} RON
+                                </p>
 
                                 {/* <p><strong>Proprietar:</strong> {apartment.ownername}</p> */}
                                 {/* <p><strong>Email proprietar:</strong> {apartment.owneremail}</p> */}
@@ -177,7 +184,7 @@ const Home: React.FC = () => {
                                 <button
                                     onClick={() => handleMoreDetails(apartment._id)}
                                     className="button"
-                                    disabled={apartment.status === 'indisponibil'}
+                                    disabled={apartment.status === "indisponibil"}
                                 >
                                     {/* {apartment.price} RON */}
                                     Mai multe detalii
@@ -195,4 +202,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-

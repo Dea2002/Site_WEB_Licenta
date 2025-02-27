@@ -1,6 +1,6 @@
 // frontend/src/LoginModal.tsx
-import React from 'react';
-import Login from './Login';
+import React from "react";
+import Login from "./Login";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -13,7 +13,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <button onClick={onClose} className="close-button">X</button>
+                <button onClick={onClose} className="close-button">
+                    X
+                </button>
                 <Login />
             </div>
         </div>

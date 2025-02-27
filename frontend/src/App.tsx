@@ -1,23 +1,23 @@
 // frontend/src/App.tsx
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import LandingPage from './LandingPage';
-import Home from './Home';
-import ApartmentDetails from './ApartmentDetails';
-import Reservation from './Reservation';
-import Confirmation from './Confirmation';
-import PrivateRoute from './PrivateRoute';
-import Login from './Login';
-import Register from './Register';
-import { AuthProvider } from './AuthContext';
-import DashboardAdmin from './DashboardAdmin';
-import UserListAdmin from './UserListAdmin';
-import ApartmentsListAdmin from './ApartmentsListAdmin';
-import OwnersListAdmin from './OwnersListAdmin';
-import AdminRoute from './AdminRoute';
-import Bara_navigatie from './Bara_navigatie';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Profile from './Profile';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import LandingPage from "./LandingPage";
+import Home from "./Home";
+import ApartmentDetails from "./ApartmentDetails";
+import Reservation from "./Reservation";
+import Confirmation from "./Confirmation";
+import PrivateRoute from "./PrivateRoute";
+import Login from "./Login";
+import Register from "./Register";
+import { AuthProvider } from "./AuthContext";
+import DashboardAdmin from "./DashboardAdmin";
+import UserListAdmin from "./UserListAdmin";
+import ApartmentsListAdmin from "./ApartmentsListAdmin";
+import OwnersListAdmin from "./OwnersListAdmin";
+import AdminRoute from "./AdminRoute";
+import Bara_navigatie from "./Bara_navigatie";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Profile from "./Profile";
 
 const App: React.FC = () => {
     return (

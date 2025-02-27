@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
-import { AuthContext } from './AuthContext';
-import { Navigate, Outlet } from 'react-router-dom';
-import jwt_decode from 'jwt-decode';
+import React, { useContext } from "react";
+import { AuthContext } from "./AuthContext";
+import { Navigate, Outlet } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 
 const AdminRoute: React.FC = () => {
     const { token } = useContext(AuthContext);
@@ -11,7 +11,7 @@ const AdminRoute: React.FC = () => {
     }
 
     const decodedToken: any = jwt_decode(token);
-    if (decodedToken.role !== 'admin') {
+    if (decodedToken.role !== "admin") {
         return <Navigate to="/" />;
     }
 

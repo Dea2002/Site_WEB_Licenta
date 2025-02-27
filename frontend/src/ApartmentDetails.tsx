@@ -82,41 +82,41 @@
 
 // export default ApartmentDetails;
 
-
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Apartment } from './types';
-import { AuthContext } from './AuthContext';
-import Bara_navigatie from './Bara_navigatie';
-import Login from './Login';
-import './ApartmentDetails.css';
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Apartment } from "./types";
+import { AuthContext } from "./AuthContext";
+import Bara_navigatie from "./Bara_navigatie";
+import Login from "./Login";
+import "./ApartmentDetails.css";
 
 const ApartmentDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [apartment, setApartment] = useState<Apartment | null>(null);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const { isAuthenticated } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (id) {
-            axios.get<Apartment>(`http://localhost:5000/apartments/${id}`)
-                .then(response => {
+            axios
+                .get<Apartment>(`http://localhost:5000/apartments/${id}`)
+                .then((response) => {
                     setApartment(response.data);
                 })
-                .catch(error => {
-                    console.error('Eroare la preluarea detaliilor apartamentului:', error);
-                    setError('Apartamentul nu a fost gasit.');
+                .catch((error) => {
+                    console.error("Eroare la preluarea detaliilor apartamentului:", error);
+                    setError("Apartamentul nu a fost gasit.");
                 });
         }
     }, [id]);
 
     const handleReserve = () => {
         if (isAuthenticated) {
-            navigate('/confirmation', { state: { apartmentId: id } });
+            navigate("/confirmation", { state: { apartmentId: id } });
         } else {
-            navigate('/login', { state: { from: `/apartment/${id}` } });
+            navigate("/login", { state: { from: `/apartment/${id}` } });
         }
     };
 
@@ -158,14 +158,24 @@ const ApartmentDetails: React.FC = () => {
 
                     {/* Informații apartament */}
                     <div className="info-container">
-                        <p><strong>Pret:</strong> {apartment.price} RON</p>
-                        <p><strong>Locatie:</strong> {apartment.location}</p>
-                        <p><strong>Numar de camere:</strong> {apartment.numberofrooms}</p>
+                        <p>
+                            <strong>Pret:</strong> {apartment.price} RON
+                        </p>
+                        <p>
+                            <strong>Locatie:</strong> {apartment.location}
+                        </p>
+                        <p>
+                            <strong>Numar de camere:</strong> {apartment.numberofrooms}
+                        </p>
 
                         {/* Exemplu: "Coleg de camera" (dacă ai această informație în DB) */}
-                        <p><strong>Coleg de camera:</strong> (aici textul dorit)</p>
+                        <p>
+                            <strong>Coleg de camera:</strong> (aici textul dorit)
+                        </p>
 
-                        <p><strong>Descriere:</strong> {apartment.description}</p>
+                        <p>
+                            <strong>Descriere:</strong> {apartment.description}
+                        </p>
                     </div>
                 </div>
 
