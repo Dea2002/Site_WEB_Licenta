@@ -1,0 +1,146 @@
+/* Containerul principal al paginii de landing */
+
+.landing-page {
+    /* Sa se intinda pe toata latimea si inaltimea ecranului */
+    width: 100%;
+    height: 100vh;
+    /* position: relative; */
+    /* Imaginea de fundal, cea principala */
+    background-image: url("/Poze_apartamente/landing_pagev2.png");
+    /* Proprietati pentru a acoperi toata suprafata (fara repetare) */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* Daca vrei sa center pe verticala continutul */
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.landing-content {
+    margin-top: 5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Card-ul (overlay) care va contine doar titlul */
+
+.card_titlu {
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+/* Stil de baza pentru textul wave */
+.text-wave {
+    font-size: 2.5rem;
+    color: #8b5e30;
+    font-weight: 700;
+    display: inline-block;
+    margin: 0; /* elimina marginile implicite de la h1 */
+}
+
+/* Animatia se aplica fiecarui <span> din text-wave */
+.text-wave span {
+    display: inline-block;
+    animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+        /* cat “salt” vrei */
+    }
+}
+
+/* form - stilul pentru bara de cautare */
+.landing-page form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* stilul pentru Casuta de cautare */
+.landing-page input[type="text"] {
+    width: 250px;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    font-size: 1rem;
+    /* sau orice valoare dorești, de ex. 16px, 18px etc. */
+}
+
+/* stilul pentru Butonul de cautare */
+.landing-page button[type="submit"] {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    background-color: #d8ac70;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #76471e;
+    border-color: #d8ac70;
+    border-width: 2px;
+    border-style: solid;
+}
+
+/* aplicam hover la Butonul de cautare */
+.landing-page button[type="submit"]:hover {
+    border-color: #e0e0e0;
+    border-style: solid;
+}
+
+/* stilul pentru butonul Lista cu apartamentele */
+.list-all-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 25px;
+    background-color: #d8ac70;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    -ms-border-radius: 25px;
+    -o-border-radius: 25px;
+    color: #76471e;
+    border-color: #d8ac70;
+    border-width: 2px;
+    border-style: solid;
+}
+
+/* aplicam hover la buton */
+.list-all-button:hover {
+    border-color: #e0e0e0;
+    border-style: solid;
+}
+
+/* pentru iconita de cautare */
+.search-container {
+    position: relative;
+    display: inline-block; /* sau block, depinde de layout */
+}
+
+.search-container input {
+    padding-right: 80px;
+}
+
+.search-container i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888; /* culoarea iconiței, modifică după preferințe */
+    cursor: pointer;
+}
