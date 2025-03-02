@@ -11,6 +11,7 @@ interface RegisterFormState {
     gender: string;
     password: string;
     confirmPassword: string;
+    faculty: string;
 }
 
 const Register: React.FC = () => {
@@ -21,6 +22,7 @@ const Register: React.FC = () => {
         gender: "",
         password: "",
         confirmPassword: "",
+        faculty: "",
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -36,7 +38,8 @@ const Register: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const { email, fullName, phoneNumber, gender, password, confirmPassword } = formState;
+        const { email, fullName, phoneNumber, gender, password, confirmPassword, faculty } =
+            formState;
 
         // Validare client-side
         if (password !== confirmPassword) {
@@ -56,8 +59,9 @@ const Register: React.FC = () => {
                 phoneNumber,
                 gender,
                 password,
+                faculty,
             });
-            setSuccess("inregistrare reusita! Te poti loga acum.");
+            setSuccess("Inregistrare reusita! Te poti loga acum.");
             setTimeout(() => navigate("/login"), 2000); // Redirectioneaza dupa 2 secunde
         } catch (err: any) {
             if (err.response && err.response.data && err.response.data.message) {
@@ -135,9 +139,19 @@ const Register: React.FC = () => {
                         required
                     />
                 </div>
+                <div>
+                    <label>Facultatea:</label>
+                    <input
+                        type="text"
+                        name="faculty"
+                        value={formState.faculty}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
                 {error && <p className="error">{error}</p>}
                 {success && <p className="success">{success}</p>}
-                <button type="submit">inregistreaza-te</button>
+                <button type="submit">Inregistreaza-te</button>
             </form>
             <p>
                 Ai deja un cont? <Link to="/login">Autentifica-te</Link>

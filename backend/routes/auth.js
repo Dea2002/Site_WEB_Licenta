@@ -128,13 +128,14 @@ module.exports = (usersCollection) => {
         body('phoneNumber').matches(/^[0-9]{10}$/).withMessage('Numar de telefon invalid. Trebuie sa aiba 10 cifre.'),
         body('gender').isIn(['male', 'female']).withMessage('Gen invalid. Selecteaza "male" sau "female".'),
         body('password').isLength({ min: 6 }).withMessage('Parola trebuie sa aiba cel putin 6 caractere'),
-    ], async(req, res) => {
+        body('faculty').notEmpty().withMessage('Campul de facultate este necesar')
+    ], async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { email, fullName, phoneNumber, gender, password } = req.body;
+        const { email, fullName, phoneNumber, gender, password, faculty } = req.body;
 
         try {
             // Verifica daca utilizatorul exista deja
@@ -158,6 +159,7 @@ module.exports = (usersCollection) => {
                 gender: gender.toLowerCase(),
                 password: hashedPassword,
                 role: 'client', // Seteaza automat rolul
+                faculty,
                 createdAt: new Date(),
             };
 
@@ -180,7 +182,7 @@ module.exports = (usersCollection) => {
     router.post('/login', [
         body('email').isEmail().withMessage('Email invalid'),
         body('password').notEmpty().withMessage('Parola este necesara'),
-    ], async(req, res) => {
+    ], async (req, res) => {
         console.log("Vreau login");
 
         const errors = validationResult(req);
