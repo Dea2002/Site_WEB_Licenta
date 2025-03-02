@@ -34,8 +34,6 @@ const verifyAdmin = require('./middleware/verifyAdmin');
 
 
 // mongodb connection
-
-
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@inchiriere-apartamente.2qkb7.mongodb.net/?retryWrites=true&w=majority&appName=inchiriere-apartamente`;
 
@@ -50,7 +48,6 @@ const client = new MongoClient(uri, {
 });
 
 
-
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
@@ -61,11 +58,10 @@ async function run() {
         const database = client.db("inchiriere-apartamente");
         const usersCollection = database.collection("users");
         const apartmentsCollection = database.collection("apartments");
-        const listCollection = database.collection("list");
+        //const listCollection = database.collection("list");
         //const paymentCollection = database.collection("payments");
-        const enrolledCollection = database.collection("enrolled");
-        const appliedCollection = database.collection("applied");
-
+        const reservationHistoryCollection = database.collection("reservation_history");
+        const reservationRequestsCollection = database.collection("reservation_requests");
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
@@ -83,7 +79,7 @@ async function run() {
         app.use('/auth', authRoutes);
 
         // Ruta pentru actualizarea profilului utilizatorului
-        app.put('/update-user/:id', authenticateToken, async(req, res) => {
+        app.put('/update-user/:id', authenticateToken, async (req, res) => {
             const id = req.params.id;
             const updatedUser = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -117,7 +113,7 @@ async function run() {
 
 
         // Ruta pentru actualizarea statusului unui apartament
-        app.put('/admin/apartments/:id/status', authenticateToken, verifyAdmin, async(req, res) => {
+        app.put('/admin/apartments/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
             const apartmentId = req.params.id;
             const { status, reason } = req.body;
 
@@ -157,7 +153,7 @@ async function run() {
 
 
         // Pentru stergerea utilizatorilor 
-        app.delete('/admin/users/:id', authenticateToken, verifyAdmin, async(req, res) => {
+        app.delete('/admin/users/:id', authenticateToken, verifyAdmin, async (req, res) => {
             const userId = req.params.id;
 
             if (!ObjectId.isValid(userId)) {
@@ -180,7 +176,7 @@ async function run() {
 
 
         // Pentru adaugarea de useri
-        app.post('/admin/users', authenticateToken, verifyAdmin, async(req, res) => {
+        app.post('/admin/users', authenticateToken, verifyAdmin, async (req, res) => {
             const { email, fullName, phoneNumber, role, password } = req.body;
 
             // Validari simple
@@ -222,7 +218,7 @@ async function run() {
 
 
         // Exemplu de ruta protejata
-        app.post('/reserve', authenticateToken, async(req, res) => {
+        app.post('/reserve', authenticateToken, async (req, res) => {
             console.log("Buna");
             const { apartmentId } = req.body;
             const userId = req.user.userId;
@@ -261,10 +257,91 @@ async function run() {
             }
         });
 
+        app.post('/reservation_request', authenticateToken, async (req, res) => { // asta face verificarea cererilor de request
 
+            const { clientId, apartmentId, checkIn, checkOut } = req.body; // extrag datele din request
+            const clientObjectId = new ObjectId(clientId); // creez un obiect de tip ObjectId pentru client
+            const apartmentObjectId = new ObjectId(apartmentId);
+
+            // creez obiecte de tip Date pentru check-in si check-out
+            const newCheckIn = new Date(checkIn);
+            const newCheckOut = new Date(checkOut);
+
+            const reservations = await reservationRequestsCollection.find({ client: clientObjectId }).toArray(); // caut cererile clientului
+
+            for (const reservation of reservations) {
+                // creez obiecte de tip Date pentru check-in si check-out pentru fiecare cerere existenta
+                const existingCheckIn = new Date(reservation.checkIn);
+                const existingCheckOut = new Date(reservation.checkOut);
+
+                // conditia de suprapunere a datelor
+                if (newCheckIn <= existingCheckOut && newCheckOut >= existingCheckIn) {
+                    return res.status(400).json({ message: 'Datele pentru check-in și check-out se suprapun cu o cerere existentă' });
+                }
+            }
+
+            const newReservationRequest = {
+                client: clientObjectId,
+                apartament: apartmentObjectId,
+                checkIn: newCheckIn,
+                checkOut: newCheckOut
+            };
+
+            await reservationRequestsCollection.insertOne(newReservationRequest);
+
+            res.status(200).json({ message: 'Am facut cerere de rezervare' });
+        });
+
+        app.post('/reservation_request/:id/accept', authenticateToken, async (req, res) => {
+            const reservationId = req.params.id;
+            if (!ObjectId.isValid(reservationId)) {
+                return res.status(400).json({ message: 'ID-ul rezervarii este invalid' });
+            }
+            try {
+                const reservationRequest = await reservationRequestsCollection.findOne({ _id: new ObjectId(reservationId) });
+                if (!reservationRequest) {
+                    return res.status(404).json({ message: 'Cererea de rezervare nu a fost gasita' });
+                }
+
+                // sterg documentul din colectia de cereri
+                await reservationRequestsCollection.deleteOne({ _id: new ObjectId(reservationId) });
+
+                // adaug campul isActive si mut documentul in colectia de istoric de rezervari
+                reservationRequest.isActive = true;
+
+                await reservationHistoryCollection.insertOne(reservationRequest);
+
+                res.status(200).json({ message: 'Cererea de rezervare a fost acceptata' });
+            } catch (error) {
+                console.error('Eroare la acceptarea cererii de rezervare:', error);
+                res.status(500).json({ message: 'Eroare interna a serverului' });
+            }
+        });
+
+        app.post('/reservation_request/:id/decline', authenticateToken, async (req, res) => {
+            const reservationId = req.params.id;
+            if (!ObjectId.isValid(reservationId)) {
+                return res.status(400).json({ message: 'ID-ul rezervarii este invalid' });
+            }
+
+            try {
+                const reservationRequest = await reservationRequestsCollection.findOne({ _id: new ObjectId(reservationId) });
+                if (!reservationRequest) {
+                    return res.status(404).json({ message: 'Cererea de rezervare nu a fost gasita' });
+                }
+
+                // sterg documentul din colectia de cereri
+                await reservationRequestsCollection.deleteOne({ _id: new ObjectId(reservationId) });
+
+                res.status(200).json({ message: 'Cererea de rezervare a fost respinsa' });
+            } catch (error) {
+                console.error('Eroare la respingerea cererii de rezervare:', error);
+                res.status(500).json({ message: 'Eroare interna a serverului' });
+            }
+        });
 
         // apartments routes here
-        app.post('/new-apartments', async(req, res) => {
+        app.post('/new-apartments', async (req, res) => {
             const newClass = req.body;
             //newClass.numberofrooms = parseInt(newClass.numberofrooms);
             const result = await apartmentsCollection.insertOne(newClass);
@@ -279,7 +356,7 @@ async function run() {
         // })
 
         // Afiseaza pe pagina toate apartamentele disponibile si indisponibile
-        app.get('/apartments', async(req, res) => {
+        app.get('/apartments', async (req, res) => {
             const result = await apartmentsCollection.find().toArray();
             res.send(result);
         });
@@ -287,7 +364,7 @@ async function run() {
 
 
         // getapartments by owner email address
-        app.get('/apartments/by-email/:email', async(req, res) => {
+        app.get('/apartments/by-email/:email', async (req, res) => {
             const email = req.params.email;
             const query = { owneremail: email };
             const result = await apartmentsCollection.find(query).toArray();
@@ -295,7 +372,7 @@ async function run() {
         });
 
         // manage apartments
-        app.get('/apartments-manage', async(req, res) => {
+        app.get('/apartments-manage', async (req, res) => {
             const result = await apartmentsCollection.find().toArray();
             res.send(result);
         })
@@ -319,7 +396,7 @@ async function run() {
 
 
         //get single class details
-        app.get('/apartments/:id', async(req, res) => {
+        app.get('/apartments/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await apartmentsCollection.findOne(query);
@@ -327,7 +404,7 @@ async function run() {
         })
 
         // update class details (toate detaliileb    )
-        app.put('/update-apartments/:id', async(req, res) => {
+        app.put('/update-apartments/:id', async (req, res) => {
             const id = req.params.id;
             const updatedApartment = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -357,13 +434,13 @@ async function run() {
 
 
         // Get all users
-        app.get('/users', async(req, res) => {
+        app.get('/users', async (req, res) => {
             const users = await usersCollection.find({}).toArray();
             res.send(users);
         })
 
         // Get user by ID
-        app.get('/users/:id', async(req, res) => {
+        app.get('/users/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const user = await usersCollection.findOne(query);
@@ -371,7 +448,7 @@ async function run() {
         })
 
         // Get user by email
-        app.get('/user/by-email/:email', async(req, res) => {
+        app.get('/user/by-email/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await usersCollection.findOne(query);
@@ -381,7 +458,7 @@ async function run() {
 
         // Delete user  
         // ! Poate doar adminul
-        app.delete('/delete-user/:id', async(req, res) => {
+        app.delete('/delete-user/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await usersCollection.deleteOne(query);
@@ -418,44 +495,44 @@ async function run() {
 
         // ! ENROLLED ROUTES
         // afiseaza lista cu apartamentele cele mai populare in ordine descrescatoare, care au fost inchiriate de mai multe ori
-        app.get('/popular_apartments', async(req, res) => {
+        app.get('/popular_apartments', async (req, res) => {
             const result = await apartmentsCollection.find().sort({ totalbooked: -1 }).limit(6).toArray();
             res.send(result);
         })
 
 
-        app.get('/popular-owner', async(req, res) => {
+        app.get('/popular-owner', async (req, res) => {
             const pipeline = [{
-                    $group: {
-                        _id: "$owneremail",
-                        totalbooked: { $sum: "$totalbooked" },
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "_id",
-                        foreignField: "email",
-                        as: "owner"
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        owner: {
-                            $arrayElemAt: ["$owner", 0]
-                        },
-                        totalbooked: 1
-                    }
-                },
-                {
-                    $sort: {
-                        totalbooked: -1
-                    }
-                },
-                {
-                    $limit: 6
+                $group: {
+                    _id: "$owneremail",
+                    totalbooked: { $sum: "$totalbooked" },
                 }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "email",
+                    as: "owner"
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    owner: {
+                        $arrayElemAt: ["$owner", 0]
+                    },
+                    totalbooked: 1
+                }
+            },
+            {
+                $sort: {
+                    totalbooked: -1
+                }
+            },
+            {
+                $limit: 6
+            }
             ]
             const result = await apartmentsCollection.aggregate(pipeline).toArray();
             res.send(result);
@@ -463,7 +540,7 @@ async function run() {
 
 
         // ADMINS stats 
-        app.get('/admin-stats', async(req, res) => {
+        app.get('/admin-stats', async (req, res) => {
             // Get approved classes and pending classes and instructors 
             const approvedApartments = (await apartmentsCollection.find({ status: 'disponibil' }).toArray()).length;
             const unavailableApartments = (await apartmentsCollection.find({ status: 'indisponibil' }).toArray()).length;
@@ -485,58 +562,58 @@ async function run() {
 
 
         // Get all owners 
-        app.get('/owners', async(req, res) => {
+        app.get('/owners', async (req, res) => {
             const result = await usersCollection.find({ role: 'proprietar' }).toArray();
             res.send(result);
         })
 
         // Add ENROLLMENT
-        app.post('/new-enrollment', async(req, res) => {
+        app.post('/new-enrollment', async (req, res) => {
             const newEnroll = req.body;
             const result = await enrolledCollection.insertOne(newEnroll);
             res.send(result);
         })
 
-        app.get('/enrolled', async(req, res) => {
+        app.get('/enrolled', async (req, res) => {
             const result = await enrolledCollection.find({}).toArray();
             res.send(result);
         })
 
         // NU MERGE
-        app.get('/enrolled-apartments/:email', async(req, res) => {
+        app.get('/enrolled-apartments/:email', async (req, res) => {
             const email = req.params.email;
             const query = { userEmail: email };
             const pipeline = [{
-                    $match: query
-                },
-                {
-                    $lookup: {
-                        from: "apartments",
-                        localField: "apartmentId",
-                        foreignField: "_id",
-                        as: "apartments"
-                    }
-                },
-                {
-                    $unwind: "$apartments"
-                },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "apartments.owneremail",
-                        foreignField: "email",
-                        as: "proprietar"
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        proprietar: {
-                            $arrayElemAt: ["$proprietar", 0]
-                        },
-                        apartments: 1,
-                    }
+                $match: query
+            },
+            {
+                $lookup: {
+                    from: "apartments",
+                    localField: "apartmentId",
+                    foreignField: "_id",
+                    as: "apartments"
                 }
+            },
+            {
+                $unwind: "$apartments"
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "apartments.owneremail",
+                    foreignField: "email",
+                    as: "proprietar"
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    proprietar: {
+                        $arrayElemAt: ["$proprietar", 0]
+                    },
+                    apartments: 1,
+                }
+            }
 
             ];
 
@@ -555,12 +632,12 @@ async function run() {
 
 
         // Applied route 
-        app.post('/as-proprietar', async(req, res) => {
+        app.post('/as-proprietar', async (req, res) => {
             const data = req.body;
             const result = await appliedCollection.insertOne(data);
             res.send(result);
         })
-        app.get('/applied-owners/:email', async(req, res) => {
+        app.get('/applied-owners/:email', async (req, res) => {
             const email = req.params.email;
             const result = await appliedCollection.findOne({ email });
             res.send(result);

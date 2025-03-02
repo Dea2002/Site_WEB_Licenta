@@ -19,7 +19,7 @@ const Home: React.FC = () => {
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [filteredApartments, setFilteredApartments] = useState<Apartment[]>([]);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
     // Folosim useSearchParams pentru a prelua query-urile din URL
@@ -56,6 +56,35 @@ const Home: React.FC = () => {
             setFilteredApartments(apartments);
         }
     }, [apartments]);
+
+    // functii de test pentru accept/decline
+    const accept = async () => {
+        try {
+            await axios.post(
+                "http://localhost:5000/reservation_request/67c4b263c18ce8a852dda6bd/accept",
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+        } catch (err: any) {
+            console.log(err);
+        }
+    };
+
+    const decline = async () => {
+        try {
+            await axios.post(
+                "http://localhost:5000/reservation_request/67c4bb1147067a0a3520f16f/decline",
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+        } catch (err: any) {
+            console.log(err);
+        }
+    };
 
     // Functie pentru aplicarea filtrelor
     const handleRefreshFilters = () => {
@@ -123,6 +152,8 @@ const Home: React.FC = () => {
                     <button onClick={handleRefreshFilters} className="refresh-button">
                         Actualizeaza filtrele
                     </button>
+                    <button onClick={accept}> Accept</button>
+                    <button onClick={decline}> Decline</button>
                 </aside>
 
                 {/* Lista cu apartamente filtrate */}

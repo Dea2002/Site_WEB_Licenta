@@ -12,7 +12,7 @@ const ApartmentDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [apartment, setApartment] = useState<Apartment | null>(null);
     const [error, setError] = useState("");
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, user, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
     // Stare pentru afișarea modalului
@@ -43,12 +43,40 @@ const ApartmentDetails: React.FC = () => {
         };
     }, [showOwnerPop_up]);
 
-    const handleReserve = () => {
-        if (isAuthenticated) {
-            navigate("/confirmation", { state: { apartmentId: id } });
-        } else {
-            navigate("/login", { state: { from: `/apartment/${id}` } });
+    const handleReserve = async () => {
+        console.log("am apasat butonul");
+        try {
+            // Presupunem că AuthContext furnizează și user, cu proprietatea _id
+            if (!user) {
+                navigate("/login", { state: { from: `/apartment/${id}` } });
+                // throw new Error("Utilizatorul nu este autentificat");
+                return;
+            }
+            await axios.post(
+                "http://localhost:5000/reservation_request",
+                {
+                    clientId: user!._id,
+                    apartmentId: id,
+                    checkIn: "2025-03-04",
+                    checkOut: "2025-03-08",
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+        } catch (err: any) {
+            setError(
+                err.response?.data?.message || "Eroare la rezervare. Încearcă din nou mai târziu.",
+            );
+            // console.log(err);
         }
+
+        // if (isAuthenticated) {
+        //     navigate("/confirmation", { state: { apartmentId: id } });
+        // } else {
+        // }
     };
 
     if (error) {
