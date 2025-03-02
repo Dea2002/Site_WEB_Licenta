@@ -32,6 +32,17 @@ const ApartmentDetails: React.FC = () => {
         }
     }, [id]);
 
+    useEffect(() => {
+        if (showOwnerPop_up) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showOwnerPop_up]);
+
     const handleReserve = () => {
         if (isAuthenticated) {
             navigate("/confirmation", { state: { apartmentId: id } });
@@ -75,7 +86,7 @@ const ApartmentDetails: React.FC = () => {
                             />
                         )}
                     </div>
-                    <hr className="line-popup" />
+                    <hr className="line-image" />
                     {/* Informații apartament */}
                     <div className="info-container">
                         <p>

@@ -22,25 +22,45 @@ const OwnerPop_up: React.FC<OwnerPop_upProps> = ({
     return (
         <div className="overlay-popup" onClick={onClose}>
             <div className="card-popup" onClick={(e) => e.stopPropagation()}>
-                <h2>
-                    <i
-                        className="fa-solid fa-user-tie circle-icon"
-                        style={{ marginRight: "20px" }}
-                    />
-                    <strong className="owner-name">{ownername}</strong>
-                </h2>
+                <button className="button-closepopup" onClick={onClose}>
+                    <strong>X</strong>
+                </button>
+                <div className="card-popup-content">
+                    <h2>
+                        <i
+                            className="fa-solid fa-user-tie circle-icon"
+                            style={{ marginRight: "20px" }}
+                        />
+                        <strong className="owner-name">{ownername}</strong>
+                    </h2>
 
-                <p>
-                    <LuPhone className="phone-icon" />
-                    <span className="phone-text">{phoneNumber}</span>
-                </p>
-                <p>
-                    <FiMail className="email-icon" />
-                    <span className="email-text">{owneremail}</span>
-                </p>
+                    <p>
+                        <LuPhone className="phone-icon" />
+                        <span className="phone-text">{phoneNumber}</span>
+                    </p>
+                    <p>
+                        <FiMail className="email-icon" />
+                        <span className="email-text">{owneremail}</span>
+                    </p>
 
-                <hr className="line-popup" />
-                <button onClick={onClose}>Inchide</button>
+                    <hr className="line-popup" />
+
+                    <div className="text-description">
+                        <h2>Descriere</h2>
+                    </div>
+                    <hr className="line-popup" />
+
+                    <div className="text-interese">
+                        <h2>Interese despre proprietar</h2>
+                    </div>
+                    <hr className="line-popup" />
+
+                    <div className="text-proprietati">
+                        <h2>Alte proprietati</h2>
+                    </div>
+
+                    <hr className="line-popup" />
+                </div>
             </div>
         </div>
     );
