@@ -14,18 +14,39 @@ const Login: React.FC = () => {
     const location = useLocation();
     const from = (location.state as any)?.from?.pathname || "/";
 
+    // const handleSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     try {
+    //         const response = await axios.post("http://localhost:5000/auth/login", {
+    //             email,
+    //             password,
+    //         }); // Schimbat de la 'username' la 'email'
+    //         console.log(response.data);
+    //         login(response.data.token);
+    //         if (response.data.role == "admin") {
+    //             navigate("/admin/dashboard");
+    //         } else navigate(from, { replace: true });
+    //     } catch (err) {
+    //         setError("Email sau parola incorecte");
+    //     }
+    // };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const response = await axios.post("http://localhost:5000/auth/login", {
                 email,
                 password,
-            }); // Schimbat de la 'username' la 'email'
+            });
             console.log(response.data);
             login(response.data.token);
-            if (response.data.role == "admin") {
+            if (response.data.role === "admin") {
                 navigate("/admin/dashboard");
-            } else navigate(from, { replace: true });
+            } else if (response.data.role === "proprietar") {
+                navigate("/owner-dashboard");
+            } else {
+                navigate(from, { replace: true });
+            }
         } catch (err) {
             setError("Email sau parola incorecte");
         }

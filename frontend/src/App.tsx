@@ -15,6 +15,10 @@ import UserListAdmin from "./UserListAdmin";
 import ApartmentsListAdmin from "./ApartmentsListAdmin";
 import OwnersListAdmin from "./OwnersListAdmin";
 import AdminRoute from "./AdminRoute";
+import DashboardOwner from "./DashboardOwner";
+import OwnerApartments from "./OwnerApartments";
+import OwnerRequests from "./OwnerRequests";
+import OwnerListNewApartment from "./CreateAparment";
 import Bara_navigatie from "./Bara_navigatie";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Profile from "./Profile";
@@ -53,6 +57,18 @@ const App: React.FC = () => {
                     <Route path="/admin/apartments" element={<ApartmentsListAdmin />} />
                     <Route path="/admin/owners" element={<OwnersListAdmin />} />
                 </Route>
+
+                {/* Ruta pentru dashboard-ul proprietar - disponibilă pentru proprietari */}
+                <Route path="/owner-dashboard" element={<DashboardOwner />} />
+
+                {/* ruta pentru a putea crea un nou apartament atunci cand esti  */}
+                <Route path="/owner-dashboard/list_apartment" element={<OwnerListNewApartment />} />
+
+                {/* Ruta pentru pagina cu lista apartamentelor proprietarului */}
+                <Route path="/owner/apartments" element={<OwnerApartments />} />
+
+                {/* Ruta pentru pagina cu lista de cereri de rezervare pentru proprietar */}
+                <Route path="/owner/reservation_requests" element={<OwnerRequests />} />
             </Routes>
         </AuthProvider>
     );

@@ -193,7 +193,7 @@ const Home: React.FC = () => {
                                         style={{ marginRight: "4px" }}
                                     ></i>
                                     <strong>: </strong>
-                                    {apartment.numberofrooms}
+                                    {apartment.numberOfRooms}
                                     <> camere</>
                                 </p>
 

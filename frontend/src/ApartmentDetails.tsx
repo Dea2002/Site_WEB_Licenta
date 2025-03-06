@@ -57,8 +57,8 @@ const ApartmentDetails: React.FC = () => {
                 {
                     clientId: user!._id,
                     apartmentId: id,
-                    checkIn: "2025-03-04",
-                    checkOut: "2025-03-08",
+                    checkIn: "2025-03-09",
+                    checkOut: "2025-03-10",
                 },
                 {
                     headers: {
@@ -124,7 +124,7 @@ const ApartmentDetails: React.FC = () => {
                             <strong>Locatie:</strong> {apartment.location}
                         </p>
                         <p>
-                            <strong>Numar de camere:</strong> {apartment.numberofrooms}
+                            <strong>Numar de camere:</strong> {apartment.numberOfRooms}
                         </p>
 
                         {/* Exemplu: "Coleg de camera" (dacă ai această informație în DB) */}

@@ -257,7 +257,11 @@ async function run() {
             }
         });
 
-        app.post('/reservation_request', authenticateToken, async (req, res) => { // asta face verificarea cererilor de request
+        app.post('/reservation_request', authenticateToken, async (req, res) => { // asta creeaza o cerere de rezervare a unui apartament
+
+            if (req.user.role !== 'client') {
+                return res.status(403).json({ message: 'Doar clientii pot face cereri de rezervare' });
+            }
 
             const { clientId, apartmentId, checkIn, checkOut } = req.body; // extrag datele din request
             const clientObjectId = new ObjectId(clientId); // creez un obiect de tip ObjectId pentru client
@@ -290,6 +294,19 @@ async function run() {
             await reservationRequestsCollection.insertOne(newReservationRequest);
 
             res.status(200).json({ message: 'Am facut cerere de rezervare' });
+        });
+
+        /* returneaza toate cererile de rezervare pentru un proprietar */
+        app.get('/owner/reservation_requests/:email', authenticateToken, async (req, res) => {
+            try {
+                const ownerEmail = req.params.email;
+                // Găsește toate rezervările care au ownerEmail-ul respectiv
+                const requests = await reservationRequestsCollection.find({ ownerEmail }).toArray();
+                res.status(200).json(requests);
+            } catch (error) {
+                console.error("Eroare la preluarea cererilor de rezervare pentru proprietar:", error);
+                res.status(500).json({ message: "Eroare internă a serverului" });
+            }
         });
 
         app.post('/reservation_request/:id/accept', authenticateToken, async (req, res) => {
@@ -340,11 +357,15 @@ async function run() {
             }
         });
 
-        // apartments routes here
-        app.post('/new-apartments', async (req, res) => {
-            const newClass = req.body;
-            //newClass.numberofrooms = parseInt(newClass.numberofrooms);
-            const result = await apartmentsCollection.insertOne(newClass);
+        // create an apartment
+        app.post('/new-apartment', async (req, res) => {
+            const { ownerId, ...rest } = req.body;
+
+            // get the ownerId from requirementBody and replace it with the ObjectId from it and place it the first in the whole json
+            requirementBody = { ownerId: new ObjectId(ownerId), ...rest };
+
+            //requirementBody.numberofrooms = parseInt(requirementBody.numberofrooms);
+            const result = await apartmentsCollection.insertOne(requirementBody);
             res.send(result);
         })
 
@@ -369,6 +390,19 @@ async function run() {
             const query = { owneremail: email };
             const result = await apartmentsCollection.find(query).toArray();
             res.send(result);
+        });
+
+
+        // ruta pentru dashboardul pentru proprietari
+        app.get('/owner/dashboard/:email', authenticateToken, async (req, res) => {
+            try {
+                const email = req.params.email;
+                const count = await apartmentsCollection.countDocuments({ owneremail: email });
+                res.status(200).json({ count });
+            } catch (error) {
+                console.error("Eroare la preluarea numărului de apartamente pentru proprietar:", error);
+                res.status(500).json({ message: "Eroare internă a serverului" });
+            }
         });
 
         // manage apartments

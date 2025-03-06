@@ -1,0 +1,46 @@
+/* frontend/src/DashboardOwner.css */
+.dashboard-owner-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-owner-container h1 {
+    color: #deaa79;
+    font-size: 2.2rem;
+}
+
+.card-owner {
+    background-color: #e8efcf;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.card-owner:hover {
+    transform: scale(1.02);
+}
+
+.card-owner h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #487368;
+}
+
+.card-owner p {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #659287;
+}
