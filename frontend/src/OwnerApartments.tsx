@@ -14,7 +14,7 @@ const OwnerApartments: React.FC = () => {
     useEffect(() => {
         if (user?.email) {
             axios
-                .get(`http://localhost:5000/apartments/by-email/${user.email}`, {
+                .get(`http://localhost:5000/apartments/by-id/${user._id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
                 .then((response) => {
@@ -34,9 +34,26 @@ const OwnerApartments: React.FC = () => {
                 {apartments.length > 0 ? (
                     apartments.map((apartment) => (
                         <div key={apartment._id} className="apartment-card">
-                            <h2>{apartment.name}</h2>
-                            <p>{apartment.location}</p>
-                            <p>{apartment.description}</p>
+                            <img
+                                src={`/Poze_apartamente/${apartment.image}`}
+                                alt={apartment.ownerInformation?.fullName}
+                            />
+                            <p>
+                                <strong>Locatie: </strong>
+                                {apartment.location}
+                            </p>
+                            {/* <p>
+                                <strong>Pret:</strong> {apartment.price} RON
+                            </p>
+                            <p>
+                                <strong>Numar de camere:</strong> {apartment.numberOfRooms}
+                            </p>
+
+                            <p>
+                                <strong>Suprafata totala:</strong> {apartment.totalSurface} mp
+                            </p>
+
+                            <p>{apartment.description}</p> */}
                             {/* Poți adăuga alte detalii după necesitate */}
                         </div>
                     ))

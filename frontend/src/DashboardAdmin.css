@@ -9,7 +9,8 @@
 }
 
 .dashboard-container h1 {
-    color: #800080;
+    /* color: #deaa79; */
+    color: #64b29e;
     margin-bottom: 40px;
 }
 
@@ -31,14 +32,14 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 8px rgba(201, 81, 153, 0.2);
+    /* box-shadow: 0 2px 3px #659287; */
     cursor: pointer;
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(201, 81, 153, 0.4);
+    box-shadow: 0 3px 3px #659287;
 }
 
 .card h2 {
@@ -49,6 +50,7 @@
 
 .card p {
     font-size: 2rem;
-    color: #800080;
+    /* color: #deaa79; */
+    color: #659287;
     font-weight: bold;
 }

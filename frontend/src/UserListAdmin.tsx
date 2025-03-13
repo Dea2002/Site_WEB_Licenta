@@ -69,6 +69,9 @@ interface User {
     email: string;
     role: string;
     phoneNumber: string;
+    faculty: string;
+    gender: string;
+    createdAt: Date;
     // pot sa pun si alte detalii despre useri
 }
 
@@ -78,6 +81,8 @@ interface NewUserFormState {
     phoneNumber: string;
     role: string;
     password: string;
+    faculty: string;
+    gender: string;
     createdAt: Date;
 }
 
@@ -93,6 +98,8 @@ const UserListAdmin: React.FC = () => {
         phoneNumber: "",
         role: "client",
         password: "",
+        faculty: "",
+        gender: "",
         createdAt: new Date(),
     });
 
@@ -161,6 +168,8 @@ const UserListAdmin: React.FC = () => {
                     phoneNumber: "",
                     role: "client",
                     password: "",
+                    faculty: "",
+                    gender: "",
                     createdAt: new Date(),
                 });
                 setTimeout(() => setSuccessMessage(""), 3000);
@@ -237,6 +246,27 @@ const UserListAdmin: React.FC = () => {
                             onChange={handleNewUserChange}
                             required
                             minLength={6}
+                        />
+                    </div>
+
+                    <div>
+                        <label>Facultate:</label>
+                        <input
+                            type="text"
+                            name="faculty"
+                            value={newUserForm.faculty}
+                            onChange={handleNewUserChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Gen:</label>
+                        <input
+                            type="text"
+                            name="gender"
+                            value={newUserForm.gender}
+                            onChange={handleNewUserChange}
+                            required
                         />
                     </div>
                     <button type="submit">Adauga Utilizator</button>

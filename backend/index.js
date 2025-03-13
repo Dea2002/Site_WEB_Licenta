@@ -9,7 +9,6 @@ const rateLimit = require('express-rate-limit');
 const port = process.env.PORT || 5000;
 
 
-
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -175,12 +174,13 @@ async function run() {
         });
 
 
+
         // Pentru adaugarea de useri
         app.post('/admin/users', authenticateToken, verifyAdmin, async (req, res) => {
-            const { email, fullName, phoneNumber, role, password } = req.body;
+            const { email, fullName, phoneNumber, role, password, gender, faculty } = req.body;
 
             // Validari simple
-            if (!email || !fullName || !phoneNumber || !role || !password) {
+            if (!email || !fullName || !phoneNumber || !role || !password || !gender || !faculty) {
                 return res.status(400).json({ message: 'Toate campurile sunt obligatorii' });
             }
 
@@ -201,6 +201,9 @@ async function run() {
                     phoneNumber,
                     role,
                     password: hashedPassword,
+                    gender,
+                    faculty,
+                    createdAt: new Date()
                 };
 
                 await app.locals.usersCollection.insertOne(newUser);
@@ -210,11 +213,6 @@ async function run() {
                 res.status(500).json({ message: 'Eroare interna a serverului' });
             }
         });
-
-
-
-
-
 
 
         // Exemplu de ruta protejata
@@ -257,7 +255,7 @@ async function run() {
             }
         });
 
-        app.post('/reservation_request', authenticateToken, async (req, res) => { // asta creeaza o cerere de rezervare a unui apartament
+        app.post('/create_reservation_request', authenticateToken, async (req, res) => { // asta creeaza o cerere de rezervare a unui apartament
 
             if (req.user.role !== 'client') {
                 return res.status(403).json({ message: 'Doar clientii pot face cereri de rezervare' });
@@ -297,15 +295,42 @@ async function run() {
         });
 
         /* returneaza toate cererile de rezervare pentru un proprietar */
-        app.get('/owner/reservation_requests/:email', authenticateToken, async (req, res) => {
+        app.get('/owner/list_reservation_requests/:ownerId', authenticateToken, async (req, res) => {
             try {
-                const ownerEmail = req.params.email;
-                // Găsește toate rezervările care au ownerEmail-ul respectiv
-                const requests = await reservationRequestsCollection.find({ ownerEmail }).toArray();
-                res.status(200).json(requests);
-            } catch (error) {
-                console.error("Eroare la preluarea cererilor de rezervare pentru proprietar:", error);
-                res.status(500).json({ message: "Eroare internă a serverului" });
+                const ownerId = req.params.ownerId;
+
+                const rezervari = await reservationRequestsCollection.aggregate([
+                    // Lookup pentru apartamente
+                    {
+                        $lookup: {
+                            from: 'apartments',          // Numele colecției de apartamente
+                            localField: 'apartament',     // Câmpul din cereri care conține id-ul apartamentului
+                            foreignField: '_id',         // Câmpul din colecția de apartamente
+                            as: 'apartamentData'
+                        }
+                    },
+                    { $unwind: '$apartamentData' }, // Transformă array-ul din lookup într-un document
+                    {
+                        $match: {
+                            'apartamentData.ownerId': new ObjectId(ownerId)  // Filtrează după ownerId
+                        }
+                    },
+                    // Lookup pentru client (utilizator)
+                    {
+                        $lookup: {
+                            from: 'users',             // Numele colecției de utilizatori
+                            localField: 'client',      // Câmpul din cereri care conține id-ul clientului
+                            foreignField: '_id',       // Câmpul din colecția de users
+                            as: 'clientData'
+                        }
+                    },
+                    // Opțional: dacă te aștepți ca fiecare cerere să aibă un singur client, poți face unwind:
+                    { $unwind: { path: '$clientData', preserveNullAndEmptyArrays: true } }
+                ]).toArray();
+
+                res.json(rezervari);
+            } catch (err) {
+                res.status(500).json({ error: err.message });
             }
         });
 
@@ -369,12 +394,6 @@ async function run() {
             res.send(result);
         })
 
-        // Afiseaza pe pagina doar apartamentele care sunt disponibile, cele care au statusul indisponibil nu apar
-        // app.get('/apartments', async(req, res) => {
-        //     const query = { status: 'disponibil' };
-        //     const result = await apartmentsCollection.find(query).toArray();
-        //     res.send(result);
-        // })
 
         // Afiseaza pe pagina toate apartamentele disponibile si indisponibile
         app.get('/apartments', async (req, res) => {
@@ -383,21 +402,11 @@ async function run() {
         });
 
 
-
-        // getapartments by owner email address
-        app.get('/apartments/by-email/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { owneremail: email };
-            const result = await apartmentsCollection.find(query).toArray();
-            res.send(result);
-        });
-
-
         // ruta pentru dashboardul pentru proprietari
-        app.get('/owner/dashboard/:email', authenticateToken, async (req, res) => {
+        app.get('/owner/dashboard/:id', authenticateToken, async (req, res) => {
             try {
-                const email = req.params.email;
-                const count = await apartmentsCollection.countDocuments({ owneremail: email });
+                const id = req.params.id;
+                const count = await apartmentsCollection.countDocuments({ ownerId: new ObjectId(id) });
                 res.status(200).json({ count });
             } catch (error) {
                 console.error("Eroare la preluarea numărului de apartamente pentru proprietar:", error);
@@ -429,13 +438,41 @@ async function run() {
         // })
 
 
-        //get single class details
-        app.get('/apartments/:id', async (req, res) => {
+        app.get('/apartments/by-id/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await apartmentsCollection.findOne(query);
+            const query = { ownerId: new ObjectId(id) };
+            const result = await apartmentsCollection.find(query).toArray();
             res.send(result);
-        })
+
+        });
+
+
+        // folosim o agregare de tio lookup pentru a extrage informatii despre proprietarul unui apartament
+        app.get('/apartments/:id', async (req, res) => {
+            const id = req.params.id; // id-ul ownerului
+            try {
+                const apartmentOwner = await apartmentsCollection.aggregate([
+                    { $match: { _id: new ObjectId(id) } },
+                    {
+                        $lookup: {
+                            from: "users", // asigură-te că numele colecției de utilizatori este corect
+                            localField: "ownerId", // presupunem că ai stocat id-ul proprietarului aici
+                            foreignField: "_id",
+                            as: "ownerInformation"
+                        }
+                    },
+                    { $unwind: "$ownerInformation" } // presupunând că fiecare apartament are un singur proprietar
+                ]).toArray();
+
+                if (!apartmentOwner || apartmentOwner.length === 0) {
+                    return res.status(404).json({ message: 'Apartamentul nu a fost găsit' });
+                }
+                res.status(200).json(apartmentOwner[0]);
+            } catch (error) {
+                console.error('Eroare la preluarea apartamentului:', error);
+                res.status(500).json({ message: 'Eroare internă a serverului' });
+            }
+        });
 
         // update class details (toate detaliileb    )
         app.put('/update-apartments/:id', async (req, res) => {
@@ -457,15 +494,6 @@ async function run() {
             const result = await apartmentsCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         })
-
-
-        // USERS 
-        // app.post('/new-user', async (req, res) => {
-        //     const newUser = req.body;
-        //     const result = await usersCollection.insertOne(newUser);
-        //     res.send(result);
-        // })
-
 
         // Get all users
         app.get('/users', async (req, res) => {

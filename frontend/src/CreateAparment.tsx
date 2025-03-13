@@ -46,7 +46,7 @@ const OwnerListNewApartment: React.FC = () => {
         airConditioning: false,
         balcony: false,
         colleagues: false,
-        images: "",
+        image: "",
     });
 
     // Mesaj pentru feedback-ul utilizatorului
@@ -324,9 +324,9 @@ const OwnerListNewApartment: React.FC = () => {
                     <label htmlFor="">Selfie cu bunica:</label>
                     <input
                         type="text" /* //! trebuie vazut cum se poate incarca o imagine */
-                        id="images"
-                        name="images"
-                        value={formData.images}
+                        id="image"
+                        name="image"
+                        value={formData.image}
                         onChange={handleChange}
                         required
                     />

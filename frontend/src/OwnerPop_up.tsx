@@ -6,12 +6,12 @@ import { FiMail } from "react-icons/fi";
 import "./OwnerPop_up.css";
 
 interface OwnerPop_upProps {
-    ownername: string;
-    owneremail: string;
-    phoneNumber: string;
+    ownername?: string;
+    owneremail?: string;
+    phoneNumber?: string;
     onClose: () => void;
-    // adaugam informatiile despre proprietar
 }
+// adaugam informatiile despre proprietar
 
 const OwnerPop_up: React.FC<OwnerPop_upProps> = ({
     ownername,

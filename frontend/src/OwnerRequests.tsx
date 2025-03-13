@@ -8,13 +8,18 @@ import "./OwnerRequests.css";
 interface ReservationRequest {
     _id: string;
     client: string;
-    clientName: string;
     apartament: string;
-    apartmentLocation: string;
-    ownerEmail: string;
     checkIn: string;
     checkOut: string;
-    // alte câmpuri după nevoie
+    clientData: {
+        fullName: string;
+        email: string;
+
+        // alte câmpuri după nevoie
+    };
+    apartamentData: {
+        location: string;
+    };
 }
 
 const OwnerRequests: React.FC = () => {
@@ -22,18 +27,17 @@ const OwnerRequests: React.FC = () => {
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
 
     useEffect(() => {
-        if (user?.email) {
-            axios
-                .get(`http://localhost:5000/owner/reservation_requests/${user.email}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                })
-                .then((response) => {
-                    setRequests(response.data);
-                })
-                .catch((error) => {
-                    console.error("Eroare la preluarea cererilor de rezervare:", error);
-                });
-        }
+        axios
+            .get(`http://localhost:5000/owner/list_reservation_requests/${user!._id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((response) => {
+                setRequests(response.data);
+                console.log(response.data);
+            })
+            .catch((error) => {
+                console.error("Eroare la preluarea cererilor de rezervare:", error);
+            });
     }, [user, token]);
 
     return (
@@ -46,10 +50,11 @@ const OwnerRequests: React.FC = () => {
                         {requests.map((req) => (
                             <li key={req._id} className="request-item">
                                 <p>
-                                    <strong>Nume client:</strong> {req.clientName}
+                                    <strong>Nume client:</strong> {req.clientData.fullName}
                                 </p>
                                 <p>
-                                    <strong>Locația apartamentului:</strong> {req.apartmentLocation}
+                                    <strong>Locația apartamentului:</strong>{" "}
+                                    {req.apartamentData.location}
                                 </p>
                                 <p>
                                     <strong>Check-In:</strong>{" "}

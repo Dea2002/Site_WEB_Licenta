@@ -2,17 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
 import "./ApartmentsListAdmin.css";
-
-interface Apartment {
-    _id: string;
-    name: string;
-    description: string;
-    ownername: string;
-    image: string;
-    owneremail: string;
-    status: "disponibil" | "indisponibil";
-    reason?: string; // Adaugam reason optional
-}
+import { Apartment } from "./types";
 
 const ApartmentsListAdmin: React.FC = () => {
     const { token } = useContext(AuthContext);
@@ -30,6 +20,7 @@ const ApartmentsListAdmin: React.FC = () => {
             })
             .then((response) => {
                 setApartments(response.data);
+                console.log(response.data);
                 setLoading(false);
             })
             .catch((error) => {
@@ -59,7 +50,7 @@ const ApartmentsListAdmin: React.FC = () => {
                 const updatedApartment = response.data;
                 setApartments((prevApartments) =>
                     prevApartments.map((apartment) =>
-                        apartment._id === id ? updatedApartment : apartment,
+                        apartment._id === id ? { ...apartment, ...updatedApartment } : apartment,
                     ),
                 );
                 setSuccessMessage("Statusul a fost actualizat cu succes!");
@@ -83,16 +74,16 @@ const ApartmentsListAdmin: React.FC = () => {
             <div className="apartments-list">
                 {apartments.map((apartment) => (
                     <div key={apartment._id} className="apartment-card">
-                        <img src={`/Poze_apartamente/${apartment.image}`} alt={apartment.name} />
-                        <h2>{apartment.name}</h2>
+                        <img
+                            src={`/Poze_apartamente/${apartment.image}`}
+                            alt={apartment.ownerInformation?.fullName}
+                        />
+                        {/* <h2>{apartment.name}</h2> */}
                         <p>
-                            <strong>Descriere:</strong> {apartment.description}
+                            <strong>Proprietar:</strong> {apartment.ownerInformation?.fullName}
                         </p>
                         <p>
-                            <strong>Proprietar:</strong> {apartment.ownername}
-                        </p>
-                        <p>
-                            <strong>Email:</strong> {apartment.owneremail}
+                            <strong>Email:</strong> {apartment.ownerInformation?.email}
                         </p>
                         <div className="status-selector">
                             <label>Status:</label>

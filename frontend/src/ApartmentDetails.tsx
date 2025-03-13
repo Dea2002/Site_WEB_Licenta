@@ -53,7 +53,7 @@ const ApartmentDetails: React.FC = () => {
                 return;
             }
             await axios.post(
-                "http://localhost:5000/reservation_request",
+                "http://localhost:5000/create_reservation_request",
                 {
                     clientId: user!._id,
                     apartmentId: id,
@@ -110,7 +110,7 @@ const ApartmentDetails: React.FC = () => {
                         {apartment.image && (
                             <img
                                 src={`/Poze_apartamente/${apartment.image}`}
-                                alt={`Imagine pentru ${apartment.name}`}
+                                // alt={`Imagine pentru ${apartment.name}`}
                             />
                         )}
                     </div>
@@ -126,14 +126,55 @@ const ApartmentDetails: React.FC = () => {
                         <p>
                             <strong>Numar de camere:</strong> {apartment.numberOfRooms}
                         </p>
-
-                        {/* Exemplu: "Coleg de camera" (dacă ai această informație în DB) */}
                         <p>
-                            <strong>Coleg de camera:</strong> (aici textul dorit)
+                            <strong>Numar de băi:</strong> {apartment.numberOfBathrooms}
                         </p>
-
                         <p>
-                            <strong>Descriere:</strong> {apartment.description}
+                            <strong>Etajul:</strong> {apartment.floorNumber}
+                        </p>
+                        <p>
+                            <strong>Parcare:</strong> {apartment.parking ? "Da" : "Nu"}
+                        </p>
+                        <p>
+                            <strong>Prietenos cu animalele:</strong>{" "}
+                            {apartment.petFriendly ? "Da" : "Nu"}
+                        </p>
+                        <p>
+                            <strong>Suprafata totala:</strong> {apartment.totalSurface} mp
+                        </p>
+                        <p>
+                            <strong>Lift:</strong> {apartment.elevator ? "Da" : "Nu"}
+                        </p>
+                        <p>
+                            <strong>Anul constructiei:</strong> {apartment.constructionYear}
+                        </p>
+                        <p>
+                            <strong>Anul renovarii:</strong> {apartment.renovationYear}
+                        </p>
+                        <p>
+                            <strong>Pret Internet:</strong> {apartment.internetPrice} RON
+                        </p>
+                        <p>
+                            <strong>Pret TV:</strong> {apartment.TVPrice} RON
+                        </p>
+                        <p>
+                            <strong>Pret apa:</strong> {apartment.waterPrice} RON
+                        </p>
+                        <p>
+                            <strong>Pret gaz:</strong> {apartment.gasPrice} RON
+                        </p>
+                        <p>
+                            <strong>Pret electricitate:</strong> {apartment.electricityPrice} RON
+                        </p>
+                        <p>
+                            <strong>Aer conditionat:</strong>{" "}
+                            {apartment.airConditioning ? "Da" : "Nu"}
+                        </p>
+                        <p>
+                            <strong>Balcon:</strong> {apartment.balcony ? "Da" : "Nu"}
+                        </p>
+                        <p>
+                            <strong>Coleg de camera:</strong> {apartment.colleagues ? "Da" : "Nu"}
                         </p>
                     </div>
                 </div>
@@ -141,30 +182,32 @@ const ApartmentDetails: React.FC = () => {
                 {/* Partea dreapta */}
                 <div className="right-section">
                     {/* Card Proprietar */}
-                    <div className="owner-section">
-                        <h2>Proprietar</h2>
-                        <p>{apartment.ownername}</p>
-                        {/* Butoane Detalii și Chat în colțurile de jos */}
-                        <button
-                            className="owner-section-button details-btn"
-                            onClick={() => setshowOwnerPop_up(true)}
-                        >
-                            Detalii
-                        </button>
-                        <button className="owner-section-button chat-btn">Chat</button>
-                        <button className="reserve-btn" onClick={handleReserve}>
-                            Rezerva acum
-                        </button>
-                    </div>
+                    {apartment.ownerInformation && (
+                        <div className="owner-section">
+                            <h2>Proprietar</h2>
+                            <p>{apartment.ownerInformation.fullName}</p>
+                            {/* Butoane Detalii și Chat în colțurile de jos */}
+                            <button
+                                className="owner-section-button details-btn"
+                                onClick={() => setshowOwnerPop_up(true)}
+                            >
+                                Detalii
+                            </button>
+                            <button className="owner-section-button chat-btn">Chat</button>
+                            <button className="reserve-btn" onClick={handleReserve}>
+                                Rezerva acum
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Afișează modalul dacă showOwnerPop_up este true */}
             {showOwnerPop_up && (
                 <OwnerPop_up
-                    ownername={apartment.ownername}
-                    owneremail={apartment.owneremail}
-                    phoneNumber="0789641230"
+                    ownername={apartment.ownerInformation?.fullName}
+                    owneremail={apartment.ownerInformation?.email}
+                    phoneNumber={apartment.ownerInformation?.phoneNumber}
                     onClose={() => setshowOwnerPop_up(false)}
                 />
             )}
