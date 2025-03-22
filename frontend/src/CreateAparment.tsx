@@ -20,7 +20,7 @@ const OwnerListNewApartment: React.FC = () => {
         //             setApartmentsCount(response.data.count);
         //         })
         //         .catch((error) => {
-        //             console.error("Eroare la preluarea numărului de apartamente:", error);
+        //             console.error("Eroare la preluarea numarului de apartamente:", error);
         //         });
         // }
     }, [user, token]);
@@ -46,6 +46,7 @@ const OwnerListNewApartment: React.FC = () => {
         airConditioning: false,
         balcony: false,
         colleagues: false,
+        colleaguesNames: "",
         image: "",
     });
 
@@ -341,6 +342,18 @@ const OwnerListNewApartment: React.FC = () => {
                         name="colleagues"
                         checked={formData.colleagues}
                         onChange={handleChange}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="">Nume Coleg:</label>
+                    <input
+                        type="text"
+                        id="colleaguesNames"
+                        name="colleaguesNames"
+                        value={formData.colleaguesNames}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
 

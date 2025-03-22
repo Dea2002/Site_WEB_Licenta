@@ -1,0 +1,40 @@
+/* Containerul general pentru pagina apartamentelor */
+.owner-apartments-container {
+    margin: 20px auto;
+    max-width: 1200px; /* Ajusteaza latimea maxima dupa preferinte */
+    padding: 20px;
+}
+
+/* Containerul pentru lista de apartamente afisate ca carduri */
+.apartments-owner-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 carduri pe linie */
+    gap: 20px; /* Spatiere intre carduri */
+}
+
+/* Stilizarea cardurilor individuale pentru apartamente */
+.apartment-owner-card {
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 8px;
+    padding: 16px;
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
+    transition: box-shadow 0.2s ease;
+    text-align: center;
+}
+
+/* Efect de hover pentru card (optional) */
+.apartment-owner-card:hover {
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); */
+    border: 4px solid #fac67a;
+    border-radius: 8px;
+}
+
+/* Stilizare pentru imaginea din card */
+.apartment-owner-card img {
+    width: 330px;
+    height: 200px;
+    border-radius: 8px 8px 0 0;
+    object-fit: cover;
+    margin-bottom: 16px;
+}

@@ -18,16 +18,22 @@ function NavBar() {
             <Container>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                    {/* Dropdown-uri din partea stângă */}
+                    {/* Dropdown-uri din partea stanga */}
                     <Nav className="nav nav-underline align-items-center" style={{ gap: "1rem" }}>
-                        <NavDropdown title="Cereri" id="requests-dropdown" align="start">
+                        {/* <NavDropdown title="Cereri" id="requests-dropdown" align="start">
                             <NavDropdown.Item as={Link} to="/owner/reservation_requests">
                                 Vezi cereri
                             </NavDropdown.Item>
-                        </NavDropdown>
-                        <NavDropdown title="Istoric rezervari" id="history-dropdown" align="start">
+                        </NavDropdown> */}
+                        {/* <NavDropdown title="Istoric rezervari" id="history-dropdown" align="start">
                             <NavDropdown.Item disabled>Istoric gol momentan</NavDropdown.Item>
-                        </NavDropdown>
+                        </NavDropdown> */}
+                        <Nav.Link as={Link} to="/owner/reservation_requests">
+                            Cereri
+                        </Nav.Link>
+                        <Nav.Link as={Link} to="/owner/reservation_history">
+                            Istoric rezervari
+                        </Nav.Link>
                     </Nav>
 
                     {/* Meniul din dreapta */}

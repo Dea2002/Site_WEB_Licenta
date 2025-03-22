@@ -21,13 +21,13 @@ const DashboardOwner: React.FC = () => {
                     setApartmentsCount(response.data.count);
                 })
                 .catch((error) => {
-                    console.error("Eroare la preluarea numărului de apartamente:", error);
+                    console.error("Eroare la preluarea numarului de apartamente:", error);
                 });
         }
     }, [user, token]);
 
     const handleCardClick = () => {
-        // Navigăm către noua pagină care afișează lista apartamentelor
+        // Navigam catre noua pagina care afiseaza lista apartamentelor
         navigate("/owner/apartments");
     };
 
@@ -43,7 +43,9 @@ const DashboardOwner: React.FC = () => {
                 <div className="card-owner" onClick={handleCardClick}>
                     <p>{apartmentsCount}</p>
                 </div>
-                <button onClick={listNewApartment}>List new apartment</button>
+                <button className="button-listNewApartment" onClick={listNewApartment}>
+                    List new apartment
+                </button>
             </div>
         </div>
     );

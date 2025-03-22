@@ -15,7 +15,7 @@ interface ReservationRequest {
         fullName: string;
         email: string;
 
-        // alte câmpuri după nevoie
+        // alte campuri dupa nevoie
     };
     apartamentData: {
         location: string;
@@ -24,6 +24,7 @@ interface ReservationRequest {
 
 const OwnerRequests: React.FC = () => {
     const { token, user } = useContext(AuthContext);
+    const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
 
     useEffect(() => {
@@ -40,11 +41,81 @@ const OwnerRequests: React.FC = () => {
             });
     }, [user, token]);
 
+    // const handleAccept = async (reservationId: string) => {
+    //     try {
+    //         await axios.post(
+    //             `http://localhost:5000/create_reservation_request/${reservationId}/accept`,
+    //             {},
+    //             { headers: { Authorization: `Bearer ${token}` } },
+    //         );
+    //         // Elimina cererea acceptata din lista
+    //         setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reservationId));
+    //     } catch (error) {
+    //         console.error("Eroare la acceptarea cererii:", error);
+    //     }
+    // };
+
+    // const handleDecline = async (reservationId: string) => {
+    //     try {
+    //         await axios.post(
+    //             `http://localhost:5000/create_reservation_request/${reservationId}/decline`,
+    //             {},
+    //             { headers: { Authorization: `Bearer ${token}` } },
+    //         );
+    //         // Elimina cererea respinsa din lista
+    //         setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reservationId));
+    //     } catch (error) {
+    //         console.error("Eroare la respingerea cererii:", error);
+    //     }
+    // };
+
+    // functii de test pentru accept/decline
+    const accept = async (id: string) => {
+        try {
+            await axios
+                .post(
+                    `http://localhost:5000/reservation_request/${id}/accept`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                )
+                .then(() => {
+                    setSuccessMessage("Cererea a fost acceptata!");
+                    setRequests(requests.filter((request) => request._id !== id));
+                    setTimeout(() => setSuccessMessage(""), 3000);
+                });
+        } catch (err: any) {
+            console.log(err);
+        }
+    };
+
+    const decline = async (id: string) => {
+        try {
+            await axios
+                .post(
+                    `http://localhost:5000/reservation_request/${id}/decline`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                )
+                .then(() => {
+                    setSuccessMessage("Cererea a fost stearsa!");
+                    setRequests(requests.filter((request) => request._id !== id));
+                    setTimeout(() => setSuccessMessage(""), 3000);
+                });
+        } catch (err: any) {
+            console.log(err);
+        }
+    };
+
     return (
         <>
             <Bara_navigatie />
             <div className="owner-requests-container">
                 <h1>Cereri de rezervare</h1>
+                {successMessage && <div className="success-message">{successMessage}</div>}
                 {requests.length > 0 ? (
                     <ul className="requests-list">
                         {requests.map((req) => (
@@ -53,7 +124,7 @@ const OwnerRequests: React.FC = () => {
                                     <strong>Nume client:</strong> {req.clientData.fullName}
                                 </p>
                                 <p>
-                                    <strong>Locația apartamentului:</strong>{" "}
+                                    <strong>Locatia apartamentului:</strong>{" "}
                                     {req.apartamentData.location}
                                 </p>
                                 <p>
@@ -64,12 +135,14 @@ const OwnerRequests: React.FC = () => {
                                     <strong>Check-Out:</strong>{" "}
                                     {new Date(req.checkOut).toLocaleDateString()}
                                 </p>
-                                {/* Adaugă alte detalii relevante, de exemplu informații despre client sau apartament */}
+                                <button onClick={() => accept(req._id)}>Accepta</button>
+                                <button onClick={() => decline(req._id)}>Respinge</button>
+                                {/* Adauga alte detalii relevante, de exemplu informatii despre client sau apartament */}
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p>Nu există cereri de rezervare.</p>
+                    <p>Nu exista cereri de rezervare.</p>
                 )}
             </div>
         </>

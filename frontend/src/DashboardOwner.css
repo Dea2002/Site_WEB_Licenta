@@ -44,3 +44,24 @@
     font-weight: bold;
     color: #659287;
 }
+
+.button-listNewApartment {
+    /* gap: 20px; */
+    justify-content: center;
+    color: #659287;
+    font-weight: bold;
+    background-color: white;
+    border: 1px solid white;
+    border-radius: 8px;
+    /* padding: 2rem; */
+    width: 170px;
+    height: 38px;
+}
+
+.button-listNewApartment:hover {
+    /* background-color: #e8efcf; */
+    color: #659287;
+    border-color: #659287;
+    border-width: 3px;
+    border-style: solid;
+}

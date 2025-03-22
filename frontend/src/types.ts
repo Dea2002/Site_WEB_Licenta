@@ -34,12 +34,13 @@ export interface Apartment {
     airConditioning: boolean;
     balcony: boolean;
     colleagues: boolean;
+    colleaguesNames: string;
     image: string;
 
     ownerInformation?: {
         fullName: string;
         email: string;
         phoneNumber: string;
-        // alte detalii despre proprietar dacă e nevoie
+        // alte detalii despre proprietar daca e nevoie
     };
 }

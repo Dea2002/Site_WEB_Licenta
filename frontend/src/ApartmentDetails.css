@@ -4,15 +4,15 @@
     font-family: Arial, sans-serif;
 }
 
-/* Container pentru secțiunea stânga (imagine + info) și secțiunea dreapta (card proprietar) */
+/* Container pentru sectiunea stanga (imagine + info) si sectiunea dreapta (card proprietar) */
 .details-container {
     display: flex;
-    justify-content: center; /* spațiu între stânga și dreapta */
+    justify-content: center; /* spatiu intre stanga si dreapta */
     align-items: flex-start; /* aliniere sus */
     gap: 20px;
-    max-width: 1000px; /* lățime maximă a paginii */
-    margin: 0 auto; /* centrează orizontal */
-    padding: 0 20px; /* un pic de spațiu lateral */
+    max-width: 1000px; /* latime maxima a paginii */
+    margin: 0 auto; /* centreaza orizontal */
+    padding: 0 20px; /* un pic de spatiu lateral */
 }
 
 .left-section {
@@ -20,18 +20,18 @@
     /* margin-right: 20px; */
     /* margin-left: 200px; */
     /* background-color: hsl(0, 7%, 92%); 
-    border: 1px solid #ddd; bordură fină */
+    border: 1px solid #ddd; bordura fina */
     background-color: rgba(255, 255, 255, 0.8); /* alb cu 80% opacitate */
     backdrop-filter: blur(20px); /* blur de 5px pe fundalul din spate */
-    border-radius: 8px; /* colțuri rotunjite */
+    border-radius: 8px; /* colturi rotunjite */
     padding: 35px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* umbră discretă */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* umbra discreta */
     /* padding-top: 30px; */
     margin-top: 40px;
 }
 /* Container pentru imagine */
 .image-container {
-    text-align: center; /* ca imaginea să fie pe mijloc */
+    text-align: center; /* ca imaginea sa fie pe mijloc */
     /* margin-top: 25px; */
     margin-bottom: 25px;
     /* margin-left: 40px; */
@@ -54,7 +54,7 @@
 
 /*Partea dreapta*/
 .right-section {
-    flex: 1; /* mai îngustă decât left-section */
+    flex: 1; /* mai ingusta decat left-section */
     display: flex;
     height: auto;
     flex-direction: column;
@@ -79,7 +79,7 @@
 
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     text-align: center;
-    padding-bottom: 40px; /* spațiu pentru butonul "Rezerva acum" */
+    padding-bottom: 40px; /* spatiu pentru butonul "Rezerva acum" */
     margin-left: 25px;
 }
 
@@ -101,10 +101,10 @@
     /* color: #dba979; */
 }
 
-/* Butoanele Detalii și Chat */
+/* Butoanele Detalii si Chat */
 .owner-section-button {
     position: absolute;
-    bottom: 60px; /* poziționează-le puțin deasupra butonului de rezervă */
+    bottom: 60px; /* pozitioneaza-le putin deasupra butonului de rezerva */
     padding: 8px 12px;
     background-color: #659287;
     border-color: #659287;
@@ -129,23 +129,23 @@
     border-style: solid;
 }
 
-/* Buton "Detalii" în stânga jos */
+/* Buton "Detalii" in stanga jos */
 .details-btn {
     left: 10px;
 }
 
-/* Buton "Chat" în dreapta jos */
+/* Buton "Chat" in dreapta jos */
 .chat-btn {
     right: 10px;
 }
 
-/* Butonul "Rezerva acum" – poziționat la marginea de jos */
+/* Butonul "Rezerva acum" – pozitionat la marginea de jos */
 .reserve-btn {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 100%; /* acoperă toată lățimea cardului */
-    height: 45px; /* ajustează înălțimea după preferințe */
+    width: 100%; /* acopera toata latimea cardului */
+    height: 45px; /* ajusteaza inaltimea dupa preferinte */
     background-color: #659287;
     color: #e8efcf;
     border: none;

@@ -4,9 +4,15 @@ import axios from "axios";
 import { Apartment } from "./types";
 import { AuthContext } from "./AuthContext";
 import Bara_navigatie from "./Bara_navigatie";
-import Login from "./Login";
 import "./ApartmentDetails.css";
 import OwnerPop_up from "./OwnerPop_up";
+import ReservationPopup from "./ReservationPopup";
+import { format } from "date-fns";
+
+interface selectedDates {
+    checkIn: Date;
+    checkOut: Date;
+}
 
 const ApartmentDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -15,8 +21,15 @@ const ApartmentDetails: React.FC = () => {
     const { isAuthenticated, user, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // Stare pentru afișarea modalului
+    // Stare pentru afisarea modalului
     const [showOwnerPop_up, setshowOwnerPop_up] = useState(false);
+    const [showReservationPopup, setShowReservationPopup] = useState(false);
+    const [selectedDates, setSelectedDates] = useState<selectedDates | null>(null);
+
+    // handler ce primeste datele din ReservationPopup
+    const handleDatesSelected = (checkIn: Date, checkOut: Date) => {
+        setSelectedDates({ checkIn, checkOut });
+    };
 
     useEffect(() => {
         if (id) {
@@ -43,22 +56,21 @@ const ApartmentDetails: React.FC = () => {
         };
     }, [showOwnerPop_up]);
 
-    const handleReserve = async () => {
-        console.log("am apasat butonul");
+    const selectInterval = async () => {
+        setShowReservationPopup(true);
+    };
+
+    const makeReservation = async () => {
+        console.log(selectedDates);
         try {
-            // Presupunem că AuthContext furnizează și user, cu proprietatea _id
-            if (!user) {
-                navigate("/login", { state: { from: `/apartment/${id}` } });
-                // throw new Error("Utilizatorul nu este autentificat");
-                return;
-            }
+            console.log(selectedDates);
             await axios.post(
                 "http://localhost:5000/create_reservation_request",
                 {
                     clientId: user!._id,
                     apartmentId: id,
-                    checkIn: "2025-03-09",
-                    checkOut: "2025-03-10",
+                    checkIn: format(selectedDates!.checkIn, "yyyy-MM-dd"),
+                    checkOut: format(selectedDates!.checkOut, "yyyy-MM-dd"),
                 },
                 {
                     headers: {
@@ -72,11 +84,6 @@ const ApartmentDetails: React.FC = () => {
             );
             // console.log(err);
         }
-
-        // if (isAuthenticated) {
-        //     navigate("/confirmation", { state: { apartmentId: id } });
-        // } else {
-        // }
     };
 
     if (error) {
@@ -115,7 +122,7 @@ const ApartmentDetails: React.FC = () => {
                         )}
                     </div>
                     <hr className="line-image" />
-                    {/* Informații apartament */}
+                    {/* Informatii apartament */}
                     <div className="info-container">
                         <p>
                             <strong>Pret:</strong> {apartment.price} RON
@@ -127,7 +134,7 @@ const ApartmentDetails: React.FC = () => {
                             <strong>Numar de camere:</strong> {apartment.numberOfRooms}
                         </p>
                         <p>
-                            <strong>Numar de băi:</strong> {apartment.numberOfBathrooms}
+                            <strong>Numar de bai:</strong> {apartment.numberOfBathrooms}
                         </p>
                         <p>
                             <strong>Etajul:</strong> {apartment.floorNumber}
@@ -176,6 +183,15 @@ const ApartmentDetails: React.FC = () => {
                         <p>
                             <strong>Coleg de camera:</strong> {apartment.colleagues ? "Da" : "Nu"}
                         </p>
+
+                        {apartment.colleagues && (
+                            <p>
+                                <strong>Nume coleg:</strong>{" "}
+                                {apartment.colleaguesNames === ""
+                                    ? "Momentan nu exista coleg de apartament."
+                                    : apartment.colleaguesNames}
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -186,7 +202,7 @@ const ApartmentDetails: React.FC = () => {
                         <div className="owner-section">
                             <h2>Proprietar</h2>
                             <p>{apartment.ownerInformation.fullName}</p>
-                            {/* Butoane Detalii și Chat în colțurile de jos */}
+                            {/* Butoane Detalii si Chat in colturile de jos */}
                             <button
                                 className="owner-section-button details-btn"
                                 onClick={() => setshowOwnerPop_up(true)}
@@ -194,15 +210,35 @@ const ApartmentDetails: React.FC = () => {
                                 Detalii
                             </button>
                             <button className="owner-section-button chat-btn">Chat</button>
-                            <button className="reserve-btn" onClick={handleReserve}>
+                            {selectedDates && (
+                                <div>
+                                    <p>Check-in: {format(selectedDates.checkIn, "dd/MM/yyyy")}</p>
+                                    <p>Check-out: {format(selectedDates.checkOut, "dd/MM/yyyy")}</p>
+                                    <p>Pret: dada</p>
+                                    <button onClick={selectInterval}>Modifica intervalul</button>
+                                </div>
+                            )}
+                            <button
+                                className="reserve-btn"
+                                onClick={selectedDates ? makeReservation : selectInterval}
+                            >
                                 Rezerva acum
                             </button>
                         </div>
                     )}
                 </div>
+
+                {/* Afisam pop-up-ul gol pentru rezervare */}
+                {showReservationPopup && (
+                    <ReservationPopup
+                        onClose={() => setShowReservationPopup(false)}
+                        onDatesSelected={handleDatesSelected}
+                        apartmentId={id!} // trimite id-ul apartamentului catre pop-up pentru a putea face request mai departe
+                    />
+                )}
             </div>
 
-            {/* Afișează modalul dacă showOwnerPop_up este true */}
+            {/* Afiseaza modalul daca showOwnerPop_up este true */}
             {showOwnerPop_up && (
                 <OwnerPop_up
                     ownername={apartment.ownerInformation?.fullName}

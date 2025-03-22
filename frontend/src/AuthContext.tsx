@@ -55,6 +55,7 @@ interface User {
     phoneNumber: string;
     gender: string;
     role: string;
+    faculty: string;
 }
 
 interface AuthContextType {
@@ -93,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 phoneNumber: decoded.phoneNumber,
                 gender: decoded.gender,
                 role: decoded.role,
+                faculty: decoded.faculty,
             });
         }
     }, []);
@@ -109,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             phoneNumber: decoded.phoneNumber,
             gender: decoded.gender,
             role: decoded.role,
+            faculty: decoded.faculty,
         });
     };
 

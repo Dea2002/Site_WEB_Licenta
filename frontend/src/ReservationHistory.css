@@ -1,0 +1,45 @@
+/* Container general pentru intreaga pagina de istoric */
+.reservation-history-container {
+    margin: 20px auto;
+    max-width: 900px; /* Ajusteaza dupa preferinte */
+    padding: 0 20px;
+}
+
+/* Titlul sectiunii */
+.reservation-history-container h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #fac67a;
+}
+
+/* Containerul ce contine lista de carduri */
+.history-list {
+    display: grid;
+    /* Foloseste repeat(auto-fill, minmax(300px, 1fr)) pentru layout responsive pe mai multe coloane */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    /* distanta intre carduri */
+}
+
+/* Cardul individual */
+.history-card {
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 8px;
+    padding: 16px;
+    /* box-shadow: 0 4px 10px #659287; */
+    transition: none;
+}
+
+/* Efect de hover pentru card (optional) */
+.history-card:hover {
+    /* box-shadow: 0 4px 10px #659287; */
+    border: 4px solid #fac67a;
+    border-radius: 8px;
+}
+
+/* Stil pentru paragrafele din card */
+.history-card p {
+    margin: 6px 0;
+    line-height: 1.4;
+}

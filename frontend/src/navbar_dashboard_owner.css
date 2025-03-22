@@ -4,7 +4,7 @@
 
 .custom-navbar {
     background-color: #b1b685;
-    /* o culoare de bază (albastru Bootstrap, de exemplu) */
+    /* o culoare de baza (albastru Bootstrap, de exemplu) */
     padding: 1rem 2rem;
     background: #659287;
 }
@@ -13,7 +13,7 @@
 
 .custom-navbar .nav-link {
     color: #fac67a !important;
-    /* folosește !important dacă vrei să suprascrii stilurile Bootstrap */
+    /* foloseste !important daca vrei sa suprascrii stilurile Bootstrap */
     font-size: 1.2rem;
     /* font-weight: 350; */
     transition: color 0.2s ease;
@@ -22,7 +22,7 @@
 .custom-navbar .nav-link:hover {
     color: #e8efcf !important;
     /* DE AICI SE SCHIMBA DIMENSIUNEA ICONITELOR LA CLICK */
-    /* de exemplu, o nuanță de galben la hover */
+    /* de exemplu, o nuanta de galben la hover */
 }
 
 /* Stilizarea meniului dropdown */
@@ -48,12 +48,12 @@
     color: #efeded;
 }
 
-/* Stilizarea iconițelor dacă dorești să le modifici dimensiunea sau culoarea */
+/* Stilizarea iconitelor daca doresti sa le modifici dimensiunea sau culoarea */
 
 .custom-navbar i {
     color: #dba979;
     font-size: 1.2rem;
-    /* poți ajusta dimensiunea după preferință */
+    /* poti ajusta dimensiunea dupa preferinta */
     transition: transform 0.2s ease;
 }
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import { AuthContext } from "./AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import Bara_navigatie from "./Bara_navigatie";
+import "./Login.css";
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState(""); // Schimbat de la 'username' la 'email'
@@ -53,35 +54,37 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div>
+        <>
             <Bara_navigatie />
-            <h1>Autentificare</h1>
-            <form onSubmit={handleSubmit} className="login-form">
-                <div>
-                    <label>Email:</label> {/* Schimbat de la 'Username' la 'Email' */}
-                    <input
-                        type="email" // Schimbat tipul la 'email' pentru a facilita validarea
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Parola:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p className="error">{error}</p>}
-                <button type="submit">Logheaza-te</button>
-            </form>
-            <p>
-                Nu ai un cont? <Link to="/register">inregistreaza-te</Link>
-            </p>
-        </div>
+            <div className="login-container">
+                <h1> Autentificare</h1>
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div>
+                        <label>Email:</label> {/* Schimbat de la 'Username' la 'Email' */}
+                        <input
+                            type="email" // Schimbat tipul la 'email' pentru a facilita validarea
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Parola:</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    {error && <p className="error">{error}</p>}
+                    <button type="submit">Logheaza-te</button>
+                </form>
+                <p>
+                    Nu ai un cont? <Link to="/register">Inregistreaza-te</Link>
+                </p>
+            </div>
+        </>
     );
 };
 

@@ -27,22 +27,23 @@ const OwnerApartments: React.FC = () => {
     }, [user, token]);
 
     return (
-        <div className="owner-apartments-container">
+        <>
             <Bara_nav_OwnerDashboard />
-            {/* <h1>Apartamentele tale</h1> */}
-            <div className="apartments-list">
-                {apartments.length > 0 ? (
-                    apartments.map((apartment) => (
-                        <div key={apartment._id} className="apartment-card">
-                            <img
-                                src={`/Poze_apartamente/${apartment.image}`}
-                                alt={apartment.ownerInformation?.fullName}
-                            />
-                            <p>
-                                <strong>Locatie: </strong>
-                                {apartment.location}
-                            </p>
-                            {/* <p>
+            <div className="owner-apartments-container">
+                {/* <h1>Apartamentele tale</h1> */}
+                <div className="apartments-owner-list">
+                    {apartments.length > 0 ? (
+                        apartments.map((apartment) => (
+                            <div key={apartment._id} className="apartment-owner-card">
+                                <img
+                                    src={`/Poze_apartamente/${apartment.image}`}
+                                    alt={apartment.ownerInformation?.fullName}
+                                />
+                                <p>
+                                    <strong>Locatie: </strong>
+                                    {apartment.location}
+                                </p>
+                                {/* <p>
                                 <strong>Pret:</strong> {apartment.price} RON
                             </p>
                             <p>
@@ -54,14 +55,15 @@ const OwnerApartments: React.FC = () => {
                             </p>
 
                             <p>{apartment.description}</p> */}
-                            {/* Poți adăuga alte detalii după necesitate */}
-                        </div>
-                    ))
-                ) : (
-                    <p>Nu ai apartamente listate momentan.</p>
-                )}
+                                {/* Poti adauga alte detalii dupa necesitate */}
+                            </div>
+                        ))
+                    ) : (
+                        <p>Nu ai apartamente listate momentan.</p>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

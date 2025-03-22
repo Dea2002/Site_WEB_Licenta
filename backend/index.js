@@ -278,7 +278,7 @@ async function run() {
 
                 // conditia de suprapunere a datelor
                 if (newCheckIn <= existingCheckOut && newCheckOut >= existingCheckIn) {
-                    return res.status(400).json({ message: 'Datele pentru check-in și check-out se suprapun cu o cerere existentă' });
+                    return res.status(400).json({ message: 'Datele pentru check-in si check-out se suprapun cu o cerere existenta' });
                 }
             }
 
@@ -303,28 +303,28 @@ async function run() {
                     // Lookup pentru apartamente
                     {
                         $lookup: {
-                            from: 'apartments',          // Numele colecției de apartamente
-                            localField: 'apartament',     // Câmpul din cereri care conține id-ul apartamentului
-                            foreignField: '_id',         // Câmpul din colecția de apartamente
+                            from: 'apartments',          // Numele colectiei de apartamente
+                            localField: 'apartament',     // Campul din cereri care contine id-ul apartamentului
+                            foreignField: '_id',         // Campul din colectia de apartamente
                             as: 'apartamentData'
                         }
                     },
-                    { $unwind: '$apartamentData' }, // Transformă array-ul din lookup într-un document
+                    { $unwind: '$apartamentData' }, // Transforma array-ul din lookup intr-un document
                     {
                         $match: {
-                            'apartamentData.ownerId': new ObjectId(ownerId)  // Filtrează după ownerId
+                            'apartamentData.ownerId': new ObjectId(ownerId)  // Filtreaza dupa ownerId
                         }
                     },
                     // Lookup pentru client (utilizator)
                     {
                         $lookup: {
-                            from: 'users',             // Numele colecției de utilizatori
-                            localField: 'client',      // Câmpul din cereri care conține id-ul clientului
-                            foreignField: '_id',       // Câmpul din colecția de users
+                            from: 'users',             // Numele colectiei de utilizatori
+                            localField: 'client',      // Campul din cereri care contine id-ul clientului
+                            foreignField: '_id',       // Campul din colectia de users
                             as: 'clientData'
                         }
                     },
-                    // Opțional: dacă te aștepți ca fiecare cerere să aibă un singur client, poți face unwind:
+                    // Optional: daca te astepti ca fiecare cerere sa aiba un singur client, poti face unwind:
                     { $unwind: { path: '$clientData', preserveNullAndEmptyArrays: true } }
                 ]).toArray();
 
@@ -350,6 +350,18 @@ async function run() {
 
                 // adaug campul isActive si mut documentul in colectia de istoric de rezervari
                 reservationRequest.isActive = true;
+
+                // Populeaza datele clientului si apartamentului inainte de inserare in istoric
+                const clientData = await app.locals.usersCollection.findOne({ _id: reservationRequest.client });
+                const apartamentData = await app.locals.apartmentsCollection.findOne({ _id: reservationRequest.apartament });
+                reservationRequest.clientData = clientData;
+                reservationRequest.apartamentData = apartamentData;
+
+                // Actualizeaza documentul apartamentului: seteaza numele clientului in campul "numeColeg"
+                await app.locals.apartmentsCollection.updateOne(
+                    { _id: reservationRequest.apartament },
+                    { $set: { colleaguesNames: clientData.fullName } }
+                );
 
                 await reservationHistoryCollection.insertOne(reservationRequest);
 
@@ -382,6 +394,49 @@ async function run() {
             }
         });
 
+        // Afiseaza istoricul rezervarilor
+        app.get('/owner/reservation_history/:ownerId', authenticateToken, async (req, res) => {
+            try {
+                const ownerId = req.params.ownerId;
+                const history = await reservationHistoryCollection.aggregate([
+                    {
+                        $lookup: {
+                            from: 'users',
+                            localField: 'client',
+                            foreignField: '_id',
+                            as: 'clientData'
+                        }
+                    },
+
+                    { $unwind: "$clientData" },
+
+                    {
+                        $lookup: {
+                            from: 'apartments',
+                            localField: 'apartament',
+                            foreignField: '_id',
+                            as: 'apartamentData'
+                        }/*  */
+                    },
+
+                    { $unwind: "$apartamentData" },
+                    {
+                        $match: {
+                            'apartamentData.ownerId': new ObjectId(ownerId)  // Filtreaza dupa ownerId
+                        }
+                    },
+
+                ]).toArray();
+                // console.log(history);
+                res.status(200).json(history);
+            } catch (error) {
+                console.error('Eroare la preluarea istoricului rezervarilor:', error);
+                res.status(500).json({ message: 'Eroare interna a serverului' });
+            }
+        });
+
+
+
         // create an apartment
         app.post('/new-apartment', async (req, res) => {
             const { ownerId, ...rest } = req.body;
@@ -409,8 +464,8 @@ async function run() {
                 const count = await apartmentsCollection.countDocuments({ ownerId: new ObjectId(id) });
                 res.status(200).json({ count });
             } catch (error) {
-                console.error("Eroare la preluarea numărului de apartamente pentru proprietar:", error);
-                res.status(500).json({ message: "Eroare internă a serverului" });
+                console.error("Eroare la preluarea numarului de apartamente pentru proprietar:", error);
+                res.status(500).json({ message: "Eroare interna a serverului" });
             }
         });
 
@@ -455,22 +510,22 @@ async function run() {
                     { $match: { _id: new ObjectId(id) } },
                     {
                         $lookup: {
-                            from: "users", // asigură-te că numele colecției de utilizatori este corect
-                            localField: "ownerId", // presupunem că ai stocat id-ul proprietarului aici
+                            from: "users", // asigura-te ca numele colectiei de utilizatori este corect
+                            localField: "ownerId", // presupunem ca ai stocat id-ul proprietarului aici
                             foreignField: "_id",
                             as: "ownerInformation"
                         }
                     },
-                    { $unwind: "$ownerInformation" } // presupunând că fiecare apartament are un singur proprietar
+                    { $unwind: "$ownerInformation" } // presupunand ca fiecare apartament are un singur proprietar
                 ]).toArray();
 
                 if (!apartmentOwner || apartmentOwner.length === 0) {
-                    return res.status(404).json({ message: 'Apartamentul nu a fost găsit' });
+                    return res.status(404).json({ message: 'Apartamentul nu a fost gasit' });
                 }
                 res.status(200).json(apartmentOwner[0]);
             } catch (error) {
                 console.error('Eroare la preluarea apartamentului:', error);
-                res.status(500).json({ message: 'Eroare internă a serverului' });
+                res.status(500).json({ message: 'Eroare interna a serverului' });
             }
         });
 
@@ -698,15 +753,55 @@ async function run() {
             const data = req.body;
             const result = await appliedCollection.insertOne(data);
             res.send(result);
-        })
+        });
+
         app.get('/applied-owners/:email', async (req, res) => {
             const email = req.params.email;
             const result = await appliedCollection.findOne({ email });
             res.send(result);
         });
 
+        app.get('/unavailable_dates/:apartment_id', async (req, res) => {
 
+            const apartmentId = req.params.apartment_id;
 
+            try {
+                const reservationsFromHistory = await reservationHistoryCollection.find({
+                    apartament: new ObjectId(apartmentId),
+                    isActive: true
+                }, {
+                    projection: { _id: 0, checkIn: 1, checkOut: 1 }
+                }).toArray();
+
+                // extrage datele de check-in si check-out din fiecare rezervare sub forma "yyyy-mm-dd"
+                const unavailableDatesHistory = reservationsFromHistory.map(reservation => {
+                    checkIn = new Date(reservation.checkIn).toISOString().split('T')[0];
+                    checkOut = new Date(reservation.checkOut).toISOString().split('T')[0];
+                    return [checkIn, checkOut];
+                }).flat();
+
+                // repet pentru colectia de cereri
+                const reservationsFromRequests = await reservationRequestsCollection.find({
+                    apartament: new ObjectId(apartmentId),
+                }, {
+                    projection: { _id: 0, checkIn: 1, checkOut: 1 }
+                }).toArray();
+                const unavailableDatesRequests = reservationsFromRequests.map(reservation => {
+                    checkIn = new Date(reservation.checkIn).toISOString().split('T')[0];
+                    checkOut = new Date(reservation.checkOut).toISOString().split('T')[0];
+                    return [checkIn, checkOut];
+                }).flat();
+
+                // unesc intervalele de timp gasite in colectia de istoric si in cea de cereri
+                const unavailableDates = [...unavailableDatesHistory, ...unavailableDatesRequests];
+
+                res.send(unavailableDates);
+            } catch (error) {
+                console.error("Eroare la preluarea rezervarilor:", error);
+                res.status(500).json({ message: "Eroare interna a serverului" });
+            }
+
+        });
 
 
         // Send a ping to confirm a successful connection

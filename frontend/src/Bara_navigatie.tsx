@@ -7,7 +7,7 @@
 //     const { isAuthenticated, user, logout } = useContext(AuthContext);
 //     const navigate = useNavigate();
 
-//     // stare pentru a ști dacă dropdown-ul e deschis sau închis
+//     // stare pentru a sti daca dropdown-ul e deschis sau inchis
 //     const [dropdownOpen, setDropdownOpen] = useState(false);
 
 //     const handleLogout = () => {
@@ -15,7 +15,7 @@
 //         navigate('/');
 //     };
 
-//     // Funcție care schimbă starea dropdown-ului
+//     // Functie care schimba starea dropdown-ului
 //     const toggleDropdown = () => {
 //         setDropdownOpen(!dropdownOpen);
 //     };
@@ -71,7 +71,7 @@
 //                         </>
 //                     ) : (
 //                         <>
-//                             {/* Afișez DOAR iconița. Când dau click, apare dropdown cu Autentificare și Înregistrează-te */}
+//                             {/* Afisez DOAR iconita. Cand dau click, apare dropdown cu Autentificare si inregistreaza-te */}
 //                             <li>
 //                                 <span className="nav-user" onClick={toggleDropdown} style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
 //                                     Cont
@@ -113,7 +113,7 @@
 //     const { isAuthenticated, user, logout } = useContext(AuthContext);
 //     const navigate = useNavigate();
 
-//     // stare pentru a ști dacă dropdown-ul e deschis sau închis
+//     // stare pentru a sti daca dropdown-ul e deschis sau inchis
 //     const [dropdownOpen, setDropdownOpen] = useState(false);
 
 //     const handleLogout = () => {
@@ -121,7 +121,7 @@
 //         navigate('/');
 //     };
 
-//     // Funcție care schimbă starea dropdown-ului
+//     // Functie care schimba starea dropdown-ului
 //     const toggleDropdown = () => {
 //         setDropdownOpen(!dropdownOpen);
 //     };
@@ -224,7 +224,7 @@
 //                         </>
 //                     ) : (
 //                         <>
-//                             {/* Afișez DOAR iconița. Când dau click, apare dropdown cu Autentificare și Înregistrează-te */}
+//                             {/* Afisez DOAR iconita. Cand dau click, apare dropdown cu Autentificare si inregistreaza-te */}
 //                             <li>
 //                                 <span className="nav-user" onClick={toggleDropdown} style={{ cursor: 'pointer' }}>
 //                                     Cont

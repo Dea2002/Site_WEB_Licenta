@@ -57,35 +57,6 @@ const Home: React.FC = () => {
         }
     }, [apartments]);
 
-    // functii de test pentru accept/decline
-    const accept = async () => {
-        try {
-            await axios.post(
-                "http://localhost:5000/reservation_request/67c4b263c18ce8a852dda6bd/accept",
-                {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-        } catch (err: any) {
-            console.log(err);
-        }
-    };
-
-    const decline = async () => {
-        try {
-            await axios.post(
-                "http://localhost:5000/reservation_request/67c4bb1147067a0a3520f16f/decline",
-                {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-        } catch (err: any) {
-            console.log(err);
-        }
-    };
-
     // Functie pentru aplicarea filtrelor
     const handleRefreshFilters = () => {
         let filtered = apartments;
@@ -152,8 +123,6 @@ const Home: React.FC = () => {
                     <button onClick={handleRefreshFilters} className="refresh-button">
                         Actualizeaza filtrele
                     </button>
-                    <button onClick={accept}> Accept</button>
-                    <button onClick={decline}> Decline</button>
                 </aside>
 
                 {/* Lista cu apartamente filtrate */}

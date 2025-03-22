@@ -77,7 +77,7 @@
     border-radius: 25px;
     outline: none;
     font-size: 1rem;
-    /* sau orice valoare dorești, de ex. 16px, 18px etc. */
+    /* sau orice valoare doresti, de ex. 16px, 18px etc. */
 }
 
 /* stilul pentru Butonul de cautare */
@@ -141,6 +141,6 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #888; /* culoarea iconiței, modifică după preferințe */
+    color: #888; /* culoarea iconitei, modifica dupa preferinte */
     cursor: pointer;
 }
