@@ -4,10 +4,10 @@ import axios from "axios";
 import { Apartment } from "./types";
 import { AuthContext } from "./AuthContext";
 import Bara_navigatie from "./Bara_navigatie";
-import "./ApartmentDetails.css";
 import OwnerPop_up from "./OwnerPop_up";
 import ReservationPopup from "./ReservationPopup";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
+import "./ApartmentDetails.css";
 
 interface selectedDates {
     checkIn: Date;
@@ -147,17 +147,28 @@ const ApartmentDetails: React.FC = () => {
                             {apartment.petFriendly ? "Da" : "Nu"}
                         </p>
                         <p>
+                            <strong>Lift:</strong> {apartment.elevator ? "Da" : "Nu"}
+                        </p>
+                        <p>
                             <strong>Suprafata totala:</strong> {apartment.totalSurface} mp
                         </p>
                         <p>
-                            <strong>Lift:</strong> {apartment.elevator ? "Da" : "Nu"}
+                            <strong>Aer conditionat:</strong>{" "}
+                            {apartment.airConditioning ? "Da" : "Nu"}
                         </p>
+                        <p>
+                            <strong>Balcon:</strong> {apartment.balcony ? "Da" : "Nu"}
+                        </p>
+
                         <p>
                             <strong>Anul constructiei:</strong> {apartment.constructionYear}
                         </p>
                         <p>
                             <strong>Anul renovarii:</strong> {apartment.renovationYear}
                         </p>
+
+                        <hr className="line-image-info" />
+
                         <p>
                             <strong>Pret Internet:</strong> {apartment.internetPrice} RON
                         </p>
@@ -173,13 +184,9 @@ const ApartmentDetails: React.FC = () => {
                         <p>
                             <strong>Pret electricitate:</strong> {apartment.electricityPrice} RON
                         </p>
-                        <p>
-                            <strong>Aer conditionat:</strong>{" "}
-                            {apartment.airConditioning ? "Da" : "Nu"}
-                        </p>
-                        <p>
-                            <strong>Balcon:</strong> {apartment.balcony ? "Da" : "Nu"}
-                        </p>
+
+                        <hr className="line-image-info" />
+
                         <p>
                             <strong>Coleg de camera:</strong> {apartment.colleagues ? "Da" : "Nu"}
                         </p>
@@ -203,21 +210,103 @@ const ApartmentDetails: React.FC = () => {
                             <h2>Proprietar</h2>
                             <p>{apartment.ownerInformation.fullName}</p>
                             {/* Butoane Detalii si Chat in colturile de jos */}
-                            <button
+                            {/* <button
                                 className="owner-section-button details-btn"
                                 onClick={() => setshowOwnerPop_up(true)}
                             >
                                 Detalii
                             </button>
-                            <button className="owner-section-button chat-btn">Chat</button>
-                            {selectedDates && (
-                                <div>
-                                    <p>Check-in: {format(selectedDates.checkIn, "dd/MM/yyyy")}</p>
-                                    <p>Check-out: {format(selectedDates.checkOut, "dd/MM/yyyy")}</p>
-                                    <p>Pret: dada</p>
-                                    <button onClick={selectInterval}>Modifica intervalul</button>
-                                </div>
-                            )}
+                            <button className="owner-section-button chat-btn">Chat</button> */}
+
+                            {/* Container pentru butoanele "Detalii" și "Chat" */}
+                            <div className="owner-buttons">
+                                <button
+                                    className="owner-section-button details-btn"
+                                    onClick={() => setshowOwnerPop_up(true)}
+                                >
+                                    Detalii
+                                </button>
+                                <button className="owner-section-button chat-btn">Chat</button>
+                            </div>
+
+                            {/* Afiseaza datele selectate */}
+                            {selectedDates &&
+                                (() => {
+                                    const nights =
+                                        differenceInCalendarDays(
+                                            selectedDates.checkOut,
+                                            selectedDates.checkIn,
+                                        ) + 1;
+
+                                    const nightsText =
+                                        nights === 1 ? "1 noapte" : `${nights} nopti`;
+
+                                    // se convertesc preturile in numere
+                                    const dailyInternetCost =
+                                        (parseFloat(apartment.internetPrice?.toString() || "0") ||
+                                            0) / 30;
+                                    const dailyTVCost =
+                                        (parseFloat(apartment.TVPrice?.toString() || "0") || 0) /
+                                        30;
+                                    const dailyWaterCost =
+                                        parseFloat(apartment.waterPrice?.toString() || "0") || 0;
+                                    const dailyGasCost =
+                                        parseFloat(apartment.gasPrice?.toString() || "0") || 0;
+                                    const dailyElectricityCost =
+                                        parseFloat(apartment.electricityPrice?.toString() || "0") ||
+                                        0;
+
+                                    // Calcul cost extra zilnic:
+                                    const extraDailyCost =
+                                        dailyInternetCost +
+                                        dailyTVCost +
+                                        dailyWaterCost +
+                                        dailyGasCost +
+                                        dailyElectricityCost;
+
+                                    // Cost total extra pentru perioada selectată:
+                                    const extraTotalCost = extraDailyCost * nights;
+
+                                    // Calcul pret apartament total pentru perioada selectată
+                                    const apartmentTotalCost = apartment.price * nights;
+
+                                    // Pret total final = cost apartament + costuri extra
+                                    const finalTotalCost = apartmentTotalCost + extraTotalCost;
+
+                                    return (
+                                        <div className="selected-dates">
+                                            <hr className="line-image-dates" />
+                                            <p>
+                                                Check-in:{" "}
+                                                {format(selectedDates.checkIn, "dd/MM/yyyy")}
+                                            </p>
+                                            <p>
+                                                Check-out:{" "}
+                                                {format(selectedDates.checkOut, "dd/MM/yyyy")}
+                                            </p>
+                                            <p>
+                                                Pret apartament: {apartmentTotalCost} RON /{" "}
+                                                {nightsText}
+                                            </p>
+
+                                            <p>
+                                                Costuri extra: {extraTotalCost.toFixed(2)} RON /{" "}
+                                                {nightsText}
+                                            </p>
+
+                                            <p>Pret total: {finalTotalCost.toFixed(2)} RON</p>
+                                            <button
+                                                className="owner-section-button"
+                                                onClick={selectInterval}
+                                                style={{ width: "161px" }}
+                                            >
+                                                Modifica intervalul
+                                            </button>
+                                            <hr className="line-image-dates" />
+                                        </div>
+                                    );
+                                })()}
+
                             <button
                                 className="reserve-btn"
                                 onClick={selectedDates ? makeReservation : selectInterval}

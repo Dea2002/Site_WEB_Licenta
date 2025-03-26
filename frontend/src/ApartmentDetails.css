@@ -64,13 +64,12 @@
 
 /* Card Proprietar */
 .owner-section {
-    position: relative;
+    /* position: relative;
     width: 235px;
     height: 240px;
-    /* background-color: #f7f7f7; */
-    /* background-color: #e8efcf; */
-    background-color: rgba(255, 255, 255, 0.8); /* alb cu 80% opacitate */
-    backdrop-filter: blur(20px); /* blur de 5px pe fundalul din spate */
+
+    background-color: rgba(255, 255, 255, 0.8); 
+    backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(5px);
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -79,7 +78,23 @@
 
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     text-align: center;
-    padding-bottom: 40px; /* spatiu pentru butonul "Rezerva acum" */
+    padding-bottom: 40px; 
+    margin-left: 25px; */
+
+    position: relative;
+    width: 235px;
+    height: auto; /* schimbi de la o înălțime fixă la auto pentru a permite fluxul natural */
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(5px);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    /* padding: 20px;  */
+    padding-bottom: 0px;
     margin-left: 25px;
 }
 
@@ -103,8 +118,8 @@
 
 /* Butoanele Detalii si Chat */
 .owner-section-button {
-    position: absolute;
-    bottom: 60px; /* pozitioneaza-le putin deasupra butonului de rezerva */
+    /* position: absolute;
+    bottom: 60px; 
     padding: 8px 12px;
     background-color: #659287;
     border-color: #659287;
@@ -117,7 +132,21 @@
     width: 75px;
     transition: background-color 0.3s ease;
     margin-left: 15px;
-    margin-right: 15px;
+    margin-right: 15px; */
+
+    padding: 8px 12px;
+    background-color: #659287;
+    border-color: #659287;
+    border-width: 2px;
+    border-style: solid;
+    color: #e8efcf;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 75px;
+    transition: background-color 0.3s ease;
+    /* margin adăugat pentru spațiere */
+    margin: 0 5px;
 }
 
 .owner-section-button:hover {
@@ -127,6 +156,14 @@
     border-color: #659287;
     border-width: 2px;
     border-style: solid;
+}
+
+/* Containerul pentru butoane */
+.owner-buttons {
+    display: flex;
+    justify-content: center; /* le centrează orizontal */
+    margin-top: 20px; /* spațiu deasupra containerului de butoane */
+    margin-bottom: 10px; /* spațiu sub containerul de butoane, pentru ca textul să vină dedesubt */
 }
 
 /* Buton "Detalii" in stanga jos */
@@ -141,7 +178,7 @@
 
 /* Butonul "Rezerva acum" – pozitionat la marginea de jos */
 .reserve-btn {
-    position: absolute;
+    /* position: absolute; */
     bottom: 0;
     left: 0;
     width: 100%; /* acopera toata latimea cardului */
@@ -154,6 +191,7 @@
     cursor: pointer;
     font-size: 1.2rem;
     transition: background-color 0.3s ease;
+    /* margin-top: 10px; */
 }
 
 .reserve-btn:hover {
@@ -164,4 +202,45 @@
     border: none;
     border-top: 7px double black;
     margin: 20px 0;
+}
+
+/* .line-image {
+    position: relative;
+    margin: 10px 0;
+    height: 9px; 
+}
+
+.line-image::before,
+.line-image::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px; 
+    background: linear-gradient(to right, red, rgb(203, 208, 131));
+} */
+
+/* Prima linie în partea de sus */
+/* .line-image::before {
+    top: 0;
+} */
+
+/* A doua linie în partea de jos */
+/* .line-image::after {
+    bottom: 0;
+} */
+
+.line-image-dates {
+    border: none;
+    border-top: 3px dashed black;
+    margin: 15px 0;
+}
+
+.line-image-info {
+    border: none;
+    border-top: 3px solid black;
+    margin: 15px 0;
+    /* border: none;
+    height: 4px;
+    background: linear-gradient(to right, red, purple); */
 }

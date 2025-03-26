@@ -114,7 +114,9 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                             required
                         />
                     </div>
-                    <button type="submit">Confirma</button>
+                    <button className="submit-confirma-interval" type="submit">
+                        Confirma
+                    </button>
                 </form>
             </div>
         </div>
