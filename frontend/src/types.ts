@@ -43,4 +43,7 @@ export interface Apartment {
         phoneNumber: string;
         // alte detalii despre proprietar daca e nevoie
     };
+
+    latitude: number;
+    longitude: number;
 }

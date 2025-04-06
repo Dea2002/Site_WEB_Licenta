@@ -115,8 +115,8 @@ body::before {
     color: #333333;
 }
 
-.button {
-    position: absolute;
+.button-details-apartment {
+    position: absolute; /* schimba din absolute în relative sau combină-le în funcție de design */
     bottom: 20px;
     right: 35px;
     padding: 10px 20px;
@@ -124,32 +124,50 @@ body::before {
     color: #e8efcf;
     cursor: pointer;
     border-radius: 4px;
-    border-color: #659287;
-    border-width: 2px;
-    border-style: solid;
+    border: 2px solid #659287;
     display: inline-block;
     text-decoration: none;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
     font-size: 1rem;
     margin-top: 20px;
-
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    -ms-border-radius: 4px;
-    -o-border-radius: 4px;
-    -webkit-transition: background-color 0.3s ease;
-    -moz-transition: background-color 0.3s ease;
-    -ms-transition: background-color 0.3s ease;
-    -o-transition: background-color 0.3s ease;
+    overflow: hidden; /* dacă vrei să ascunzi eventualele depășiri */
 }
 
-.button:hover {
-    /* background-color: #DBA979; */
+/* Elementul pentru text */
+.details-btn-text {
+    transition: opacity 0.3s ease;
+}
+
+/* Elementul pentru iconiță, poziționat centrul butonului */
+.details-btn-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 0px !important;
+}
+
+/* Dacă este nevoie să setezi dimensiunea iconiței */
+.details-btn-icon img {
+    width: auto; /* ajustează dimensiunea după preferințe */
+    height: auto;
+    border-radius: 0px !important;
+}
+
+/* La hover schimbăm fundalul și culorile, ascundem textul și fazăm iconița vizibilă */
+.button-details-apartment:hover {
     background-color: #e8efcf;
     color: #659287;
-    border-color: #659287;
-    border-width: 2px;
-    border-style: solid;
+}
+
+.button-details-apartment:hover .details-btn-text {
+    opacity: 0;
+}
+
+.button-details-apartment:hover .details-btn-icon {
+    opacity: 1;
 }
 
 .modal-overlay {

@@ -8,6 +8,9 @@ import OwnerPop_up from "./OwnerPop_up";
 import ReservationPopup from "./ReservationPopup";
 import { format, differenceInCalendarDays } from "date-fns";
 import "./ApartmentDetails.css";
+import "leaflet/dist/leaflet.css";
+import MapPop_up from "./MapPop_up";
+import { LiaXing } from "react-icons/lia";
 
 interface selectedDates {
     checkIn: Date;
@@ -24,6 +27,11 @@ const ApartmentDetails: React.FC = () => {
     // Stare pentru afisarea modalului
     const [showOwnerPop_up, setshowOwnerPop_up] = useState(false);
     const [showReservationPopup, setShowReservationPopup] = useState(false);
+    const [selectedMapData, setSelectedMapData] = useState<{
+        lat: number;
+        lng: number;
+        address: string;
+    } | null>(null);
     const [selectedDates, setSelectedDates] = useState<selectedDates | null>(null);
 
     // handler ce primeste datele din ReservationPopup
@@ -104,6 +112,31 @@ const ApartmentDetails: React.FC = () => {
         );
     }
 
+    const handleLocationClick = async (apartment: Apartment) => {
+        try {
+            const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+                params: {
+                    q: apartment.location,
+                    format: "json",
+                    limit: 1,
+                },
+            });
+
+            if (response.data.length > 0) {
+                const { lat, lon } = response.data[0];
+                setSelectedMapData({
+                    lat: parseFloat(lat),
+                    lng: parseFloat(lon),
+                    address: apartment.location,
+                });
+            } else {
+                console.error("Nu s-au găsit coordonate pentru adresa dată");
+            }
+        } catch (error) {
+            console.error("Eroare la obținerea coordonatelor:", error);
+        }
+    };
+
     return (
         <div className="apartment-details-page">
             <Bara_navigatie />
@@ -129,7 +162,17 @@ const ApartmentDetails: React.FC = () => {
                         </p>
                         <p>
                             <strong>Locatie:</strong> {apartment.location}
+                            <button
+                                className="button-map"
+                                onClick={() => handleLocationClick(apartment)}
+                            >
+                                <span className="button-map-text">Vezi harta</span>
+                                <span className="button-map-icon">
+                                    <img src="/Poze_apartamente/location2.png" alt="Icon harta" />
+                                </span>
+                            </button>
                         </p>
+
                         <p>
                             <strong>Numar de camere:</strong> {apartment.numberOfRooms}
                         </p>
@@ -311,7 +354,10 @@ const ApartmentDetails: React.FC = () => {
                                 className="reserve-btn"
                                 onClick={selectedDates ? makeReservation : selectInterval}
                             >
-                                Rezerva acum
+                                <span className="reserve-btn-text">Rezerva acum</span>
+                                <span className="reserve-btn-icon">
+                                    <img src="/Poze_apartamente/booking.png" />
+                                </span>
                             </button>
                         </div>
                     )}
@@ -334,6 +380,17 @@ const ApartmentDetails: React.FC = () => {
                     owneremail={apartment.ownerInformation?.email}
                     phoneNumber={apartment.ownerInformation?.phoneNumber}
                     onClose={() => setshowOwnerPop_up(false)}
+                />
+            )}
+
+            {/* {showMapPopup && <MapPop_up onClose={() => setShowMapPopup(false)} />} */}
+
+            {selectedMapData && (
+                <MapPop_up
+                    lat={selectedMapData.lat}
+                    lng={selectedMapData.lng}
+                    address={selectedMapData.address}
+                    onClose={() => setSelectedMapData(null)}
                 />
             )}
         </div>

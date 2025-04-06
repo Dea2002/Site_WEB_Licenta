@@ -7,6 +7,7 @@ import LoginModal from "./LoginModal";
 import { AuthContext } from "./AuthContext";
 import { Apartment } from "./types";
 import "./style.css";
+import MapModal from "./MapModal";
 // import './Home.css';
 
 // Definim o interfata pentru filtre (poti adauga si alte filtre dupa nevoie)
@@ -32,6 +33,12 @@ const Home: React.FC = () => {
         location: locationParam,
         available: false,
     });
+
+    const [selectedMapData, setSelectedMapData] = useState<{
+        lat: number;
+        lng: number;
+        address: string;
+    } | null>(null);
 
     // Preluam toate apartamentele de pe server
     useEffect(() => {
@@ -81,6 +88,18 @@ const Home: React.FC = () => {
         navigate(`/apartment/${id}`);
     };
 
+    // const handleLocationClick = (apartment: Apartment) => {
+    //     // Presupunem că în obiectul apartment există proprietățile lat și lng.
+    //     // Dacă nu, va trebui să folosești un API de geocodificare pentru a obține coordonatele din adresa apartment.location.
+    //     if (apartment.lat && apartment.lng) {
+    //         setSelectedMapData({
+    //             lat: apartment.lat,
+    //             lng: apartment.lng,
+    //             address: apartment.location,
+    //         });
+    //     }
+    // };
+
     return (
         <div>
             <Bara_navigatie />
@@ -129,22 +148,9 @@ const Home: React.FC = () => {
                 <section className="apartments-list">
                     {filteredApartments.length > 0 ? (
                         filteredApartments.map((apartment) => (
-                            <div
-                                key={apartment._id}
-                                className={`apartment ${
-                                    apartment.status === "indisponibil" ? "unavailable" : ""
-                                }`}
-                            >
-                                {/* <h2>{apartment.name}</h2> */}
-                                {/* <p><strong>Descriere:</strong> {apartment.description}</p> */}
-                                {/* <p><strong>Numar de camere:</strong> {apartment.numberofrooms}</p> */}
-
+                            <div key={apartment._id} className="apartment">
                                 {apartment.image && (
-                                    <img
-                                        src={`/Poze_apartamente/${apartment.image}`}
-                                        alt={`Imagine pentru ${apartment.name}`}
-                                        width="300"
-                                    />
+                                    <img src={`/Poze_apartamente/${apartment.image}`} width="300" />
                                 )}
                                 {/* <p><strong>Pret:</strong> {apartment.price} RON</p> */}
                                 <p style={{ marginTop: "15px" }}>
@@ -181,13 +187,22 @@ const Home: React.FC = () => {
                                         <img src={`/Poze_apartamente/${apartment.image}`} alt={`Imagine pentru ${apartment.name}`} width="300" />
                                     )} */}
 
-                                <button
+                                {/* <button
                                     onClick={() => handleMoreDetails(apartment._id)}
-                                    className="button"
+                                    className="button-details-apartment"
                                     disabled={apartment.status === "indisponibil"}
                                 >
-                                    {/* {apartment.price} RON */}
                                     Mai multe detalii
+                                </button> */}
+
+                                <button
+                                    className="button-details-apartment"
+                                    onClick={() => handleMoreDetails(apartment._id)}
+                                >
+                                    <span className="details-btn-text">Mai multe detalii</span>
+                                    <span className="details-btn-icon">
+                                        <img src="/Poze_apartamente/search.png" />
+                                    </span>
                                 </button>
                             </div>
                         ))
@@ -197,6 +212,15 @@ const Home: React.FC = () => {
                 </section>
             </div>
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+
+            {selectedMapData && (
+                <MapModal
+                    lat={selectedMapData.lat}
+                    lng={selectedMapData.lng}
+                    address={selectedMapData.address}
+                    onClose={() => setSelectedMapData(null)}
+                />
+            )}
         </div>
     );
 };
