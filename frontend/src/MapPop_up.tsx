@@ -33,13 +33,13 @@
 //     onClose: () => void;
 // }
 
-// // Componentă separată pentru a accesa instanța hărții și a o invalida
+// // Componenta separata pentru a accesa instanta hartii si a o invalida
 // const MapInvalidator = ({ mapRef }: { mapRef: React.RefObject<LeafletMap | null> }) => {
-//     // Nu folosim useMap direct aici, ci ne bazăm pe ref-ul trimis
-//     // pentru a rula invalidateSize din useEffect-ul părintelui
+//     // Nu folosim useMap direct aici, ci ne bazam pe ref-ul trimis
+//     // pentru a rula invalidateSize din useEffect-ul parintelui
 
-//     // Alternativ, am putea folosi useMap aici și un useEffect,
-//     // dar controlul din părinte cu ref poate fi mai clar în acest caz.
+//     // Alternativ, am putea folosi useMap aici si un useEffect,
+//     // dar controlul din parinte cu ref poate fi mai clar in acest caz.
 //     // const map = useMap();
 //     // useEffect(() => {
 //     //   const timer = setTimeout(() => {
@@ -49,63 +49,63 @@
 //     //   return () => clearTimeout(timer);
 //     // }, [map]);
 
-//     return null; // Această componentă nu redă nimic vizibil
+//     return null; // Aceasta componenta nu reda nimic vizibil
 // };
 
 // const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
-//     const position: LatLngExpression = [lat, lng]; // Tipare corectă
+//     const position: LatLngExpression = [lat, lng]; // Tipare corecta
 //     const mapRef = useRef<LeafletMap>(null);
 
-//     // Efect pentru a invalida dimensiunea hărții după montare/afișare
+//     // Efect pentru a invalida dimensiunea hartii dupa montare/afisare
 //     useEffect(() => {
-//         // Folosim un setTimeout pentru a ne asigura că DOM-ul este stabil
-//         // și container-ul hărții are dimensiunile finale.
+//         // Folosim un setTimeout pentru a ne asigura ca DOM-ul este stabil
+//         // si container-ul hartii are dimensiunile finale.
 //         const timer = setTimeout(() => {
 //             if (mapRef.current) {
 //                 mapRef.current.invalidateSize();
 //                 // console.log("Map invalidated from parent useEffect");
-//                 // Opțional: Zboară la centru după invalidare, dacă e nevoie
+//                 // Optional: Zboara la centru dupa invalidare, daca e nevoie
 //                 // mapRef.current.flyTo(position, mapRef.current.getZoom());
 //             }
-//         }, 100); // Un delay mic, ajustează dacă e necesar
+//         }, 100); // Un delay mic, ajusteaza daca e necesar
 
-//         // Funcție de curățare pentru a anula timeout-ul dacă componenta se demontează
+//         // Functie de curatare pentru a anula timeout-ul daca componenta se demonteaza
 //         return () => {
 //             clearTimeout(timer);
 //         };
-//     }, [lat, lng]); // Rulează când lat/lng se schimbă, deși ar putea fi suficient [] dacă popup-ul se remontează complet la deschidere
+//     }, [lat, lng]); // Ruleaza cand lat/lng se schimba, desi ar putea fi suficient [] daca popup-ul se remonteaza complet la deschidere
 
 //     return (
 //         <div className="popup-overlay" onClick={onClose}>
-//             {/* Asigură-te că popup-content are dimensiuni definite în CSS! */}
+//             {/* Asigura-te ca popup-content are dimensiuni definite in CSS! */}
 //             <div className="popup-content" onClick={(e) => e.stopPropagation()}>
 //                 <button className="popup-close" onClick={onClose}>
 //                     X
 //                 </button>
-//                 <p>Locația pentru: {address}</p>
+//                 <p>Locatia pentru: {address}</p>
 
 //                 {/*
-//                     Notă: Eliminăm cast-ul `as any`. Folosim direct `position`.
-//                     Adăugăm prop-ul `whenCreated` pentru a obține ref-ul la mapă.
-//                     Dacă `whenCreated` nu e disponibil în versiunea ta (mai veche),
-//                     poți folosi un wrapper component cu `useMap` ca în exemplul comentat `MapInvalidator`.
+//                     Nota: Eliminam cast-ul `as any`. Folosim direct `position`.
+//                     Adaugam prop-ul `whenCreated` pentru a obtine ref-ul la mapa.
+//                     Daca `whenCreated` nu e disponibil in versiunea ta (mai veche),
+//                     poti folosi un wrapper component cu `useMap` ca in exemplul comentat `MapInvalidator`.
 //                  */}
 //                 <MapContainer
 //                     center={position}
 //                     zoom={13}
 //                     style={{ height: "400px", width: "100%" }}
 //                     whenCreated={(mapInstance) => {
-//                         // Stochează instanța hărții în ref
-//                         // Verifică tipul înainte de a asigna pentru siguranță
+//                         // Stocheaza instanta hartii in ref
+//                         // Verifica tipul inainte de a asigna pentru siguranta
 //                         if (mapInstance) {
 //                             mapRef.current = mapInstance as LeafletMap;
 //                         }
 //                     }}
 //                 >
 //                     {/*
-//                         Dacă eroarea TS persistă aici, verifică compatibilitatea versiunilor
+//                         Daca eroarea TS persista aici, verifica compatibilitatea versiunilor
 //                         @types/react-leaflet, react-leaflet, @types/leaflet, leaflet.
-//                         Ca ultimă soluție temporară: // @ts-ignore
+//                         Ca ultima solutie temporara: // @ts-ignore
 //                     */}
 //                     <TileLayer
 //                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -118,7 +118,7 @@
 //                     <Marker position={position}>
 //                         <Popup>{address}</Popup>
 //                     </Marker>
-//                     {/* Componenta MapInvalidator nu mai e necesară dacă folosim whenCreated */}
+//                     {/* Componenta MapInvalidator nu mai e necesara daca folosim whenCreated */}
 //                     {/* <MapInvalidator mapRef={mapRef} /> */}
 //                 </MapContainer>
 //             </div>
@@ -135,12 +135,12 @@ import L, { LatLngExpression, Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapPop_up.css";
 
-// Aceste importuri sunt opționale, dacă nu dorești să folosești iconițele implicite
+// Aceste importuri sunt optionale, daca nu doresti sa folosesti iconitele implicite
 import iconRetinaUrl from "/leaflet-images/marker-icon-2x.png";
 import iconUrl from "/leaflet-images/marker-icon.png";
 import shadowUrl from "/leaflet-images/marker-shadow.png";
 
-// Setăm opțiunile implicite pentru iconițele Leaflet
+// Setam optiunile implicite pentru iconitele Leaflet
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: iconRetinaUrl,
     iconUrl: iconUrl,
@@ -163,16 +163,16 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
     const position: LatLngExpression = [lat, lng];
     const mapRef = useRef<LeafletMap>(null);
 
-    // Creăm o iconiță personalizată folosind Font Awesome
-    // Asigură-te că Font Awesome este inclus în proiectul tău (printr-un link în index.html sau ca pachet npm)
+    // Cream o iconita personalizata folosind Font Awesome
+    // Asigura-te ca Font Awesome este inclus in proiectul tau (printr-un link in index.html sau ca pachet npm)
     const customIcon = L.divIcon({
         html: '<i class="fa-solid fa-location-dot" style="font-size:24px; color: #FF8000"></i>',
-        className: "custom-marker-icon", // Poți adăuga stiluri suplimentare în CSS, dacă dorești
+        className: "custom-marker-icon", // Poti adauga stiluri suplimentare in CSS, daca doresti
         iconSize: [30, 30],
         iconAnchor: [15, 30],
     });
 
-    // Efect pentru a invalida dimensiunea hărții după montare
+    // Efect pentru a invalida dimensiunea hartii dupa montare
     useEffect(() => {
         const timer = setTimeout(() => {
             if (mapRef.current) {

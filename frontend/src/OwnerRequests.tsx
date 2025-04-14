@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_nav_OwnerDashboard from "./Bara_nav_OwnerDashboard";
 import "./OwnerRequests.css";
 
 interface ReservationRequest {
@@ -112,7 +112,7 @@ const OwnerRequests: React.FC = () => {
 
     return (
         <>
-            <Bara_navigatie />
+            <Bara_nav_OwnerDashboard />
             <div className="owner-requests-container">
                 <h1>Cereri de rezervare</h1>
                 {successMessage && <div className="success-message">{successMessage}</div>}
@@ -137,7 +137,6 @@ const OwnerRequests: React.FC = () => {
                                 </p>
                                 <button onClick={() => accept(req._id)}>Accepta</button>
                                 <button onClick={() => decline(req._id)}>Respinge</button>
-                                {/* Adauga alte detalii relevante, de exemplu informatii despre client sau apartament */}
                             </li>
                         ))}
                     </ul>

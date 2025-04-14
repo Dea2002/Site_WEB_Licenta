@@ -75,7 +75,7 @@ const Register: React.FC = () => {
     return (
         <div>
             <Bara_navigatie />
-            <h1>inregistrare</h1>
+            <h1>Inregistrare</h1>
             <form onSubmit={handleSubmit} className="register-form">
                 <div>
                     <label>Email:</label>
@@ -153,8 +153,11 @@ const Register: React.FC = () => {
                 {success && <p className="success">{success}</p>}
                 <button type="submit">Inregistreaza-te</button>
             </form>
-            <p>
-                Ai deja un cont? <Link to="/login">Autentifica-te</Link>
+            <p style={{ color: "white" }}>
+                Ai deja un cont?{" "}
+                <Link to="/login" className="custom-link">
+                    Autentifica-te
+                </Link>
             </p>
         </div>
     );

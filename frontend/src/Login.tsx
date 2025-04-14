@@ -81,7 +81,10 @@ const Login: React.FC = () => {
                     <button type="submit">Logheaza-te</button>
                 </form>
                 <p>
-                    Nu ai un cont? <Link to="/register">Inregistreaza-te</Link>
+                    Nu ai un cont?{" "}
+                    <Link to="/register" className="custom-link">
+                        Inregistreaza-te
+                    </Link>
                 </p>
             </div>
         </>

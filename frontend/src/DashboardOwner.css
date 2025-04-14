@@ -1,67 +1,123 @@
-/* frontend/src/DashboardOwner.css */
-.dashboard-owner-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
+/* General styling for the page container */
+.dashboard-owner-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    min-height: calc(80vh);
+    box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
 
-.dashboard-owner-container h1 {
-    color: #deaa79;
-    font-size: 2.2rem;
-}
+/* Container for the dashboard header and card */
+.dashboard-owner-apartments {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
 
-.card-owner {
-    background-color: #e8efcf;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 2rem auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    transition: transform 0.2s ease-in-out;
-    cursor: pointer;
+    box-sizing: border-box;
 }
 
-.card-owner:hover {
+/* Header styling */
+.dashboard-header {
+    background-color: #211c84; /* Dark blue background */
+    color: #ffffff; /* White text */
+    padding: 20px 25px;
+    text-align: center;
+
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 25px;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    font-size: 1.8em; /* Larger font size for the title */
+    font-weight: 600;
+}
+
+/* Card content styling */
+.dashboard-card {
+    padding: 20px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    width: 260px;
+    height: 270px;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    border-radius: 20px;
+}
+
+.dashboard-card:hover {
+    background-color: #f0f0f0;
+    border-color: #b5a8d5;
+    border-radius: 20px;
+}
+
+/* Icon container and styling */
+.card-icon-container {
+    margin-bottom: 20px; /* Space below the icon */
+}
+
+.card-icon {
+    font-size: 4rem;
+    color: #7a73d1;
+}
+
+.card-label {
+    font-size: 1.3em;
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Count number styling */
+.card-count {
+    font-size: 4em;
+    color: #333;
+    font-weight: bold;
+    margin-top: 0;
+    /* margin-bottom: 30px; */
+    line-height: 1;
+}
+
+.card-button {
+    background-color: #4d55cc;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+    box-sizing: border-box;
+
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.card-button:hover {
+    background-color: #2980b9;
     transform: scale(1.02);
 }
 
-.card-owner h2 {
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #487368;
-}
-
-.card-owner p {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #659287;
-}
-
-.button-listNewApartment {
-    /* gap: 20px; */
-    justify-content: center;
-    color: #659287;
-    font-weight: bold;
-    background-color: white;
-    border: 1px solid white;
-    border-radius: 8px;
-    /* padding: 2rem; */
-    width: 170px;
-    height: 38px;
-}
-
-.button-listNewApartment:hover {
-    /* background-color: #e8efcf; */
-    color: #659287;
-    border-color: #659287;
-    border-width: 3px;
-    border-style: solid;
+.card-button:active {
+    transform: scale(0.98);
 }

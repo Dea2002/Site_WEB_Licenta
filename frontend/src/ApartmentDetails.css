@@ -1,76 +1,135 @@
+/* ApartmentDetails.css - FINAL COMPLETE VERSION */
+
+/* Base Page Style with Background */
 .apartment-details-page {
     margin: 0;
-    padding: 0;
+    padding: 0 0 50px 0;
     font-family: Arial, sans-serif;
+    /* Background Image */
+    background-image: url("/path/to/your/background-image.jpg"); /* !!! UPDATE THIS PATH !!! */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
 }
 
-/* Container pentru sectiunea stanga (imagine + info) si sectiunea dreapta (card proprietar) */
+/* General container for loading/error messages */
+.loading-error-container {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2em;
+    color: #555;
+    background-color: rgba(255, 255, 255, 0.8); /* Make sure message is readable */
+    border-radius: 8px;
+    max-width: 600px;
+    margin: 40px auto;
+}
+.error {
+    color: #dc3545; /* Red color for errors */
+    font-weight: bold;
+    margin-top: 10px;
+}
+.booking-error {
+    font-size: 0.9em;
+    text-align: center;
+    margin-bottom: 10px;
+    padding: 0 15px; /* Add padding */
+}
+
+/* Main container for the two columns */
 .details-container {
     display: flex;
-    justify-content: center; /* spatiu intre stanga si dreapta */
-    align-items: flex-start; /* aliniere sus */
-    gap: 20px;
-    max-width: 1000px; /* latime maxima a paginii */
-    margin: 0 auto; /* centreaza orizontal */
-    padding: 0 20px; /* un pic de spatiu lateral */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
 }
 
+/* === Left Section (Image & Details) === */
 .left-section {
-    flex: 2;
-    /* margin-right: 20px; */
-    /* margin-left: 200px; */
-    /* background-color: hsl(0, 7%, 92%); 
-    border: 1px solid #ddd; bordura fina */
-    background-color: rgba(255, 255, 255, 0.8); /* alb cu 80% opacitate */
-    backdrop-filter: blur(20px); /* blur de 5px pe fundalul din spate */
-    border-radius: 8px; /* colturi rotunjite */
-    padding: 35px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* umbra discreta */
-    /* padding-top: 30px; */
-    margin-top: 40px;
+    flex: 1 1 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
-/* Container pentru imagine */
+
+/* --- NEW: Wrapper for image and title/price --- */
+.image-title-wrapper {
+    /* This wrapper doesn't need specific styles unless you want */
+    /* a combined background/shadow for image+title */
+    /* For now, it's just a structural container */
+    display: flex; /* Optional: if needed for inner layout */
+    flex-direction: column; /* Stack image above title */
+    gap: 0; /* No gap if they should look connected */
+}
+
+/* Image container styling (within wrapper) */
 .image-container {
-    text-align: center; /* ca imaginea sa fie pe mijloc */
-    /* margin-top: 25px; */
-    margin-bottom: 25px;
-    /* margin-left: 40px; */
+    text-align: center;
+    background-color: #fff; /* White background for image area */
+    padding: 15px;
+    /* Adjust border-radius if it's part of a combined card */
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 0; /* Remove bottom radius */
+    border-bottom-right-radius: 0; /* Remove bottom radius */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Imaginea apartamentului */
 .image-container img {
-    width: 830px;
-    height: 450px;
+    width: 100%;
+    max-width: 830px;
+    height: auto;
+    max-height: 500px;
+    border-radius: 8px; /* Inner image can still be rounded */
+    object-fit: cover;
+}
+
+/* Title, Location, Price section (within wrapper) */
+.title-location-price {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 20px 25px;
+    /* Adjust border-radius if it's part of a combined card */
+    border-top-left-radius: 0; /* Remove top radius */
+    border-top-right-radius: 0; /* Remove top radius */
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: left;
+    position: relative; /* Needed for ::before pseudo-element */
+}
+/* Inner border for title/location */
+.title-location-price::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
 }
 
-/* informatiile despre apartament(textul) */
-.info-container p {
-    font-size: 1rem;
-    margin: 8px 0;
-    color: rgb(12, 12, 12);
+.title-location-price h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+    color: #333;
 }
-/* 
-.button-map {
-    background-color: #deaa79;
-    color: black;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 6px 13px;
-    margin-left: 20px;
-    transition: background-color 0.3s ease;
-} */
+.price-display {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #28a745;
+    margin: 0 0 15px 0;
+}
 
+/* --- Map Button Styling (Original) --- */
 .button-map {
-    /* position: relative;
-    padding: 8px 16px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    overflow: hidden; */
     position: relative;
     background-color: #deaa79;
     color: black;
@@ -81,12 +140,11 @@
     padding: 6px 13px;
     margin-left: 20px;
     transition: background-color 0.3s ease;
+    vertical-align: middle;
 }
-
 .button-map-text {
     transition: opacity 0.3s ease;
 }
-
 .button-map-icon {
     position: absolute;
     top: 50%;
@@ -94,86 +152,113 @@
     transform: translate(-50%, -50%);
     opacity: 0;
     transition: opacity 0.3s ease;
-    font-size: 16px; /* Ajustează dimensiunea după preferințe */
 }
-
-/* La hover, textul devine invizibil iar iconița devine vizibilă */
+.button-map-icon img {
+    width: 18px;
+    height: 18px;
+}
+.button-map:hover {
+    background-color: #c9986a;
+}
 .button-map:hover .button-map-text {
     opacity: 0;
 }
-
 .button-map:hover .button-map-icon {
     opacity: 1;
 }
 
-/*Partea dreapta*/
-.right-section {
-    flex: 1; /* mai ingusta decat left-section */
+/* Container for grouped details */
+.detail-group {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: relative; /* Needed for ::before */
+}
+/* Inner border for detail groups */
+.detail-group::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.detail-group h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.3em;
+    color: #211c84;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
     display: flex;
-    height: auto;
+    align-items: center;
+}
+
+.icon-prefix {
+    margin-right: 10px;
+    color: #60b5ff;
+    font-size: 1.1em;
+}
+
+.detail-group p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 8px 0;
+    color: #555;
+}
+.detail-group p span {
+    font-weight: 600;
+    color: #333;
+    margin-right: 8px;
+    display: inline-block;
+}
+on (Owner/Booking Card) === */ .right-section {
+    flex: 1 1 350px; /* Flex behavior */
+    position: sticky; /* Stick to top on scroll */
+    top: 20px; /* Offset from top */
+    align-self: flex-start; /* Required for sticky */
+}
+
+.owner-booking-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    overflow: hidden; /* Clip content/reserve button */
+    display: flex;
     flex-direction: column;
-    /* align-items: center; */
-    padding-top: 100px;
 }
 
-/* Card Proprietar */
-.owner-section {
-    /* position: relative;
-    width: 235px;
-    height: 240px;
-
-    background-color: rgba(255, 255, 255, 0.8); 
-    backdrop-filter: blur(20px); 
-    -webkit-backdrop-filter: blur(5px);
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.owner-info-header {
+    padding: 20px 25px;
     text-align: center;
-    padding-bottom: 40px; 
-    margin-left: 25px; */
-
-    position: relative;
-    width: 235px;
-    height: auto; /* schimbi de la o înălțime fixă la auto pentru a permite fluxul natural */
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(5px);
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    /* padding: 20px;  */
-    padding-bottom: 0px;
-    margin-left: 25px;
+    background-color: rgba(248, 249, 250, 0.8); /* Light header background */
+}
+.owner-info-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.4em;
+    color: #333;
+}
+.owner-info-header p {
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #555;
 }
 
-/* Titlul din card (Proprietar) */
-.owner-section h2 {
-    margin-top: 0;
-    margin-top: 20px;
-    margin-bottom: 27px;
-    font-weight: bold;
-    font-size: 1.8rem;
+.owner-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
 }
 
-/* Numele proprietarului */
-.owner-section p {
-    margin: 10px 0;
-    font-weight: bold;
-    font-size: 1.1rem;
-    /* color: #fac67a; */
-    /* color: #dba979; */
-}
-
-/* Butoanele Detalii si Chat */
+/* --- Owner Action Buttons (Detalii/Chat - Original Styles Restored) --- */
 .owner-section-button {
-    /* position: absolute;
-    bottom: 60px; 
     padding: 8px 12px;
     background-color: #659287;
     border-color: #659287;
@@ -184,133 +269,211 @@
     cursor: pointer;
     font-size: 1rem;
     width: 75px;
-    transition: background-color 0.3s ease;
-    margin-left: 15px;
-    margin-right: 15px; */
-
-    padding: 8px 12px;
-    background-color: #659287;
-    border-color: #659287;
-    border-width: 2px;
-    border-style: solid;
-    color: #e8efcf;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    width: 75px;
-    transition: background-color 0.3s ease;
-    /* margin adăugat pentru spațiere */
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     margin: 0 5px;
+    text-align: center;
+    flex-grow: 0; /* Prevent growing */
+    flex-shrink: 0;
 }
-
 .owner-section-button:hover {
-    /* background-color: #4a716b; */
     background-color: #e8efcf;
     color: #659287;
     border-color: #659287;
-    border-width: 2px;
-    border-style: solid;
 }
-
-/* Containerul pentru butoane */
-.owner-buttons {
-    display: flex;
-    justify-content: center; /* le centrează orizontal */
-    margin-top: 20px; /* spațiu deasupra containerului de butoane */
-    margin-bottom: 10px; /* spațiu sub containerul de butoane, pentru ca textul să vină dedesubt */
-}
-
-/* Buton "Detalii" in stanga jos */
 .details-btn {
-    left: 10px;
 }
-
-/* Buton "Chat" in dreapta jos */
 .chat-btn {
-    right: 10px;
 }
 
-/* Butonul "Rezerva acum" – pozitionat la marginea de jos */
-.reserve-btn {
-    /* position: absolute; */
-    position: relative;
-    bottom: 0;
-    left: 0;
-    width: 100%; /* acopera toata latimea cardului */
-    height: 45px; /* ajusteaza inaltimea dupa preferinte */
-    background-color: #659287;
-    color: #e8efcf;
+.booking-section {
+    padding: 20px 25px;
+    text-align: center;
+}
+.booking-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.selected-dates-info {
+    background-color: #e9ecef; /* Background for selected dates block */
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+.selected-dates-info p {
+    font-size: 0.95em;
+    margin: 6px 0;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+}
+.selected-dates-info p span {
+    font-weight: 500;
+    color: #555;
+    margin-right: 10px;
+}
+.selected-dates-info p.total-price span {
+    font-weight: bold;
+    color: #222;
+}
+.selected-dates-info p.total-price {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+}
+
+/* Button to open date selection popup initially */
+.select-interval-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
     border: none;
-    border-bottom-right-radius: 8px;
-    border-bottom-left-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1em;
+    width: 100%;
+    margin-top: 10px;
     transition: background-color 0.3s ease;
-    /* margin-top: 10px; */
+}
+.select-interval-btn:hover {
+    background-color: #0056b3;
 }
 
-.reserve-btn:hover {
-    background-color: #4a716b;
+/* --- Style for Modify Interval Button (Themed from Original Buttons) --- */
+.modify-interval-btn {
+    background-color: transparent;
+    color: #659287; /* Original theme color */
+    border: 2px solid #659287; /* Original theme border */
+    padding: 6px 12px;
+    border-radius: 4px; /* Match original */
+    cursor: pointer;
+    font-size: 0.9em;
+    width: 100%;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: 600;
 }
+.modify-interval-btn:hover {
+    background-color: #659287; /* Fill on hover */
+    color: #e8efcf; /* Contrast text on hover */
+}
+
+/* --- Reserve Button Styling (Original Restored) --- */
+.reserve-btn {
+    position: relative; /* For icon */
+    width: 100%;
+    height: 45px; /* Original height */
+    background-color: #659287; /* Original background */
+    color: #e8efcf; /* Original text color */
+    border: none; /* Original: no border */
+    /* Original border radius - important for card look */
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    cursor: pointer;
+    font-size: 1.2rem; /* Original font size */
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Original transition */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Hide icon overflow */
+}
+.reserve-btn:hover {
+    background-color: #4a716b; /* Original hover background */
+}
+/* Original hover effect for text/icon */
 .reserve-btn:hover .reserve-btn-text {
     opacity: 0;
 }
-
 .reserve-btn:hover .reserve-btn-icon {
     opacity: 1;
 }
+
+/* Icon positioning and styling within reserve button */
 .reserve-btn-icon {
-    position: absolute; /* Poziționează absolut în raport cu butonul */
-    top: 50%; /* 50% de sus */
-    left: 50%; /* 50% de la stânga */
-    transform: translate(-50%, -50%); /* Centrează iconița */
-    opacity: 0; /* Inițial ascunsă */
-    transition: opacity 0.3s ease;
-}
-
-.line-image {
-    border: none;
-    border-top: 7px double black;
-    margin: 20px 0;
-}
-
-/* .line-image {
-    position: relative;
-    margin: 10px 0;
-    height: 9px; 
-}
-
-.line-image::before,
-.line-image::after {
-    content: "";
     position: absolute;
-    left: 0;
-    right: 0;
-    height: 3px; 
-    background: linear-gradient(to right, red, rgb(203, 208, 131));
-} */
-
-/* Prima linie în partea de sus */
-/* .line-image::before {
-    top: 0;
-} */
-
-/* A doua linie în partea de jos */
-/* .line-image::after {
-    bottom: 0;
-} */
-
-.line-image-dates {
-    border: none;
-    border-top: 3px dashed black;
-    margin: 15px 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0; /* Initially hidden for hover effect */
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.reserve-btn-icon img {
+    width: 24px;
+    height: 24px;
+}
+.reserve-btn-text {
+    transition: opacity 0.3s ease;
+    margin-right: 0;
 }
 
-.line-image-info {
+/* Disabled state for Reserve Button */
+.reserve-btn:disabled {
+    background-color: #adb5bd; /* Neutral disabled color */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.reserve-btn:disabled:hover {
+    background-color: #adb5bd; /* Prevent hover change when disabled */
+}
+/* Prevent icon/text swap when disabled */
+.reserve-btn:disabled .reserve-btn-text,
+.reserve-btn:disabled .reserve-btn-icon {
+    opacity: 1;
+}
+.reserve-btn:disabled:hover .reserve-btn-text {
+    opacity: 1;
+}
+.reserve-btn:disabled:hover .reserve-btn-icon {
+    opacity: 0;
+} /* Ensure icon stays hidden on hover when disabled */
+
+/* Warning text for non-authenticated users */
+.auth-warning {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9em;
+    color: #6c757d;
+    background-color: rgba(248, 249, 250, 0.8); /* Match card header background */
+    /* Apply bottom radius only if reserve button doesn't have it */
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* General purpose divider lines */
+.line-divider {
     border: none;
-    border-top: 3px solid black;
+    height: 1px;
+    background-color: #eee;
     margin: 15px 0;
-    /* border: none;
+}
+.line-divider.short {
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.line-divider.bold {
+    height: 2px;
+    background-color: #ddd;
+}
+.line-divider.thick {
     height: 4px;
-    background: linear-gradient(to right, red, purple); */
+    background-color: rgba(233, 236, 239, 0.8);
+    margin: 0;
+} /* Thicker separator */
+
+/* Hide old <hr> elements if they were based on classes */
+.line-image,
+.line-image-dates,
+.line-image-info {
+    display: none;
 }

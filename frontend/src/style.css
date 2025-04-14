@@ -116,7 +116,7 @@ body::before {
 }
 
 .button-details-apartment {
-    position: absolute; /* schimba din absolute în relative sau combină-le în funcție de design */
+    position: absolute; /* schimba din absolute in relative sau combina-le in functie de design */
     bottom: 20px;
     right: 35px;
     padding: 10px 20px;
@@ -130,7 +130,7 @@ body::before {
     transition: background-color 0.3s ease, color 0.3s ease;
     font-size: 1rem;
     margin-top: 20px;
-    overflow: hidden; /* dacă vrei să ascunzi eventualele depășiri */
+    overflow: hidden; /* daca vrei sa ascunzi eventualele depasiri */
 }
 
 /* Elementul pentru text */
@@ -138,7 +138,7 @@ body::before {
     transition: opacity 0.3s ease;
 }
 
-/* Elementul pentru iconiță, poziționat centrul butonului */
+/* Elementul pentru iconita, pozitionat centrul butonului */
 .details-btn-icon {
     position: absolute;
     top: 50%;
@@ -149,14 +149,14 @@ body::before {
     border-radius: 0px !important;
 }
 
-/* Dacă este nevoie să setezi dimensiunea iconiței */
+/* Daca este nevoie sa setezi dimensiunea iconitei */
 .details-btn-icon img {
-    width: auto; /* ajustează dimensiunea după preferințe */
+    width: auto; /* ajusteaza dimensiunea dupa preferinte */
     height: auto;
     border-radius: 0px !important;
 }
 
-/* La hover schimbăm fundalul și culorile, ascundem textul și fazăm iconița vizibilă */
+/* La hover schimbam fundalul si culorile, ascundem textul si fazam iconita vizibila */
 .button-details-apartment:hover {
     background-color: #e8efcf;
     color: #659287;

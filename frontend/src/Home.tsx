@@ -89,8 +89,8 @@ const Home: React.FC = () => {
     };
 
     // const handleLocationClick = (apartment: Apartment) => {
-    //     // Presupunem că în obiectul apartment există proprietățile lat și lng.
-    //     // Dacă nu, va trebui să folosești un API de geocodificare pentru a obține coordonatele din adresa apartment.location.
+    //     // Presupunem ca in obiectul apartment exista proprietatile lat si lng.
+    //     // Daca nu, va trebui sa folosesti un API de geocodificare pentru a obtine coordonatele din adresa apartment.location.
     //     if (apartment.lat && apartment.lng) {
     //         setSelectedMapData({
     //             lat: apartment.lat,

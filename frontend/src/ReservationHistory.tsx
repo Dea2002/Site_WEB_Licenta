@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_nav_OwnerDashboard from "./Bara_nav_OwnerDashboard";
 import "./ReservationHistory.css";
 
 interface ReservationHistory {
@@ -40,7 +40,7 @@ const ReservationHistory: React.FC = () => {
 
     return (
         <>
-            <Bara_navigatie />
+            <Bara_nav_OwnerDashboard />
             <div className="reservation-history-container">
                 <h1>Istoric rezervari</h1>
                 <div className="history-list">

@@ -13,7 +13,7 @@ interface MapModalProps {
 const MapModal: React.FC<MapModalProps> = ({ lat, lng, address, onClose }) => {
     return (
         <div className="map-modal">
-            <button onClick={onClose}>Închide</button>
+            <button onClick={onClose}>inchide</button>
             <MapContainer center={[lat, lng]} zoom={13} style={{ height: "400px", width: "100%" }}>
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

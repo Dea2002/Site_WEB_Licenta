@@ -14,9 +14,9 @@ function NavBar() {
     };
 
     return (
-        <Navbar expand="lg" className="custom-navbar">
+        <Navbar expand="lg" className="custom-navbar-owner">
             <Container>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Toggle aria-controls="basic-navbar-nav-owner" />
                 <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                     {/* Dropdown-uri din partea stanga */}
                     <Nav className="nav nav-underline align-items-center" style={{ gap: "1rem" }}>

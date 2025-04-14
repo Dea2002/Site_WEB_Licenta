@@ -66,11 +66,22 @@
 }
 
 .login-form button:hover {
-    background-color: #659287;
+    background-color: #e5be99;
 }
 
 .login-container p {
     text-align: center;
     font-size: 1.1em;
     margin-top: 20px;
+    color: white;
+    /* color: #deaa79; */
+}
+
+.custom-link {
+    color: #deaa79;
+    /* text-decoration: none; */
+}
+
+.custom-link:hover {
+    color: #deaa79;
 }
