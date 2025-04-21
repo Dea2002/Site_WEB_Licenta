@@ -390,7 +390,7 @@ const ApartmentDetails: React.FC = () => {
                                 <h4>Verifica Disponibilitatea</h4>
                                 {renderSelectedDatesInfo()}{" "}
                                 {/* Renders dates & original 'Modifica' button */}
-                                {!selectedDates && (
+                                {/* {!selectedDates && (
                                     // Using new button style for initial selection
                                     <button
                                         className="select-interval-btn"
@@ -398,7 +398,7 @@ const ApartmentDetails: React.FC = () => {
                                     >
                                         Selecteaza Perioada
                                     </button>
-                                )}
+                                )} */}
                             </div>
                             <hr className="line-divider thick" /> {/* Using new divider class */}
                             {/* Error display */}
@@ -417,9 +417,7 @@ const ApartmentDetails: React.FC = () => {
                                 }
                             >
                                 <span className="reserve-btn-text">
-                                    {selectedDates
-                                        ? "Trimite Cerere Rezervare"
-                                        : "Verifica Disponibilitate"}
+                                    {selectedDates ? "Trimite Cerere Rezervare" : "Rezerva Acum"}
                                 </span>
                                 <span className="reserve-btn-icon">
                                     <img src="/Poze_apartamente/booking.png" alt="Booking Icon" />
