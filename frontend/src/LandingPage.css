@@ -144,3 +144,31 @@
     color: #888; /* culoarea iconitei, modifica dupa preferinte */
     cursor: pointer;
 }
+
+/* pentru butonul de autentifcare */
+.landing-action-button {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    background-color: #d8ac70; /* Your theme color */
+    color: #76471e; /* Your theme text color */
+    border: 2px solid #d8ac70; /* Matching border */
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.landing-action-button:hover {
+    border-color: #e0e0e0;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
+    align-items: center;
+}

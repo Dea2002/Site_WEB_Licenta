@@ -48,6 +48,192 @@ body::before {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #d1d9b0; /* Border color derived from sidebar bg */
+}
+
+.filters-header h2 {
+    margin: 0;
+    font-size: 1.3em;
+    color: #505c36; /* Darker color derived from sidebar bg */
+    font-weight: 600;
+}
+.filters-header h2 i {
+    /* Optional icon */
+    margin-right: 10px;
+    color: #659287; /* Use a theme color */
+}
+
+/* Reset Button Styling */
+.reset-button {
+    background: none;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+.reset-button i {
+    margin-right: 4px;
+}
+.reset-button:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Styling for each group of filters */
+.filter-group {
+    margin-bottom: 25px;
+}
+.filter-group:last-of-type {
+    /* Less margin for the last group before button */
+    margin-bottom: 20px;
+}
+
+/* Labels for filter groups */
+.filter-group > label,
+.sub-filter > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #505c36; /* Darker label text */
+    font-size: 0.95em;
+}
+.filter-group > label i,
+.spec-group h4 i,
+.check-group h4 i {
+    margin-right: 8px;
+    color: #659287; /* Theme color for icons */
+    width: 1.3em;
+    text-align: center;
+    display: inline-block;
+}
+
+/* General Input/Select Styling */
+.filter-group input[type="text"],
+.filter-group input[type="number"],
+.filter-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #c5cea3; /* Border color derived from sidebar bg */
+    background-color: #fff; /* White background for inputs */
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.filter-group input[type="text"]:focus,
+.filter-group input[type="number"]:focus,
+.filter-group select:focus {
+    border-color: #a5b08a; /* Darker focus border */
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(101, 146, 135, 0.25); /* Focus shadow using theme color */
+}
+
+/* Price/Surface Range Input Styling */
+.price-inputs,
+.surface-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.price-inputs span,
+.surface-inputs span {
+    padding: 0 2px;
+    color: #6c757d;
+    font-weight: 600;
+}
+.price-inputs input,
+.surface-inputs input {
+    flex: 1;
+    min-width: 60px;
+}
+.filter-group input[type="number"]::-webkit-inner-spin-button,
+.filter-group input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.filter-group input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Spec/Check Group Headers */
+.spec-group h4,
+.check-group h4 {
+    font-size: 1.05em;
+    color: #505c36;
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #c5cea3; /* Dashed divider */
+    font-weight: 600;
+}
+.spec-group h4 i,
+.check-group h4 i {
+    color: #659287;
+} /* Theme icon color */
+
+/* Spacing within Spec Group */
+.spec-group .sub-filter {
+    margin-bottom: 18px;
+}
+.spec-group .sub-filter:last-child {
+    margin-bottom: 5px;
+}
+.spec-group .sub-filter label {
+    margin-bottom: 6px;
+}
+
+/* Checkbox Group Styling */
+.check-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.95em;
+    color: #495057;
+}
+.check-group label:last-child {
+    margin-bottom: 5px;
+}
+.check-group input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+    accent-color: #659287; /* Theme color for checkbox */
+}
+
+/* Style your original refresh button */
+.refresh-button {
+    /* Add your original styles here if you want to keep it */
+    /* Or style it similarly to other buttons */
+    width: 100%;
+    padding: 10px;
+    background-color: #659287; /* Your theme color */
+    color: #e8efcf; /* Your contrast color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    margin-top: 10px; /* Space above button */
+    transition: background-color 0.2s ease;
+}
+.refresh-button:hover {
+    background-color: #4a716b; /* Darker theme color */
+}
+
 .apartments-list {
     flex: 1;
     display: flex;

@@ -1,0 +1,236 @@
+/* Register.css */
+
+/* Overall page container */
+.register-page-container {
+    min-height: calc(100vh - 60px); /* Adjust based on navbar height */
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Keep your background if needed, or set a plain one */
+    /* background-color: #f4f7f9; */
+}
+
+/* Styling for the role selection section */
+.role-selection-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white card */
+    padding: 40px 50px;
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    margin-top: 5vh; /* Space from top */
+    max-width: 500px;
+    width: 90%;
+    border: 1px solid #eee;
+    backdrop-filter: blur(5px);
+}
+
+.role-selection-container h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.role-buttons {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 15px; /* Space between buttons */
+    align-items: center; /* Center buttons horizontally */
+}
+
+.role-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 25px; /* Oval shape */
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    width: 80%; /* Make buttons wider */
+    max-width: 250px;
+}
+
+/* Specific styles for each role button */
+.role-button.student {
+    background-color: #007bff; /* Blue for student */
+    color: white;
+}
+.role-button.student:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.role-button.proprietar {
+    background-color: #28a745; /* Green for owner */
+    color: white;
+}
+.role-button.proprietar:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+}
+
+.role-button.facultate {
+    background-color: #ffc107; /* Yellow for faculty */
+    color: #333;
+}
+.role-button.facultate:hover {
+    background-color: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+
+/* Container for the actual registration form/placeholders */
+.register-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 3rem; /* Space from navbar */
+    width: 100%;
+    max-width: 600px; /* Max width for the form */
+    border: 1px solid #eee;
+    backdrop-filter: blur(5px);
+}
+
+.register-container h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+/* Your existing .register-form styles */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Space between form fields */
+}
+.register-form div {
+    display: flex;
+    flex-direction: column;
+}
+.register-form label {
+    margin-bottom: 0.4rem;
+    font-weight: bold;
+    color: #555;
+}
+.register-form input[type="email"],
+.register-form input[type="text"],
+.register-form input[type="tel"],
+.register-form input[type="password"],
+.register-form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+.register-form input:focus,
+.register-form select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+.register-form select {
+    cursor: pointer;
+}
+.register-form button[type="submit"] {
+    padding: 12px 20px;
+    background-color: #007bff; /* Consistent button color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.2s ease;
+}
+.register-form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Style for error/success messages */
+.error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 1rem;
+    text-align: center;
+}
+.success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+/* Style for the "Back" button */
+.back-button {
+    margin-top: 1.5rem;
+    padding: 8px 15px;
+    background-color: #6c757d; /* Grey color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+/* Style for the "Already have an account?" link area */
+.login-link-text {
+    margin-top: 2rem;
+    text-align: center;
+    color: #333; /* Adjust color to be visible on background */
+}
+.login-link-text .custom-link {
+    /* Assuming .custom-link is your link style */
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+}
+.login-link-text .custom-link:hover {
+    text-decoration: underline;
+}
+
+/* --- START: Styles for Animation --- * /
+/* Wrapper for the changing content (role selection or form) */
+.content-area {
+    width: 100%; /* Ensure it takes available width */
+    max-width: 600px; /* Or match the max-width of your form/role selection */
+    display: flex; /* Helps if content inside needs centering */
+    justify-content: center;
+    /* Apply the animation */
+    animation: fadeIn 0.4s ease-out forwards; /* Adjust duration (0.4s) and timing as needed */
+}
+
+/* Define the fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        /* Optional: Add a slight vertical movement */
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ensure inner containers take up width within the animated area */
+.role-selection-container,
+.register-container {
+    width: 100%; /* Helps maintain consistent width during animation */
+}
+
+/* --- END: Styles for Animation --- */

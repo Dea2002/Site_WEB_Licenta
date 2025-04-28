@@ -18,6 +18,10 @@ const LandingPage: React.FC = () => {
         navigate("/home");
     };
 
+    const handleLoginRedirect = () => {
+        navigate("/login"); // Navigate to your login route
+    };
+
     return (
         <div className="landing-page">
             <div className="landing-content">
@@ -59,10 +63,22 @@ const LandingPage: React.FC = () => {
                     </div>
                     <button type="submit">Cauta</button>
                 </form>
-                {/* Buton suplimentar pentru afisarea tuturor apartamentelor */}
-                <button onClick={handleListAll} className="list-all-button">
-                    Lista cu apartamentele
-                </button>
+
+                <div className="button-group">
+                    <button
+                        onClick={handleListAll}
+                        className="landing-action-button list-all-button"
+                    >
+                        Lista cu apartamentele
+                    </button>
+
+                    <button
+                        onClick={handleLoginRedirect}
+                        className="landing-action-button login-button"
+                    >
+                        Autentificare
+                    </button>
+                </div>
             </div>
         </div>
     );
