@@ -53,33 +53,30 @@
 
 /* Specific styles for each role button */
 .role-button.student {
-    background-color: #007bff; /* Blue for student */
+    background-color: #40a578;
     color: white;
 }
 .role-button.student:hover {
-    background-color: #0056b3;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 0 15px #ff9b17;
 }
 
 .role-button.proprietar {
-    background-color: #28a745; /* Green for owner */
+    background-color: #9dde8b; /* Green for owner */
     color: white;
 }
 .role-button.proprietar:hover {
-    background-color: #218838;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 0 15px #ff9b17;
 }
 
 .role-button.facultate {
-    background-color: #ffc107; /* Yellow for faculty */
-    color: #333;
+    background-color: #006769; /* Yellow for faculty */
+    color: white;
 }
 .role-button.facultate:hover {
-    background-color: #e0a800;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+    box-shadow: 0 0 15px #ff9b17;
 }
 
 /* Container for the actual registration form/placeholders */

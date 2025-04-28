@@ -281,23 +281,25 @@ const Register: React.FC = () => {
 
     return (
         // Use a main container for overall page styling if needed
-        <div className="register-page-container">
+        <>
             <Bara_navigatie />
-            {/* Conditionally render content based on selected role */}
-            <div key={selectedRole || "selection"} className="content-area">
-                {renderContent()}
-            </div>
+            <div className="register-page-container">
+                {/* Conditionally render content based on selected role */}
+                <div key={selectedRole || "selection"} className="content-area">
+                    {renderContent()}
+                </div>
 
-            {/* Keep the "Already have an account?" link, visible always or only when a form is shown */}
-            {selectedRole && ( // Only show if a role is selected (form is visible)
-                <p className="login-link-text">
-                    Ai deja un cont?{" "}
-                    <Link to="/login" className="custom-link">
-                        Autentifică-te
-                    </Link>
-                </p>
-            )}
-        </div>
+                {/* Keep the "Already have an account?" link, visible always or only when a form is shown */}
+                {selectedRole && ( // Only show if a role is selected (form is visible)
+                    <p className="login-link-text">
+                        Ai deja un cont?{" "}
+                        <Link to="/login" className="custom-link">
+                            Autentifică-te
+                        </Link>
+                    </p>
+                )}
+            </div>
+        </>
     );
 };
 
