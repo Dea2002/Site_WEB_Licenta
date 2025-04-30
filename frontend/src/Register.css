@@ -13,12 +13,12 @@
 
 /* Styling for the role selection section */
 .role-selection-container {
-    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white card */
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 40px 50px;
-    border-radius: 15px; /* Rounded corners */
+    border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     text-align: center;
-    margin-top: 5vh; /* Space from top */
+    margin-top: 5vh;
     max-width: 500px;
     width: 90%;
     border: 1px solid #eee;
@@ -95,10 +95,10 @@
 
     /* Base color (darkest green) */
     background-color: #9dde8b;
-    background-image: linear-gradient(20deg, #006769 30%, transparent 45%),
-        linear-gradient(-60deg, #40a578 50%, transparent 60%);
-    /* background-image: linear-gradient(20deg, #006769 17%, transparent 55%),
-        linear-gradient(-60deg, #40a578 35%, transparent 70%); */
+    /* background-image: linear-gradient(20deg, #006769 30%, transparent 45%),
+        linear-gradient(-60deg, #40a578 50%, transparent 60%); */
+    background-image: linear-gradient(20deg, #006769 17%, transparent 55%),
+        linear-gradient(-60deg, #40a578 35%, transparent 70%);
 
     /* Ensure gradients cover the entire container and don't repeat */
     background-size: 100% 100%;
@@ -248,4 +248,39 @@
     width: 100%; /* Helps maintain consistent width during animation */
 }
 
-/* --- END: Styles for Animation --- */
+.student-form h1 {
+    color: #007bff;
+}
+
+.owner-form h1 {
+    color: #007bff;
+}
+.owner-form p {
+    font-style: italic;
+    color: #6c757d;
+}
+
+.faculty-form h1 {
+    color: #007bff;
+}
+.faculty-form p {
+    font-style: italic;
+    color: #6c757d;
+}
+
+/* Style for file input labels or hints */
+.register-form small {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Style for file input itself (basic) */
+.register-form input[type="file"] {
+    padding: 8px; /* Adjust padding */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95rem; /* Slightly smaller */
+    background-color: #f8f9fa; /* Light background */
+}
