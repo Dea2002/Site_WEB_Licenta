@@ -14,18 +14,18 @@ app.use(cors());
 app.use(express.json());
 
 // Example CORS setup
-const allowedOrigins = ['http://localhost:5173', 'https://your-deployed-frontend-url.com']; // Add your frontend URL
-app.use(cors({
-    origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    }
-}));
+// const allowedOrigins = ['http://localhost:5173', 'https://your-deployed-frontend-url.com']; // Add your frontend URL
+// app.use(cors({
+//     origin: function (origin, callback) {
+//         // allow requests with no origin (like mobile apps or curl requests)
+//         if (!origin) return callback(null, true);
+//         if (allowedOrigins.indexOf(origin) === -1) {
+//             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+//             return callback(new Error(msg), false);
+//         }
+//         return callback(null, true);
+//     }
+// }));
 // Rate limiter pentru rutele de autentificare
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minute

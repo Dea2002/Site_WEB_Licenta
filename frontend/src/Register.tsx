@@ -5,6 +5,9 @@ import { useNavigate, Link } from "react-router-dom";
 import Bara_navigatie from "./Bara_navigatie";
 import "./Register.css"; // Ensure CSS is imported
 
+import { storage } from "./firebaseConfig"; // Import Firebase storage if needed
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 // Interface for Student form
 interface RegisterFormState {
     email: string;
@@ -18,6 +21,7 @@ interface RegisterFormState {
 
 interface FacultyFormState {
     denumireaCompleta: string;
+    abreviere: string;
     logo: File | null; // Store the File object
     documentOficial: File | null; // Store the File object
     numeRector: string;
@@ -42,6 +46,8 @@ const Register: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState<Role>(null);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [isUploading, setIsUploading] = useState(false); // Stare pentru a arăta progresul upload-ului
+    const [uploadProgress, setUploadProgress] = useState(0); // Stare pentru progresul numeric
     const navigate = useNavigate();
 
     // State for Student form
@@ -57,6 +63,7 @@ const Register: React.FC = () => {
 
     const [facultyFormState, setFacultyFormState] = useState<FacultyFormState>({
         denumireaCompleta: "",
+        abreviere: "",
         logo: null,
         documentOficial: null,
         numeRector: "",
@@ -84,7 +91,6 @@ const Register: React.FC = () => {
         setError("");
     };
 
-    // --- START: Change handler for Faculty form ---
     const handleFacultyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, files } = e.target;
 
@@ -101,7 +107,40 @@ const Register: React.FC = () => {
         }
         setError(""); // Clear errors on change
     };
-    // --- END: Change handler for Faculty form ---
+
+    const uploadFileToStorage = (file: File, path: String): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            if (!file) {
+                reject("Fisier invalid");
+                return;
+            }
+
+            const storageRef = ref(storage, `${path}/${Date.now()}-${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                    // observa schimbarile de stare, cum ar fi progresul
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(progress); // ! optional
+                    console.log("Upload is" + progress + "% done");
+                },
+                (error) => {
+                    console.error("Upload Error:", error);
+                },
+                () => {
+                    // upload finalizat cu succes, obtine URL pentru download
+                    getDownloadURL(uploadTask.snapshot.ref)
+                        .then((downloadURL) => {
+                            console.log("File available at", downloadURL);
+                            resolve(downloadURL); // rezolva promise-ul cu URL-ul
+                        })
+                        .catch(reject);
+                },
+            );
+        });
+    };
 
     // Submit handler for Student form
     const handleStudentSubmit = async (e: React.FormEvent) => {
@@ -160,8 +199,13 @@ const Register: React.FC = () => {
         e.preventDefault();
         setError("");
         setSuccess("");
+
+        setIsUploading(true); // incepe upload-ul
+        setUploadProgress(0);
+
         const {
             denumireaCompleta,
+            abreviere,
             logo,
             documentOficial,
             numeRector,
@@ -179,8 +223,8 @@ const Register: React.FC = () => {
         }
         if (
             !denumireaCompleta ||
-            // !logo ||
-            // !documentOficial ||
+            !logo ||
+            !documentOficial ||
             !numeRector ||
             !emailSecretariat ||
             !numarTelefonSecretariat ||
@@ -195,11 +239,23 @@ const Register: React.FC = () => {
         }
 
         try {
-            // IMPORTANT: Adjust the endpoint for faculty registration
+            // 1. Upload Logo
+            console.log("Uploading logo");
+            const logoUrl = await uploadFileToStorage(logo, `faculty_files/${abreviere}`);
+
+            // 2. Upload Document
+            console.log("Uploading document");
+            const documentUrl = await uploadFileToStorage(
+                documentOficial,
+                `faculty_files/${abreviere}`,
+            );
+
+            // 3. Send data to backend
             await axios.post("http://localhost:5000/auth/register_faculty", {
                 denumireaCompleta,
-                logo,
-                documentOficial,
+                abreviere,
+                logoUrl,
+                documentUrl,
                 numeRector,
                 emailSecretariat,
                 numarTelefonSecretariat,
@@ -211,6 +267,7 @@ const Register: React.FC = () => {
             // Reset form state
             setFacultyFormState({
                 denumireaCompleta: "",
+                abreviere: "",
                 logo: null,
                 documentOficial: null,
                 numeRector: "",
@@ -229,6 +286,9 @@ const Register: React.FC = () => {
                 setError("Eroare la înregistrarea facultății. Încercați din nou.");
             }
             console.error("Faculty Registration Error:", err);
+        } finally {
+            setIsUploading(false); // Finalizează starea de upload indiferent de rezultat
+            setUploadProgress(0);
         }
     };
     // --- END: Submit handler for Faculty form ---
@@ -500,13 +560,24 @@ const Register: React.FC = () => {
                             />
                         </div>
                         <div>
+                            <label htmlFor="abreviere">Abrevierea facultatii:*</label>
+                            <input
+                                type="text"
+                                id="abreviere"
+                                name="abreviere"
+                                value={facultyFormState.abreviere}
+                                onChange={handleFacultyChange}
+                                required
+                            />
+                        </div>
+                        <div>
                             <label htmlFor="logo">Logo Facultate:*</label>
                             <input
                                 type="file"
                                 id="logo"
                                 name="logo"
                                 onChange={handleFacultyChange}
-                                // required //! pune inapoi
+                                required
                                 accept="image/*"
                             />
                             {/* Optional: Preview logo */}
@@ -526,7 +597,7 @@ const Register: React.FC = () => {
                                 id="documentOficial"
                                 name="documentOficial"
                                 onChange={handleFacultyChange}
-                                // required //! pune inapoi
+                                required
                                 accept=".pdf,.doc,.docx,image/*"
                             />
                             <small>

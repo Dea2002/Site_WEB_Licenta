@@ -20,7 +20,7 @@ module.exports = (usersCollection, facultiesCollection) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { denumireaCompleta, numeRector, emailSecretariat, numarTelefonSecretariat, password, role } = req.body;
+        const { denumireaCompleta, numeRector, emailSecretariat, numarTelefonSecretariat, logoUrl, documentUrl, password, role } = req.body;
 
         try {
 
@@ -43,6 +43,8 @@ module.exports = (usersCollection, facultiesCollection) => {
                 numeRector,
                 emailSecretariat,
                 numarTelefonSecretariat,
+                logoUrl,
+                documentUrl,
                 password: hashedPassword,
                 createdAt: new Date(),
             };
