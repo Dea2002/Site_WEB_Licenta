@@ -13,7 +13,19 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
+// Example CORS setup
+const allowedOrigins = ['http://localhost:5173', 'https://your-deployed-frontend-url.com']; // Add your frontend URL
+app.use(cors({
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+}));
 // Rate limiter pentru rutele de autentificare
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minute
@@ -56,6 +68,7 @@ async function run() {
 
         const database = client.db("inchiriere-apartamente");
         const usersCollection = database.collection("users");
+        const facultiesCollection = database.collection("faculties");
         const apartmentsCollection = database.collection("apartments");
         //const listCollection = database.collection("list");
         //const paymentCollection = database.collection("payments");
@@ -64,6 +77,7 @@ async function run() {
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
+        app.locals.facultiesCollection = facultiesCollection; // pentru a accesa colectia de facultati
         app.locals.apartmentsCollection = apartmentsCollection; // pentru a accesa colectia de apartamente
 
 
@@ -74,7 +88,7 @@ async function run() {
 
 
         // Importa rutele de autentificare
-        const authRoutes = require('./routes/auth')(usersCollection);
+        const authRoutes = require('./routes/auth')(usersCollection, facultiesCollection);
         app.use('/auth', authRoutes);
 
         // Ruta pentru actualizarea profilului utilizatorului

@@ -20,7 +20,7 @@ interface FacultyFormState {
     denumireaCompleta: string;
     logo: File | null; // Store the File object
     documentOficial: File | null; // Store the File object
-    numeDecan: string;
+    numeRector: string;
     emailSecretariat: string;
     numarTelefonSecretariat: string;
     websiteOficial: string;
@@ -59,7 +59,7 @@ const Register: React.FC = () => {
         denumireaCompleta: "",
         logo: null,
         documentOficial: null,
-        numeDecan: "",
+        numeRector: "",
         emailSecretariat: "",
         numarTelefonSecretariat: "",
         websiteOficial: "",
@@ -164,7 +164,7 @@ const Register: React.FC = () => {
             denumireaCompleta,
             logo,
             documentOficial,
-            numeDecan,
+            numeRector,
             emailSecretariat,
             numarTelefonSecretariat,
             websiteOficial,
@@ -179,9 +179,9 @@ const Register: React.FC = () => {
         }
         if (
             !denumireaCompleta ||
-            !logo ||
-            !documentOficial ||
-            !numeDecan ||
+            // !logo ||
+            // !documentOficial ||
+            !numeRector ||
             !emailSecretariat ||
             !numarTelefonSecretariat ||
             !password
@@ -200,7 +200,7 @@ const Register: React.FC = () => {
                 denumireaCompleta,
                 logo,
                 documentOficial,
-                numeDecan,
+                numeRector,
                 emailSecretariat,
                 numarTelefonSecretariat,
                 websiteOficial,
@@ -213,7 +213,7 @@ const Register: React.FC = () => {
                 denumireaCompleta: "",
                 logo: null,
                 documentOficial: null,
-                numeDecan: "",
+                numeRector: "",
                 emailSecretariat: "",
                 numarTelefonSecretariat: "",
                 websiteOficial: "",
@@ -506,7 +506,7 @@ const Register: React.FC = () => {
                                 id="logo"
                                 name="logo"
                                 onChange={handleFacultyChange}
-                                required
+                                // required //! pune inapoi
                                 accept="image/*"
                             />
                             {/* Optional: Preview logo */}
@@ -526,7 +526,7 @@ const Register: React.FC = () => {
                                 id="documentOficial"
                                 name="documentOficial"
                                 onChange={handleFacultyChange}
-                                required
+                                // required //! pune inapoi
                                 accept=".pdf,.doc,.docx,image/*"
                             />
                             <small>
@@ -535,12 +535,12 @@ const Register: React.FC = () => {
                             </small>
                         </div>
                         <div>
-                            <label htmlFor="numeDecan">Nume Decan:*</label>
+                            <label htmlFor="numeRector">Nume Rector:*</label>
                             <input
                                 type="text"
-                                id="numeDecan"
-                                name="numeDecan"
-                                value={facultyFormState.numeDecan}
+                                id="numeRector"
+                                name="numeRector"
+                                value={facultyFormState.numeRector}
                                 onChange={handleFacultyChange}
                                 required
                             />

@@ -4,17 +4,59 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 
-module.exports = (usersCollection) => {
+module.exports = (usersCollection, facultiesCollection) => {
 
 
     // endpoint pentru inregistrare facultate
-    router.post('/register_faculty', [], async (req, res) => {
+    router.post('/register_faculty', [
+        body('denumireaCompleta').notEmpty().withMessage('Denumirea completa este necesara'),
+        body('numeRector').notEmpty().withMessage('Nume Rector este necesar'),
+        body('emailSecretariat').isEmail().withMessage('Email invalid'),
+        body('numarTelefonSecretariat').notEmpty().withMessage('Numar de telefon secretariat este necesar'),
+        body('password').isLength({ min: 6 }).withMessage('Parola trebuie sa aiba cel putin 6 caractere'),
+    ], async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        try { }
+        const { denumireaCompleta, numeRector, emailSecretariat, numarTelefonSecretariat, password, role } = req.body;
+
+        try {
+
+            // Verifica daca facultatea exista deja
+            const existingFaculty = await facultiesCollection.findOne({
+                $or: [{ emailSecretariat: emailSecretariat }]
+            });
+
+            if (existingFaculty) {
+                return res.status(400).json({ message: 'Email deja utilizat' });
+            }
+
+            // Cripteaza parola
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            // Creeaza noua facultate
+            const newFaculty = {
+                denumireaCompleta,
+                numeRector,
+                emailSecretariat,
+                numarTelefonSecretariat,
+                password: hashedPassword,
+                createdAt: new Date(),
+            };
+
+            // Insereaza facultatea in baza de date
+            const result = await facultiesCollection.insertOne(newFaculty);
+
+            // Generare token JWT
+            const token = jwt.sign({ facultyId: result.insertedId, role: role, email: emailSecretariat },
+                process.env.ACCESS_SECRET, { expiresIn: '1h' }
+            );
+
+            res.status(200).json({ message: 'Facultate creata cu succes', token });
+        }
         catch (error) {
             console.error('Eroare la inregistrare:', error);
             res.status(500).json({ message: 'Eroare interna a serverului' });
