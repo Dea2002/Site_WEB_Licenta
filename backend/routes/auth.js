@@ -20,7 +20,7 @@ module.exports = (usersCollection, facultiesCollection) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { denumireaCompleta, numeRector, emailSecretariat, numarTelefonSecretariat, logoUrl, documentUrl, password, role } = req.body;
+        const { denumireaCompleta, abreviere, numeRector, emailSecretariat, numarTelefonSecretariat, logoUrl, documentUrl, password, role } = req.body;
 
         try {
 
@@ -40,6 +40,7 @@ module.exports = (usersCollection, facultiesCollection) => {
             // Creeaza noua facultate
             const newFaculty = {
                 denumireaCompleta,
+                abreviere,
                 numeRector,
                 emailSecretariat,
                 numarTelefonSecretariat,

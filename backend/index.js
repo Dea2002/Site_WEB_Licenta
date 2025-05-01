@@ -45,16 +45,16 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         console.log("Conectat la MongoDB!");
-        // create a database and collections
 
+        // database and collections
         const database = client.db("inchiriere-apartamente");
         const usersCollection = database.collection("users");
         const facultiesCollection = database.collection("faculties");
         const apartmentsCollection = database.collection("apartments");
-        //const listCollection = database.collection("list");
-        //const paymentCollection = database.collection("payments");
         const reservationHistoryCollection = database.collection("reservation_history");
         const reservationRequestsCollection = database.collection("reservation_requests");
+        //const listCollection = database.collection("list");
+        //const paymentCollection = database.collection("payments");
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
@@ -77,6 +77,10 @@ async function run() {
         const createApartmentsRoutes = require('./routes/apartments'); // Importa rutele pentru utilizatori
         const apartmentsRoutes = createApartmentsRoutes(apartmentsCollection);
         app.use('/apartments', apartmentsRoutes);
+
+        const createFacultyRoutes = require('./routes/faculty');
+        const facultyRoutes = createFacultyRoutes(facultiesCollection);
+        app.use('/faculty', facultyRoutes);
 
         // // --- Handler pentru rute inexistente (404) - Se pune DUPĂ definirea tuturor rutelor ---
         // app.use((req, res, next) => {

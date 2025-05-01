@@ -1,10 +1,9 @@
 // frontend/src/Register.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Bara_navigatie from "./Bara_navigatie";
 import "./Register.css"; // Ensure CSS is imported
-
 import { storage } from "./firebaseConfig"; // Import Firebase storage if needed
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
@@ -39,6 +38,12 @@ interface OwnerFormState {
     confirmPassword: string;
 }
 
+interface FacultyInfo {
+    _id?: string; // Optional, but good practice if backend sends it
+    denumireaCompleta: string;
+    abreviere: string;
+}
+
 // Define possible roles
 type Role = "student" | "proprietar" | "facultate" | null;
 
@@ -46,9 +51,8 @@ const Register: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState<Role>(null);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [isUploading, setIsUploading] = useState(false); // Stare pentru a arăta progresul upload-ului
-    const [uploadProgress, setUploadProgress] = useState(0); // Stare pentru progresul numeric
     const navigate = useNavigate();
+    const [facultiesList, setFacultiesList] = useState<FacultyInfo[]>([]);
 
     // State for Student form
     const [formState, setFormState] = useState<RegisterFormState>({
@@ -80,6 +84,22 @@ const Register: React.FC = () => {
         password: "",
         confirmPassword: "",
     });
+
+
+    useEffect(() => {
+        const fetchFaculties = async () => {
+            try {
+                // Asigură-te că URL-ul este corect (poate ai un base URL în axios config)
+                const response = await axios.get<FacultyInfo[]>("http://localhost:5000/faculty");
+                // Presupunând că backend-ul returnează direct array-ul [{denumireaCompleta: '...', abreviere: '...'}, ...]
+                setFacultiesList(response.data);
+            } catch (err) {
+                console.error("Eroare la fetch facultati:", err);
+            }
+        };
+
+        fetchFaculties();
+    }, []); // [] asigură rularea o singură dată la montare
 
     // Change handler for Student form
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -120,12 +140,7 @@ const Register: React.FC = () => {
 
             uploadTask.on(
                 "state_changed",
-                (snapshot) => {
-                    // observa schimbarile de stare, cum ar fi progresul
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    setUploadProgress(progress); // ! optional
-                    console.log("Upload is" + progress + "% done");
-                },
+                () => { },
                 (error) => {
                     console.error("Upload Error:", error);
                 },
@@ -200,9 +215,6 @@ const Register: React.FC = () => {
         setError("");
         setSuccess("");
 
-        setIsUploading(true); // incepe upload-ul
-        setUploadProgress(0);
-
         const {
             denumireaCompleta,
             abreviere,
@@ -223,6 +235,7 @@ const Register: React.FC = () => {
         }
         if (
             !denumireaCompleta ||
+            !abreviere ||
             !logo ||
             !documentOficial ||
             !numeRector ||
@@ -287,8 +300,7 @@ const Register: React.FC = () => {
             }
             console.error("Faculty Registration Error:", err);
         } finally {
-            setIsUploading(false); // Finalizează starea de upload indiferent de rezultat
-            setUploadProgress(0);
+
         }
     };
     // --- END: Submit handler for Faculty form ---
@@ -426,14 +438,24 @@ const Register: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            <label>Facultatea:*</label>
-                            <input
-                                type="text"
+                            <label htmlFor="facultySelect">Facultatea:*</label>
+                            <select
+                                id="facultySelect"
                                 name="faculty"
                                 value={formState.faculty}
                                 onChange={handleChange}
                                 required
-                            />
+                            >
+                                <option value="" disabled> -- Selecteaza facultatea -- </option>
+                                {facultiesList.map((faculty) => (
+                                    <option
+                                        key={faculty.abreviere || faculty.denumireaCompleta}
+                                        value={faculty.denumireaCompleta}
+                                    >
+                                        {faculty.denumireaCompleta} ({faculty.abreviere}) {/* afiseaza numele si abrevierea */}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label>Parolă:*</label>
