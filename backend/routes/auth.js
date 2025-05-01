@@ -126,14 +126,15 @@ module.exports = (usersCollection, facultiesCollection) => {
         body('phoneNumber').matches(/^[0-9]{10}$/).withMessage('Numar de telefon invalid. Trebuie sa aiba 10 cifre.'),
         body('gender').isIn(['male', 'female']).withMessage('Gen invalid. Selecteaza "male" sau "female".'),
         body('password').isLength({ min: 6 }).withMessage('Parola trebuie sa aiba cel putin 6 caractere'),
-        body('faculty').notEmpty().withMessage('Campul de facultate este necesar')
+        body('faculty').notEmpty().withMessage('Campul de facultate este necesar'),
+        body('numar_matricol').notEmpty().withMessage('Numar matricol obligatoriu')
     ], async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { email, fullName, phoneNumber, gender, password, faculty, role } = req.body; /* ce primesc de la frontend catre backend */
+        const { email, fullName, phoneNumber, gender, password, faculty, numar_matricol, role } = req.body; /* ce primesc de la frontend catre backend */
 
         try {
             // Verifica daca utilizatorul exista deja
@@ -158,6 +159,7 @@ module.exports = (usersCollection, facultiesCollection) => {
                 password: hashedPassword,
                 role: role,
                 faculty,
+                numar_matricol,
                 createdAt: new Date(),
             };
 

@@ -16,6 +16,7 @@ interface RegisterFormState {
     password: string;
     confirmPassword: string;
     faculty: string; // Specific to student
+    numar_matricol: string;
 }
 
 interface FacultyFormState {
@@ -63,6 +64,7 @@ const Register: React.FC = () => {
         password: "",
         confirmPassword: "",
         faculty: "",
+        numar_matricol: ""
     });
 
     const [facultyFormState, setFacultyFormState] = useState<FacultyFormState>({
@@ -163,14 +165,14 @@ const Register: React.FC = () => {
         // ... (keep existing student submit logic) ...
         setError("");
         setSuccess("");
-        const { email, fullName, phoneNumber, gender, password, confirmPassword, faculty } =
+        const { email, fullName, phoneNumber, gender, password, confirmPassword, faculty, numar_matricol } =
             formState;
 
         if (password !== confirmPassword) {
             setError("Parolele nu se potrivesc");
             return;
         }
-        if (!email || !fullName || !phoneNumber || !gender || !faculty) {
+        if (!email || !fullName || !phoneNumber || !gender || !faculty || !numar_matricol) {
             setError("Toate câmpurile sunt obligatorii pentru studenți");
             return;
         }
@@ -187,6 +189,7 @@ const Register: React.FC = () => {
                 gender,
                 password,
                 faculty,
+                numar_matricol,
                 role: "student",
             });
             setSuccess("Inregistrare reusita! Vei fi redirectionat către pagina de login.");
@@ -198,6 +201,7 @@ const Register: React.FC = () => {
                 password: "",
                 confirmPassword: "",
                 faculty: "",
+                numar_matricol: ""
             });
             setTimeout(() => navigate("/login"), 3000);
         } catch (err: any) {
@@ -457,6 +461,17 @@ const Register: React.FC = () => {
                                 ))}
                             </select>
                         </div>
+
+                        <div>
+                            <label>Numar matricol:*</label>
+                            <input
+                                type="text"
+                                name="numar_matricol"
+                                value={formState.numar_matricol}
+                                onChange={handleChange}
+                                required></input>
+                        </div>
+
                         <div>
                             <label>Parolă:*</label>
                             <input
