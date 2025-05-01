@@ -46,6 +46,7 @@ module.exports = (usersCollection, facultiesCollection) => {
                 logoUrl,
                 documentUrl,
                 password: hashedPassword,
+                role: role,
                 createdAt: new Date(),
             };
 
@@ -194,24 +195,40 @@ module.exports = (usersCollection, facultiesCollection) => {
         try {
             // Gaseste utilizatorul dupa email
 
-
             const user = await usersCollection.findOne({ email: email });
-            if (!user) {
-                return res.status(401).json({ message: 'Email sau parola incorecte' });
+            if (user != null) {
+                // Compara parolele
+                const isMatch = await bcrypt.compare(password, user.password);
+                if (!isMatch) {
+                    return res.status(401).json({ message: 'Email sau parola incorecte' });
+                }
+
+                // Creeaza tokenul JWT
+                const token = jwt.sign({ userId: user._id, fullName: user.fullName, role: user.role, email: user.email },
+                    process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                );
+
+                return res.status(200).json({ message: 'Autentificare reusita', token, role: user.role });
             }
 
-            // Compara parolele
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(401).json({ message: 'Email sau parola incorecte' });
+            const faculty = await facultiesCollection.findOne({ emailSecretariat: email });
+            if (faculty != null) {
+                // Compara parolele
+                const isMatch = await bcrypt.compare(password, faculty.password);
+                if (!isMatch) {
+                    return res.status(401).json({ message: 'Email sau parola incorecte' });
+                }
+
+                // Creeaza tokenul JWT
+                const token = jwt.sign({ userId: faculty._id, fullName: faculty.denumireaCompleta, role: faculty.role, email: faculty.emailSecretariat },
+                    process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                );
+
+                return res.status(200).json({ message: 'Autentificare reusita', token, role: faculty.role });
             }
 
-            // Creeaza tokenul JWT
-            const token = jwt.sign({ userId: user._id, fullName: user.fullName, role: user.role, email: user.email },
-                process.env.ACCESS_SECRET, { expiresIn: '1h' }
-            );
+            return res.status(401).json({ message: 'Email sau parola incorecte' });
 
-            res.status(200).json({ message: 'Autentificare reusita', token, role: user.role });
         } catch (error) {
             console.error('Eroare la autentificare:', error);
             res.status(500).json({ message: 'Eroare interna a serverului' });

@@ -277,8 +277,8 @@ const Register: React.FC = () => {
                 password: "",
                 confirmPassword: "",
             });
-            // Maybe navigate to a confirmation page or login after admin approval
-            // setTimeout(() => navigate("/login"), 3000);
+
+            setTimeout(() => navigate("/login"), 3000);
         } catch (err: any) {
             if (err.response?.data?.message) {
                 setError(err.response.data.message);

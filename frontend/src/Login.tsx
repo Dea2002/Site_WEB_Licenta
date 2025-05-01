@@ -45,6 +45,8 @@ const Login: React.FC = () => {
                 navigate("/admin/dashboard");
             } else if (response.data.role === "proprietar") {
                 navigate("/owner-dashboard");
+            } else if (response.data.role === "facultate") {
+                navigate("/faculty_dashboard")
             } else {
                 navigate(from, { replace: true });
             }

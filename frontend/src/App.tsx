@@ -11,6 +11,7 @@ import Login from "./Login";
 import Register from "./Register";
 import { AuthProvider } from "./AuthContext";
 import DashboardAdmin from "./DashboardAdmin";
+import DashboardFaculty from "./DashboardFaculty";
 import UserListAdmin from "./UserListAdmin";
 import ApartmentsListAdmin from "./ApartmentsListAdmin";
 import OwnersListAdmin from "./OwnersListAdmin";
@@ -20,7 +21,9 @@ import OwnerApartments from "./OwnerApartments";
 import OwnerRequests from "./OwnerRequests";
 import ReservationHistory from "./ReservationHistory";
 import OwnerListNewApartment from "./CreateAparment";
-import Bara_navigatie from "./Bara_navigatie";
+import FacultyAssociations from './FacultyAssociations';
+import FacultyMarks from './FacultyMarks';
+// import Bara_navigatie from "./Bara_navigatie";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Profile from "./Profile";
 
@@ -73,6 +76,15 @@ const App: React.FC = () => {
 
                 {/* Ruta pentru pagina cu istoricul rezervarilor pentru proprietar */}
                 <Route path="/owner/reservation_history" element={<ReservationHistory />} />
+
+                {/* ruta pentru dashboard-ul facultatii */}
+                <Route path="/faculty_dashboard" element={<DashboardFaculty />} />
+
+                {/* ruta pentru cererile de asociere cu facultatea */}
+                <Route path="/faculty_dashboard/associations" element={<FacultyAssociations />} />
+
+                {/* ruta pentru cererile de asociere cu facultatea */}
+                <Route path="/faculty_dashboard/student_marks" element={<FacultyMarks />} />
             </Routes>
         </AuthProvider>
     );

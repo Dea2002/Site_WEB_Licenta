@@ -1,4 +1,3 @@
-// frontend/src/OwnerRequests.tsx
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
@@ -41,35 +40,6 @@ const OwnerRequests: React.FC = () => {
             });
     }, [user, token]);
 
-    // const handleAccept = async (reservationId: string) => {
-    //     try {
-    //         await axios.post(
-    //             `http://localhost:5000/create_reservation_request/${reservationId}/accept`,
-    //             {},
-    //             { headers: { Authorization: `Bearer ${token}` } },
-    //         );
-    //         // Elimina cererea acceptata din lista
-    //         setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reservationId));
-    //     } catch (error) {
-    //         console.error("Eroare la acceptarea cererii:", error);
-    //     }
-    // };
-
-    // const handleDecline = async (reservationId: string) => {
-    //     try {
-    //         await axios.post(
-    //             `http://localhost:5000/create_reservation_request/${reservationId}/decline`,
-    //             {},
-    //             { headers: { Authorization: `Bearer ${token}` } },
-    //         );
-    //         // Elimina cererea respinsa din lista
-    //         setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reservationId));
-    //     } catch (error) {
-    //         console.error("Eroare la respingerea cererii:", error);
-    //     }
-    // };
-
-    // functii de test pentru accept/decline
     const accept = async (id: string) => {
         try {
             await axios
