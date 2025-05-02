@@ -172,7 +172,7 @@ const Register: React.FC = () => {
             setError("Parolele nu se potrivesc");
             return;
         }
-        if (!email || !fullName || !phoneNumber || !gender || !faculty || !numar_matricol) {
+        if (!email || !fullName || !phoneNumber || !gender || !faculty) {
             setError("Toate câmpurile sunt obligatorii pentru studenți");
             return;
         }
@@ -463,13 +463,13 @@ const Register: React.FC = () => {
                         </div>
 
                         <div>
-                            <label>Numar matricol:*</label>
+                            <label>Numar matricol:</label>
                             <input
                                 type="text"
                                 name="numar_matricol"
                                 value={formState.numar_matricol}
                                 onChange={handleChange}
-                                required></input>
+                            />
                         </div>
 
                         <div>
