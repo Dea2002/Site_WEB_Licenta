@@ -1,28 +1,3 @@
-// // backend/middleware/authenticateToken.js
-
-// const jwt = require('jsonwebtoken');
-
-// const authenticateToken = (req, res, next) => {
-//     const authorization = req.headers.authorization;
-//     if (!authorization) {
-//         return res.status(401).json({ message: 'Acces neautorizat' });
-//     }
-
-//     const token = authorization.split(' ')[1];
-//     jwt.verify(token, process.env.ACCESS_SECRET, (err, decoded) => {
-//         if (err) {
-//             return res.status(403).json({ message: 'Token invalid sau a expirat' });
-//         }
-//         req.user = decoded; // Stocheaza informatiile decodate in req.user
-//         next();
-//     });
-// };
-
-// module.exports = authenticateToken;
-
-// backend/middleware/authenticateToken.js
-
-
 const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {

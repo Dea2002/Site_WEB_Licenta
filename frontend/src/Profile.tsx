@@ -1,10 +1,9 @@
-// frontend/src/Profile.tsx
-
 import React, { useContext, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import axios from "axios";
 import "./profile.css";
 import { useNavigate } from "react-router-dom";
+import { parseISO, format, isAfter } from "date-fns";
 
 const Profile: React.FC = () => {
     const { user, setUser, token } = useContext(AuthContext);
@@ -16,6 +15,8 @@ const Profile: React.FC = () => {
         email: user?.email || "",
         password: "",
         phoneNumber: user?.phoneNumber || "",
+        medie_valid: format(user!.medie_valid, "yyyy-MM-dd")
+        ,
     });
 
     // Mesaj pentru feedback-ul utilizatorului
@@ -29,6 +30,8 @@ const Profile: React.FC = () => {
             [name]: value,
         }));
     };
+
+    const canEditSemester = isAfter(new Date(), user!.medie_valid);
 
     // Handle pentru trimiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
@@ -65,7 +68,7 @@ const Profile: React.FC = () => {
 
     return (
         <div className="profile-container">
-            <h2>Profil Utilizator</h2>
+            <h2>Profil {user?.role === "student" || user?.role === "proprietar" ? "Utilizator" : "Facultate"}</h2>
 
             {/* Afiseaza mesajele de feedback */}
             {message && <p className="message">{message}</p>}
@@ -81,7 +84,7 @@ const Profile: React.FC = () => {
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
-                        //required
+                    //required
                     />
                 </div>
 
@@ -94,9 +97,23 @@ const Profile: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        //required
+                    //required
                     />
                 </div>
+
+                <label htmlFor="medie_valid">Data terminare semestru:</label>
+                <input
+                    type="date"
+                    id="medie_valid"
+                    name="medie_valid"
+                    value={formData.medie_valid}
+                    onChange={handleChange}
+                    disabled={!canEditSemester}
+                    min={format(new Date(), "yyyy-MM-dd")}
+                />
+                {!canEditSemester && (
+                    <small className="hint">Acest camp va fi editabil dupa {format(parseISO(formData.medie_valid), "dd.MM.yyyy")}</small>
+                )}
 
                 {/* Parola */}
                 <div className="form-group">
@@ -120,7 +137,7 @@ const Profile: React.FC = () => {
                         name="phoneNumber"
                         value={formData.phoneNumber}
                         onChange={handleChange}
-                        //required
+                    //required
                     />
                 </div>
 

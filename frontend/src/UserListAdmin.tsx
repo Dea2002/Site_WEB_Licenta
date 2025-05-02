@@ -1,63 +1,3 @@
-// import React, { useEffect, useState, useContext } from 'react';
-// import axios from 'axios';
-// import { AuthContext } from './AuthContext';
-// import './UserListAdmin.css'
-
-// interface User {
-//     _id: string;
-//     fullName: string;
-//     email: string;
-//     role: string;
-//     phoneNumber: string;
-//     // pot sa pun si alte detalii despre useri
-// }
-
-// const UserListAdmin: React.FC = () => {
-//     const { token } = useContext(AuthContext);
-//     const [users, setUsers] = useState<User[]>([]);
-//     const [loading, setLoading] = useState<boolean>(true);
-
-//     useEffect(() => {
-//         axios
-//             .get('http://localhost:5000/admin/users', {
-//                 headers: {
-//                     Authorization: `Bearer ${token}`,
-//                 },
-//             })
-//             .then((response) => {
-//                 setUsers(response.data);
-//                 setLoading(false);
-
-//             })
-//             .catch((error) => {
-//                 console.error('Eroare la obtinerea utilizatorilor:', error);
-//                 setLoading(false);
-//             });
-//     }, [token]);
-
-//     if (loading) {
-//         return <p>Se incarca utilizatorii...</p>;
-//     }
-
-//     return (
-//         <div className="admin-users-container">
-//             <h1>Lista de Utilizatori</h1>
-//             <div className="users-list">
-//                 {users.map((user) => (
-//                     <div key={user._id} className="user-card">
-//                         <h2>{user.fullName}</h2>
-//                         <p><strong>Email:</strong> {user.email}</p>
-//                         <p><strong>Telefon:</strong> {user.phoneNumber}</p>
-//                         <p><strong>Rol:</strong> {user.role}</p>
-//                     </div>
-//                 ))}
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default UserListAdmin;
-
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
@@ -300,23 +240,6 @@ const UserListAdmin: React.FC = () => {
                     </div>
                 ))}
             </div>
-
-            {/* <div className="users-list">
-                {users.map((user) => (
-                    <div key={user._id} className="user-card">
-                        <h2>{user.fullName}</h2>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Telefon:</strong> {user.phoneNumber}</p>
-                        <p><strong>Rol:</strong> {user.role}</p>
-                        <button
-                            className="delete-button"
-                            onClick={() => handleDeleteUser(user._id)}
-                        >
-                            sterge
-                        </button>
-                    </div>
-                ))}
-            </div> */}
         </div>
     );
 };

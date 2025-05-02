@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { ObjectId } = require('mongodb');
-
+const { subDays } = require('date-fns');
 module.exports = (usersCollection, facultiesCollection, notificationService, notificationsCollection, markRequestsCollection, associationsRequestsCollection) => {
 
     async function getFacultyIdByName(facultyName) {
@@ -69,6 +69,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 documentUrl,
                 password: hashedPassword,
                 role: role,
+                medie_valid: subDays(new Date(), 1),
                 createdAt: new Date(),
             };
 
@@ -186,6 +187,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 numar_matricol: numar_matricol || "",
                 anUniversitar,
                 medie: medie,
+                medie_valid: subDays(new Date(), 1),
                 createdAt: new Date(),
             };
 

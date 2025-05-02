@@ -1,4 +1,3 @@
-// ReservationPopup.tsx
 import React, { useEffect, useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import axios from "axios";

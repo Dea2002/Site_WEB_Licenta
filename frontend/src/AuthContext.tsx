@@ -1,49 +1,3 @@
-// // frontend/src/AuthContext.tsx
-// import React, { createContext, useState, ReactNode, useEffect } from 'react';
-
-// interface AuthContextType {
-//     token: string | null;
-//     login: (token: string) => void;
-//     logout: () => void;
-//     isAuthenticated: boolean;
-// }
-
-// export const AuthContext = createContext<AuthContextType>({
-//     token: null,
-//     login: () => { },
-//     logout: () => { },
-//     isAuthenticated: false,
-// });
-
-// export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-//     const [token, setToken] = useState<string | null>(null);
-
-//     useEffect(() => {
-//         const storedToken = localStorage.getItem('token');
-//         if (storedToken) {
-//             setToken(storedToken);
-//         }
-//     }, []);
-
-//     const login = (newToken: string) => {
-//         setToken(newToken);
-//         localStorage.setItem('token', newToken);
-//     };
-
-//     const logout = () => {
-//         setToken(null);
-//         localStorage.removeItem('token');
-//     };
-
-//     return (
-//         <AuthContext.Provider value={{ token, login, logout, isAuthenticated: !!token }}>
-//             {children}
-//         </AuthContext.Provider>
-//     );
-// };
-
-// frontend/src/AuthContext.tsx
-
 import React, { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import axios from "axios";
@@ -56,6 +10,9 @@ interface User {
     gender: string;
     role: string;
     faculty: string;
+    faculty_valid: boolean;
+    medie_valid: Date;
+    medie: string | null;
 }
 
 interface AuthContextType {

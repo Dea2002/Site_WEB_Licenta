@@ -506,24 +506,6 @@ async function run() {
             }
         });
 
-
-        // update apartments status and reason
-        // app.patch('/change-status/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const status = req.body.status;
-        //     const reason = req.body.reason;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const options = { upsert: false };
-        //     const updateDoc = {
-        //         $set: {
-        //             status: status,
-        //             reason: reason
-        //         },
-        //     };
-        //     const result = await apartmentsCollection.updateOne(filter, updateDoc, options);
-        //     res.send(result);
-        // })
-
         // update class details (toate detaliileb    )
         app.put('/update-apartments/:id', async (req, res) => {
             const id = req.params.id;

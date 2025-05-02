@@ -18,7 +18,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         res.send(associationRequests);
     });
 
-
     router.get('/get_association_requests/:facultyId', async (req, res) => {
         const { facultyId } = req.params;
         if (!ObjectId.isValid(facultyId)) {
@@ -50,9 +49,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
                 return res.status(404).json({ message: 'Cererea de asociere nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
             }
-            console.log(associationRequest);
-
-
             const { studentId } = associationRequest;
 
             // get the user document from the userId
@@ -118,6 +114,55 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             res.status(500).json({ message: 'Eroare server la respingerea cererii de asociere.' });
         }
     });
+
+    router.get('/get_mark_requests', async (req, res) => {
+        const markRequests = await markRequestsCollection.find({}).toArray();
+        res.send(markRequests);
+    });
+
+    router.get('/get_mark_requests/:facultyId', async (req, res) => {
+        const { facultyId } = req.params;
+        if (!ObjectId.isValid(facultyId)) {
+            // Returneaza o eroare 400 Bad Request daca ID-ul nu e valid
+            return res.status(400).json({ message: 'ID facultate invalid.' });
+        }
+
+        try {
+            const markRequests = await markRequestsCollection.find({ facultyId: new ObjectId(facultyId) }).toArray();
+            res.send(markRequests);
+        } catch (error) {
+            console.log("Eroare la listare cereri de actualizare medii:", error);
+            res.status(500).json({ message: 'Eroare server la cerere actualizare medii.' });
+        }
+    });
+
+    router.put('/mark/:id/approve', async (req, res) => {
+        const { id } = req.params;
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "ID request invalid" });
+        }
+
+        const markRequestId = new ObjectId(id);
+
+        try {
+            const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
+
+            if (!markRequest) {
+                // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
+                return res.status(404).json({ message: 'Cererea de actualizare medii nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
+            }
+            const { studentId } = markRequest;
+
+
+
+        } catch (error) {
+            console.log("Eroare la acceptarea cererii de actualizare medii: ", error);
+            res.status(500).json({ message: 'Eroare server la acceptarea cererii de actualizare medii.' });
+        }
+
+    });
+
+    router.put('/mark/:id/reject', async (req, res) => { });
 
 
 

@@ -30,14 +30,12 @@ const FacultyAssociations: React.FC = () => {
 
     // functie pentru a face fetch la cereri
     const fetchAssociationRequests = async () => {
-
         if (!token || !user?._id) {
             setError("Utilizator neautentificat sau date lipsa.");
             return;
         }
 
         try {
-            console.log(`fac cerere cu id ${user!._id}`);
             const response = await axios.get<AssociationRequest[]>(
                 `http://localhost:5000/faculty/get_association_requests/${user!._id}`,
                 {
