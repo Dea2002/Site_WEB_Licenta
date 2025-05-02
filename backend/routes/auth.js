@@ -3,9 +3,30 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const { ObjectId } = require('mongodb');
 
-module.exports = (usersCollection, facultiesCollection) => {
+module.exports = (usersCollection, facultiesCollection, notificationsCollection, markRequestsCollection, associationsRequestsCollection) => {
 
+    async function getFacultyIdByName(facultyName) {
+        if (!facultyName) {
+            console.error("Numele facultatii lipseste");
+            return null;
+        }
+
+        try {
+            const foundFaculty = await facultiesCollection.findOne({ denumireaCompleta: facultyName });
+
+            if (foundFaculty) {
+                return new ObjectId(foundFaculty._id);
+            } else {
+                console.log(`Facultatea cu numele "${facultyName}" nu a fost gasita.`);
+                return null;
+            }
+        } catch (error) {
+            console.error(`Eroare la căutarea facultății cu numele "${facultyName}":`, error);
+            return null;
+        }
+    }
 
     // endpoint pentru inregistrare facultate
     router.post('/register_faculty', [
@@ -130,8 +151,6 @@ module.exports = (usersCollection, facultiesCollection) => {
         body('anUniversitar').notEmpty().withMessage('Campul anul Universitar este necesar'),
         body('medie').notEmpty().withMessage('Media trebuie introdusa'),
 
-
-
     ], async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -172,6 +191,67 @@ module.exports = (usersCollection, facultiesCollection) => {
 
             // Insereaza utilizatorul in baza de date
             const result = await usersCollection.insertOne(newUser);
+
+            //! creez cererea de asociere cu facultatea + validarea mediei introduse
+            //!!!!!! PLUS NOTIFICARE PENTRU AMBELE
+
+            if (result.insertedId) {
+                // cererea de asociere cu facultatea
+                const newAssociationRequest = {
+                    numeStudent: fullName,
+                    emailStudent: email,
+                    faculty: faculty,
+                    requestDate: new Date()
+                };
+
+                try {
+                    await associationsRequestsCollection.insertOne(newAssociationRequest);
+                } catch (assocError) {
+                    console.log("Eroare la crearea cererii de asociere: ", assocError);
+                }
+
+                // cererea de actualizare a mediei
+                const newMarkRequest = {
+                    numeStudent: fullName,
+                    mark: medie,
+                    faculty: faculty,
+                    requestDate: new Date()
+                };
+
+                try {
+                    await markRequestsCollection.insertOne(newMarkRequest);
+                } catch (markError) {
+                    console.log("Eroare la crearea cererii de actualizare a mediei: ", markError);
+                }
+
+                // notificarile
+
+                const facultyId = await getFacultyIdByName(faculty);
+
+                const newAssociationNotification = {
+                    message: `Studentul ${fullName} doreste sa isi asocieze contul cu facultatea dumneavoastra.`,
+                    receiver: facultyId,
+                    sender: `system`,
+                    date: new Date()
+                };
+                try {
+                    await notificationsCollection.insertOne(newAssociationNotification);
+                } catch (newNotificationError) {
+                    console.log("Eroare la crearea unei notificari: ", newNotificationError);
+                }
+
+                const newMarkNotification = {
+                    message: `Studentul ${fullName} doreste sa isi actualizeze media.`,
+                    receiver: facultyId,
+                    sender: `system`,
+                    date: new Date()
+                };
+                try {
+                    await notificationsCollection.insertOne(newMarkNotification);
+                } catch (newNotificationError) {
+                    console.log("Eroare la crearea unei notificari: ", newNotificationError);
+                }
+            }
 
             // Generare token JWT
             const token = jwt.sign({ userId: result.insertedId, role: role, email: email },

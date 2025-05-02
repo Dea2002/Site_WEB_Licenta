@@ -53,8 +53,9 @@ async function run() {
         const apartmentsCollection = database.collection("apartments");
         const reservationHistoryCollection = database.collection("reservation_history");
         const reservationRequestsCollection = database.collection("reservation_requests");
-        //const listCollection = database.collection("list");
-        //const paymentCollection = database.collection("payments");
+        const notificationsCollection = database.collection("notifications");
+        const markRequestsCollection = database.collection("mark_requests");
+        const associationsRequestsCollection = database.collection("association_requests");
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
@@ -62,12 +63,15 @@ async function run() {
         app.locals.apartmentsCollection = apartmentsCollection; // pentru a accesa colectia de apartamente
         app.locals.reservationHistoryCollection = reservationHistoryCollection;
         app.locals.reservationRequestsCollection = reservationRequestsCollection;
+        app.locals.notificationsCollection = notificationsCollection;
+        app.locals.markRequestsCollection = markRequestsCollection;
+        app.locals.associationsRequestsCollection = associationsRequestsCollection;
 
         // --- Importa rutele ---
         const adminRoutes = require('./routes/admin')(usersCollection, apartmentsCollection);
         app.use('/admin', authenticateToken, verifyAdmin, adminRoutes);
 
-        const authRoutes = require('./routes/auth')(usersCollection, facultiesCollection);
+        const authRoutes = require('./routes/auth')(usersCollection, facultiesCollection, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
         app.use('/auth', authRoutes);
 
         const createUsersRoutes = require('./routes/users'); // Importa rutele pentru utilizatori
@@ -79,8 +83,12 @@ async function run() {
         app.use('/apartments', apartmentsRoutes);
 
         const createFacultyRoutes = require('./routes/faculty');
-        const facultyRoutes = createFacultyRoutes(facultiesCollection);
+        const facultyRoutes = createFacultyRoutes(facultiesCollection, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
         app.use('/faculty', facultyRoutes);
+
+        const createNotificationsRoutes = require('./routes/notifications');
+        const notificationsRoutes = createNotificationsRoutes(notificationsCollection);
+        app.use('/notifications', notificationsRoutes);
 
         // // --- Handler pentru rute inexistente (404) - Se pune DUPĂ definirea tuturor rutelor ---
         // app.use((req, res, next) => {

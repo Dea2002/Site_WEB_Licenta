@@ -166,7 +166,7 @@ const Register: React.FC = () => {
 
             uploadTask.on(
                 "state_changed",
-                () => {},
+                () => { },
                 (error) => {
                     console.error("Upload Error:", error);
                 },
