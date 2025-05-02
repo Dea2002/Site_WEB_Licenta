@@ -248,7 +248,7 @@ const Home: React.FC = () => {
                         <button
                             onClick={handleResetFilters}
                             className="reset-button"
-                            title="Resetează filtrele"
+                            title="Reseteaza filtrele"
                         >
                             <i className="fas fa-undo"></i> Reset
                         </button>
@@ -261,7 +261,7 @@ const Home: React.FC = () => {
                         <input
                             type="text"
                             id="filter-location"
-                            placeholder="Oraș, zonă..."
+                            placeholder="Oras, zona..."
                             value={filters.location}
                             onChange={(e) => handleFilterChange("location", e.target.value)}
                             onKeyDown={(e) => {
@@ -312,8 +312,8 @@ const Home: React.FC = () => {
                                     handleFilterChange("numberOfRooms", e.target.value)
                                 }
                             >
-                                <option value="">Oricâte</option>
-                                <option value="1">1 (Garsonieră)</option>
+                                <option value="">Oricate</option>
+                                <option value="1">1 (Garsoniera)</option>
                                 <option value="2">2 Camere</option>
                                 <option value="3">3 Camere</option>
                                 <option value="4">4 Camere</option>
@@ -329,14 +329,14 @@ const Home: React.FC = () => {
                                     handleFilterChange("numberOfBathrooms", e.target.value)
                                 }
                             >
-                                <option value="">Oricâte</option>
+                                <option value="">Oricate</option>
                                 <option value="1">1 Baie</option>
                                 <option value="2">2 Bai</option>
                                 <option value="3+">3+ Bai</option>
                             </select>
                         </div>
                         <div className="sub-filter surface-range">
-                            <label>Suprafață (mp):</label>
+                            <label>Suprafata (mp):</label>
                             <div className="surface-inputs">
                                 <input
                                     type="number"
@@ -408,7 +408,7 @@ const Home: React.FC = () => {
                                     handleFilterChange("airConditioning", e.target.checked)
                                 }
                             />
-                            Aer Condiționat
+                            Aer Conditionat
                         </label>
                         <label>
                             <input
@@ -418,7 +418,7 @@ const Home: React.FC = () => {
                                     handleFilterChange("petFriendly", e.target.checked)
                                 }
                             />
-                            Acceptă Animale
+                            Accepta Animale
                         </label>
                         <label>
                             <input
@@ -428,7 +428,7 @@ const Home: React.FC = () => {
                                     handleFilterChange("acceptsColleagues", e.target.checked)
                                 }
                             />
-                            Acceptă Colegi
+                            Accepta Colegi
                         </label>
                     </div>
                     {/* Keep your original button, but have it call the apply function */}

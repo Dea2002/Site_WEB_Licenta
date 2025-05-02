@@ -71,9 +71,9 @@ export const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
     user: null,
     token: null,
-    setUser: () => {},
-    login: () => {}, // Adaugat
-    logout: () => {},
+    setUser: () => { },
+    login: () => { }, // Adaugat
+    logout: () => { },
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

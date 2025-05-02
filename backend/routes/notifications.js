@@ -1,10 +1,10 @@
 const express = require('express');
-const router = express.Router(); // Creează o instanță de Router
+const router = express.Router(); // Creeaza o instanta de Router
 const { ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
 
-function createNotificationsRoutes(notificationsCollection) {
+function createNotificationsRoutes(notificationsCollection, notificationService) {
 
     router.get('/', async (req, res) => {
         // get all notifications

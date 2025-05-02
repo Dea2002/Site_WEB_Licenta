@@ -1,0 +1,119 @@
+.faculty-associations-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 20px auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.faculty-associations-container h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.loading-message,
+.error-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1em;
+}
+
+.error-message {
+    color: #d9534f; /* Red for errors */
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    border-radius: 4px;
+}
+
+.requests-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.requests-list th,
+.requests-list td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.requests-list th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #555;
+}
+
+.requests-list tr:nth-child(even) {
+    background-color: #fdfdfd;
+}
+
+.requests-list tr:hover {
+    background-color: #f1f1f1;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    color: white;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background-color: #f0ad4e; /* Orange */
+}
+
+.status-badge.approved {
+    background-color: #5cb85c; /* Green */
+}
+
+.status-badge.rejected {
+    background-color: #d9534f; /* Red */
+}
+
+.action-buttons button {
+    padding: 6px 12px;
+    margin-right: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.action-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.approve-button {
+    background-color: #5cb85c; /* Green */
+    color: white;
+}
+.approve-button:hover:not(:disabled) {
+    background-color: #4cae4c;
+}
+
+
+.reject-button {
+    background-color: #d9534f; /* Red */
+    color: white;
+}
+ .reject-button:hover:not(:disabled) {
+    background-color: #c9302c;
+}
+
+/* Optional: Add styles for different row statuses */
+.requests-list tr.status-approved td {
+    /* background-color: #e9f5e9; */
+    opacity: 0.7; /* Make approved/rejected less prominent */
+}
+ .requests-list tr.status-rejected td {
+    /* background-color: #f8eaea; */
+     opacity: 0.7;
+     text-decoration: line-through; /* Example */
+}

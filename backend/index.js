@@ -57,6 +57,9 @@ async function run() {
         const markRequestsCollection = database.collection("mark_requests");
         const associationsRequestsCollection = database.collection("association_requests");
 
+        const initNotificationSerivece = require('./utils/notificationService');
+        const notificationService = initNotificationSerivece(notificationsCollection);
+
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
         app.locals.facultiesCollection = facultiesCollection; // pentru a accesa colectia de facultati
@@ -71,7 +74,7 @@ async function run() {
         const adminRoutes = require('./routes/admin')(usersCollection, apartmentsCollection);
         app.use('/admin', authenticateToken, verifyAdmin, adminRoutes);
 
-        const authRoutes = require('./routes/auth')(usersCollection, facultiesCollection, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
+        const authRoutes = require('./routes/auth')(usersCollection, facultiesCollection, notificationService, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
         app.use('/auth', authRoutes);
 
         const createUsersRoutes = require('./routes/users'); // Importa rutele pentru utilizatori
@@ -83,14 +86,14 @@ async function run() {
         app.use('/apartments', apartmentsRoutes);
 
         const createFacultyRoutes = require('./routes/faculty');
-        const facultyRoutes = createFacultyRoutes(facultiesCollection, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
+        const facultyRoutes = createFacultyRoutes(usersCollection, facultiesCollection, notificationService, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
         app.use('/faculty', facultyRoutes);
 
         const createNotificationsRoutes = require('./routes/notifications');
-        const notificationsRoutes = createNotificationsRoutes(notificationsCollection);
+        const notificationsRoutes = createNotificationsRoutes(notificationsCollection, notificationService);
         app.use('/notifications', notificationsRoutes);
 
-        // // --- Handler pentru rute inexistente (404) - Se pune DUPĂ definirea tuturor rutelor ---
+        // // --- Handler pentru rute inexistente (404) - Se pune DUPa definirea tuturor rutelor ---
         // app.use((req, res, next) => {
         //     res.status(404).json({ message: "Endpoint negasit" }); // Trimite JSON pt API
         // });
@@ -98,12 +101,12 @@ async function run() {
         // // --- Middleware de gestionare a erorilor (Se pune ULTIMUL) ---
         // app.use((err, req, res, next) => {
         //     console.error("-----------------------");
-        //     console.error("A apărut o eroare:", err.message);
+        //     console.error("A aparut o eroare:", err.message);
         //     console.error(err.stack);
         //     console.error("-----------------------");
         //     res.status(err.status || 500).json({
         //         message: err.message || 'Ceva a mers prost pe server!',
-        //         // Poți adăuga detalii suplimentare în mod dezvoltare
+        //         // Poti adauga detalii suplimentare in mod dezvoltare
         //         // error: process.env.NODE_ENV === 'development' ? err : {}
         //     });
         // });
@@ -794,11 +797,11 @@ async function run() {
         //!! --- Sfarsit structura veche ---
 
         app.listen(port, () => {
-            console.log(`Serverul rulează pe http://localhost:${port}`);
+            console.log(`Serverul ruleaza pe http://localhost:${port}`);
         });
     } catch (error) {
-        console.error("!!!!!!!!!!!!!!!!! Eroare FATALĂ la pornire sau conectare DB:", error);
-        process.exit(1); // Oprește procesul dacă nu se poate conecta la DB
+        console.error("!!!!!!!!!!!!!!!!! Eroare FATALa la pornire sau conectare DB:", error);
+        process.exit(1); // Opreste procesul daca nu se poate conecta la DB
     }
 }
 run();

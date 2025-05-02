@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { ObjectId } = require('mongodb');
 
-module.exports = (usersCollection, facultiesCollection, notificationsCollection, markRequestsCollection, associationsRequestsCollection) => {
+module.exports = (usersCollection, facultiesCollection, notificationService, notificationsCollection, markRequestsCollection, associationsRequestsCollection) => {
 
     async function getFacultyIdByName(facultyName) {
         if (!facultyName) {
@@ -23,7 +23,7 @@ module.exports = (usersCollection, facultiesCollection, notificationsCollection,
                 return null;
             }
         } catch (error) {
-            console.error(`Eroare la căutarea facultății cu numele "${facultyName}":`, error);
+            console.error(`Eroare la cautarea facultatii cu numele "${facultyName}":`, error);
             return null;
         }
     }
@@ -76,7 +76,7 @@ module.exports = (usersCollection, facultiesCollection, notificationsCollection,
             const result = await facultiesCollection.insertOne(newFaculty);
 
             // Generare token JWT
-            const token = jwt.sign({ facultyId: result.insertedId, role: role, email: emailSecretariat },
+            const token = jwt.sign({ userId: result.insertedId, role: role, email: emailSecretariat },
                 process.env.ACCESS_SECRET, { expiresIn: '1h' }
             );
 
@@ -196,11 +196,15 @@ module.exports = (usersCollection, facultiesCollection, notificationsCollection,
             //!!!!!! PLUS NOTIFICARE PENTRU AMBELE
 
             if (result.insertedId) {
+                const facultyId = await getFacultyIdByName(faculty);
+
                 // cererea de asociere cu facultatea
                 const newAssociationRequest = {
                     numeStudent: fullName,
+                    studentId: result.insertedId,
                     emailStudent: email,
                     faculty: faculty,
+                    facultyId: facultyId,
                     requestDate: new Date()
                 };
 
@@ -213,8 +217,10 @@ module.exports = (usersCollection, facultiesCollection, notificationsCollection,
                 // cererea de actualizare a mediei
                 const newMarkRequest = {
                     numeStudent: fullName,
+                    studentId: result.insertedId,
                     mark: medie,
                     faculty: faculty,
+                    facultyId: facultyId,
                     requestDate: new Date()
                 };
 
@@ -225,32 +231,9 @@ module.exports = (usersCollection, facultiesCollection, notificationsCollection,
                 }
 
                 // notificarile
+                notificationService.createNotification(message = `Studentul ${fullName} doreste sa isi asocieze contul cu facultatea dumneavoastra.`, receiver = facultyId);
 
-                const facultyId = await getFacultyIdByName(faculty);
-
-                const newAssociationNotification = {
-                    message: `Studentul ${fullName} doreste sa isi asocieze contul cu facultatea dumneavoastra.`,
-                    receiver: facultyId,
-                    sender: `system`,
-                    date: new Date()
-                };
-                try {
-                    await notificationsCollection.insertOne(newAssociationNotification);
-                } catch (newNotificationError) {
-                    console.log("Eroare la crearea unei notificari: ", newNotificationError);
-                }
-
-                const newMarkNotification = {
-                    message: `Studentul ${fullName} doreste sa isi actualizeze media.`,
-                    receiver: facultyId,
-                    sender: `system`,
-                    date: new Date()
-                };
-                try {
-                    await notificationsCollection.insertOne(newMarkNotification);
-                } catch (newNotificationError) {
-                    console.log("Eroare la crearea unei notificari: ", newNotificationError);
-                }
+                notificationService.createNotification(message = `Studentul ${fullName} doreste sa isi actualizeze media.`, receiver = facultyId);
             }
 
             // Generare token JWT

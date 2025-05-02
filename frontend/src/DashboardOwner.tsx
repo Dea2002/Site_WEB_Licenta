@@ -27,12 +27,12 @@ const DashboardOwner: React.FC = () => {
     }, [user, token]);
 
     const handleCardClick = () => {
-        // Navigăm către pagina cu lista apartamentelor
+        // Navigam catre pagina cu lista apartamentelor
         navigate("/owner/apartments");
     };
 
     const listNewApartment = () => {
-        // Navigăm către pagina de listare a unui nou apartament
+        // Navigam catre pagina de listare a unui nou apartament
         navigate("/owner-dashboard/list_apartment");
     };
 

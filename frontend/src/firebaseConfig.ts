@@ -1,7 +1,7 @@
 // frontend/src/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
-// import { getAuth } from "firebase/auth"; // Adaugă și alte servicii dacă le folosești
+// import { getAuth } from "firebase/auth"; // Adauga si alte servicii daca le folosesti
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -15,7 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Obține instanțe ale serviciilor
+// Obtine instante ale serviciilor
 const storage = getStorage(app);
 // const auth = getAuth(app); // Exemplu
 

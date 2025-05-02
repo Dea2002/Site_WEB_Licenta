@@ -49,7 +49,7 @@ const ApartmentDetails: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error("Eroare la preluarea detaliilor apartamentului:", error);
-                    setError("Apartamentul nu a fost gasit sau a apărut o eroare.");
+                    setError("Apartamentul nu a fost gasit sau a aparut o eroare.");
                 });
         }
     }, [id]);
@@ -100,12 +100,12 @@ const ApartmentDetails: React.FC = () => {
             );
             // Handle successful request submission
             console.log("Reservation request sent successfully!");
-            alert("Cererea de rezervare a fost trimisă cu succes!"); // Simple confirmation
+            alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page
             navigate("/my-requests"); // Example navigation
         } catch (err: any) {
             setError(
-                err.response?.data?.message || "Eroare la trimiterea cererii. Încercați din nou.",
+                err.response?.data?.message || "Eroare la trimiterea cererii. incercati din nou.",
             );
             console.error("Reservation Error:", err);
         }
@@ -132,11 +132,11 @@ const ApartmentDetails: React.FC = () => {
                 });
             } else {
                 console.error("Nu s-au gasit coordonate pentru adresa data");
-                setError("Nu s-au putut găsi coordonatele pentru această locație.");
+                setError("Nu s-au putut gasi coordonatele pentru aceasta locatie.");
             }
         } catch (error) {
             console.error("Eroare la obtinerea coordonatelor:", error);
-            setError("Eroare la căutarea locației pe hartă.");
+            setError("Eroare la cautarea locatiei pe harta.");
         }
     };
 
@@ -298,7 +298,7 @@ const ApartmentDetails: React.FC = () => {
                     {/* Grup Facilitati */}
                     <div className="detail-group">
                         <h3>
-                            <i className="fas fa-check-circle icon-prefix"></i>Facilități
+                            <i className="fas fa-check-circle icon-prefix"></i>Facilitati
                         </h3>
                         <hr className="line-divider" />
                         <p>
@@ -357,7 +357,7 @@ const ApartmentDetails: React.FC = () => {
                             <p>
                                 <span>Nume coleg existent:</span>{" "}
                                 {apartment.colleaguesNames &&
-                                apartment.colleaguesNames.trim() !== ""
+                                    apartment.colleaguesNames.trim() !== ""
                                     ? apartment.colleaguesNames
                                     : "Niciunul momentan"}
                             </p>
@@ -412,8 +412,8 @@ const ApartmentDetails: React.FC = () => {
                                     !isAuthenticated
                                         ? "Trebuie sa fiti autentificat pentru a rezerva"
                                         : selectedDates
-                                        ? "Trimite Cerere Rezervare"
-                                        : "Selectati perioada"
+                                            ? "Trimite Cerere Rezervare"
+                                            : "Selectati perioada"
                                 }
                             >
                                 <span className="reserve-btn-text">

@@ -53,7 +53,6 @@ type Role = "student" | "proprietar" | "facultate" | null;
 const getYearOptionsForFaculty = (facultyName: string): string[] => {
     // Normalize the faculty name slightly for easier comparison (lowercase)
     const lowerCaseFaculty = facultyName.toLowerCase();
-    console.log(`Bomboclaat: ${lowerCaseFaculty}`);
     if (lowerCaseFaculty.includes("universitatea politehnica timisoara")) {
         return ["1", "2", "3", "4"];
     } else if (lowerCaseFaculty.includes("medicina victor babes timisoara")) {
@@ -107,9 +106,9 @@ const Register: React.FC = () => {
     useEffect(() => {
         const fetchFaculties = async () => {
             try {
-                // Asigură-te că URL-ul este corect (poate ai un base URL în axios config)
+                // Asigura-te ca URL-ul este corect (poate ai un base URL in axios config)
                 const response = await axios.get<FacultyInfo[]>("http://localhost:5000/faculty");
-                // Presupunând că backend-ul returnează direct array-ul [{denumireaCompleta: '...', abreviere: '...'}, ...]
+                // Presupunand ca backend-ul returneaza direct array-ul [{denumireaCompleta: '...', abreviere: '...'}, ...]
                 setFacultiesList(response.data);
             } catch (err) {
                 console.error("Eroare la fetch facultati:", err);
@@ -117,7 +116,7 @@ const Register: React.FC = () => {
         };
 
         fetchFaculties();
-    }, []); // [] asigură rularea o singură dată la montare
+    }, []); // [] asigura rularea o singura data la montare
 
     // Change handler for Student form
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -214,11 +213,11 @@ const Register: React.FC = () => {
             !anUniversitar ||
             !medie
         ) {
-            setError("Toate câmpurile sunt obligatorii pentru studenți");
+            setError("Toate campurile sunt obligatorii pentru studenti");
             return;
         }
         if (password.length < 6) {
-            setError("Parola trebuie să aibă cel puțin 6 caractere");
+            setError("Parola trebuie sa aiba cel putin 6 caractere");
             return;
         }
 
@@ -226,7 +225,7 @@ const Register: React.FC = () => {
         let medieRange = ""; // Initialize range string
 
         if (isNaN(medieValue) || medieValue < 5 || medieValue > 10) {
-            setError("Media introdusă nu este validă (trebuie să fie între 5.00 și 10.00).");
+            setError("Media introdusa nu este valida (trebuie sa fie intre 5.00 si 10.00).");
             return;
         }
 
@@ -254,7 +253,7 @@ const Register: React.FC = () => {
                 medie: medieRange,
                 role: "student",
             });
-            setSuccess("Inregistrare reusita! Vei fi redirectionat către pagina de login.");
+            setSuccess("Inregistrare reusita! Vei fi redirectionat catre pagina de login.");
             setFormState({
                 email: "",
                 fullName: "",
@@ -272,7 +271,7 @@ const Register: React.FC = () => {
             if (err.response?.data?.message) {
                 setError(err.response.data.message);
             } else {
-                setError("Eroare la înregistrare. Emailul ar putea fi deja folosit.");
+                setError("Eroare la inregistrare. Emailul ar putea fi deja folosit.");
             }
         }
     };
@@ -311,11 +310,11 @@ const Register: React.FC = () => {
             !numarTelefonSecretariat ||
             !password
         ) {
-            setError("Toate câmpurile marcate cu * sunt obligatorii");
+            setError("Toate campurile marcate cu * sunt obligatorii");
             return;
         }
         if (password.length < 6) {
-            setError("Parola trebuie să aibă cel puțin 6 caractere");
+            setError("Parola trebuie sa aiba cel putin 6 caractere");
             return;
         }
 
@@ -344,7 +343,7 @@ const Register: React.FC = () => {
                 password,
                 role: "facultate",
             });
-            setSuccess("Înregistrare facultate reușită! Contul va fi verificat.");
+            setSuccess("inregistrare facultate reusita! Contul va fi verificat.");
             // Reset form state
             setFacultyFormState({
                 denumireaCompleta: "",
@@ -364,7 +363,7 @@ const Register: React.FC = () => {
             if (err.response?.data?.message) {
                 setError(err.response.data.message);
             } else {
-                setError("Eroare la înregistrarea facultății. Încercați din nou.");
+                setError("Eroare la inregistrarea facultatii. incercati din nou.");
             }
             console.error("Faculty Registration Error:", err);
         } finally {
@@ -393,11 +392,11 @@ const Register: React.FC = () => {
             return;
         }
         if (!email || !fullName || !password) {
-            setError("Toate câmpurile marcate cu * sunt obligatorii");
+            setError("Toate campurile marcate cu * sunt obligatorii");
             return;
         }
         if (password.length < 6) {
-            setError("Parola trebuie să aibă cel puțin 6 caractere");
+            setError("Parola trebuie sa aiba cel putin 6 caractere");
             return;
         }
 
@@ -408,7 +407,7 @@ const Register: React.FC = () => {
                 password,
                 role: "proprietar",
             });
-            setSuccess("Înregistrare proprietar reușită! Veți fi redirecționat.");
+            setSuccess("inregistrare proprietar reusita! Veti fi redirectionat.");
 
             setOwnerFormState({ email: "", fullName: "", password: "", confirmPassword: "" });
             setTimeout(() => navigate("/login"), 3000);
@@ -417,7 +416,7 @@ const Register: React.FC = () => {
                 setError(err.response.data.message);
             } else {
                 setError(
-                    "Eroare la înregistrarea proprietarului. Emailul ar putea fi deja folosit.",
+                    "Eroare la inregistrarea proprietarului. Emailul ar putea fi deja folosit.",
                 );
             }
             console.error("Owner Registration Error:", err);
@@ -458,7 +457,7 @@ const Register: React.FC = () => {
 
             return (
                 <div className="register-container student-form">
-                    <h1>Înregistrare Student</h1>
+                    <h1>inregistrare Student</h1>
                     <form onSubmit={handleStudentSubmit} className="register-form">
                         {/* Student Form Fields... */}
                         <div>
@@ -482,7 +481,7 @@ const Register: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label>Număr de telefon:*</label>
+                            <label>Numar de telefon:*</label>
                             <input
                                 type="tel"
                                 name="phoneNumber"
@@ -490,7 +489,7 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 pattern="[0-9]{10}"
-                                title="Introduceți un număr de telefon valid (10 cifre)"
+                                title="Introduceti un numar de telefon valid (10 cifre)"
                             />
                         </div>
                         <div>
@@ -501,7 +500,7 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="">Selectează genul</option>
+                                <option value="">Selecteaza genul</option>
                                 <option value="male">Masculin</option>
                                 <option value="female">Feminin</option>
                             </select>
@@ -553,7 +552,7 @@ const Register: React.FC = () => {
                                 disabled={!formState.faculty || currentYearOptions.length === 0}
                             >
                                 <option value="" disabled>
-                                    -- Selectează anul --
+                                    -- Selecteaza anul --
                                 </option>
                                 {currentYearOptions.map((year) => (
                                     <option key={year} value={year}>
@@ -578,13 +577,13 @@ const Register: React.FC = () => {
                                 min="5"
                                 max="10"
                                 placeholder="Ex: 8.75"
-                                title="Introduceți media (între 5.00 și 10.00)"
+                                title="Introduceti media (intre 5.00 si 10.00)"
                             />
-                            <small>Media exactă nu va fi afișată, ci doar intervalul.</small>
+                            <small>Media exacta nu va fi afisata, ci doar intervalul.</small>
                         </div>
 
                         <div>
-                            <label>Parolă:*</label>
+                            <label>Parola:*</label>
                             <input
                                 type="password"
                                 name="password"
@@ -592,11 +591,11 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 minLength={6}
-                                title="Parola trebuie să aibă cel puțin 6 caractere"
+                                title="Parola trebuie sa aiba cel putin 6 caractere"
                             />
                         </div>
                         <div>
-                            <label>Confirmă Parola:*</label>
+                            <label>Confirma Parola:*</label>
                             <input
                                 type="password"
                                 name="confirmPassword"
@@ -607,13 +606,13 @@ const Register: React.FC = () => {
                         </div>
                         {error && <p className="error">{error}</p>}
                         {success && <p className="success">{success}</p>}
-                        <button type="submit">Înregistrează-te ca Student</button>
+                        <button type="submit">inregistreaza-te ca Student</button>
                         <button
                             type="button"
                             onClick={() => setSelectedRole(null)}
                             className="back-button"
                         >
-                            Înapoi
+                            inapoi
                         </button>
                     </form>
                 </div>
@@ -625,7 +624,7 @@ const Register: React.FC = () => {
                 <div className="register-container owner-form">
                     {" "}
                     {/* Specific class */}
-                    <h1>Înregistrare Proprietar</h1>
+                    <h1>inregistrare Proprietar</h1>
                     {/* Use owner state and handlers */}
                     <form onSubmit={handleOwnerSubmit} className="register-form">
                         <div>
@@ -651,7 +650,7 @@ const Register: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label htmlFor="ownerPassword">Parolă:*</label>
+                            <label htmlFor="ownerPassword">Parola:*</label>
                             <input
                                 type="password"
                                 id="ownerPassword"
@@ -660,11 +659,11 @@ const Register: React.FC = () => {
                                 onChange={handleOwnerChange}
                                 required
                                 minLength={6}
-                                title="Parola trebuie să aibă cel puțin 6 caractere"
+                                title="Parola trebuie sa aiba cel putin 6 caractere"
                             />
                         </div>
                         <div>
-                            <label htmlFor="ownerConfirmPassword">Confirmă Parola:*</label>
+                            <label htmlFor="ownerConfirmPassword">Confirma Parola:*</label>
                             <input
                                 type="password"
                                 id="ownerConfirmPassword"
@@ -677,13 +676,13 @@ const Register: React.FC = () => {
 
                         {error && <p className="error">{error}</p>}
                         {success && <p className="success">{success}</p>}
-                        <button type="submit">Înregistrează-te ca Proprietar</button>
+                        <button type="submit">inregistreaza-te ca Proprietar</button>
                         <button
                             type="button"
                             onClick={() => setSelectedRole(null)}
                             className="back-button"
                         >
-                            Înapoi la selecția rolului
+                            inapoi la selectia rolului
                         </button>
                     </form>
                 </div>
@@ -694,10 +693,10 @@ const Register: React.FC = () => {
         if (selectedRole === "facultate") {
             return (
                 <div className="register-container faculty-form">
-                    <h1>Înregistrare Facultate</h1>
+                    <h1>inregistrare Facultate</h1>
                     <form onSubmit={handleFacultySubmit} className="register-form">
                         <div>
-                            <label htmlFor="denumireaCompleta">Denumirea completă:*</label>
+                            <label htmlFor="denumireaCompleta">Denumirea completa:*</label>
                             <input
                                 type="text"
                                 id="denumireaCompleta"
@@ -749,8 +748,8 @@ const Register: React.FC = () => {
                                 accept=".pdf,.doc,.docx,image/*"
                             />
                             <small>
-                                Atașați un document oficial (PDF, DOC, imagine) care atestă statutul
-                                instituției.
+                                Atasati un document oficial (PDF, DOC, imagine) care atesta statutul
+                                institutiei.
                             </small>
                         </div>
                         <div>
@@ -785,11 +784,11 @@ const Register: React.FC = () => {
                                 onChange={handleFacultyChange}
                                 required
                                 pattern="[0-9]{10}"
-                                title="Introduceți un număr de telefon valid (10 cifre)"
+                                title="Introduceti un numar de telefon valid (10 cifre)"
                             />
                         </div>
                         <div>
-                            <label htmlFor="websiteOficial">Website Oficial (opțional):</label>
+                            <label htmlFor="websiteOficial">Website Oficial (optional):</label>
                             <input
                                 type="url"
                                 id="websiteOficial"
@@ -800,7 +799,7 @@ const Register: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label htmlFor="facPassword">Parolă:*</label>
+                            <label htmlFor="facPassword">Parola:*</label>
                             <input
                                 type="password"
                                 id="facPassword"
@@ -809,11 +808,11 @@ const Register: React.FC = () => {
                                 onChange={handleFacultyChange}
                                 required
                                 minLength={6}
-                                title="Parola trebuie să aibă cel puțin 6 caractere"
+                                title="Parola trebuie sa aiba cel putin 6 caractere"
                             />
                         </div>
                         <div>
-                            <label htmlFor="facConfirmPassword">Confirmă Parola:*</label>
+                            <label htmlFor="facConfirmPassword">Confirma Parola:*</label>
                             <input
                                 type="password"
                                 id="facConfirmPassword"
@@ -826,13 +825,13 @@ const Register: React.FC = () => {
 
                         {error && <p className="error">{error}</p>}
                         {success && <p className="success">{success}</p>}
-                        <button type="submit">Înregistrează Facultate</button>
+                        <button type="submit">inregistreaza Facultate</button>
                         <button
                             type="button"
                             onClick={() => setSelectedRole(null)}
                             className="back-button"
                         >
-                            Înapoi
+                            inapoi
                         </button>
                     </form>
                 </div>
@@ -856,7 +855,7 @@ const Register: React.FC = () => {
                     <p className="login-link-text">
                         Ai deja un cont?{" "}
                         <Link to="/login" className="custom-link">
-                            Autentifică-te
+                            Autentifica-te
                         </Link>
                     </p>
                 )}
