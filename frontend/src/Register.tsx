@@ -17,6 +17,8 @@ interface RegisterFormState {
     confirmPassword: string;
     faculty: string; // Specific to student
     numar_matricol: string;
+    anUniversitar: string;
+    medie: string;
 }
 
 interface FacultyFormState {
@@ -48,6 +50,19 @@ interface FacultyInfo {
 // Define possible roles
 type Role = "student" | "proprietar" | "facultate" | null;
 
+const getYearOptionsForFaculty = (facultyName: string): string[] => {
+    // Normalize the faculty name slightly for easier comparison (lowercase)
+    const lowerCaseFaculty = facultyName.toLowerCase();
+    console.log(`Bomboclaat: ${lowerCaseFaculty}`);
+    if (lowerCaseFaculty.includes("universitatea politehnica timisoara")) {
+        return ["1", "2", "3", "4"];
+    } else if (lowerCaseFaculty.includes("medicina victor babes timisoara")) {
+        return ["1", "2", "3", "4", "5", "6"];
+    } else if (lowerCaseFaculty.includes("universitatea de vest")) {
+        return ["1", "2", "3"];
+    } else return [""];
+};
+
 const Register: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState<Role>(null);
     const [error, setError] = useState("");
@@ -64,7 +79,9 @@ const Register: React.FC = () => {
         password: "",
         confirmPassword: "",
         faculty: "",
-        numar_matricol: ""
+        numar_matricol: "",
+        anUniversitar: "",
+        medie: "",
     });
 
     const [facultyFormState, setFacultyFormState] = useState<FacultyFormState>({
@@ -86,7 +103,6 @@ const Register: React.FC = () => {
         password: "",
         confirmPassword: "",
     });
-
 
     useEffect(() => {
         const fetchFaculties = async () => {
@@ -110,6 +126,14 @@ const Register: React.FC = () => {
             ...prevState,
             [name]: value,
         }));
+
+        if (name === "faculty") {
+            setFormState((prevState) => ({
+                ...prevState,
+                anUniversitar: "", // Reset year selection
+            }));
+        }
+
         setError("");
     };
 
@@ -142,7 +166,7 @@ const Register: React.FC = () => {
 
             uploadTask.on(
                 "state_changed",
-                () => { },
+                () => {},
                 (error) => {
                     console.error("Upload Error:", error);
                 },
@@ -162,23 +186,59 @@ const Register: React.FC = () => {
     // Submit handler for Student form
     const handleStudentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // ... (keep existing student submit logic) ...
         setError("");
         setSuccess("");
-        const { email, fullName, phoneNumber, gender, password, confirmPassword, faculty, numar_matricol } =
-            formState;
+        const {
+            email,
+            fullName,
+            phoneNumber,
+            gender,
+            password,
+            confirmPassword,
+            faculty,
+            numar_matricol,
+            anUniversitar,
+            medie,
+        } = formState;
 
         if (password !== confirmPassword) {
             setError("Parolele nu se potrivesc");
             return;
         }
-        if (!email || !fullName || !phoneNumber || !gender || !faculty) {
+        if (
+            !email ||
+            !fullName ||
+            !phoneNumber ||
+            !gender ||
+            !faculty ||
+            !anUniversitar ||
+            !medie
+        ) {
             setError("Toate câmpurile sunt obligatorii pentru studenți");
             return;
         }
         if (password.length < 6) {
             setError("Parola trebuie să aibă cel puțin 6 caractere");
             return;
+        }
+
+        const medieValue = parseFloat(medie); // Convert input string to number
+        let medieRange = ""; // Initialize range string
+
+        if (isNaN(medieValue) || medieValue < 5 || medieValue > 10) {
+            setError("Media introdusă nu este validă (trebuie să fie între 5.00 și 10.00).");
+            return;
+        }
+
+        // Define your ranges (adjust these as needed)
+        if (medieValue >= 9.5) {
+            medieRange = "Categoria_1 (9.50 - 10.00)";
+        } else if (medieValue >= 9.0) {
+            medieRange = "Categoria_2 (9.00 - 9.49)";
+        } else if (medieValue >= 8.5) {
+            medieRange = "Categoria_3 (8.50 - 8.99)";
+        } else if (medieValue >= 5.0) {
+            medieRange = "Categoria_4 (5.00 - 8.49)";
         }
 
         try {
@@ -190,6 +250,8 @@ const Register: React.FC = () => {
                 password,
                 faculty,
                 numar_matricol,
+                anUniversitar,
+                medie: medieRange,
                 role: "student",
             });
             setSuccess("Inregistrare reusita! Vei fi redirectionat către pagina de login.");
@@ -201,7 +263,9 @@ const Register: React.FC = () => {
                 password: "",
                 confirmPassword: "",
                 faculty: "",
-                numar_matricol: ""
+                numar_matricol: "",
+                anUniversitar: "",
+                medie: "",
             });
             setTimeout(() => navigate("/login"), 3000);
         } catch (err: any) {
@@ -304,7 +368,6 @@ const Register: React.FC = () => {
             }
             console.error("Faculty Registration Error:", err);
         } finally {
-
         }
     };
     // --- END: Submit handler for Faculty form ---
@@ -391,6 +454,8 @@ const Register: React.FC = () => {
         }
 
         if (selectedRole === "student") {
+            const currentYearOptions = getYearOptionsForFaculty(formState.faculty);
+
             return (
                 <div className="register-container student-form">
                     <h1>Înregistrare Student</h1>
@@ -450,13 +515,17 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="" disabled> -- Selecteaza facultatea -- </option>
+                                <option value="" disabled>
+                                    {" "}
+                                    -- Selecteaza facultatea --{" "}
+                                </option>
                                 {facultiesList.map((faculty) => (
                                     <option
                                         key={faculty.abreviere || faculty.denumireaCompleta}
                                         value={faculty.denumireaCompleta}
                                     >
-                                        {faculty.denumireaCompleta} ({faculty.abreviere}) {/* afiseaza numele si abrevierea */}
+                                        {faculty.denumireaCompleta} ({faculty.abreviere}){" "}
+                                        {/* afiseaza numele si abrevierea */}
                                     </option>
                                 ))}
                             </select>
@@ -470,6 +539,48 @@ const Register: React.FC = () => {
                                 value={formState.numar_matricol}
                                 onChange={handleChange}
                             />
+                        </div>
+
+                        <div>
+                            <label htmlFor="anUniversitar">Anul universitar:*</label>
+                            <select
+                                id="anUniversitar"
+                                name="anUniversitar"
+                                value={formState.anUniversitar} // Use the state value
+                                onChange={handleChange}
+                                required
+                                // Disable if no faculty is selected OR if options are empty
+                                disabled={!formState.faculty || currentYearOptions.length === 0}
+                            >
+                                <option value="" disabled>
+                                    -- Selectează anul --
+                                </option>
+                                {currentYearOptions.map((year) => (
+                                    <option key={year} value={year}>
+                                        {`Anul ${year}`}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            {/* Use conditional rendering for the label text */}
+                            <label htmlFor="medie">
+                                {formState.anUniversitar === "1" ? "Medie admitere:*" : "Media:*"}
+                            </label>
+                            <input
+                                type="number"
+                                id="medie"
+                                name="medie"
+                                value={formState.medie}
+                                onChange={handleChange}
+                                required
+                                step="0.01"
+                                min="5"
+                                max="10"
+                                placeholder="Ex: 8.75"
+                                title="Introduceți media (între 5.00 și 10.00)"
+                            />
+                            <small>Media exactă nu va fi afișată, ci doar intervalul.</small>
                         </div>
 
                         <div>

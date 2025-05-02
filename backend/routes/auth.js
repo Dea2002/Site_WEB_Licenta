@@ -127,14 +127,18 @@ module.exports = (usersCollection, facultiesCollection) => {
         body('gender').isIn(['male', 'female']).withMessage('Gen invalid. Selecteaza "male" sau "female".'),
         body('password').isLength({ min: 6 }).withMessage('Parola trebuie sa aiba cel putin 6 caractere'),
         body('faculty').notEmpty().withMessage('Campul de facultate este necesar'),
-        body('numar_matricol').notEmpty().withMessage('Numar matricol obligatoriu')
+        body('anUniversitar').notEmpty().withMessage('Campul anul Universitar este necesar'),
+        body('medie').notEmpty().withMessage('Media trebuie introdusa'),
+
+
+
     ], async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { email, fullName, phoneNumber, gender, password, faculty, numar_matricol, role } = req.body; /* ce primesc de la frontend catre backend */
+        const { email, fullName, phoneNumber, gender, password, faculty, numar_matricol, anUniversitar, medie, role } = req.body; /* ce primesc de la frontend catre backend */
 
         try {
             // Verifica daca utilizatorul exista deja
@@ -159,7 +163,10 @@ module.exports = (usersCollection, facultiesCollection) => {
                 password: hashedPassword,
                 role: role,
                 faculty,
-                numar_matricol,
+                faculty_valid: "false",
+                numar_matricol: numar_matricol || "",
+                anUniversitar,
+                medie: medie,
                 createdAt: new Date(),
             };
 

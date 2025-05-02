@@ -6,13 +6,13 @@
     background-color: #60b5ff;
     /* o culoare de baza (albastru Bootstrap, de exemplu) */
     padding: 1rem 2rem;
-    background: #4A102A;
+    background: #4a102a;
 }
 
 /* Stilizarea link-urilor din navbar */
 
 .custom-navbar-faculty .nav-link {
-    color: #F5C45E !important;
+    color: #f5c45e !important;
     /* foloseste !important daca vrei sa suprascrii stilurile Bootstrap */
     font-size: 1.2rem;
     /* font-weight: 350; */
@@ -29,14 +29,14 @@
 
 .custom-navbar-faculty .dropdown-menu {
     /* background-color: #FCF259; */
-    background-color: #E9F5BE;
+    background-color: #e9f5be;
     font-size: 1.2rem;
     border: none;
 }
 
 /* culoarea textului din dropdown */
 .custom-navbar-faculty .dropdown-item {
-    color: #85193C;
+    color: #85193c;
     font-size: 1.1rem;
     transition: background-color 0.2s ease;
     -webkit-transition: background-color 0.2s ease;
@@ -55,7 +55,7 @@
 /* Stilizarea iconitelor daca doresti sa le modifici dimensiunea sau culoarea */
 
 .custom-navbar-faculty i {
-    color: #E78B48;
+    color: #e78b48;
     font-size: 1.2rem;
     /* poti ajusta dimensiunea dupa preferinta */
     transition: transform 0.2s ease;
