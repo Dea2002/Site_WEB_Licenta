@@ -8,10 +8,32 @@ interface EditProfileProps {
     user: User; // Primim datele curente ale userului
 }
 
+interface ProfileFormState {
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    faculty?: string;
+    faculty_valid?: boolean;
+    numar_matricol?: string;
+    anUniversitar?: string;
+    medie?: string;
+    medie_valid?: string;
+};
+
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     // Stări pentru câmpurile formularului, initializate cu datele userului
-    const [fullName, setFullName] = useState(user.fullName);
-    const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
+    const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
+        fullName: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        faculty: user.faculty,
+        faculty_valid: user.faculty_valid,
+        numar_matricol: user.numar_matricol,
+        anUniversitar: user.anUniversitar,
+        medie: user.medie,
+        medie_valid: user.medie_valid,
+    });
+
     // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -26,9 +48,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setError('');
 
         const updatedData = {
-            fullName,
-            phoneNumber,
-            //! Adaugă alte câmpuri aici
+
+
         };
 
         try {
@@ -65,13 +86,30 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         }
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setProfilFormState((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+
+        setError("");
+    }
+
+
     return (
         <div className="profile-section-content">
             <h2>Editare Profil</h2>
             <form onSubmit={handleSubmit} className="edit-profile-form">
                 <div className="form-group">
                     <label htmlFor="email">Email:</label>
-                    <input type="email" id="email" value={user.email} disabled />
+                    <input
+                        type="email"
+                        id="email"
+                        value={profileFormState.email}
+                        onChange={handleChange}
+                        disabled
+                    />
                     <small>Emailul nu poate fi modificat.</small>
                 </div>
                 <div className="form-group">
@@ -79,20 +117,76 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="fullName"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
+                        value={profileFormState.fullName}
+                        onChange={handleChange}
                         required
-                        disabled={isLoading}
+                        disabled
                     />
                 </div>
                 <div className="form-group">
                     <label htmlFor="phoneNumber">Număr de telefon:</label>
                     <input
-                        type="tel"
+                        type="text"
                         id="phoneNumber"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        value={profileFormState.phoneNumber}
+                        onChange={handleChange}
                         disabled={isLoading}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="faculty">Facultatea:</label>
+                    <input
+                        type="text"
+                        id="faculty"
+                        value={profileFormState.faculty}
+                        onChange={handleChange}
+                        disabled
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="faculty_valid">Facultatea asociata:</label>
+                    <input
+                        type="text"
+                        id="faculty_valid"
+                        value={profileFormState.faculty_valid ? "Da" : "Nu"}
+                        onChange={handleChange}
+                        disabled
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="numar_matricol">Numar matricol:</label>
+                    <input
+                        type="text"
+                        id="numar_matricol"
+                        value={profileFormState.numar_matricol}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="anUniversitar">Anul universitar:</label>
+                    <input
+                        type="text"
+                        id="anUniversitar"
+                        value={profileFormState.anUniversitar}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="medie">Medie:</label>
+                    <input
+                        type="text"
+                        id="medie"
+                        value={profileFormState.medie}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="medie_valid">Termen valabilitate medie:</label>
+                    <input
+                        type="date"
+                        id="medie_valid"
+                        value={profileFormState.medie_valid!.substring(0, 10)}
+                        onChange={handleChange}
                     />
                 </div>
                 {/* Adaugă aici alte câmpuri editabile */}

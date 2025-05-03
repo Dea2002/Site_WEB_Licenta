@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../../AuthContext";
 import axios from "axios";
-import "./profile_owner.css";
+import "./profile_faculty.css";
 import { parseISO, format, isAfter } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const Profile_owner: React.FC = () => {
+const Profile_faculty: React.FC = () => {
     const { user, token, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -153,4 +153,4 @@ const Profile_owner: React.FC = () => {
     );
 };
 
-export default Profile_owner;
+export default Profile_faculty;

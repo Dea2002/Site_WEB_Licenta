@@ -12,8 +12,10 @@ export interface User {
     role: "student" | "proprietar" | "facultate" | "admin";
     faculty?: string;
     faculty_valid?: boolean;
+    numar_matricol?: string;
+    anUniversitar?: string;
     medie_valid?: string;  // observă: string ISO
-    medie?: string | null;
+    medie?: string;
     iat: number;
     exp: number;
 }
