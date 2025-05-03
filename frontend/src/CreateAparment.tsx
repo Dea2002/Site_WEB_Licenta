@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_nav_OwnerDashboard from "./Bara_nav_OwnerDashboard";
+import Bara_nav_OwnerDashboard from "./NavBars/Bara_nav_OwnerDashboard";
 // Import the CSS file (ensure the path is correct)
 import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you create a new file
 import { useNavigate } from "react-router-dom";
@@ -132,7 +132,7 @@ const OwnerListNewApartment: React.FC = () => {
             console.error("Eroare la listare apartament nou: ", error);
             setMessage(
                 error.response?.data?.message ||
-                    "Eroare la listare apartament. Verificati consola.",
+                "Eroare la listare apartament. Verificati consola.",
             );
         }
     };
@@ -145,9 +145,8 @@ const OwnerListNewApartment: React.FC = () => {
                 <h1>Listeaza un apartament nou</h1>
                 {message && (
                     <div
-                        className={`message ${
-                            message.includes("succes") ? "message-success" : "message-error"
-                        }`}
+                        className={`message ${message.includes("succes") ? "message-success" : "message-error"
+                            }`}
                     >
                         {message}
                     </div>
@@ -411,7 +410,7 @@ const OwnerListNewApartment: React.FC = () => {
                             accept="image/png, image/jpeg, image/webp" // Specify accepted types
                             // value={formData.image} // Value cannot be controlled for type="file"
                             onChange={handleFileChange} // Use a dedicated handler for files
-                            // required // Consider if one image is mandatory
+                        // required // Consider if one image is mandatory
                         />
                         {/* You might want to show a preview of the selected image here */}
                     </div>
@@ -441,7 +440,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 placeholder="ex: Ana Popescu (daca exista deja)"
                                 value={formData.colleaguesNames}
                                 onChange={handleChange}
-                                // required={formData.colleagues} // Make required only if checkbox is checked
+                            // required={formData.colleagues} // Make required only if checkbox is checked
                             />
                         </div>
                     )}

@@ -1,10 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../AuthContext";
-// import axios from "axios";
 import "./profile_student.css";
-// import { parseISO, format, isAfter } from "date-fns";
-// import { useNavigate } from "react-router-dom";
-import Bara_navigatie from "../../Bara_navigatie"; // Your Navbar component
+import Bara_navigatie from "../../NavBars/Bara_navigatie"; // Your Navbar component
 import EditProfile from './EditProfile';
 import CurrentRent from './CurrentRent';
 import RentHistory from './RentHistory';
@@ -16,7 +13,7 @@ type ProfileSection = 'edit' | 'current-rent' | 'history';
 const UserProfilePage: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
     const { user } = useContext(AuthContext); // Preluăm user-ul din context
-
+    console.log(user);
     // Dacă nu există user logat, poate redirecționăm sau afișăm un mesaj
     if (!user) {
         // Poți adăuga o redirecționare sau un placeholder aici

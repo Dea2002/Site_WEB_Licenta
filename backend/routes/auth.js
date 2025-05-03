@@ -14,7 +14,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         }
 
         try {
-            const foundFaculty = await facultiesCollection.findOne({ denumireaCompleta: facultyName });
+            const foundFaculty = await facultiesCollection.findOne({ fullName: facultyName });
 
             if (foundFaculty) {
                 return new ObjectId(foundFaculty._id);
@@ -30,7 +30,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
 
     // endpoint pentru inregistrare facultate
     router.post('/register_faculty', [
-        body('denumireaCompleta').notEmpty().withMessage('Denumirea completa este necesara'),
+        body('fullName').notEmpty().withMessage('Denumirea completa este necesara'),
         body('numeRector').notEmpty().withMessage('Nume Rector este necesar'),
         body('emailSecretariat').isEmail().withMessage('Email invalid'),
         body('numarTelefonSecretariat').notEmpty().withMessage('Numar de telefon secretariat este necesar'),
@@ -41,7 +41,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { denumireaCompleta, abreviere, numeRector, emailSecretariat, numarTelefonSecretariat, logoUrl, documentUrl, password, role } = req.body;
+        const { fullName, abreviere, numeRector, emailSecretariat, numarTelefonSecretariat, logoUrl, documentUrl, password, role } = req.body;
 
         try {
 
@@ -60,7 +60,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
 
             // Creeaza noua facultate
             const newFaculty = {
-                denumireaCompleta,
+                fullName,
                 abreviere,
                 numeRector,
                 emailSecretariat,
@@ -276,10 +276,8 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                     return res.status(401).json({ message: 'Email sau parola incorecte' });
                 }
 
-                // creez user-ul
-                const userLogin = { userId: user._id, fullName: user.fullName, role: user.role, email: user.email }; //! posibile modificari necesare
                 // Creeaza tokenul JWT
-                const token = jwt.sign(userLogin, process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                const token = jwt.sign(user, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
                 return res.status(200).json({ message: 'Autentificare reusita', token });
@@ -293,10 +291,8 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                     return res.status(401).json({ message: 'Email sau parola incorecte' });
                 }
 
-                // creez obiectul facultate
-                const facultyLogin = { userId: faculty._id, fullName: faculty.denumireaCompleta, role: faculty.role, email: faculty.emailSecretariat };
                 // Creeaza tokenul JWT
-                const token = jwt.sign(facultyLogin, process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                const token = jwt.sign(faculty, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
                 return res.status(200).json({ message: 'Autentificare reusita', token });

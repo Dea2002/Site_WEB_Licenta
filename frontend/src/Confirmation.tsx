@@ -1,7 +1,7 @@
 // frontend/src/Confirmation.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_navigatie from "./NavBars/Bara_navigatie";
 
 const Confirmation: React.FC = () => {
     const navigate = useNavigate();

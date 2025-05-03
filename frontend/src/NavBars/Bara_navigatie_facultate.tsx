@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import "./navbar_dashboard_faculty.css";
 
@@ -8,6 +8,7 @@ import "./navbar_dashboard_faculty.css";
 function NavBar() {
     const { isAuthenticated, user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+    console.log(user);
 
     const handleLogout = () => {
         logout();

@@ -3,7 +3,7 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext, User } from "./AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_navigatie from "./NavBars/Bara_navigatie";
 import "./Login.css";
 import jwt_decode from 'jwt-decode';
 
@@ -36,8 +36,8 @@ const Login: React.FC = () => {
                 navigate("/owner-dashboard");
             } else if (decoded.role === "facultate") {
                 navigate("/faculty_dashboard")
-            } else {
-                navigate(from, { replace: true });
+            } else if (decoded.role === "student") {
+                navigate("/home");
             }
         } catch (err) {
             setError("Email sau parola incorecte");

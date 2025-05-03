@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_navigatie from "./NavBars/Bara_navigatie";
 import { Apartment } from "./types";
 
 interface ReservationState {

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { AuthContext, User } from '../../AuthContext'; // Importăm User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_student.css'; // Stiluri

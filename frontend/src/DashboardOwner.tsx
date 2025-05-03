@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_nav_OwnerDashboard from "./Bara_nav_OwnerDashboard";
+import Bara_nav_OwnerDashboard from "./NavBars/Bara_nav_OwnerDashboard";
 import { useNavigate } from "react-router-dom";
 import { FaBuilding } from "react-icons/fa";
 import "./DashboardOwner.css";

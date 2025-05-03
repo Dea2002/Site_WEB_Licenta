@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_navigatie from "./NavBars/Bara_navigatie";
 import LoginModal from "./LoginModal";
 import { AuthContext } from "./AuthContext";
 import { Apartment } from "./types"; // Make sure Apartment type includes all relevant fields
@@ -231,7 +231,6 @@ const Home: React.FC = () => {
         <div>
             <Bara_navigatie />
             {/* Keep h1 commented out if desired */}
-            {/* <h1>Apartamente pentru inchiriere</h1> */}
             <div className="home-container">
                 {" "}
                 {/* Keep your container */}

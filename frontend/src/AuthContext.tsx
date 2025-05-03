@@ -37,9 +37,17 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+    // citește imediat din localStorage, sincron
+    const [token, setToken] = useState<string | null>(() => {
+        return localStorage.getItem("token");
+    });
+    const [user, setUser] = useState<User | null>(() => {
+        const t = localStorage.getItem("token");
+        return t ? jwt_decode<User>(t) : null;
+    });
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+        return !!localStorage.getItem("token");
+    });
 
     // interceptor Axios
     useEffect(() => {

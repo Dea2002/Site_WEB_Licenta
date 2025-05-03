@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./DashboardFaculty.css";
-import Bara_navigatie_facultate from "./Bara_navigatie_facultate"; // Your Navbar component
+import Bara_navigatie_facultate from "./NavBars/Bara_navigatie_facultate"; // Your Navbar component
 
 const DashboardFaculty: React.FC = () => {
     const { id } = useParams<{ id: string }>();

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import Bara_navigatie from "./Bara_navigatie";
+import Bara_navigatie from "./NavBars/Bara_navigatie";
 import "./Register.css"; // Ensure CSS is imported
 import { storage } from "./firebaseConfig"; // Import Firebase storage if needed
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -22,7 +22,7 @@ interface RegisterFormState {
 }
 
 interface FacultyFormState {
-    denumireaCompleta: string;
+    fullName: string;
     abreviere: string;
     logo: File | null; // Store the File object
     documentOficial: File | null; // Store the File object
@@ -43,7 +43,7 @@ interface OwnerFormState {
 
 interface FacultyInfo {
     _id?: string; // Optional, but good practice if backend sends it
-    denumireaCompleta: string;
+    fullName: string;
     abreviere: string;
 }
 
@@ -84,7 +84,7 @@ const Register: React.FC = () => {
     });
 
     const [facultyFormState, setFacultyFormState] = useState<FacultyFormState>({
-        denumireaCompleta: "",
+        fullName: "",
         abreviere: "",
         logo: null,
         documentOficial: null,
@@ -108,7 +108,7 @@ const Register: React.FC = () => {
             try {
                 // Asigura-te ca URL-ul este corect (poate ai un base URL in axios config)
                 const response = await axios.get<FacultyInfo[]>("http://localhost:5000/faculty");
-                // Presupunand ca backend-ul returneaza direct array-ul [{denumireaCompleta: '...', abreviere: '...'}, ...]
+                // Presupunand ca backend-ul returneaza direct array-ul [{fullName: '...', abreviere: '...'}, ...]
                 setFacultiesList(response.data);
             } catch (err) {
                 console.error("Eroare la fetch facultati:", err);
@@ -283,7 +283,7 @@ const Register: React.FC = () => {
         setSuccess("");
 
         const {
-            denumireaCompleta,
+            fullName,
             abreviere,
             logo,
             documentOficial,
@@ -301,7 +301,7 @@ const Register: React.FC = () => {
             return;
         }
         if (
-            !denumireaCompleta ||
+            !fullName ||
             !abreviere ||
             !logo ||
             !documentOficial ||
@@ -332,7 +332,7 @@ const Register: React.FC = () => {
 
             // 3. Send data to backend
             await axios.post("http://localhost:5000/auth/register_faculty", {
-                denumireaCompleta,
+                fullName,
                 abreviere,
                 logoUrl,
                 documentUrl,
@@ -346,7 +346,7 @@ const Register: React.FC = () => {
             setSuccess("inregistrare facultate reusita! Contul va fi verificat.");
             // Reset form state
             setFacultyFormState({
-                denumireaCompleta: "",
+                fullName: "",
                 abreviere: "",
                 logo: null,
                 documentOficial: null,
@@ -520,10 +520,10 @@ const Register: React.FC = () => {
                                 </option>
                                 {facultiesList.map((faculty) => (
                                     <option
-                                        key={faculty.abreviere || faculty.denumireaCompleta}
-                                        value={faculty.denumireaCompleta}
+                                        key={faculty.abreviere || faculty.fullName}
+                                        value={faculty.fullName}
                                     >
-                                        {faculty.denumireaCompleta} ({faculty.abreviere}){" "}
+                                        {faculty.fullName} ({faculty.abreviere}){" "}
                                         {/* afiseaza numele si abrevierea */}
                                     </option>
                                 ))}
@@ -696,12 +696,12 @@ const Register: React.FC = () => {
                     <h1>inregistrare Facultate</h1>
                     <form onSubmit={handleFacultySubmit} className="register-form">
                         <div>
-                            <label htmlFor="denumireaCompleta">Denumirea completa:*</label>
+                            <label htmlFor="fullName">Denumirea completa:*</label>
                             <input
                                 type="text"
-                                id="denumireaCompleta"
-                                name="denumireaCompleta"
-                                value={facultyFormState.denumireaCompleta}
+                                id="fullName"
+                                name="fullName"
+                                value={facultyFormState.fullName}
                                 onChange={handleFacultyChange}
                                 required
                             />
