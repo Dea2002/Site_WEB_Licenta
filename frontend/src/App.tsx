@@ -1,11 +1,8 @@
-// frontend/src/App.tsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "./LandingPage";
 import Home from "./Home";
 import ApartmentDetails from "./ApartmentDetails";
-import Reservation from "./Reservation";
-import Confirmation from "./Confirmation";
 import PrivateRoute from "./PrivateRoute";
 import Login from "./Login";
 import Register from "./Register";
@@ -15,7 +12,6 @@ import DashboardFaculty from "./DashboardFaculty";
 import UserListAdmin from "./UserListAdmin";
 import ApartmentsListAdmin from "./ApartmentsListAdmin";
 import OwnersListAdmin from "./OwnersListAdmin";
-import AdminRoute from "./AdminRoute";
 import DashboardOwner from "./DashboardOwner";
 import OwnerApartments from "./OwnerApartments";
 import OwnerRequests from "./OwnerRequests";

@@ -2,15 +2,15 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from "../../AuthContext";
 import "./profile_student.css";
 import Bara_navigatie from "../../NavBars/Bara_navigatie"; // Your Navbar component
-import EditProfile from './EditProfile';
-import CurrentRent from './CurrentRent';
-import RentHistory from './RentHistory';
-import ProfileSidebar from './ProfileSidebar';
+import EditProfile from './EditProfile_student';
+import CurrentRent from './CurrentRent_student';
+import RentHistory from './RentHistory_student';
+import ProfileSidebar from './ProfileSidebar_student';
 
 // Definește tipurile posibile pentru secțiunea activă
 type ProfileSection = 'edit' | 'current-rent' | 'history';
 
-const UserProfilePage: React.FC = () => {
+const Profile_student: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
     const { user } = useContext(AuthContext); // Preluăm user-ul din context
     console.log(user);
@@ -64,4 +64,4 @@ const UserProfilePage: React.FC = () => {
     );
 };
 
-export default UserProfilePage;
+export default Profile_student;

@@ -185,7 +185,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="date"
                         id="medie_valid"
-                        value={profileFormState.medie_valid!.substring(0, 10)}
+                        value={profileFormState.medie_valid ? profileFormState.medie_valid!.substring(0, 10) : ''}
                         onChange={handleChange}
                     />
                 </div>
