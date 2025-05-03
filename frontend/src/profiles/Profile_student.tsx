@@ -5,6 +5,13 @@ import "./profile_student.css";
 import { parseISO, format, isAfter } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
+interface ProfileData {
+    phoneNumber: string;
+    password: string;
+    medie: string;
+    anUniversitate: string;
+}
+
 const Profile_student: React.FC = () => {
     const { user, token, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
