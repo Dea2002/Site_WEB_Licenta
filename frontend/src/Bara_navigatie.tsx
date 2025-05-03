@@ -48,7 +48,7 @@ function NavBar() {
                                         className="fa-solid fa-user-pen"
                                         style={{ marginRight: "6px" }}
                                     />
-                                    Editeaza cont
+                                    Profilul meu
                                 </NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/chat-history">
                                     <i

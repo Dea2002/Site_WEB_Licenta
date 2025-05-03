@@ -21,14 +21,7 @@ const Login: React.FC = () => {
         e.preventDefault();
         try {
             const payload = { email, password };
-            const response = await axios.post("http://localhost:5000/auth/login",
-                payload,
-                // {
-                //     headers: {
-                //         Authorization: `Bearer ${token}`
-                //     }
-                // }
-            );
+            const response = await axios.post("http://localhost:5000/auth/login", payload);
 
             const { token } = response.data;
 

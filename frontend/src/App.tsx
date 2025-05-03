@@ -25,7 +25,7 @@ import FacultyAssociations from './FacultyAssociations';
 import FacultyMarks from './FacultyMarks';
 // import Bara_navigatie from "./Bara_navigatie";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Profile_student from "./profiles/Profile_student";
+import Profile_student from "./profiles/student/Profile_student";
 import Profile_owner from "./profiles/Profile_owner";
 import Profile_faculty from "./profiles/Profile_faculty";
 
