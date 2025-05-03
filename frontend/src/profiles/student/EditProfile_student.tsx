@@ -1,8 +1,9 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { AuthContext, User } from '../../AuthContext'; // Importăm User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_student.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
+import { parseISO, isAfter } from "date-fns";
 
 interface EditProfileProps {
     user: User; // Primim datele curente ale userului
@@ -33,6 +34,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         medie: user.medie,
         medie_valid: user.medie_valid,
     });
+    const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
 
     // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
@@ -48,8 +50,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setError('');
 
         const updatedData = {
-
-
         };
 
         try {
@@ -96,7 +96,16 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setError("");
     }
 
-
+    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) și-l transformă în Date
+    const semestruDate = parseISO(profileFormState.medie_valid!);
+    // doar dacă azi > semestruDate putem edita
+    const canEdit = isAfter(new Date(), semestruDate);
+    // compară câmp cu câmp
+    const isDirty = Object.entries(profileFormState).some(
+        ([key, value]) =>
+            // @ts-ignore – ca să poţi indexa generic
+            value !== initialFormStateRef.current[key]
+    );
     return (
         <div className="profile-section-content">
             <h2>Editare Profil</h2>
@@ -106,6 +115,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="email"
                         id="email"
+                        name="email"
                         value={profileFormState.email}
                         onChange={handleChange}
                         disabled
@@ -117,6 +127,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="fullName"
+                        name="fullName"
                         value={profileFormState.fullName}
                         onChange={handleChange}
                         required
@@ -128,6 +139,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="phoneNumber"
+                        name="phoneNumber"
                         value={profileFormState.phoneNumber}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -138,6 +150,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="faculty"
+                        name="faculty"
                         value={profileFormState.faculty}
                         onChange={handleChange}
                         disabled
@@ -148,6 +161,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="faculty_valid"
+                        name="faculty_valid"
                         value={profileFormState.faculty_valid ? "Da" : "Nu"}
                         onChange={handleChange}
                         disabled
@@ -158,6 +172,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="numar_matricol"
+                        name="numar_matricol"
                         value={profileFormState.numar_matricol}
                         onChange={handleChange}
                     />
@@ -167,6 +182,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="anUniversitar"
+                        name="anUniversitar"
                         value={profileFormState.anUniversitar}
                         onChange={handleChange}
                     />
@@ -176,6 +192,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="text"
                         id="medie"
+                        name="medie"
                         value={profileFormState.medie}
                         onChange={handleChange}
                     />
@@ -185,6 +202,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     <input
                         type="date"
                         id="medie_valid"
+                        name="medie_valid"
                         value={profileFormState.medie_valid ? profileFormState.medie_valid!.substring(0, 10) : ''}
                         onChange={handleChange}
                     />
@@ -194,7 +212,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 {message && <p className="success-message">{message}</p>}
                 {error && <p className="error-message">{error}</p>}
 
-                <button type="submit" disabled={isLoading}>
+                <button
+                    type="submit"
+                    disabled={isLoading || !isDirty}
+                >
                     {isLoading ? 'Se salvează...' : 'Salvează Modificările'}
                 </button>
             </form>

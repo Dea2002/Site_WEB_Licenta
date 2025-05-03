@@ -1,8 +1,7 @@
-// frontend/src/Login.tsx
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext, User } from "./AuthContext";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Bara_navigatie from "./NavBars/Bara_navigatie";
 import "./Login.css";
 import jwt_decode from 'jwt-decode';
@@ -13,9 +12,6 @@ const Login: React.FC = () => {
     const [error, setError] = useState("");
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
-    const location = useLocation();
-    const from = (location.state as any)?.from?.pathname || "/";
-    const { token } = useContext(AuthContext);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

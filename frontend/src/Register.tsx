@@ -28,7 +28,7 @@ interface FacultyFormState {
     documentOficial: File | null; // Store the File object
     numeRector: string;
     emailSecretariat: string;
-    numarTelefonSecretariat: string;
+    phoneNumber: string;
     websiteOficial: string;
     password: string;
     confirmPassword: string;
@@ -90,7 +90,7 @@ const Register: React.FC = () => {
         documentOficial: null,
         numeRector: "",
         emailSecretariat: "",
-        numarTelefonSecretariat: "",
+        phoneNumber: "",
         websiteOficial: "",
         password: "",
         confirmPassword: "",
@@ -289,7 +289,7 @@ const Register: React.FC = () => {
             documentOficial,
             numeRector,
             emailSecretariat,
-            numarTelefonSecretariat,
+            phoneNumber,
             websiteOficial,
             password,
             confirmPassword,
@@ -307,7 +307,7 @@ const Register: React.FC = () => {
             !documentOficial ||
             !numeRector ||
             !emailSecretariat ||
-            !numarTelefonSecretariat ||
+            !phoneNumber ||
             !password
         ) {
             setError("Toate campurile marcate cu * sunt obligatorii");
@@ -338,7 +338,7 @@ const Register: React.FC = () => {
                 documentUrl,
                 numeRector,
                 emailSecretariat,
-                numarTelefonSecretariat,
+                phoneNumber,
                 websiteOficial,
                 password,
                 role: "facultate",
@@ -352,7 +352,7 @@ const Register: React.FC = () => {
                 documentOficial: null,
                 numeRector: "",
                 emailSecretariat: "",
-                numarTelefonSecretariat: "",
+                phoneNumber: "",
                 websiteOficial: "",
                 password: "",
                 confirmPassword: "",
@@ -775,12 +775,12 @@ const Register: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label htmlFor="numarTelefonSecretariat">Telefon Secretariat:*</label>
+                            <label htmlFor="phoneNumber">Telefon Secretariat:*</label>
                             <input
                                 type="tel"
-                                id="numarTelefonSecretariat"
-                                name="numarTelefonSecretariat"
-                                value={facultyFormState.numarTelefonSecretariat}
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                value={facultyFormState.phoneNumber}
                                 onChange={handleFacultyChange}
                                 required
                                 pattern="[0-9]{10}"

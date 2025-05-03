@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Bara_navigatie from "./NavBars/Bara_navigatie";
 import LoginModal from "./LoginModal";
-import { AuthContext } from "./AuthContext";
 import { Apartment } from "./types"; // Make sure Apartment type includes all relevant fields
 import "./style.css"; // Your existing CSS for Home
 import MapModal from "./MapModal"; // Assuming this is used elsewhere or for future use
@@ -207,11 +206,6 @@ const Home: React.FC = () => {
             [filterName]: value,
         }));
         // Note: Filtering does NOT happen automatically here anymore
-    };
-
-    // Handler for the refresh button (explicitly triggers filtering with current state)
-    const handleRefreshButtonClick = () => {
-        applyFilters(apartments, filters);
     };
 
     // Reset Filters Function

@@ -33,7 +33,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         body('fullName').notEmpty().withMessage('Denumirea completa este necesara'),
         body('numeRector').notEmpty().withMessage('Nume Rector este necesar'),
         body('emailSecretariat').isEmail().withMessage('Email invalid'),
-        body('numarTelefonSecretariat').notEmpty().withMessage('Numar de telefon secretariat este necesar'),
+        body('phoneNumber').notEmpty().withMessage('Numar de telefon secretariat este necesar'),
         body('password').isLength({ min: 6 }).withMessage('Parola trebuie sa aiba cel putin 6 caractere'),
     ], async (req, res) => {
         const errors = validationResult(req);
@@ -41,7 +41,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { fullName, abreviere, numeRector, emailSecretariat, numarTelefonSecretariat, logoUrl, documentUrl, password, role } = req.body;
+        const { fullName, abreviere, numeRector, emailSecretariat, phoneNumber, logoUrl, documentUrl, password, role } = req.body;
 
         try {
 
@@ -64,7 +64,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 abreviere,
                 numeRector,
                 emailSecretariat,
-                numarTelefonSecretariat,
+                phoneNumber,
                 logoUrl,
                 documentUrl,
                 password: hashedPassword,
