@@ -46,7 +46,7 @@ function NavBar() {
                             id="user-nav-dropdown"
                             align="end"
                         >
-                            <NavDropdown.Item as={Link} to="/profile">
+                            <NavDropdown.Item as={Link} to="/profile_faculty">
                                 <i
                                     className="fa-solid fa-user-pen"
                                     style={{ marginRight: "6px" }}

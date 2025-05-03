@@ -1,21 +1,27 @@
-// frontend/src/PrivateRoute.tsx
-import React, { useContext } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import React from "react";
+import { useContext } from "react";
 import { AuthContext } from "./AuthContext";
+import { Navigate, Outlet } from "react-router-dom";
+import { User } from "./AuthContext";
 
-interface PrivateRouteProps {
-    children: JSX.Element;
+interface Props {
+    allowedRoles?: User["role"][];
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const { isAuthenticated } = useContext(AuthContext);
-    const location = useLocation();
+// Dacă nu ești logat => login.
+// Dacă ai rol, dar nu ești în allowedRoles => /unauthorized (sau altă pagină).
+// Altfel, afișează ruta copil cu <Outlet/>.
+export const PrivateRoute: React.FC<Props> = ({ allowedRoles }) => {
+    const { isAuthenticated, user } = useContext(AuthContext);
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+        return <Navigate to="/login" replace />;
     }
-
-    return children;
+    if (allowedRoles && !allowedRoles.includes(user!.role)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
+    return <Outlet />;
 };
+
 
 export default PrivateRoute;

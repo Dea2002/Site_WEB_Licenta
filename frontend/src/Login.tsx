@@ -1,10 +1,11 @@
 // frontend/src/Login.tsx
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { AuthContext } from "./AuthContext";
+import { AuthContext, User } from "./AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import Bara_navigatie from "./Bara_navigatie";
 import "./Login.css";
+import jwt_decode from 'jwt-decode';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState(""); // Schimbat de la 'username' la 'email'
@@ -14,21 +15,33 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const from = (location.state as any)?.from?.pathname || "/";
+    const { token } = useContext(AuthContext);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/auth/login", {
-                email,
-                password,
-            });
-            console.log(response.data);
-            login(response.data.token);
-            if (response.data.role === "admin") {
+            const payload = { email, password };
+            const response = await axios.post("http://localhost:5000/auth/login",
+                payload,
+                // {
+                //     headers: {
+                //         Authorization: `Bearer ${token}`
+                //     }
+                // }
+            );
+
+            const { token } = response.data;
+
+            // stochez token-ul si user-ul in context
+            const decoded = jwt_decode<User & { iat: number; exp: number }>(token);
+            login(token, decoded);
+
+            // redirect in functie de rol
+            if (decoded.role === "admin") {
                 navigate("/admin/dashboard");
-            } else if (response.data.role === "proprietar") {
+            } else if (decoded.role === "proprietar") {
                 navigate("/owner-dashboard");
-            } else if (response.data.role === "facultate") {
+            } else if (decoded.role === "facultate") {
                 navigate("/faculty_dashboard")
             } else {
                 navigate(from, { replace: true });

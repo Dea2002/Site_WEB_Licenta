@@ -260,8 +260,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             console.log(errors);
-
-
             return res.status(400).json({ errors: errors.array() });
         }
 
@@ -278,12 +276,13 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                     return res.status(401).json({ message: 'Email sau parola incorecte' });
                 }
 
+                // creez user-ul
+                const userLogin = { userId: user._id, fullName: user.fullName, role: user.role, email: user.email }; //! posibile modificari necesare
                 // Creeaza tokenul JWT
-                const token = jwt.sign({ userId: user._id, fullName: user.fullName, role: user.role, email: user.email },
-                    process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                const token = jwt.sign(userLogin, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
-                return res.status(200).json({ message: 'Autentificare reusita', token, role: user.role });
+                return res.status(200).json({ message: 'Autentificare reusita', token });
             }
 
             const faculty = await facultiesCollection.findOne({ emailSecretariat: email });
@@ -294,12 +293,13 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                     return res.status(401).json({ message: 'Email sau parola incorecte' });
                 }
 
+                // creez obiectul facultate
+                const facultyLogin = { userId: faculty._id, fullName: faculty.denumireaCompleta, role: faculty.role, email: faculty.emailSecretariat };
                 // Creeaza tokenul JWT
-                const token = jwt.sign({ userId: faculty._id, fullName: faculty.denumireaCompleta, role: faculty.role, email: faculty.emailSecretariat },
-                    process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                const token = jwt.sign(facultyLogin, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
-                return res.status(200).json({ message: 'Autentificare reusita', token, role: faculty.role });
+                return res.status(200).json({ message: 'Autentificare reusita', token });
             }
 
             return res.status(401).json({ message: 'Email sau parola incorecte' });

@@ -25,7 +25,9 @@ import FacultyAssociations from './FacultyAssociations';
 import FacultyMarks from './FacultyMarks';
 // import Bara_navigatie from "./Bara_navigatie";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Profile from "./Profile";
+import Profile_student from "./profiles/Profile_student";
+import Profile_owner from "./profiles/Profile_owner";
+import Profile_faculty from "./profiles/Profile_faculty";
 
 const App: React.FC = () => {
     return (
@@ -36,31 +38,49 @@ const App: React.FC = () => {
                 {/* Pagina Home cu oferte */}
                 <Route path="/home" element={<Home />} />
                 <Route path="/apartment/:id" element={<ApartmentDetails />} />
+
+                {/* rute publice */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route
+
+
+                {/* <Route
                     path="/reservation"
                     element={
                         <PrivateRoute>
                             <Reservation />
                         </PrivateRoute>
                     }
-                />
-                <Route
+                /> */}
+                {/* <Route
                     path="/confirmation"
                     element={
                         <PrivateRoute>
                             <Confirmation />
                         </PrivateRoute>
                     }
-                />
-                <Route path="/profile" element={<Profile />} />
-                <Route element={<AdminRoute />}>
+                /> */}
+
+                <Route element={<PrivateRoute allowedRoles={["student"]} />}>
+                    <Route path="/profile_student" element={<Profile_student />} />
+                </Route>
+
+                <Route element={<PrivateRoute allowedRoles={["proprietar"]} />}>
+                    <Route path="/profile_owner" element={<Profile_owner />} />
+
+                </Route>
+
+                <Route element={<PrivateRoute allowedRoles={["facultate"]} />}>
+                    <Route path="/profile_faculty" element={<Profile_faculty />} />
+                </Route>
+
+                <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
                     <Route path="/admin/dashboard" element={<DashboardAdmin />} />
                     <Route path="/admin/users" element={<UserListAdmin />} />
                     <Route path="/admin/apartments" element={<ApartmentsListAdmin />} />
                     <Route path="/admin/owners" element={<OwnersListAdmin />} />
                 </Route>
+
 
                 {/* Ruta pentru dashboard-ul proprietar - disponibila pentru proprietari */}
                 <Route path="/owner-dashboard" element={<DashboardOwner />} />

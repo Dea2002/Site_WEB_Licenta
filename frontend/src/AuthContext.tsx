@@ -1,18 +1,21 @@
+// frontend/src/AuthContext.tsx
 import React, { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import axios from "axios";
 
-interface User {
+export interface User {
     _id: string;
     fullName: string;
     email: string;
     phoneNumber: string;
     gender: string;
-    role: string;
-    faculty: string;
-    faculty_valid: boolean;
-    medie_valid: Date;
-    medie: string | null;
+    role: "student" | "proprietar" | "facultate" | "admin";
+    faculty?: string;
+    faculty_valid?: boolean;
+    medie_valid?: string;  // observă: string ISO
+    medie?: string | null;
+    iat: number;
+    exp: number;
 }
 
 interface AuthContextType {
@@ -20,7 +23,7 @@ interface AuthContextType {
     user: User | null;
     token: string | null;
     setUser: (user: User | null) => void;
-    login: (token: string) => void; // Adaugat
+    login: (token: string, decoded: User) => void;
     logout: () => void;
 }
 
@@ -29,7 +32,7 @@ export const AuthContext = createContext<AuthContextType>({
     user: null,
     token: null,
     setUser: () => { },
-    login: () => { }, // Adaugat
+    login: () => { },
     logout: () => { },
 });
 
@@ -38,38 +41,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
 
+    // interceptor Axios
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-            setToken(storedToken);
+        const i = axios.interceptors.request.use((config) => {
+            if (token) config.headers!["Authorization"] = `Bearer ${token}`;
+            return config;
+        });
+        return () => axios.interceptors.request.eject(i);
+    }, [token]);
+
+    // preia token de pe localStorage
+    useEffect(() => {
+        const t = localStorage.getItem("token");
+        if (t) {
+            const decoded = jwt_decode<User>(t);
+            setToken(t);
+            setUser(decoded);
             setIsAuthenticated(true);
-            const decoded: any = jwt_decode(storedToken);
-            setUser({
-                _id: decoded.userId,
-                fullName: decoded.fullName,
-                email: decoded.email,
-                phoneNumber: decoded.phoneNumber,
-                gender: decoded.gender,
-                role: decoded.role,
-                faculty: decoded.faculty,
-            });
         }
     }, []);
 
-    const login = (token: string) => {
-        localStorage.setItem("token", token);
-        setToken(token);
+    const login = (newToken: string, decoded: User) => {
+        localStorage.setItem("token", newToken);
+        setToken(newToken);
+        setUser(decoded);
         setIsAuthenticated(true);
-        const decoded: any = jwt_decode(token);
-        setUser({
-            _id: decoded.userId,
-            fullName: decoded.fullName,
-            email: decoded.email,
-            phoneNumber: decoded.phoneNumber,
-            gender: decoded.gender,
-            role: decoded.role,
-            faculty: decoded.faculty,
-        });
     };
 
     const logout = () => {
@@ -80,7 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, token, setUser, login, logout }}>
+        <AuthContext.Provider
+            value={{ isAuthenticated, user, token, setUser, login, logout }}
+        >
             {children}
         </AuthContext.Provider>
     );
