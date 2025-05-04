@@ -457,7 +457,7 @@ const Register: React.FC = () => {
 
             return (
                 <div className="register-container student-form">
-                    <h1>inregistrare Student</h1>
+                    <h1>Inregistrare Student</h1>
                     <form onSubmit={handleStudentSubmit} className="register-form">
                         {/* Student Form Fields... */}
                         <div>

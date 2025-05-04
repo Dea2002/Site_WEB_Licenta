@@ -3,7 +3,7 @@ import { AuthContext, User } from '../../AuthContext'; // Importăm User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_student.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
-import { parseISO, isAfter } from "date-fns";
+import { parseISO, isAfter, format } from "date-fns";
 
 interface EditProfileProps {
     user: User; // Primim datele curente ale userului
@@ -19,6 +19,9 @@ interface ProfileFormState {
     anUniversitar?: string;
     medie?: string;
     medie_valid?: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
@@ -33,8 +36,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         anUniversitar: user.anUniversitar,
         medie: user.medie,
         medie_valid: user.medie_valid,
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
     });
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
+    const initialMatricol = initialFormStateRef.current.numar_matricol;
 
     // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
@@ -45,42 +52,56 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     // Funcție pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
         setMessage('');
         setError('');
 
+        // Dacă user a completat vreun câmp de parolă, atunci trebuie să le validezi
+        const { currentPassword, newPassword, confirmNewPassword, ...rest } = profileFormState;
+        const wantsToChangePassword =
+            currentPassword || newPassword || confirmNewPassword;
+
+        if (wantsToChangePassword) {
+            if (!currentPassword || !newPassword || !confirmNewPassword) {
+                setError("Completează toate câmpurile pentru schimbarea parolei.");
+                return;
+            }
+            if (newPassword !== confirmNewPassword) {
+                setError("Parola nouă și confirmarea nu coincid.");
+                return;
+            }
+            if (newPassword.length < 6) {
+                setError("Parola nouă trebuie să aibă cel puțin 6 caractere.");
+                return;
+            }
+        }
+
+        setIsLoading(true);
+        // 1. Construiești payload-ul exact din form state
+        // const updatedData: ProfileFormState = { ...profileFormState };
         const updatedData = {
+            ...rest,
+            password: newPassword
         };
 
         try {
-            // Presupunem un endpoint /users/me sau /users/:id pentru update
-            // Folosim PATCH pentru actualizări parțiale
+            // 2. Trimiți toate datele către backend
             const response = await axios.patch(
-                `http://localhost:5000/users/me`, // Sau `/users/${user.userId}`
-                updatedData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
+                `http://localhost:5000/users/edit_profile`,
+                { userId: user._id, ...updatedData },
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            // Daca backend-ul returneaza noul token (optional, dar bun daca se schimba ceva in payload)
-            if (response.data.token) {
-                const { token } = response.data;
-                const decoded = jwt_decode<User & { iat: number; exp: number }>(token);
-                login(response.data.token, decoded); // Actualizeaza contextul cu noul token/user data
-                setMessage('Profil actualizat cu succes!');
-            } else {
-                // Daca nu vine token nou, ar trebui sa re-fetch user data sau sa actualizam manual contextul
-                // Aici doar afisam mesaj, dar ideal ar fi sa actualizam si user-ul din context
-                setMessage('Profil actualizat. Reîmprospătați pagina pentru a vedea toate modificările.');
-                // TODO: Implementează o modalitate de a actualiza user-ul din context fără token nou
-            }
+            const newToken = response.data.token;
+            const decoded = jwt_decode<User & { iat: number; exp: number }>(newToken);
+            login(newToken, decoded);
+            setMessage("Profil actualizat cu succes!");
+
+            // resetăm „dirty” pentru a putea detecta viitoare schimbări
+            initialFormStateRef.current = { ...profileFormState };
 
         } catch (err: any) {
-            console.error("Eroare la actualizarea profilului:", err);
-            setError(err.response?.data?.message || 'A apărut o eroare la actualizare.');
+            console.error("Eroare la actualizare:", err);
+            setError(err.response?.data?.message || "A apărut o eroare la actualizare.");
         } finally {
             setIsLoading(false);
         }
@@ -106,9 +127,15 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             // @ts-ignore – ca să poţi indexa generic
             value !== initialFormStateRef.current[key]
     );
+
+    const validUntil = parseISO(profileFormState.medie_valid!);
+    const canEditMedie = isAfter(new Date(), validUntil);
+    const formattedMedieValid = profileFormState.medie_valid
+        ? format(parseISO(profileFormState.medie_valid), 'dd-MM-yyyy')
+        : '';
     return (
         <div className="profile-section-content">
-            <h2>Editare Profil</h2>
+            <h2>Editare Profil Student</h2>
             <form onSubmit={handleSubmit} className="edit-profile-form">
                 <div className="form-group">
                     <label htmlFor="email">Email:</label>
@@ -162,7 +189,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         type="text"
                         id="faculty_valid"
                         name="faculty_valid"
-                        value={profileFormState.faculty_valid ? "Da" : "Nu"}
+                        value={profileFormState.faculty_valid == true ? "Da" : "Nu"}
                         onChange={handleChange}
                         disabled
                     />
@@ -175,6 +202,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         name="numar_matricol"
                         value={profileFormState.numar_matricol}
                         onChange={handleChange}
+                        disabled={!!initialMatricol}
                     />
                 </div>
                 <div className="form-group">
@@ -195,19 +223,55 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         name="medie"
                         value={profileFormState.medie}
                         onChange={handleChange}
+                        disabled={!canEditMedie} // dacă nu e valabilă, nu poate fi editată
                     />
+                    {!canEditMedie && (
+                        <small>Medie valabilă până la {format(validUntil, "dd/MM/yyyy")}</small>
+                    )}
                 </div>
                 <div className="form-group">
                     <label htmlFor="medie_valid">Termen valabilitate medie:</label>
                     <input
-                        type="date"
+                        type="text"
                         id="medie_valid"
                         name="medie_valid"
-                        value={profileFormState.medie_valid ? profileFormState.medie_valid!.substring(0, 10) : ''}
+                        value={formattedMedieValid}
+                        disabled
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="currentPassword">Parola curentă:</label>
+                    <input
+                        type="password"
+                        id="currentPassword"
+                        name="currentPassword"
+                        value={profileFormState.currentPassword}
                         onChange={handleChange}
                     />
                 </div>
-                {/* Adaugă aici alte câmpuri editabile */}
+
+                <div className="form-group">
+                    <label htmlFor="newPassword">Parola nouă:</label>
+                    <input
+                        type="password"
+                        id="newPassword"
+                        name="newPassword"
+                        value={profileFormState.newPassword}
+                        onChange={handleChange}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="confirmNewPassword">Confirmă parola nouă:</label>
+                    <input
+                        type="password"
+                        id="confirmNewPassword"
+                        name="confirmNewPassword"
+                        value={profileFormState.confirmNewPassword}
+                        onChange={handleChange}
+                    />
+                </div>
 
                 {message && <p className="success-message">{message}</p>}
                 {error && <p className="error-message">{error}</p>}
