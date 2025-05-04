@@ -157,7 +157,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="faculty_valid">Facultatea asociata:</label>
+                    <label htmlFor="faculty_valid">Facultatea asociata?:</label>
                     <input
                         type="text"
                         id="faculty_valid"

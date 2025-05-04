@@ -49,8 +49,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setMessage('');
         setError('');
 
-        const updatedData = {
-        };
+        const updatedData: ProfileFormState = { ...profileFormState };
 
         try {
             const response = await axios.patch(

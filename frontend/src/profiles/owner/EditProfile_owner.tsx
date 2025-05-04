@@ -98,10 +98,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setError("");
     }
 
-    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) și-l transformă în Date
-    const semestruDate = parseISO(profileFormState.medie_valid!);
-    // doar dacă azi > semestruDate putem edita
-    const canEdit = isAfter(new Date(), semestruDate);
+
     // compară câmp cu câmp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
