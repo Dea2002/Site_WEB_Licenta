@@ -1,9 +1,10 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext, User } from '../../AuthContext'; // Importăm User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_student.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
 import { parseISO, isAfter, format } from "date-fns";
+import { useNavigate, Link } from "react-router-dom";
 
 interface EditProfileProps {
     user: User; // Primim datele curente ale userului
@@ -48,12 +49,51 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request și login pt update context
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Când "user" din context se schimbă (după login), reconstruim formData
+        if (!user) return;
+        const newState: ProfileFormState = {
+            fullName: user.fullName,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            faculty: user.faculty,
+            faculty_valid: user.faculty_valid,
+            numar_matricol: user.numar_matricol,
+            anUniversitar: user.anUniversitar,
+            medie: user.medie,
+            medie_valid: user.medie_valid,
+            currentPassword: "",
+            newPassword: "",
+            confirmNewPassword: "",
+        };
+        setProfilFormState(newState);
+        initialFormStateRef.current = newState;
+    }, [user]);
 
     // Funcție pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage('');
         setError('');
+
+        // validarea mediei introduse
+        const medieNum = parseFloat(profileFormState.medie!.replace(',', '.'));
+        if (isNaN(medieNum) || medieNum < 5.0 || medieNum > 10.0) {
+            setError("Medie invalidă. Trebuie să fie între 5.0 și 10.0.");
+            return;
+        }
+        let medieRange = "";
+        if (medieNum >= 9.5) {
+            medieRange = "Categoria 1: (9.50 - 10.00)";
+        } else if (medieNum >= 9.0) {
+            medieRange = "Categoria 2: (9.00 - 9.49)";
+        } else if (medieNum >= 8.5) {
+            medieRange = "Categoria 3: (8.50 - 8.99)";
+        } else if (medieNum >= 5.0) {
+            medieRange = "Categoria 4: (5.00 - 8.49)";
+        }
 
         // Dacă user a completat vreun câmp de parolă, atunci trebuie să le validezi
         const { currentPassword, newPassword, confirmNewPassword, ...rest } = profileFormState;
@@ -80,7 +120,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         // const updatedData: ProfileFormState = { ...profileFormState };
         const updatedData = {
             ...rest,
-            password: newPassword
+            password: newPassword,
+            medie: medieRange
         };
 
         try {
@@ -97,8 +138,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             setMessage("Profil actualizat cu succes!");
 
             // resetăm „dirty” pentru a putea detecta viitoare schimbări
-            initialFormStateRef.current = { ...profileFormState };
-
+            // initialFormStateRef.current = { ...profileFormState };
+            setTimeout(() => navigate("/home"), 3000);
         } catch (err: any) {
             console.error("Eroare la actualizare:", err);
             setError(err.response?.data?.message || "A apărut o eroare la actualizare.");
