@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
 import { AuthContext } from "./AuthContext";
-import Bara_navigatie from "./NavBars/Bara_navigatie"; // Your Navbar component
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
 import { format, differenceInCalendarDays } from "date-fns";

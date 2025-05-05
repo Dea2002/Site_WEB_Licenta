@@ -3,7 +3,7 @@ import axios from "axios";
 import { AuthContext } from "./AuthContext";
 import { parseISO, format } from 'date-fns';
 import "./NotificationDashboard.css";
-
+import { useNotifications } from './NotificationContext';
 interface Notification {
     _id: string;
     message: string;
@@ -18,26 +18,31 @@ const NotificationDashboard: React.FC = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [error, setError] = useState<string | null>(null);
 
+    const { refresh: refreshUnread } = useNotifications(); // refresh notifications
+
+    const fetchNotifications = async () => {
+        if (!token || !user?._id) {
+            setNotifications([]);
+            setError('Nu eşti autentificat.');
+            return;
+        }
+        try {
+            const resp = await axios.get<Notification[]>(
+                'http://localhost:5000/notifications',
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setNotifications(resp.data);
+            console.log(resp.data);
+
+        } catch (err: any) {
+            console.error('Eroare la fetch notificări:', err);
+            setError('Nu am putut încărca notificările.');
+        }
+    };
+
     useEffect(() => {
-        const fetchNotifications = async () => {
-            if (!token || !user?._id) {
-                setError('Nu eşti autentificat.');
-                return;
-            }
-            try {
-                const resp = await axios.get<Notification[]>(
-                    'http://localhost:5000/notifications',
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                setNotifications(resp.data);
-                console.log(resp.data);
-
-            } catch (err: any) {
-                console.error('Eroare la fetch notificări:', err);
-                setError('Nu am putut încărca notificările.');
-            }
-        };
-
+        setNotifications([]);
+        setError(null);
         fetchNotifications();
     }, [token, user?._id]);
 
@@ -49,11 +54,8 @@ const NotificationDashboard: React.FC = () => {
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setNotifications(prev =>
-                prev.map(n =>
-                    n._id === id ? { ...n, isRead: true } : n
-                )
-            );
+            await fetchNotifications();
+            refreshUnread();
         } catch (err) {
             console.error('Eroare la marcarea citirii:', err);
         }
@@ -66,9 +68,9 @@ const NotificationDashboard: React.FC = () => {
                 `http://localhost:5000/notifications/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setNotifications(prev =>
-                prev.filter(n => n._id !== id)
-            );
+
+            await fetchNotifications();
+            refreshUnread();
         } catch (err) {
             console.error('Eroare la ștergerea notificării:', err);
         }

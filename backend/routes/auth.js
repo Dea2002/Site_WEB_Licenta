@@ -296,8 +296,13 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                     return res.status(401).json({ message: 'Email sau parola incorecte' });
                 }
 
+                const facultyObj = {
+                    ...faculty,
+                    _id: faculty._id.toString()
+                };
+
                 // Creeaza tokenul JWT
-                const token = jwt.sign(faculty, process.env.ACCESS_SECRET, { expiresIn: '1h' }
+                const token = jwt.sign(facultyObj, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
                 return res.status(200).json({ message: 'Autentificare reusita', token });
