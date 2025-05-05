@@ -40,7 +40,6 @@ const ReservationHistory: React.FC = () => {
 
     return (
         <>
-            <Bara_nav_OwnerDashboard />
             <div className="reservation-history-container">
                 <h1>Istoric rezervari</h1>
                 <div className="history-list">

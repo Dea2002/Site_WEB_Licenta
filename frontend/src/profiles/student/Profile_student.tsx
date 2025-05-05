@@ -19,7 +19,6 @@ const Profile_student: React.FC = () => {
         // Poți adăuga o redirecționare sau un placeholder aici
         return (
             <>
-                <Bara_navigatie />
                 <div className="user-profile-container">
                     <p>Trebuie să fii autentificat pentru a vedea această pagină.</p>
                 </div>
@@ -42,7 +41,6 @@ const Profile_student: React.FC = () => {
 
     return (
         <>
-            <Bara_navigatie />
             <div className="user-profile-page-container">
                 {/* Acest div reprezintă "dreptunghiul mare" */}
                 <div className="profile-content-box">

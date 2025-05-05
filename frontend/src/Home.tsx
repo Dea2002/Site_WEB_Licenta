@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Bara_navigatie from "./NavBars/Bara_navigatie";
 import LoginModal from "./LoginModal";
 import { Apartment } from "./types"; // Make sure Apartment type includes all relevant fields
 import "./style.css"; // Your existing CSS for Home
@@ -223,7 +222,6 @@ const Home: React.FC = () => {
     // Render component (existing code structure)
     return (
         <div>
-            <Bara_navigatie />
             {/* Keep h1 commented out if desired */}
             <div className="home-container">
                 {" "}

@@ -144,7 +144,6 @@ const ApartmentDetails: React.FC = () => {
     if (!apartment && error) {
         return (
             <div>
-                <Bara_navigatie />
                 <div className="loading-error-container">
                     <p className="error">{error}</p>
                 </div>
@@ -154,7 +153,6 @@ const ApartmentDetails: React.FC = () => {
     if (!apartment) {
         return (
             <div>
-                <Bara_navigatie />
                 <div className="loading-error-container">
                     <p>Se incarca detaliile apartamentului...</p>
                 </div>
@@ -238,7 +236,6 @@ const ApartmentDetails: React.FC = () => {
     // Main component render
     return (
         <div className="apartment-details-page">
-            <Bara_navigatie />
             <div className="details-container">
                 {/* === Partea stanga (Imagine + Detalii Grupate) === */}
                 <div className="left-section">

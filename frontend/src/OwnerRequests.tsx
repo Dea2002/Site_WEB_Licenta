@@ -82,7 +82,6 @@ const OwnerRequests: React.FC = () => {
 
     return (
         <>
-            <Bara_nav_OwnerDashboard />
             <div className="owner-requests-container">
                 <h1>Cereri de rezervare</h1>
                 {successMessage && <div className="success-message">{successMessage}</div>}

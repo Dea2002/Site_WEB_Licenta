@@ -12,7 +12,6 @@ const Confirmation: React.FC = () => {
 
     return (
         <div>
-            <Bara_navigatie />
             <h1>Rezervare Confirmata</h1>
             <p>Multumim! Rezervarea ta a fost efectuata cu succes.</p>
             <button onClick={handleBackHome} className="button">

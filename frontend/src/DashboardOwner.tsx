@@ -38,7 +38,6 @@ const DashboardOwner: React.FC = () => {
 
     return (
         <div>
-            <Bara_nav_OwnerDashboard />
             <div className="dashboard-owner-page">
                 <div className="dashboard-owner-apartments">
                     <div className="dashboard-header">

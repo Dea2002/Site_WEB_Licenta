@@ -140,7 +140,6 @@ const OwnerListNewApartment: React.FC = () => {
     return (
         <div className="page-container">
             {" "}
-            <Bara_nav_OwnerDashboard />
             <div className="form-card-container">
                 <h1>Listeaza un apartament nou</h1>
                 {message && (

@@ -28,7 +28,6 @@ const OwnerApartments: React.FC = () => {
 
     return (
         <>
-            <Bara_nav_OwnerDashboard />
             <div className="owner-apartments-container">
                 {/* <h1>Apartamentele tale</h1> */}
                 <div className="apartments-owner-list">
