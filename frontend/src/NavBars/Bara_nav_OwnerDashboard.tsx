@@ -1,11 +1,15 @@
 import { useContext } from "react";
-import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
+import { Navbar, Container, Nav, NavDropdown, Badge } from "react-bootstrap";
 import { AuthContext } from "../AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import "./navbar_dashboard_owner.css";
+import { useNotifications } from "../NotificationContext";
+import { IoIosNotifications } from "react-icons/io";
+import { MdNotificationsActive } from "react-icons/md";
 
 function NavBar() {
     const { isAuthenticated, user, logout } = useContext(AuthContext);
+    const { unreadCount } = useNotifications();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -20,14 +24,6 @@ function NavBar() {
                 <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                     {/* Dropdown-uri din partea stanga */}
                     <Nav className="nav nav-underline align-items-center" style={{ gap: "1rem" }}>
-                        {/* <NavDropdown title="Cereri" id="requests-dropdown" align="start">
-                            <NavDropdown.Item as={Link} to="/owner/reservation_requests">
-                                Vezi cereri
-                            </NavDropdown.Item>
-                        </NavDropdown> */}
-                        {/* <NavDropdown title="Istoric rezervari" id="history-dropdown" align="start">
-                            <NavDropdown.Item disabled>Istoric gol momentan</NavDropdown.Item>
-                        </NavDropdown> */}
                         <Nav.Link as={Link} to="/owner/reservation_requests">
                             Cereri
                         </Nav.Link>
@@ -35,7 +31,24 @@ function NavBar() {
                             Istoric rezervari
                         </Nav.Link>
                     </Nav>
-
+                    <Nav
+                        justify
+                        className="nav nav-underline align-items-center"
+                        style={{ gap: "1rem" }}
+                    >
+                        {isAuthenticated && (<Nav.Link as={Link} to="/notifications">
+                            Notificari
+                            {unreadCount > 0
+                                ? <MdNotificationsActive size={20} color="#dba979" style={{ marginLeft: '4px' }} /> // cand am cel putin o notificare necitita
+                                : <IoIosNotifications size={20} color="#dba979" style={{ marginLeft: '4px' }} /> // cand nu am nicio notificare necitita
+                            }
+                            {unreadCount > 0 && (
+                                <Badge pill bg="danger" className="position-absolute translate-middle">
+                                    {unreadCount}
+                                </Badge>
+                            )}
+                        </Nav.Link>)}
+                    </Nav>
                     {/* Meniul din dreapta */}
                     {isAuthenticated ? (
                         <Nav justify className="nav  nav-underline">
