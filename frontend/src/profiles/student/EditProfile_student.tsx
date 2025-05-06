@@ -43,6 +43,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     });
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
     const initialMatricol = initialFormStateRef.current.numar_matricol;
+    const initialMedie = initialFormStateRef.current.medie;
 
     // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
@@ -79,21 +80,28 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setMessage('');
         setError('');
 
-        // validarea mediei introduse
-        const medieNum = parseFloat(profileFormState.medie!.replace(',', '.'));
-        if (isNaN(medieNum) || medieNum < 5.0 || medieNum > 10.0) {
-            setError("Medie invalidă. Trebuie să fie între 5.0 și 10.0.");
-            return;
-        }
         let medieRange = "";
-        if (medieNum >= 9.5) {
-            medieRange = "Categoria 1: (9.50 - 10.00)";
-        } else if (medieNum >= 9.0) {
-            medieRange = "Categoria 2: (9.00 - 9.49)";
-        } else if (medieNum >= 8.5) {
-            medieRange = "Categoria 3: (8.50 - 8.99)";
-        } else if (medieNum >= 5.0) {
-            medieRange = "Categoria 4: (5.00 - 8.49)";
+        // validarea mediei introduse
+        if (profileFormState.medie !== initialMedie) {
+            const medieNum = parseFloat(profileFormState.medie!.replace(',', '.'));
+            if (isNaN(medieNum) || medieNum < 5.0 || medieNum > 10.0) {
+                setError("Medie invalidă. Trebuie să fie între 5.0 și 10.0.");
+                return;
+            }
+
+            if (!profileFormState.numar_matricol) {
+                setError("Numar matricol gol, va rugam completati acest camp.");
+                return;
+            }
+            if (medieNum >= 9.5) {
+                medieRange = "Categoria 1: (9.50 - 10.00)";
+            } else if (medieNum >= 9.0) {
+                medieRange = "Categoria 2: (9.00 - 9.49)";
+            } else if (medieNum >= 8.5) {
+                medieRange = "Categoria 3: (8.50 - 8.99)";
+            } else if (medieNum >= 5.0) {
+                medieRange = "Categoria 4: (5.00 - 8.49)";
+            }
         }
 
         // Dacă user a completat vreun câmp de parolă, atunci trebuie să le validezi
@@ -116,13 +124,21 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         }
 
         setIsLoading(true);
+        let updatedData = {}
         // 1. Construiești payload-ul exact din form state
         // const updatedData: ProfileFormState = { ...profileFormState };
-        const updatedData = {
-            ...rest,
-            password: newPassword,
-            medie: medieRange
-        };
+        if (profileFormState.medie !== initialMedie) {
+            updatedData = {
+                ...rest,
+                password: newPassword,
+                medie: medieRange
+            };
+
+        } else {
+            updatedData = {
+                ...rest, password: newPassword
+            }
+        }
 
         try {
             // 2. Trimiți toate datele către backend

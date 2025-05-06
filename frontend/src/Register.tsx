@@ -537,6 +537,7 @@ const Register: React.FC = () => {
                                 name="numar_matricol"
                                 value={formState.numar_matricol}
                                 onChange={handleChange}
+                                required={formState.anUniversitar !== "1"}
                             />
                         </div>
 
