@@ -256,7 +256,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         body('password').notEmpty().withMessage('Parola este necesara'),
     ], async (req, res) => {
         console.log("Vreau login");
-
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             console.log(errors);
@@ -282,6 +281,8 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 };
 
                 // Creeaza tokenul JWT
+                console.log("ACCESS_SECRET folosit pentru login:", process.env.ACCESS_SECRET);
+
                 const token = jwt.sign(userObj, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
@@ -302,6 +303,8 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 };
 
                 // Creeaza tokenul JWT
+                console.log("ACCESS_SECRET folosit pentru login:", process.env.ACCESS_SECRET);
+
                 const token = jwt.sign(facultyObj, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 

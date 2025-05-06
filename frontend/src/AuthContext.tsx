@@ -51,14 +51,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return !!localStorage.getItem("token");
     });
 
-    // interceptor Axios
+    // setează header-ul implicit de fiecare dată când tokenul se schimbă
     useEffect(() => {
-        const i = axios.interceptors.request.use((config) => {
-            if (token) config.headers!["Authorization"] = `Bearer ${token}`;
-            return config;
-        });
-        return () => axios.interceptors.request.eject(i);
-    }, [token]);
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        } else {
+            delete axios.defaults.headers.common["Authorization"];
+        }
+    }, [token, isAuthenticated]);
 
     // preia token de pe localStorage
     useEffect(() => {
