@@ -281,8 +281,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 };
 
                 // Creeaza tokenul JWT
-                console.log("ACCESS_SECRET folosit pentru login:", process.env.ACCESS_SECRET);
-
                 const token = jwt.sign(userObj, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 
@@ -303,8 +301,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 };
 
                 // Creeaza tokenul JWT
-                console.log("ACCESS_SECRET folosit pentru login:", process.env.ACCESS_SECRET);
-
                 const token = jwt.sign(facultyObj, process.env.ACCESS_SECRET, { expiresIn: '1h' }
                 );
 

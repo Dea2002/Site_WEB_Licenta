@@ -4,7 +4,7 @@ import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_student.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
 import { parseISO, isAfter, format } from "date-fns";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface EditProfileProps {
     user: User; // Primim datele curente ale userului
@@ -97,8 +97,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
         // Dacă user a completat vreun câmp de parolă, atunci trebuie să le validezi
         const { currentPassword, newPassword, confirmNewPassword, ...rest } = profileFormState;
-        const wantsToChangePassword =
-            currentPassword || newPassword || confirmNewPassword;
+        const wantsToChangePassword = currentPassword || newPassword || confirmNewPassword;
 
         if (wantsToChangePassword) {
             if (!currentPassword || !newPassword || !confirmNewPassword) {
@@ -158,11 +157,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setError("");
     }
 
-    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) și-l transformă în Date
-    const semestruDate = parseISO(profileFormState.medie_valid!);
-    // doar dacă azi > semestruDate putem edita
-    const canEdit = isAfter(new Date(), semestruDate);
-    // compară câmp cu câmp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
             // @ts-ignore – ca să poţi indexa generic

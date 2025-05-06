@@ -20,12 +20,26 @@ export interface User {
     exp: number;
 }
 
+export interface Faculty {
+    _id: string;
+    abreviere: string;
+    emailSecretariat: string;
+    fullName: string;
+    medie_valid: string;
+    numeRector: string;
+    phoneNumber: string;
+    role: "facultate";
+}
+
 interface AuthContextType {
     isAuthenticated: boolean;
-    user: User | null;
+    user?: User | null;
+    faculty?: Faculty | null;
     token: string | null;
     setUser: (user: User | null) => void;
+    setFaculty: (user: Faculty | null) => void;
     login: (token: string, decoded: User) => void;
+    loginFaculty: (token: string, decoded: Faculty) => void;
     logout: () => void;
 }
 
@@ -34,7 +48,9 @@ export const AuthContext = createContext<AuthContextType>({
     user: null,
     token: null,
     setUser: () => { },
+    setFaculty: () => { },
     login: () => { },
+    loginFaculty: () => { },
     logout: () => { },
 });
 
@@ -47,6 +63,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const t = localStorage.getItem("token");
         return t ? jwt_decode<User>(t) : null;
     });
+
+    const [faculty, setFaculty] = useState<Faculty | null>(() => {
+        const t = localStorage.getItem("token");
+        return t ? jwt_decode<Faculty>(t) : null;
+    });
+
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
         return !!localStorage.getItem("token");
     });
@@ -63,11 +85,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // preia token de pe localStorage
     useEffect(() => {
         const t = localStorage.getItem("token");
-        if (t) {
-            const decoded = jwt_decode<User>(t);
-            setToken(t);
+        if (!t) return;
+
+        const decoded: any = jwt_decode(t);
+        setToken(t);
+        setIsAuthenticated(true);
+
+        if (decoded.role === "facultate") {
+            setFaculty(decoded);
+        } else {
             setUser(decoded);
-            setIsAuthenticated(true);
         }
     }, []);
 
@@ -75,19 +102,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("token", newToken);
         setToken(newToken);
         setUser(decoded);
+        setFaculty(null);
+        setIsAuthenticated(true);
+    };
+
+    const loginFaculty = (newToken: string, decoded: Faculty) => {
+        localStorage.setItem("token", newToken);
+        setToken(newToken);
+        setFaculty(decoded);
+        setUser(null);
         setIsAuthenticated(true);
     };
 
     const logout = () => {
         setToken(null);
         setUser(null);
+        setFaculty(null);
         setIsAuthenticated(false);
         localStorage.removeItem("token");
     };
 
     return (
         <AuthContext.Provider
-            value={{ isAuthenticated, user, token, setUser, login, logout }}
+            value={{ isAuthenticated, user, faculty, token, setUser, setFaculty, login, loginFaculty, logout }}
         >
             {children}
         </AuthContext.Provider>

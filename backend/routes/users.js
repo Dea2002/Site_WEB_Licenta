@@ -7,14 +7,6 @@ const jwt = require('jsonwebtoken');
 
 function createUserRoutes(usersCollection) {
 
-    //! daca este o ruta normala, fara autentificare:
-    //! router.<tip_request>('path', async(req, res) => {});
-
-
-    //! daca am nevoie de autentificare pentru ruta:
-    //! router.<tip_request>('path', authenticateToken, async (req, res) => {});
-
-
     router.get('/', async (req, res) => {
         const users = await usersCollection.find({}).toArray();
         res.send(users);

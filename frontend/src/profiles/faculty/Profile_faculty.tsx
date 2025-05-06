@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../AuthContext";
 import "./profile_faculty.css";
-import Bara_navigatie from "../../NavBars/Bara_navigatie_facultate"; // Your Navbar component
 import EditProfile from './EditProfile_faculty';
 import ProfileSidebar from './ProfileSidebar_faculty';
 
@@ -10,26 +9,17 @@ type ProfileSection = 'edit';
 
 const Profile_faculty: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
-    const { user } = useContext(AuthContext); // Preluăm user-ul din context
-    console.log(user);
-    // Dacă nu există user logat, poate redirecționăm sau afișăm un mesaj
-    if (!user) {
-        // Poți adăuga o redirecționare sau un placeholder aici
-        return (
-            <>
-                <div className="user-profile-container">
-                    <p>Trebuie să fii autentificat pentru a vedea această pagină.</p>
-                </div>
-            </>
-        );
+    const { faculty } = useContext(AuthContext); // Preluăm user-ul din context
+    if (!faculty) {
+        return <p>Trebuie să fii autentificat pentru a vedea această pagină.</p>;
     }
 
     const renderSection = () => {
         switch (activeSection) {
             case 'edit':
-                return <EditProfile user={user} />; // Trimitem user-ul către componentă
+                return <EditProfile faculty={faculty} />; // Trimitem user-ul către componentă
             default:
-                return <EditProfile user={user} />; // Sau un mesaj default
+                return <EditProfile faculty={faculty} />; // Sau un mesaj default
         }
     };
 

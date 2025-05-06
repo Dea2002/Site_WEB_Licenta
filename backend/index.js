@@ -254,7 +254,6 @@ async function run() {
 
         // Exemplu de ruta protejata
         app.post('/reserve', authenticateToken, async (req, res) => {
-            console.log("Buna");
             const { apartmentId } = req.body;
             const userId = req.user.userId;
 

@@ -22,7 +22,6 @@ function createNotificationsRoutes(notificationsCollection, notificationService)
     });
 
     router.get('/unread-count', authenticateToken, async (req, res) => {
-        console.log("incerc unread count");
         try {
             const userId = req.user._id;
 

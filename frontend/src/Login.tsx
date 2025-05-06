@@ -10,7 +10,7 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState(""); // Schimbat de la 'username' la 'email'
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const { login } = useContext(AuthContext);
+    const { login, loginFaculty } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -22,8 +22,12 @@ const Login: React.FC = () => {
             const { token } = response.data;
 
             // stochez token-ul si user-ul in context
-            const decoded = jwt_decode<User & { iat: number; exp: number }>(token);
-            login(token, decoded);
+            const decoded: any = jwt_decode<{ iat: number; exp: number }>(token);
+            if (decoded.role === "facultate") {
+                loginFaculty(token, decoded);
+            } else {
+                login(token, decoded);
+            }
 
             // redirect in functie de rol
             if (decoded.role === "admin") {

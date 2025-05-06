@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../AuthContext";
 import "./profile_student.css";
-import Bara_navigatie from "../../NavBars/Bara_navigatie"; // Your Navbar component
 import EditProfile from './EditProfile_student';
 import CurrentRent from './CurrentRent_student';
 import RentHistory from './RentHistory_student';

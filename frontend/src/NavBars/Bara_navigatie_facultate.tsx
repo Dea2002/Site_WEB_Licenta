@@ -9,7 +9,7 @@ import { useNotifications } from "../NotificationContext";
 
 
 function NavBar() {
-    const { isAuthenticated, user, logout } = useContext(AuthContext);
+    const { isAuthenticated, faculty, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const { unreadCount } = useNotifications();
@@ -61,7 +61,7 @@ function NavBar() {
                                         className="fa-solid fa-circle-user"
                                         style={{ fontSize: "20px" }}
                                     />
-                                    <span style={{ marginLeft: "6px" }}>{user?.fullName}</span>
+                                    <span style={{ marginLeft: "6px" }}>{faculty?.fullName}</span>
                                 </span>
                             }
                             id="user-nav-dropdown"

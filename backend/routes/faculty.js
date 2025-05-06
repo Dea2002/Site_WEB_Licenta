@@ -3,6 +3,7 @@ const router = express.Router(); // Creeaza o instanta de Router
 const { ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
+const jwt = require('jsonwebtoken');
 
 
 function createFacultyRoutes(usersCollection, facultiesCollection, notificationService, notificationsCollection, markRequestsCollection, associationsRequestsCollection) {
@@ -165,7 +166,47 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     router.put('/mark/:id/reject', async (req, res) => { });
 
 
+    router.patch('/edit_profile', authenticateToken, async (req, res) => {
+        try {
+            const facultyId = req.user._id;
+            const updates = { ...req.body };
+            const allowed = ['numeRector', 'emailSecretariat', 'phoneNumber', 'medie_valid'];
+            const setFields = {};
 
+            // hash parola daca a fost trimisa
+            if (updates.password) {
+                const salt = await bcrypt.genSalt(10);
+                setFields.password = await bcrypt.hash(updates.password, salt);
+            }
+
+            // copiaza campurile permise
+            allowed.forEach((field) => {
+                if (updates[field] !== undefined) {
+                    setFields[field] = updates[field];
+                }
+            });
+
+            // ruleaza actualizarea
+            await facultiesCollection.updateOne(
+                { _id: new ObjectId(facultyId) },
+                { $set: setFields }
+            );
+
+            // recupereaza documentul actualizat
+            const updated = await facultiesCollection.findOne({ _id: new ObjectId(facultyId) });
+            // creeaza un nou token pe baza datelor relevante
+            const newToken = jwt.sign(updated, process.env.ACCESS_SECRET, { expiresIn: '1h' });
+
+            // trimite tokenul nou
+            return res.json({
+                message: 'Profil actualizat cu succes',
+                token: newToken
+            });
+        } catch (error) {
+            console.error('Eroare la PATCH /faculty/edit_profile: ', error);
+            return res.status(500).json({ message: 'Eroare interna la server' });
+        }
+    });
 
 
 
