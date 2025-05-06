@@ -14,17 +14,19 @@ interface Notification {
 }
 
 const NotificationDashboard: React.FC = () => {
-    const { user, token } = useContext(AuthContext);
+    const { user, faculty, token } = useContext(AuthContext);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     const { refresh: refreshUnread } = useNotifications(); // refresh notifications
 
     const fetchNotifications = async () => {
-        if (!token || !user?._id) {
-            setNotifications([]);
-            setError('Nu eşti autentificat.');
-            return;
+        if (!token) {
+            if (!user?._id && !faculty?._id) {
+                setNotifications([]);
+                setError('Nu eşti autentificat.');
+                return;
+            }
         }
         try {
             const resp = await axios.get<Notification[]>(
@@ -32,7 +34,6 @@ const NotificationDashboard: React.FC = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setNotifications(resp.data);
-            console.log(resp.data);
 
         } catch (err: any) {
             console.error('Eroare la fetch notificări:', err);
@@ -44,7 +45,7 @@ const NotificationDashboard: React.FC = () => {
         setNotifications([]);
         setError(null);
         fetchNotifications();
-    }, [token, user?._id]);
+    }, [token, user?._id, faculty?._id]);
 
     // Mark as read handler
     const handleMarkAsRead = async (id: string) => {

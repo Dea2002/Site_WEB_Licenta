@@ -526,16 +526,6 @@ async function run() {
             res.send(result);
         })
 
-
-
-        // Get user by ID
-        app.get('/users/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const user = await usersCollection.findOne(query);
-            res.send(user);
-        })
-
         // Get user by email
         app.get('/user/by-email/:email', async (req, res) => {
             const email = req.params.email;

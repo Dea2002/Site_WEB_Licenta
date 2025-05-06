@@ -124,16 +124,55 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     router.get('/get_mark_requests/:facultyId', async (req, res) => {
         const { facultyId } = req.params;
         if (!ObjectId.isValid(facultyId)) {
-            // Returneaza o eroare 400 Bad Request daca ID-ul nu e valid
             return res.status(400).json({ message: 'ID facultate invalid.' });
         }
 
         try {
-            const markRequests = await markRequestsCollection.find({ facultyId: new ObjectId(facultyId) }).toArray();
-            res.send(markRequests);
+            const pipeline = [
+                // 1. Filtrăm după facultate
+                { $match: { facultyId: new ObjectId(facultyId) } },
+                // 2. Lookup în colecția 'users' (string), nu în obiect
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'studentId',
+                        foreignField: '_id',
+                        as: 'studentInfo'
+                    }
+                },
+                // 3. Unwind ca să extragem obiectul
+                { $unwind: '$studentInfo' },
+                // 4. Proiectăm câmpurile relevante
+                {
+                    $project: {
+                        _id: 1,
+                        requestDate: 1,
+                        faculty: 1,
+                        // Aici adaugi câmpurile din studentInfo
+                        'studentInfo._id': 1,
+                        'studentInfo.fullName': 1,
+                        'studentInfo.email': 1,
+                        'studentInfo.phoneNumber': 1,
+                        'studentInfo.numar_matricol': 1,
+                        'studentInfo.anUniversitar': 1,
+                        'studentInfo.medie': 1
+
+                    }
+                },
+                // 5. (opțional) Sortezi după data cererii
+                { $sort: { requestDate: -1 } }
+            ];
+
+            const results = await markRequestsCollection
+                .aggregate(pipeline)
+                .toArray();
+
+            return res.json(results);
         } catch (error) {
-            console.log("Eroare la listare cereri de actualizare medii:", error);
-            res.status(500).json({ message: 'Eroare server la cerere actualizare medii.' });
+            console.error("Eroare la listare cereri de actualizare medii:", error);
+            return res
+                .status(500)
+                .json({ message: 'Eroare server la cerere actualizare medii.' });
         }
     });
 
@@ -142,25 +181,72 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: "ID request invalid" });
         }
-
         const markRequestId = new ObjectId(id);
 
         try {
+            // 1. Găsește cererea
             const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
-
             if (!markRequest) {
-                // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
-                return res.status(404).json({ message: 'Cererea de actualizare medii nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
+                return res.status(404).json({
+                    message:
+                        'Cererea de actualizare medii nu a fost găsită sau nu mai este pending.'
+                });
             }
-            const { studentId } = markRequest;
 
+            // 2. Găsește studentul
+            const student = await usersCollection.findOne({
+                _id: new ObjectId(markRequest.studentId)
+            });
+            if (!student) {
+                return res.status(404).json({ message: 'Studentul nu a fost găsit.' });
+            }
 
+            // 3. Găsește facultatea din cerere (markRequest.facultyId)
+            const facultyDoc = await facultiesCollection.findOne({
+                _id: new ObjectId(markRequest.facultyId)
+            });
+            if (!facultyDoc) {
+                return res
+                    .status(404)
+                    .json({ message: 'Facultatea asociată nu a fost găsită.' });
+            }
 
+            // 4. Actualizează câmpul medie_valid al studentului cu valoarea din facultate
+            const userUpdate = await usersCollection.updateOne(
+                { _id: student._id },
+                { $set: { medie_valid: facultyDoc.medie_valid } }
+            );
+            if (userUpdate.matchedCount === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'Nu s-a putut actualiza medie_valid pentru student.' });
+            }
+
+            // 5. Șterge cererea de actualizare
+            const deleteResult = await markRequestsCollection.deleteOne({
+                _id: markRequestId
+            });
+            if (deleteResult.deletedCount === 0) {
+                return res
+                    .status(500)
+                    .json({ message: 'Nu s-a putut șterge cererea de actualizare.' });
+            }
+
+            // 6. Trimite notificare studentului
+            await notificationService.createNotification(
+                `Media ta a fost actualizată la ${facultyDoc.medie_valid}.`,
+                student._id
+            );
+
+            return res
+                .status(200)
+                .json({ message: 'Cererea a fost aprobată și media actualizată.' });
         } catch (error) {
-            console.log("Eroare la acceptarea cererii de actualizare medii: ", error);
-            res.status(500).json({ message: 'Eroare server la acceptarea cererii de actualizare medii.' });
+            console.error("Eroare la acceptarea cererii de actualizare medii:", error);
+            return res
+                .status(500)
+                .json({ message: 'Eroare server la aprobarea cererii de actualizare medii.' });
         }
-
     });
 
     router.put('/mark/:id/reject', async (req, res) => { });
