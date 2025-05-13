@@ -183,7 +183,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 password: hashedPassword,
                 role: role,
                 faculty,
-                faculty_valid: "false",
+                faculty_valid: false,
                 numar_matricol: numar_matricol || "",
                 anUniversitar,
                 medie: medie,

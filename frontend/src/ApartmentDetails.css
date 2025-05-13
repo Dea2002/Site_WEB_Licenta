@@ -430,16 +430,21 @@
     background-color: #adb5bd; /* Prevent hover change when disabled */
 }
 /* Prevent icon/text swap when disabled */
-.reserve-btn:disabled .reserve-btn-text,
 .reserve-btn:disabled .reserve-btn-icon {
-    opacity: 1;
+    opacity: 0 !important;
+}
+.reserve-btn:disabled .reserve-btn-text {
+    opacity: 1 !important; /* Ensure text is visible */
+}
+/* 3. Prevent any hover‐swap when disabled */
+.reserve-btn:disabled:hover .reserve-btn-icon {
+    /* inherit the non-hover state */
+    opacity: 0 !important;
 }
 .reserve-btn:disabled:hover .reserve-btn-text {
-    opacity: 1;
+    /* inherit the non-hover state */
+    opacity: inherit !important;
 }
-.reserve-btn:disabled:hover .reserve-btn-icon {
-    opacity: 0;
-} /* Ensure icon stays hidden on hover when disabled */
 
 /* Warning text for non-authenticated users */
 .auth-warning {

@@ -40,6 +40,7 @@ const ApartmentDetails: React.FC = () => {
 
     // Fetch apartment details
     useEffect(() => {
+        console.log(user)
         if (id) {
             axios
                 .get<Apartment>(`http://localhost:5000/apartments/${id}`)
@@ -385,16 +386,7 @@ const ApartmentDetails: React.FC = () => {
                             <div className="booking-section">
                                 <h4>Verifica Disponibilitatea</h4>
                                 {renderSelectedDatesInfo()}{" "}
-                                {/* Renders dates & original 'Modifica' button */}
-                                {/* {!selectedDates && (
-                                    // Using new button style for initial selection
-                                    <button
-                                        className="select-interval-btn"
-                                        onClick={selectInterval}
-                                    >
-                                        Selecteaza Perioada
-                                    </button>
-                                )} */}
+
                             </div>
                             <hr className="line-divider thick" /> {/* Using new divider class */}
                             {/* Error display */}
@@ -403,13 +395,19 @@ const ApartmentDetails: React.FC = () => {
                             <button
                                 className="reserve-btn"
                                 onClick={selectedDates ? makeReservation : selectInterval}
-                                disabled={!isAuthenticated}
+                                disabled={
+                                    !isAuthenticated || // verific autentificarea
+                                    !user!.faculty_valid // verific validarea facultatii
+                                }
+                                // disabled
                                 title={
                                     !isAuthenticated
                                         ? "Trebuie sa fiti autentificat pentru a rezerva"
-                                        : selectedDates
-                                            ? "Trimite Cerere Rezervare"
-                                            : "Selectati perioada"
+                                        : !user!.faculty_valid
+                                            ? "Trebuie sa aveti facultatea validata pentru a rezerva"
+                                            : selectedDates
+                                                ? "Trimite Cerere Rezervare"
+                                                : "Selectati perioada"
                                 }
                             >
                                 <span className="reserve-btn-text">
@@ -421,6 +419,11 @@ const ApartmentDetails: React.FC = () => {
                             </button>
                             {!isAuthenticated && (
                                 <p className="auth-warning">Autentifica-te pentru a rezerva</p>
+                            )}
+                            {isAuthenticated && user && !user.faculty_valid && (
+                                <p className="booking-error" style={{ marginTop: "8px" }}>
+                                    Trebuie să îți validezi facultatea înainte de a rezerva.
+                                </p>
                             )}
                         </div>
                     )}

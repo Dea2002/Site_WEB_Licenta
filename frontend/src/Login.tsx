@@ -46,7 +46,7 @@ const Login: React.FC = () => {
 
     return (
         <>
-            <Bara_navigatie />
+            {/* <Bara_navigatie /> */}
             <div className="login-container">
                 <h1> Autentificare</h1>
                 <form onSubmit={handleSubmit} className="login-form">
