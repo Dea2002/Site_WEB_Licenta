@@ -78,7 +78,7 @@ async function run() {
         app.use('/auth', authRoutes);
 
         const createUsersRoutes = require('./routes/users'); // Importa rutele pentru utilizatori
-        const userRoutes = createUsersRoutes(usersCollection);
+        const userRoutes = createUsersRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection);
         app.use('/users', userRoutes); // toate requesturile vor avea prefixul /users
 
         const createApartmentsRoutes = require('./routes/apartments'); // Importa rutele pentru utilizatori
@@ -463,7 +463,7 @@ async function run() {
                     },
 
                 ]).toArray();
-                // console.log(history);
+
                 res.status(200).json(history);
             } catch (error) {
                 console.error('Eroare la preluarea istoricului rezervarilor:', error);
@@ -698,15 +698,6 @@ async function run() {
 
             const result = await enrolledCollection.aggregate(pipeline).toArray();
             res.send(result);
-            //const result = await enrolledCollection.find(query).toArray();
-
-
-            // const result = await enrolledCollection.find({ userEmail: email }).toArray();
-            // console.log(result);
-
-
-
-
         })
 
 
@@ -776,35 +767,3 @@ async function run() {
     }
 }
 run();
-
-
-
-
-//     // Send a ping to confirm a successful connection
-//     await client.db("admin").command({ ping: 1 });
-//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-// } finally {
-//     // Ensures that the client will close when you finish/error
-//     //await client.close(); cu el nu merge
-// }
-// }
-// run().catch(console.dir);
-
-
-// app.get('/', (req, res) => {
-//     res.send('Hello Andreea, este primul inceput!')
-// })
-
-// app.use((req, res, next) => {
-//     res.status(404).send("Sorry, can't find that!");
-// });
-
-// // Middleware de gestionare a erorilor (trebuie sa fie dupa toate celelalte rute)
-// app.use((err, req, res, next) => {
-//     console.error(err.stack);
-//     res.status(500).json({ message: 'Ceva a mers prost!' });
-// });
-
-// // app.listen(port, () => {
-// //     console.log(`Example app listening on port ${port}`)
-// // })

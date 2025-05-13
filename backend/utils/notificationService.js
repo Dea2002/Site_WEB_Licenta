@@ -36,7 +36,6 @@ function initNotificationService(notificationsCollection) {
             if (!insertResult.insertedId) {
                 throw new Error('Inserarea notificarii a esuat, nu s-a returnat insertedId.');
             }
-            console.log(`Notificare (via service) creata pentru ${receiver}. ID: ${insertResult.insertedId}`);
             return insertResult;
         } catch (error) {
             console.error(`Eroare (service) la inserarea notificarii pentru ${receiverId}:`, error);

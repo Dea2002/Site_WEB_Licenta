@@ -27,10 +27,11 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
         try {
             const associationRequests = await associationsRequestsCollection.find({ facultyId: new ObjectId(facultyId) }).toArray();
+
             res.send(associationRequests);
         }
         catch (error) {
-            console.log("Eroare la listare cereri de asociere: ", error);
+            console.error("Eroare la listare cereri de asociere: ", error);
             res.status(500).json({ message: 'Eroare server la preluarea cererilor.' });
         }
     });
@@ -75,7 +76,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             res.status(200).json({ message: 'Cererea de asociere a fost acceptata cu succes.' });
 
         } catch (error) {
-            console.log("Eroare la acceptarea cererii de asociere: ", error);
+            console.error("Eroare la acceptarea cererii de asociere: ", error);
             res.status(500).json({ message: 'Eroare server la acceptarea cererii de asociere.' });
         }
 
@@ -122,7 +123,8 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     });
 
     router.get('/get_mark_requests/:facultyId', async (req, res) => {
-        const { facultyId } = req.params;
+        const facultyId = new ObjectId(req.params.facultyId);
+
         if (!ObjectId.isValid(facultyId)) {
             return res.status(400).json({ message: 'ID facultate invalid.' });
         }
@@ -130,19 +132,31 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         try {
             const pipeline = [
                 // 1. Filtrăm după facultate
-                { $match: { facultyId: new ObjectId(facultyId) } },
-                // 2. Lookup in colectia 'users' (string), nu in obiect
+                {
+                    $match: { facultyId }
+                },
+
+                {
+                    $addFields: {
+                        studentObjId: {
+                            $toObjectId: '$studentId'
+                        }
+                    }
+                },
+
                 {
                     $lookup: {
                         from: 'users',
-                        localField: 'studentId',
+                        localField: 'studentObjId',
                         foreignField: '_id',
                         as: 'studentInfo'
                     }
                 },
-                // 3. Unwind ca să extragem obiectul
-                { $unwind: '$studentInfo' },
-                // 4. Proiectăm campurile relevante
+
+                {
+                    $unwind: '$studentInfo'
+                },
+
                 {
                     $project: {
                         _id: 1,
@@ -156,11 +170,8 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                         'studentInfo.numar_matricol': 1,
                         'studentInfo.anUniversitar': 1,
                         'studentInfo.medie': 1
-
                     }
-                },
-                // 5. (optional) Sortezi după data cererii
-                { $sort: { requestDate: -1 } }
+                }
             ];
 
             const results = await markRequestsCollection
@@ -234,7 +245,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
             // 6. Trimite notificare studentului
             await notificationService.createNotification(
-                `Media ta a fost actualizată la ${facultyDoc.medie_valid}.`,
+                `Termenul de valabilitate a mediei a fost actualizat la ${facultyDoc.medie_valid}.`,
                 student._id
             );
 
@@ -249,7 +260,40 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
     });
 
-    router.put('/mark/:id/reject', async (req, res) => { });
+    router.put('/mark/:id/reject', async (req, res) => {
+        const { id } = req.params;
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "ID request invalid" });
+        }
+
+        const markRequestId = new ObjectId(id);
+
+        try {
+            const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
+
+            if (!markRequest) {
+                // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
+                return res.status(404).json({ message: 'Cererea de actualizare de medie nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
+            }
+
+            const { studentId } = markRequest;
+
+            // delete the current association request
+            const deleteRequest = await markRequestsCollection.deleteOne({ _id: markRequestId });
+            if (deleteRequest.deletedCount === 0) {
+                return res.status(500).json({ message: 'Cererea de actualizare medie nu a putut fi stearsa.' });
+            }
+
+            // add a notification for the student
+            notificationService.createNotification(message = 'Cererea de actualizare medie a fost respinsa.', receiver = studentId);
+
+            // send positive response
+            res.status(200).json({ message: 'Cererea de actualizare medie a fost respinsa.' });
+        } catch (error) {
+            console.error("Eroare la respingerea cererii de asociere: ", error);
+            res.status(500).json({ message: 'Eroare server la respingerea cererii de asociere.' });
+        }
+    });
 
 
     router.patch('/edit_profile', authenticateToken, async (req, res) => {

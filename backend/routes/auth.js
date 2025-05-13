@@ -205,6 +205,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                     numeStudent: fullName,
                     studentId: result.insertedId,
                     emailStudent: email,
+                    numar_matricol: numar_matricol,
                     faculty: faculty,
                     facultyId: facultyId,
                     requestDate: new Date()

@@ -7,6 +7,7 @@ interface AssociationRequest {
     _id: string;
     numeStudent: string;
     emailStudent: string;
+    numar_matricol: string;
     requestDate: string;
 }
 
@@ -72,7 +73,7 @@ const FacultyAssociations: React.FC = () => {
         if (!token) return;
         try {
             await axios.put(
-                `/reject`,
+                `http://localhost:5000/faculty/association/${requestId}/reject`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
 
@@ -104,6 +105,7 @@ const FacultyAssociations: React.FC = () => {
                                     <th>Nume Student</th>
                                     <th>Email Student</th>
                                     <th>Data Cererii</th>
+                                    <th>Numar Matricol</th>
                                     {/* Statusul a fost eliminat din lipsa datelor */}
                                     <th>Actiuni</th>
                                 </tr>
@@ -116,6 +118,7 @@ const FacultyAssociations: React.FC = () => {
                                         <td>{request.numeStudent}</td>
                                         <td>{request.emailStudent}</td>
                                         <td>{formatDate(request.requestDate)}</td>
+                                        <td>{request.numar_matricol}</td>
                                         <td>
                                             {/* Afisam butoanele mereu, deoarece presupunem ca toate cererile listate sunt pending */}
                                             <div className="action-buttons">

@@ -79,7 +79,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         e.preventDefault();
         setMessage('');
         setError('');
-
+        let medieEdited = false;
         let medieRange = "";
         // validarea mediei introduse
         if (profileFormState.medie !== initialMedie) {
@@ -93,6 +93,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 setError("Numar matricol gol, va rugam completati acest camp.");
                 return;
             }
+
+            medieEdited = true;
             if (medieNum >= 9.5) {
                 medieRange = "Categoria 1: (9.50 - 10.00)";
             } else if (medieNum >= 9.0) {
@@ -131,7 +133,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             updatedData = {
                 ...rest,
                 password: newPassword,
-                medie: medieRange
+                medie: medieRange,
+                medieEdited: medieEdited
             };
 
         } else {
