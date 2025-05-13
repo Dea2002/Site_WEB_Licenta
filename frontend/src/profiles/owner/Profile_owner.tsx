@@ -5,16 +5,16 @@ import Bara_navigatie from "../../NavBars/Bara_nav_OwnerDashboard"; // Your Navb
 import EditProfile from './EditProfile_owner';
 import ProfileSidebar from './ProfileSidebar_owner';
 
-// Definește tipurile posibile pentru secțiunea activă
+// Defineste tipurile posibile pentru sectiunea activă
 type ProfileSection = 'edit';
 
 const Profile_owner: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
     const { user } = useContext(AuthContext); // Preluăm user-ul din context
     console.log(user);
-    // Dacă nu există user logat, poate redirecționăm sau afișăm un mesaj
+    // Dacă nu există user logat, poate redirectionăm sau afisăm un mesaj
     if (!user) {
-        // Poți adăuga o redirecționare sau un placeholder aici
+        // Poti adăuga o redirectionare sau un placeholder aici
         return (
             <>
                 <div className="user-profile-container">
@@ -38,15 +38,15 @@ const Profile_owner: React.FC = () => {
             <div className="user-profile-page-container">
                 {/* Acest div reprezintă "dreptunghiul mare" */}
                 <div className="profile-content-box">
-                    {/* Coloana din stânga (Sidebar) */}
+                    {/* Coloana din stanga (Sidebar) */}
                     <div className="profile-sidebar-column">
                         <ProfileSidebar
                             activeSection={activeSection}
-                            onSectionChange={setActiveSection} // Trimitem funcția de actualizare
+                            onSectionChange={setActiveSection} // Trimitem functia de actualizare
                         />
                     </div>
 
-                    {/* Coloana din dreapta (Conținutul dinamic) */}
+                    {/* Coloana din dreapta (Continutul dinamic) */}
                     <div className="profile-main-content-column">
                         {renderSection()}
                     </div>

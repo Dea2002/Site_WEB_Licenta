@@ -72,30 +72,29 @@
     background-color: #f09bd5;
 }
 
-
 /* Stil pentru containerul principal al paginii */
 .user-profile-page-container {
-    max-width: 1200px; /* Sau lățimea dorită */
-    margin: 2rem auto; /* Centrare și spațiu sus/jos */
+    max-width: 1200px; /* Sau latimea dorita */
+    margin: 2rem auto; /* Centrare si spatiu sus/jos */
     padding: 1rem;
 }
 
-/* "Dreptunghiul mare" - containerul cu cele două coloane */
+/* "Dreptunghiul mare" - containerul cu cele doua coloane */
 .profile-content-box {
     display: flex;
     border: 1px solid #e0e0e0; /* Chenar fin */
-    border-radius: 8px; /* Colțuri rotunjite */
+    border-radius: 8px; /* Colturi rotunjite */
     background-color: #fff; /* Fundal alb */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Umbră subtilă */
-    min-height: 60vh; /* Înălțime minimă */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Umbra subtila */
+    min-height: 60vh; /* inaltime minima */
 }
 
-/* Coloana din stânga - Sidebar */
+/* Coloana din stanga - Sidebar */
 .profile-sidebar-column {
-    flex: 0 0 250px; /* Lățime fixă pentru sidebar, nu crește, nu scade */
+    flex: 0 0 250px; /* Latime fixa pentru sidebar, nu creste, nu scade */
     padding: 1.5rem;
     border-right: 1px solid #e0e0e0; /* Linie de separare */
-    background-color: #f8f9fa; /* Fundal ușor diferit pentru sidebar */
+    background-color: #f8f9fa; /* Fundal usor diferit pentru sidebar */
 }
 
 /* Navigarea din sidebar */
@@ -106,7 +105,7 @@
 }
 
 .profile-sidebar-nav li {
-    margin-bottom: 0.5rem; /* Spațiu între butoane */
+    margin-bottom: 0.5rem; /* Spatiu intre butoane */
 }
 
 /* Butoanele din sidebar */
@@ -114,7 +113,7 @@
     display: block;
     width: 100%;
     padding: 0.8rem 1rem;
-    border: 1px solid transparent; /* Fără border default */
+    border: 1px solid transparent; /* Fara border default */
     background-color: transparent; /* Fundal transparent */
     color: #333;
     text-align: left;
@@ -131,18 +130,18 @@
 
 /* Stil pentru butonul activ */
 .sidebar-button.active {
-    background-color: #007bff; /* Culoarea principală a site-ului */
+    background-color: #007bff; /* Culoarea principala a site-ului */
     color: #fff; /* Text alb */
     font-weight: bold;
 }
 
-/* Coloana din dreapta - Conținutul principal */
+/* Coloana din dreapta - Continutul principal */
 .profile-main-content-column {
-    flex-grow: 1; /* Ocupă spațiul rămas */
+    flex-grow: 1; /* Ocupa spatiul ramas */
     padding: 1.5rem 2rem; /* Mai mult padding orizontal */
 }
 
-/* Stiluri generale pentru secțiunea de conținut */
+/* Stiluri generale pentru sectiunea de continut */
 .profile-section-content h2 {
     margin-top: 0;
     margin-bottom: 1.5rem;
@@ -160,7 +159,7 @@
     display: block;
     margin-bottom: 0.3rem;
     font-weight: bold;
-     color: #555;
+    color: #555;
 }
 
 .edit-profile-form input[type="text"],
@@ -177,14 +176,13 @@
     cursor: not-allowed;
 }
 
-
 .edit-profile-form small {
     font-size: 0.8rem;
     color: #6c757d;
 }
 
 .edit-profile-form button[type="submit"] {
-     padding: 0.7rem 1.5rem;
+    padding: 0.7rem 1.5rem;
     background-color: #28a745; /* Verde pentru salvare */
     color: white;
     border: none;
@@ -198,8 +196,8 @@
     background-color: #218838;
 }
 .edit-profile-form button:disabled {
-     background-color: #cccccc;
-     cursor: not-allowed;
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
 /* Mesaje */
@@ -209,7 +207,7 @@
 }
 .error-message {
     color: red;
-     margin: 1rem 0;
+    margin: 1rem 0;
 }
 
 /* Stil pentru lista de istoric */
@@ -228,8 +226,8 @@
 
 .rent-history-item p {
     margin: 0.3rem 0;
-     line-height: 1.5;
+    line-height: 1.5;
 }
 .rent-history-item p strong {
- color: #444;
+    color: #444;
 }

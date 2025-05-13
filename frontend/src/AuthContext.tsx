@@ -55,7 +55,7 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // citește imediat din localStorage, sincron
+    // citeste imediat din localStorage, sincron
     const [token, setToken] = useState<string | null>(() => {
         return localStorage.getItem("token");
     });
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return !!localStorage.getItem("token");
     });
 
-    // setează header-ul implicit de fiecare dată când tokenul se schimbă
+    // setează header-ul implicit de fiecare dată cand tokenul se schimbă
     useEffect(() => {
         if (token) {
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;

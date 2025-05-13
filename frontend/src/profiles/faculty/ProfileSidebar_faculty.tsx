@@ -1,12 +1,12 @@
 import React from 'react';
 import './profile_faculty.css'; // Refolosim CSS sau creăm unul dedicat
 
-// Tipuri definite în părinte
+// Tipuri definite in părinte
 type ProfileSection = 'edit';
 
 interface ProfileSidebarProps {
     activeSection: ProfileSection;
-    onSectionChange: (section: ProfileSection) => void; // Funcție callback
+    onSectionChange: (section: ProfileSection) => void; // Functie callback
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectionChange }) => {
@@ -20,9 +20,9 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                 {menuItems.map((item) => (
                     <li key={item.id}>
                         <button
-                            // Aplicăm clasa 'active' dacă ID-ul itemului corespunde secțiunii active
+                            // Aplicăm clasa 'active' dacă ID-ul itemului corespunde sectiunii active
                             className={`sidebar-button ${activeSection === item.id ? 'active' : ''}`}
-                            // La click, apelăm funcția din părinte cu ID-ul secțiunii
+                            // La click, apelăm functia din părinte cu ID-ul sectiunii
                             onClick={() => onSectionChange(item.id as ProfileSection)}
                         >
                             {item.label}

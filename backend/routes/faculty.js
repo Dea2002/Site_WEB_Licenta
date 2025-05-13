@@ -131,7 +131,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             const pipeline = [
                 // 1. Filtrăm după facultate
                 { $match: { facultyId: new ObjectId(facultyId) } },
-                // 2. Lookup în colecția 'users' (string), nu în obiect
+                // 2. Lookup in colectia 'users' (string), nu in obiect
                 {
                     $lookup: {
                         from: 'users',
@@ -142,13 +142,13 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 },
                 // 3. Unwind ca să extragem obiectul
                 { $unwind: '$studentInfo' },
-                // 4. Proiectăm câmpurile relevante
+                // 4. Proiectăm campurile relevante
                 {
                     $project: {
                         _id: 1,
                         requestDate: 1,
                         faculty: 1,
-                        // Aici adaugi câmpurile din studentInfo
+                        // Aici adaugi campurile din studentInfo
                         'studentInfo._id': 1,
                         'studentInfo.fullName': 1,
                         'studentInfo.email': 1,
@@ -159,7 +159,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
                     }
                 },
-                // 5. (opțional) Sortezi după data cererii
+                // 5. (optional) Sortezi după data cererii
                 { $sort: { requestDate: -1 } }
             ];
 
@@ -184,7 +184,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         const markRequestId = new ObjectId(id);
 
         try {
-            // 1. Găsește cererea
+            // 1. Găseste cererea
             const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
             if (!markRequest) {
                 return res.status(404).json({
@@ -193,7 +193,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 });
             }
 
-            // 2. Găsește studentul
+            // 2. Găseste studentul
             const student = await usersCollection.findOne({
                 _id: new ObjectId(markRequest.studentId)
             });
@@ -201,7 +201,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 return res.status(404).json({ message: 'Studentul nu a fost găsit.' });
             }
 
-            // 3. Găsește facultatea din cerere (markRequest.facultyId)
+            // 3. Găseste facultatea din cerere (markRequest.facultyId)
             const facultyDoc = await facultiesCollection.findOne({
                 _id: new ObjectId(markRequest.facultyId)
             });
@@ -211,7 +211,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                     .json({ message: 'Facultatea asociată nu a fost găsită.' });
             }
 
-            // 4. Actualizează câmpul medie_valid al studentului cu valoarea din facultate
+            // 4. Actualizează campul medie_valid al studentului cu valoarea din facultate
             const userUpdate = await usersCollection.updateOne(
                 { _id: student._id },
                 { $set: { medie_valid: facultyDoc.medie_valid } }
@@ -222,14 +222,14 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                     .json({ message: 'Nu s-a putut actualiza medie_valid pentru student.' });
             }
 
-            // 5. Șterge cererea de actualizare
+            // 5. sterge cererea de actualizare
             const deleteResult = await markRequestsCollection.deleteOne({
                 _id: markRequestId
             });
             if (deleteResult.deletedCount === 0) {
                 return res
                     .status(500)
-                    .json({ message: 'Nu s-a putut șterge cererea de actualizare.' });
+                    .json({ message: 'Nu s-a putut sterge cererea de actualizare.' });
             }
 
             // 6. Trimite notificare studentului
@@ -240,7 +240,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
             return res
                 .status(200)
-                .json({ message: 'Cererea a fost aprobată și media actualizată.' });
+                .json({ message: 'Cererea a fost aprobată si media actualizată.' });
         } catch (error) {
             console.error("Eroare la acceptarea cererii de actualizare medii:", error);
             return res

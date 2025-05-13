@@ -69,7 +69,7 @@ function createNotificationsRoutes(notificationsCollection, notificationService)
                 _id: new ObjectId(id),
                 receiver: new ObjectId(req.user._id)
             });
-            res.json({ message: 'Notificare ștearsă' });
+            res.json({ message: 'Notificare stearsă' });
         }
     );
 

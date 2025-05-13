@@ -24,7 +24,7 @@ interface ProfileFormState {
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
-    // Stări pentru câmpurile formularului, initializate cu datele userului
+    // Stări pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: faculty.fullName,
         abreviere: faculty.abreviere,
@@ -39,15 +39,15 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
     const initialDate = initialFormStateRef.current.medie_valid;
 
-    // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
+    // Adaugă alte campuri pe care vrei să le permiti editării (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const { token, loginFaculty } = useContext(AuthContext); // Avem nevoie de token pt request și login pt update context
+    const { token, loginFaculty } = useContext(AuthContext); // Avem nevoie de token pt request si login pt update context
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Când "faculty" din context se schimbă (după login), reconstruim formData
+        // Cand "faculty" din context se schimbă (după login), reconstruim formData
         if (!faculty) return;
         const newState: ProfileFormState = {
             fullName: faculty.fullName,
@@ -64,7 +64,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
         initialFormStateRef.current = newState;
     }, [faculty]);
 
-    // Funcție pentru submiterea formularului
+    // Functie pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -76,15 +76,15 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
 
         if (wantsToChangePassword) {
             if (!currentPassword || !newPassword || !confirmNewPassword) {
-                setError("Completează toate câmpurile pentru schimbarea parolei.");
+                setError("Completează toate campurile pentru schimbarea parolei.");
                 return;
             }
             if (newPassword !== confirmNewPassword) {
-                setError("Parola nouă și confirmarea nu coincid.");
+                setError("Parola nouă si confirmarea nu coincid.");
                 return;
             }
             if (newPassword.length < 6) {
-                setError("Parola nouă trebuie să aibă cel puțin 6 caractere.");
+                setError("Parola nouă trebuie să aibă cel putin 6 caractere.");
                 return;
             }
         }
@@ -135,12 +135,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
         }
     }
 
-    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) și-l transformă în Date
+    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) si-l transformă in Date
 
     const semestruDate = parseISO(profileFormState.medie_valid!);
     // doar dacă azi > semestruDate putem edita
     const canEdit = isAfter(new Date(), initialDate);
-    // compară câmp cu câmp
+    // compară camp cu camp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
             // @ts-ignore – ca să poţi indexa generic
@@ -220,7 +220,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
                         dateFormat="dd/MM/yyyy"
                         className="form-control"
                         disabled={!canEdit}
-                        // nu permite azi sau zile trecute – minDate e mâine
+                        // nu permite azi sau zile trecute – minDate e maine
                         minDate={addDays(new Date(), 1)}
                     />
                 </div>

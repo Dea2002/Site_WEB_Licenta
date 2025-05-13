@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { AuthContext, User } from '../../AuthContext'; // Importăm User
+import { AuthContext, User } from '../../AuthContext'; // Importam User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_student.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
@@ -26,7 +26,7 @@ interface ProfileFormState {
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
-    // Stări pentru câmpurile formularului, initializate cu datele userului
+    // Stari pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: user.fullName,
         email: user.email,
@@ -45,16 +45,16 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     const initialMatricol = initialFormStateRef.current.numar_matricol;
     const initialMedie = initialFormStateRef.current.medie;
 
-    // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
+    // Adauga alte campuri pe care vrei sa le permiti editarii (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request și login pt update context
+    const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request si login pt update context
     const navigate = useNavigate();
 
     useEffect(() => {
         console.log(user);
-        // Când "user" din context se schimbă (după login), reconstruim formData
+        // Cand "user" din context se schimba (dupa login), reconstruim formData
         if (!user) return;
         const newState: ProfileFormState = {
             fullName: user.fullName,
@@ -74,7 +74,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         initialFormStateRef.current = newState;
     }, [user]);
 
-    // Funcție pentru submiterea formularului
+    // Functie pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage('');
@@ -85,7 +85,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         if (profileFormState.medie !== initialMedie) {
             const medieNum = parseFloat(profileFormState.medie!.replace(',', '.'));
             if (isNaN(medieNum) || medieNum < 5.0 || medieNum > 10.0) {
-                setError("Medie invalidă. Trebuie să fie între 5.0 și 10.0.");
+                setError("Medie invalida. Trebuie sa fie intre 5.0 si 10.0.");
                 return;
             }
 
@@ -104,28 +104,28 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             }
         }
 
-        // Dacă user a completat vreun câmp de parolă, atunci trebuie să le validezi
+        // Daca user a completat vreun camp de parola, atunci trebuie sa le validezi
         const { currentPassword, newPassword, confirmNewPassword, ...rest } = profileFormState;
         const wantsToChangePassword = currentPassword || newPassword || confirmNewPassword;
 
         if (wantsToChangePassword) {
             if (!currentPassword || !newPassword || !confirmNewPassword) {
-                setError("Completează toate câmpurile pentru schimbarea parolei.");
+                setError("Completeaza toate campurile pentru schimbarea parolei.");
                 return;
             }
             if (newPassword !== confirmNewPassword) {
-                setError("Parola nouă și confirmarea nu coincid.");
+                setError("Parola noua si confirmarea nu coincid.");
                 return;
             }
             if (newPassword.length < 6) {
-                setError("Parola nouă trebuie să aibă cel puțin 6 caractere.");
+                setError("Parola noua trebuie sa aiba cel putin 6 caractere.");
                 return;
             }
         }
 
         setIsLoading(true);
         let updatedData = {}
-        // 1. Construiești payload-ul exact din form state
+        // 1. Construiesti payload-ul exact din form state
         // const updatedData: ProfileFormState = { ...profileFormState };
         if (profileFormState.medie !== initialMedie) {
             updatedData = {
@@ -141,7 +141,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         }
 
         try {
-            // 2. Trimiți toate datele către backend
+            // 2. Trimiti toate datele catre backend
             const response = await axios.patch(
                 `http://localhost:5000/users/edit_profile`,
                 { userId: user._id, ...updatedData },
@@ -153,12 +153,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             login(newToken, decoded);
             setMessage("Profil actualizat cu succes!");
 
-            // resetăm „dirty” pentru a putea detecta viitoare schimbări
+            // resetam „dirty” pentru a putea detecta viitoare schimbari
             // initialFormStateRef.current = { ...profileFormState };
             setTimeout(() => navigate("/home"), 3000);
         } catch (err: any) {
             console.error("Eroare la actualizare:", err);
-            setError(err.response?.data?.message || "A apărut o eroare la actualizare.");
+            setError(err.response?.data?.message || "A aparut o eroare la actualizare.");
         } finally {
             setIsLoading(false);
         }
@@ -176,7 +176,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
-            // @ts-ignore – ca să poţi indexa generic
+            // @ts-ignore – ca sa poţi indexa generic
             value !== initialFormStateRef.current[key]
     );
     console.log(profileFormState.medie_valid);
@@ -214,7 +214,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="phoneNumber">Număr de telefon:</label>
+                    <label htmlFor="phoneNumber">Numar de telefon:</label>
                     <input
                         type="text"
                         id="phoneNumber"
@@ -275,10 +275,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         name="medie"
                         value={profileFormState.medie}
                         onChange={handleChange}
-                        disabled={!canEditMedie} // dacă nu e valabilă, nu poate fi editată
+                        disabled={!canEditMedie} // daca nu e valabila, nu poate fi editata
                     />
                     {!canEditMedie && (
-                        <small>Medie valabilă până la {format(validUntil, "dd/MM/yyyy")}</small>
+                        <small>Medie valabila pana la {format(validUntil, "dd/MM/yyyy")}</small>
                     )}
                 </div>
                 <div className="form-group">
@@ -293,7 +293,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="currentPassword">Parola curentă:</label>
+                    <label htmlFor="currentPassword">Parola curenta:</label>
                     <input
                         type="password"
                         id="currentPassword"
@@ -304,7 +304,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="newPassword">Parola nouă:</label>
+                    <label htmlFor="newPassword">Parola noua:</label>
                     <input
                         type="password"
                         id="newPassword"
@@ -315,7 +315,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="confirmNewPassword">Confirmă parola nouă:</label>
+                    <label htmlFor="confirmNewPassword">Confirma parola noua:</label>
                     <input
                         type="password"
                         id="confirmNewPassword"
@@ -332,7 +332,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     type="submit"
                     disabled={isLoading || !isDirty}
                 >
-                    {isLoading ? 'Se salvează...' : 'Salvează Modificările'}
+                    {isLoading ? 'Se salveaza...' : 'Salveaza Modificarile'}
                 </button>
             </form>
         </div>

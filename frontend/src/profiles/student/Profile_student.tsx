@@ -6,20 +6,20 @@ import CurrentRent from './CurrentRent_student';
 import RentHistory from './RentHistory_student';
 import ProfileSidebar from './ProfileSidebar_student';
 
-// Definește tipurile posibile pentru secțiunea activă
+// Defineste tipurile posibile pentru sectiunea activa
 type ProfileSection = 'edit' | 'current-rent' | 'history';
 
 const Profile_student: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
-    const { user } = useContext(AuthContext); // Preluăm user-ul din context
+    const { user } = useContext(AuthContext); // Preluam user-ul din context
     console.log(user);
-    // Dacă nu există user logat, poate redirecționăm sau afișăm un mesaj
+    // Daca nu exista user logat, poate redirectionam sau afisam un mesaj
     if (!user) {
-        // Poți adăuga o redirecționare sau un placeholder aici
+        // Poti adauga o redirectionare sau un placeholder aici
         return (
             <>
                 <div className="user-profile-container">
-                    <p>Trebuie să fii autentificat pentru a vedea această pagină.</p>
+                    <p>Trebuie sa fii autentificat pentru a vedea aceasta pagina.</p>
                 </div>
             </>
         );
@@ -28,7 +28,7 @@ const Profile_student: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'edit':
-                return <EditProfile user={user} />; // Trimitem user-ul către componentă
+                return <EditProfile user={user} />; // Trimitem user-ul catre componenta
             case 'current-rent':
                 return <CurrentRent userId={user._id} />; // Trimitem ID-ul pentru fetch
             case 'history':
@@ -41,17 +41,17 @@ const Profile_student: React.FC = () => {
     return (
         <>
             <div className="user-profile-page-container">
-                {/* Acest div reprezintă "dreptunghiul mare" */}
+                {/* Acest div reprezinta "dreptunghiul mare" */}
                 <div className="profile-content-box">
-                    {/* Coloana din stânga (Sidebar) */}
+                    {/* Coloana din stanga (Sidebar) */}
                     <div className="profile-sidebar-column">
                         <ProfileSidebar
                             activeSection={activeSection}
-                            onSectionChange={setActiveSection} // Trimitem funcția de actualizare
+                            onSectionChange={setActiveSection} // Trimitem functia de actualizare
                         />
                     </div>
 
-                    {/* Coloana din dreapta (Conținutul dinamic) */}
+                    {/* Coloana din dreapta (Continutul dinamic) */}
                     <div className="profile-main-content-column">
                         {renderSection()}
                     </div>

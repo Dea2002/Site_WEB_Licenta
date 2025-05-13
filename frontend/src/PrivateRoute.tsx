@@ -8,9 +8,9 @@ interface Props {
     allowedRoles?: User["role"][];
 }
 
-// Dacă nu ești logat => login.
-// Dacă ai rol, dar nu ești în allowedRoles => /unauthorized (sau altă pagină).
-// Altfel, afișează ruta copil cu <Outlet/>.
+// Dacă nu esti logat => login.
+// Dacă ai rol, dar nu esti in allowedRoles => /unauthorized (sau altă pagină).
+// Altfel, afisează ruta copil cu <Outlet/>.
 export const PrivateRoute: React.FC<Props> = ({ allowedRoles }) => {
     const { isAuthenticated, user, faculty } = useContext(AuthContext);
 

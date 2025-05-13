@@ -4,7 +4,7 @@ import "./profile_faculty.css";
 import EditProfile from './EditProfile_faculty';
 import ProfileSidebar from './ProfileSidebar_faculty';
 
-// Definește tipurile posibile pentru secțiunea activă
+// Defineste tipurile posibile pentru sectiunea activă
 type ProfileSection = 'edit';
 
 const Profile_faculty: React.FC = () => {
@@ -28,15 +28,15 @@ const Profile_faculty: React.FC = () => {
             <div className="user-profile-page-container">
                 {/* Acest div reprezintă "dreptunghiul mare" */}
                 <div className="profile-content-box">
-                    {/* Coloana din stânga (Sidebar) */}
+                    {/* Coloana din stanga (Sidebar) */}
                     <div className="profile-sidebar-column">
                         <ProfileSidebar
                             activeSection={activeSection}
-                            onSectionChange={setActiveSection} // Trimitem funcția de actualizare
+                            onSectionChange={setActiveSection} // Trimitem functia de actualizare
                         />
                     </div>
 
-                    {/* Coloana din dreapta (Conținutul dinamic) */}
+                    {/* Coloana din dreapta (Continutul dinamic) */}
                     <div className="profile-main-content-column">
                         {renderSection()}
                     </div>

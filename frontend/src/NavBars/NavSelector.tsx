@@ -7,10 +7,10 @@ import Bara_navigatie_facultate from "./Bara_navigatie_facultate";
 const NavSelector: React.FC = () => {
     const { isAuthenticated, user } = useContext(AuthContext);
 
-    // Dacă nu ești logat, nu afișăm niciun navbar (sau unul public)
+    // Dacă nu esti logat, nu afisăm niciun navbar (sau unul public)
     if (!isAuthenticated) return null;
 
-    // Alege în funcție de role
+    // Alege in functie de role
     switch (user?.role) {
         case "student":
             return <Bara_navigatie />;

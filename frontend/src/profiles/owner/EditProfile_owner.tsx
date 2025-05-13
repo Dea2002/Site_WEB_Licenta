@@ -22,7 +22,7 @@ interface ProfileFormState {
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
-    // Stări pentru câmpurile formularului, initializate cu datele userului
+    // Stări pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: user.fullName,
         email: user.email,
@@ -36,13 +36,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     });
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
 
-    // Adaugă alte câmpuri pe care vrei să le permiți editării (ex: email - deși e mai complicat)
+    // Adaugă alte campuri pe care vrei să le permiti editării (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request și login pt update context
+    const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request si login pt update context
 
-    // Funcție pentru submiterea formularului
+    // Functie pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -56,7 +56,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
         try {
             // Presupunem un endpoint /users/me sau /users/:id pentru update
-            // Folosim PATCH pentru actualizări parțiale
+            // Folosim PATCH pentru actualizări partiale
             const response = await axios.patch(
                 `http://localhost:5000/users/me`, // Sau `/users/${user.userId}`
                 updatedData,
@@ -76,7 +76,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             } else {
                 // Daca nu vine token nou, ar trebui sa re-fetch user data sau sa actualizam manual contextul
                 // Aici doar afisam mesaj, dar ideal ar fi sa actualizam si user-ul din context
-                setMessage('Profil actualizat. Reîmprospătați pagina pentru a vedea toate modificările.');
+                setMessage('Profil actualizat. Reimprospătati pagina pentru a vedea toate modificările.');
                 // TODO: Implementează o modalitate de a actualiza user-ul din context fără token nou
             }
 
@@ -99,7 +99,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     }
 
 
-    // compară câmp cu câmp
+    // compară camp cu camp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
             // @ts-ignore – ca să poţi indexa generic
