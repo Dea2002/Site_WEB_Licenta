@@ -18,6 +18,7 @@ interface selectedDates {
 const ApartmentDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [apartment, setApartment] = useState<Apartment | null>(null);
+    const [rooms, setRooms] = useState<{ rooms: number }>({ rooms: 0 });
     const [error, setError] = useState("");
     const { isAuthenticated, user, token } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -33,8 +34,9 @@ const ApartmentDetails: React.FC = () => {
     const [selectedDates, setSelectedDates] = useState<selectedDates | null>(null);
 
     // Handler to receive dates from ReservationPopup
-    const handleDatesSelected = (checkIn: Date, checkOut: Date) => {
+    const handleDatesSelected = (checkIn: Date, checkOut: Date, rooms: number) => {
         setSelectedDates({ checkIn, checkOut });
+        setRooms({ rooms });
         setError(""); // Clear previous booking errors when new dates are selected
     };
 
@@ -102,7 +104,7 @@ const ApartmentDetails: React.FC = () => {
             console.log("Reservation request sent successfully!");
             alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page
-            navigate("/my-requests"); // Example navigation
+            navigate("/my-rents"); // Example navigation
         } catch (err: any) {
             setError(
                 err.response?.data?.message || "Eroare la trimiterea cererii. incercati din nou.",
@@ -175,6 +177,7 @@ const ApartmentDetails: React.FC = () => {
         const nights = Math.max(1, differenceInCalendarDays(checkOutDate, checkInDate));
         const nightsText = nights === 1 ? "1 noapte" : `${nights} nopti`;
 
+        const numberOfRooms = rooms.rooms;
         const pricePerNight = parseFloat(apartment.price?.toString() || "0") || 0;
         const internetPriceMonthly = parseFloat(apartment.internetPrice?.toString() || "0") || 0;
         const tvPriceMonthly = parseFloat(apartment.TVPrice?.toString() || "0") || 0;
@@ -193,7 +196,8 @@ const ApartmentDetails: React.FC = () => {
             dailyInternetCost + dailyTVCost + dailyWaterCost + dailyGasCost + dailyElectricityCost;
         const extraTotalCost = extraDailyCost * nights;
         const apartmentTotalCost = pricePerNight * nights;
-        const finalTotalCost = apartmentTotalCost + extraTotalCost;
+
+        const finalTotalCost = numberOfRooms * apartmentTotalCost + extraTotalCost;
 
         return (
             // Using the structured selected-dates-info div from the new layout
@@ -206,11 +210,14 @@ const ApartmentDetails: React.FC = () => {
                 </p>
                 <hr className="line-divider short" /> {/* Use new divider class */}
                 <p>
-                    <span>Pret Cazare ({nightsText}):</span> {apartmentTotalCost.toFixed(2)} RON
+                    <span>Pret Cazare / camera ({nightsText}):</span> {apartmentTotalCost.toFixed(2)} RON
                 </p>
                 <p>
                     <span>Costuri Extra Estim. ({nightsText}):</span> {extraTotalCost.toFixed(2)}{" "}
                     RON
+                </p>
+                <p>
+                    <span>Numar camere:</span> {numberOfRooms}
                 </p>
                 <hr className="line-divider short bold" /> {/* Use new divider class */}
                 <p className="total-price">
@@ -252,7 +259,7 @@ const ApartmentDetails: React.FC = () => {
                     {/* Titlu - Locatie si Pret */}
                     <div className="title-location-price">
                         <h2>Apartament in {apartment.location}</h2>
-                        <p className="price-display">{apartment.price} RON / noapte</p>
+                        <p className="price-display">{apartment.price} RON / camera / noapte</p>
                         <button
                             className="button-map"
                             onClick={() => handleLocationClick(apartment)}

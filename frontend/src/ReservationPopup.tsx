@@ -7,7 +7,7 @@ import { subDays } from "date-fns";
 
 interface ReservationPopupProps {
     onClose: () => void;
-    onDatesSelected?: (checkIn: Date, checkOut: Date) => void;
+    onDatesSelected?: (checkIn: Date, checkOut: Date, rooms: number) => void;
     apartmentId: string;
 }
 
@@ -24,12 +24,14 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     const [checkInDate, setCheckInDate] = useState<Date | null>(null);
     const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
     const [unavailableIntervals, setUnavailableIntervals] = useState<DateInterval[]>([]);
+    const [roomsCount, setRoomsCount] = useState<number>(0);
+    const [selectedRooms, setSelectedRooms] = useState<number>(1);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (checkInDate && checkOutDate) {
             if (onDatesSelected) {
-                onDatesSelected(checkInDate, checkOutDate);
+                onDatesSelected(checkInDate, checkOutDate, selectedRooms);
             }
             onClose();
         } else {
@@ -57,6 +59,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }, [nextAvailableDate]);
 
     useEffect(() => {
+        console.log("Apartment ID:", apartmentId);
         // make a get request to local host /testez and console log the response
         axios
             .get(`http://localhost:5000/unavailable_dates/${apartmentId}`)
@@ -76,6 +79,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             .catch((error) => {
                 console.error("Eroare la preluarea datelor:", error);
             });
+
+        axios
+            .get(`http://localhost:5000/apartments/number-of-rooms/${apartmentId}`)
+            .then((response) => {
+                const numberOfRooms = response.data.numberOfRooms;
+                const numberOfRooms_busy = response.data.numberOfRooms_busy;
+                setRoomsCount(parseInt(numberOfRooms) - parseInt(numberOfRooms_busy));
+            })
+            .catch(error => {
+                console.error("Eroare la preluarea numarului de camere:", error);
+            });
     }, []);
 
     return (
@@ -90,7 +104,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                         <label>Check-in:</label>
                         <DatePicker
                             selected={checkInDate}
-                            onChange={(date: Date | null) => setCheckInDate(date)}
+                            onChange={(date) => setCheckInDate(date)}
                             dateFormat="dd/MM/yyyy"
                             placeholderText="Selecteaza check-in"
                             minDate={new Date()}
@@ -101,11 +115,12 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                             }))}
                         />
                     </div>
+
                     <div className="date-picker-container">
                         <label>Check-out:</label>
                         <DatePicker
                             selected={checkOutDate}
-                            onChange={(date: Date | null) => setCheckOutDate(date)}
+                            onChange={(date) => setCheckOutDate(date)}
                             dateFormat="dd/MM/yyyy"
                             placeholderText="Selecteaza check-out"
                             minDate={checkInDate || new Date()}
@@ -113,6 +128,22 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                             required
                         />
                     </div>
+
+                    {/* NOUL SELECT PENTRU NUMĂR DE CAMERE */}
+                    <div className="rooms-selector">
+                        <label>Doresc:</label>
+                        <select
+                            value={selectedRooms}
+                            onChange={(e) => setSelectedRooms(Number(e.target.value))}
+                        >
+                            {Array.from({ length: roomsCount }, (_, i) => i + 1).map((n) => (
+                                <option key={n} value={n}>
+                                    {n === 1 ? "o camera" : `${n} camere`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <button className="submit-confirma-interval" type="submit">
                         Confirma
                     </button>

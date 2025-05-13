@@ -46,6 +46,17 @@ function createApartmentsRoutes(apartmentsCollection) {
         }
     });
 
+    router.get('/number-of-rooms/:id', async (req, res) => {
+        const apartmentId = req.params.id;
+        const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+        if (!apartment) {
+            return res.status(404).send('Apartamentul nu a fost gasit');
+        }
+        const numberOfRooms = apartment.numberOfRooms;
+        const numberOfRooms_busy = apartment.numberOfRooms_busy;
+        res.send({ numberOfRooms, numberOfRooms_busy });
+    });
+
 
     return router;
 }

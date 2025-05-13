@@ -19,7 +19,7 @@
     border-radius: 8px;
     max-width: 500px;
     width: 90%;
-    height: 330px;
+    height: 370px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -67,4 +67,20 @@
     border-color: #e8efcf;
     border-width: 5px;
     border-style: solid;
+}
+
+.rooms-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.rooms-selector label {
+    font-weight: 500;
+}
+
+.rooms-selector select {
+    padding: 6px 8px;
+    font-size: 1rem;
 }

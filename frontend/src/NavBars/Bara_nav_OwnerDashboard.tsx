@@ -77,7 +77,7 @@ function NavBar() {
                                         className="fa-solid fa-comment"
                                         style={{ marginRight: "6px" }}
                                     />
-                                    Chat history
+                                    Chat
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item onClick={handleLogout}>
