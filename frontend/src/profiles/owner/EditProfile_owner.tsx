@@ -3,7 +3,6 @@ import { AuthContext, User } from '../../AuthContext'; // Importam User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_owner.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
-import { parseISO, isAfter } from "date-fns";
 
 interface EditProfileProps {
     user: User; // Primim datele curente ale userului

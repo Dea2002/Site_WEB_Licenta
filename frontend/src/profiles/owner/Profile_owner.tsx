@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../AuthContext";
 import "./profile_owner.css";
-import Bara_navigatie from "../../NavBars/Bara_nav_OwnerDashboard"; // Your Navbar component
 import EditProfile from './EditProfile_owner';
 import ProfileSidebar from './ProfileSidebar_owner';
 

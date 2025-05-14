@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
 import { AuthContext } from "./AuthContext";

@@ -1,14 +1,12 @@
-// frontend/src/DashboardOwner.tsx
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_nav_OwnerDashboard from "./NavBars/Bara_nav_OwnerDashboard";
 // Import the CSS file (ensure the path is correct)
 import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you create a new file
 import { useNavigate } from "react-router-dom";
 
 const OwnerListNewApartment: React.FC = () => {
-    const { user, setUser, token } = useContext(AuthContext);
+    const { user, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
     // useEffect(() => { ... }, [user, token]); // Your existing useEffect
@@ -87,7 +85,7 @@ const OwnerListNewApartment: React.FC = () => {
 
         try {
             // Assuming 'image' is just a text field for now based on input type="text"
-            const response = await axios.post(
+            await axios.post(
                 `http://localhost:5000/new-apartment`,
                 { ownerId: user?._id, ...formData },
                 {

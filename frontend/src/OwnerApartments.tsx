@@ -1,9 +1,7 @@
-// frontend/src/OwnerApartments.tsx
 // Lista cu apartamentele proprietarului care este autentificat
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_nav_OwnerDashboard from "./NavBars/Bara_nav_OwnerDashboard";
 import { Apartment } from "./types";
 import "./OwnerApartments.css";
 

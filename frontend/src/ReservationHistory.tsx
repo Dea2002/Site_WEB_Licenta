@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import Bara_nav_OwnerDashboard from "./NavBars/Bara_nav_OwnerDashboard";
 import "./ReservationHistory.css";
 
 interface ReservationHistory {

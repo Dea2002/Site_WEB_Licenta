@@ -1,8 +1,7 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { AuthContext, User } from "./AuthContext";
+import { AuthContext } from "./AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import Bara_navigatie from "./NavBars/Bara_navigatie";
 import "./Login.css";
 import jwt_decode from 'jwt-decode';
 

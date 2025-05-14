@@ -11,10 +11,6 @@ interface ReservationPopupProps {
     apartmentId: string;
 }
 
-interface DateInterval {
-    start: Date;
-    end: Date;
-}
 
 const ReservationPopup: React.FC<ReservationPopupProps> = ({
     onClose,
@@ -27,7 +23,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     const [roomsCount, setRoomsCount] = useState<number>(0);
     // const [selectedRooms, setSelectedRooms] = useState<number>(1);
     const [selectedRooms, setSelectedRooms] = useState<number | "">("");
-    const { token, user } = useContext(AuthContext);
+    const { token } = useContext(AuthContext);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
