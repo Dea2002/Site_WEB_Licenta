@@ -8,6 +8,7 @@ interface ReservationRequest {
     _id: string;
     client: string;
     apartament: string;
+    numberOfRooms: number;
     checkIn: string;
     checkOut: string;
     clientData: {
@@ -81,39 +82,41 @@ const OwnerRequests: React.FC = () => {
     };
 
     return (
-        <>
-            <div className="owner-requests-container">
-                <h1>Cereri de rezervare</h1>
-                {successMessage && <div className="success-message">{successMessage}</div>}
-                {requests.length > 0 ? (
-                    <ul className="requests-list">
-                        {requests.map((req) => (
-                            <li key={req._id} className="request-item">
-                                <p>
-                                    <strong>Nume client:</strong> {req.clientData.fullName}
-                                </p>
-                                <p>
-                                    <strong>Locatia apartamentului:</strong>{" "}
-                                    {req.apartamentData.location}
-                                </p>
-                                <p>
-                                    <strong>Check-In:</strong>{" "}
-                                    {new Date(req.checkIn).toLocaleDateString()}
-                                </p>
-                                <p>
-                                    <strong>Check-Out:</strong>{" "}
-                                    {new Date(req.checkOut).toLocaleDateString()}
-                                </p>
-                                <button onClick={() => accept(req._id)}>Accepta</button>
-                                <button onClick={() => decline(req._id)}>Respinge</button>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>Nu exista cereri de rezervare.</p>
-                )}
-            </div>
-        </>
+        <div className="owner-requests-container">
+            <h1>Cereri de rezervare</h1>
+            {successMessage && <div className="success-message">{successMessage}</div>}
+            {requests.length > 0 ? (
+                <ul className="requests-list">
+                    {requests.map((req) => (
+                        <li key={req._id} className="request-item">
+                            <p>
+                                <strong>Nume client:</strong> {req.clientData.fullName}
+                            </p>
+                            <p>
+                                <strong>Locatia apartamentului:</strong>{" "}
+                                {req.apartamentData.location}
+                            </p>
+                            <p>
+                                <strong>Numarul de camere:</strong>{" "}
+                                {req.numberOfRooms}
+                            </p>
+                            <p>
+                                <strong>Check-In:</strong>{" "}
+                                {new Date(req.checkIn).toLocaleDateString()}
+                            </p>
+                            <p>
+                                <strong>Check-Out:</strong>{" "}
+                                {new Date(req.checkOut).toLocaleDateString()}
+                            </p>
+                            <button onClick={() => accept(req._id)}>Accepta</button>
+                            <button onClick={() => decline(req._id)}>Respinge</button>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p>Nu exista cereri de rezervare.</p>
+            )}
+        </div>
     );
 };
 

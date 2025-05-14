@@ -93,25 +93,6 @@ async function run() {
         const notificationsRoutes = createNotificationsRoutes(notificationsCollection, notificationService);
         app.use('/notifications', notificationsRoutes);
 
-        // // --- Handler pentru rute inexistente (404) - Se pune DUPa definirea tuturor rutelor ---
-        // app.use((req, res, next) => {
-        //     res.status(404).json({ message: "Endpoint negasit" }); // Trimite JSON pt API
-        // });
-
-        // // --- Middleware de gestionare a erorilor (Se pune ULTIMUL) ---
-        // app.use((err, req, res, next) => {
-        //     console.error("-----------------------");
-        //     console.error("A aparut o eroare:", err.message);
-        //     console.error(err.stack);
-        //     console.error("-----------------------");
-        //     res.status(err.status || 500).json({
-        //         message: err.message || 'Ceva a mers prost pe server!',
-        //         // Poti adauga detalii suplimentare in mod dezvoltare
-        //         // error: process.env.NODE_ENV === 'development' ? err : {}
-        //     });
-        // });
-
-
         //!! --- Structura veche ---
 
         // Ruta pentru actualizarea profilului utilizatorului
@@ -297,9 +278,10 @@ async function run() {
                 return res.status(403).json({ message: 'Doar clientii pot face cereri de rezervare' });
             }
 
-            const { clientId, apartmentId, checkIn, checkOut } = req.body; // extrag datele din request
+            const { clientId, apartmentId, numberOfRooms, checkIn, checkOut } = req.body; // extrag datele din request
             const clientObjectId = new ObjectId(clientId); // creez un obiect de tip ObjectId pentru client
             const apartmentObjectId = new ObjectId(apartmentId);
+            const apartmentObject = await apartmentsCollection.findOne({ _id: apartmentObjectId }); // caut apartamentul in baza de date
 
             // creez obiecte de tip Date pentru check-in si check-out
             const newCheckIn = new Date(checkIn);
@@ -321,11 +303,15 @@ async function run() {
             const newReservationRequest = {
                 client: clientObjectId,
                 apartament: apartmentObjectId,
+                numberOfRooms: parseInt(numberOfRooms),
                 checkIn: newCheckIn,
                 checkOut: newCheckOut
             };
 
             await reservationRequestsCollection.insertOne(newReservationRequest);
+
+            notificationService.createNotification(message = `Cerere de rezervare pentru apartamentul de la locatia: ${apartmentObject.location}, a fost trimisa cu succes!`, receiver = clientObjectId);
+            notificationService.createNotification(message = `${req.user.fullName} a facut o cerere de rezervare pentru apartamentul ${apartmentId}`, receiver = apartmentObject.ownerId);
 
             res.status(200).json({ message: 'Am facut cerere de rezervare' });
         });

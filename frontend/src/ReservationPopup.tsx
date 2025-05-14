@@ -59,7 +59,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }, [nextAvailableDate]);
 
     useEffect(() => {
-        console.log("Apartment ID:", apartmentId);
+
         // make a get request to local host /testez and console log the response
         axios
             .get(`http://localhost:5000/unavailable_dates/${apartmentId}`)

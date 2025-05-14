@@ -9,6 +9,7 @@ import { format, differenceInCalendarDays } from "date-fns";
 import "./ApartmentDetails.css"; // Ensure this CSS is imported
 import "leaflet/dist/leaflet.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
+import { useNotifications } from "./NotificationContext";
 
 interface selectedDates {
     checkIn: Date;
@@ -16,6 +17,7 @@ interface selectedDates {
 }
 
 const ApartmentDetails: React.FC = () => {
+    const { refresh } = useNotifications();
     const { id } = useParams<{ id: string }>();
     const [apartment, setApartment] = useState<Apartment | null>(null);
     const [rooms, setRooms] = useState<{ rooms: number }>({ rooms: 0 });
@@ -93,6 +95,7 @@ const ApartmentDetails: React.FC = () => {
                 {
                     clientId: user._id,
                     apartmentId: id,
+                    numberOfRooms: rooms.rooms,
                     checkIn: format(selectedDates.checkIn, "yyyy-MM-dd"),
                     checkOut: format(selectedDates.checkOut, "yyyy-MM-dd"),
                 },
@@ -102,9 +105,10 @@ const ApartmentDetails: React.FC = () => {
             );
             // Handle successful request submission
             console.log("Reservation request sent successfully!");
+            refresh(); // Refresh notifications
             alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page
-            navigate("/my-rents"); // Example navigation
+            // navigate("/my-rents"); // Example navigation
         } catch (err: any) {
             setError(
                 err.response?.data?.message || "Eroare la trimiterea cererii. incercati din nou.",
@@ -197,7 +201,7 @@ const ApartmentDetails: React.FC = () => {
         const extraTotalCost = extraDailyCost * nights;
         const apartmentTotalCost = pricePerNight * nights;
 
-        const finalTotalCost = numberOfRooms * apartmentTotalCost + extraTotalCost;
+        const finalTotalCost = numberOfRooms * (apartmentTotalCost + extraTotalCost);
 
         return (
             // Using the structured selected-dates-info div from the new layout
