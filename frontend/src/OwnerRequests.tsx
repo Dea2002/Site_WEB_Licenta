@@ -34,7 +34,6 @@ const OwnerRequests: React.FC = () => {
             })
             .then((response) => {
                 setRequests(response.data);
-                console.log(response.data);
             })
             .catch((error) => {
                 console.error("Eroare la preluarea cererilor de rezervare:", error);
@@ -57,7 +56,7 @@ const OwnerRequests: React.FC = () => {
                     setTimeout(() => setSuccessMessage(""), 3000);
                 });
         } catch (err: any) {
-            console.log(err);
+            console.error(err);
         }
     };
 
@@ -77,7 +76,7 @@ const OwnerRequests: React.FC = () => {
                     setTimeout(() => setSuccessMessage(""), 3000);
                 });
         } catch (err: any) {
-            console.log(err);
+            console.error(err);
         }
     };
 

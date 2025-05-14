@@ -14,7 +14,7 @@ export interface User {
     faculty_valid?: boolean;
     numar_matricol?: string;
     anUniversitar?: string;
-    medie_valid?: string;  // observă: string ISO
+    medie_valid?: string;  // observa: string ISO
     medie?: string;
     iat: number;
     exp: number;
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return !!localStorage.getItem("token");
     });
 
-    // setează header-ul implicit de fiecare dată cand tokenul se schimbă
+    // seteaza header-ul implicit de fiecare data cand tokenul se schimba
     useEffect(() => {
         if (token) {
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;

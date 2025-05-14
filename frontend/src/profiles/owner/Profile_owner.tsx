@@ -5,20 +5,20 @@ import Bara_navigatie from "../../NavBars/Bara_nav_OwnerDashboard"; // Your Navb
 import EditProfile from './EditProfile_owner';
 import ProfileSidebar from './ProfileSidebar_owner';
 
-// Defineste tipurile posibile pentru sectiunea activă
+// Defineste tipurile posibile pentru sectiunea activa
 type ProfileSection = 'edit';
 
 const Profile_owner: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
-    const { user } = useContext(AuthContext); // Preluăm user-ul din context
+    const { user } = useContext(AuthContext); // Preluam user-ul din context
     console.log(user);
-    // Dacă nu există user logat, poate redirectionăm sau afisăm un mesaj
+    // Daca nu exista user logat, poate redirectionam sau afisam un mesaj
     if (!user) {
-        // Poti adăuga o redirectionare sau un placeholder aici
+        // Poti adauga o redirectionare sau un placeholder aici
         return (
             <>
                 <div className="user-profile-container">
-                    <p>Trebuie să fii autentificat pentru a vedea această pagină.</p>
+                    <p>Trebuie sa fii autentificat pentru a vedea aceasta pagina.</p>
                 </div>
             </>
         );
@@ -27,7 +27,7 @@ const Profile_owner: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'edit':
-                return <EditProfile user={user} />; // Trimitem user-ul către componentă
+                return <EditProfile user={user} />; // Trimitem user-ul catre componenta
             default:
                 return <EditProfile user={user} />; // Sau un mesaj default
         }
@@ -36,7 +36,7 @@ const Profile_owner: React.FC = () => {
     return (
         <>
             <div className="user-profile-page-container">
-                {/* Acest div reprezintă "dreptunghiul mare" */}
+                {/* Acest div reprezinta "dreptunghiul mare" */}
                 <div className="profile-content-box">
                     {/* Coloana din stanga (Sidebar) */}
                     <div className="profile-sidebar-column">

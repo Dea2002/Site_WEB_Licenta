@@ -48,24 +48,24 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         };
 
         fetchCurrentRent();
-    }, [userId, token]); // Rulează cand userId sau token se schimbă
+    }, [userId, token]); // Ruleaza cand userId sau token se schimba
 
     return (
         <div className="profile-section-content">
-            <h2>Chiria Actuală</h2>
-            {isLoading && <p>Se incarcă...</p>}
+            <h2>Chiria Actuala</h2>
+            {isLoading && <p>Se incarca...</p>}
             {error && <p className="error-message">{error}</p>}
             {!isLoading && !error && rentData && (
                 <div>
                     <p><strong>Apartament:</strong> {rentData.apartmentName}</p>
                     <p><strong>Data inceput:</strong> {new Date(rentData.startDate).toLocaleDateString()}</p>
                     <p><strong>Data sfarsit:</strong> {new Date(rentData.endDate).toLocaleDateString()}</p>
-                    <p><strong>Sumă chirie lunară:</strong> {rentData.rentAmount} RON</p>
-                    {/* Afisează alte detalii */}
+                    <p><strong>Suma chirie lunara:</strong> {rentData.rentAmount} RON</p>
+                    {/* Afiseaza alte detalii */}
                 </div>
             )}
             {!isLoading && !error && !rentData && (
-                <p>Nu există o chirie activă inregistrată.</p>
+                <p>Nu exista o chirie activa inregistrata.</p>
             )}
         </div>
     );

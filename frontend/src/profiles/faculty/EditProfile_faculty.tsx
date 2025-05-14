@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { AuthContext, Faculty } from '../../AuthContext'; // Importăm User
+import { AuthContext, Faculty } from '../../AuthContext'; // Importam User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_faculty.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
@@ -24,7 +24,7 @@ interface ProfileFormState {
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
-    // Stări pentru campurile formularului, initializate cu datele userului
+    // Stari pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: faculty.fullName,
         abreviere: faculty.abreviere,
@@ -39,7 +39,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
     const initialDate = initialFormStateRef.current.medie_valid;
 
-    // Adaugă alte campuri pe care vrei să le permiti editării (ex: email - desi e mai complicat)
+    // Adauga alte campuri pe care vrei sa le permiti editarii (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -47,7 +47,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Cand "faculty" din context se schimbă (după login), reconstruim formData
+        // Cand "faculty" din context se schimba (dupa login), reconstruim formData
         if (!faculty) return;
         const newState: ProfileFormState = {
             fullName: faculty.fullName,
@@ -76,15 +76,15 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
 
         if (wantsToChangePassword) {
             if (!currentPassword || !newPassword || !confirmNewPassword) {
-                setError("Completează toate campurile pentru schimbarea parolei.");
+                setError("Completeaza toate campurile pentru schimbarea parolei.");
                 return;
             }
             if (newPassword !== confirmNewPassword) {
-                setError("Parola nouă si confirmarea nu coincid.");
+                setError("Parola noua si confirmarea nu coincid.");
                 return;
             }
             if (newPassword.length < 6) {
-                setError("Parola nouă trebuie să aibă cel putin 6 caractere.");
+                setError("Parola noua trebuie sa aiba cel putin 6 caractere.");
                 return;
             }
         }
@@ -110,7 +110,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
             setTimeout(() => navigate("/faculty_dashboard"), 3000);
         } catch (err: any) {
             console.error("Eroare la actualizare:", err);
-            setError(err.response?.data?.message || "A apărut o eroare la actualizare.");
+            setError(err.response?.data?.message || "A aparut o eroare la actualizare.");
         } finally {
             setIsLoading(false);
         }
@@ -135,15 +135,15 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
         }
     }
 
-    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) si-l transformă in Date
+    // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) si-l transforma in Date
 
     const semestruDate = parseISO(profileFormState.medie_valid!);
-    // doar dacă azi > semestruDate putem edita
+    // doar daca azi > semestruDate putem edita
     const canEdit = isAfter(new Date(), initialDate);
-    // compară camp cu camp
+    // compara camp cu camp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
-            // @ts-ignore – ca să poţi indexa generic
+            // @ts-ignore – ca sa poţi indexa generic
             value !== initialFormStateRef.current[key]
     );
 
@@ -201,7 +201,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="phoneNumber">Număr de telefon:</label>
+                    <label htmlFor="phoneNumber">Numar de telefon:</label>
                     <input
                         type="text"
                         id="phoneNumber"
@@ -226,7 +226,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="currentPassword">Parola curentă:</label>
+                    <label htmlFor="currentPassword">Parola curenta:</label>
                     <input
                         type="password"
                         id="currentPassword"
@@ -237,7 +237,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="newPassword">Parola nouă:</label>
+                    <label htmlFor="newPassword">Parola noua:</label>
                     <input
                         type="password"
                         id="newPassword"
@@ -248,7 +248,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="confirmNewPassword">Confirmă parola nouă:</label>
+                    <label htmlFor="confirmNewPassword">Confirma parola noua:</label>
                     <input
                         type="password"
                         id="confirmNewPassword"
@@ -265,7 +265,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
                     type="submit"
                     disabled={isLoading || !isDirty}
                 >
-                    {isLoading ? 'Se salvează...' : 'Salvează Modificările'}
+                    {isLoading ? 'Se salveaza...' : 'Salveaza Modificarile'}
                 </button>
             </form>
         </div>

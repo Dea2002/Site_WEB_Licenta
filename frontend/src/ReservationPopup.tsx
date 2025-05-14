@@ -44,7 +44,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     function groupIntoIntervals(dateStrings: string[]): DateInterval[] {
         if (dateStrings.length === 0) return [];
 
-        // 1. Convertim în Date şi sortăm
+        // 1. Convertim in Date şi sortam
         const dates = dateStrings
             .map(s => new Date(s))
             .sort((a, b) => a.getTime() - b.getTime());
@@ -55,9 +55,9 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
 
         for (let i = 1; i < dates.length; i++) {
             const cur = dates[i];
-            // câte ms are o zi?
+            // cate ms are o zi?
             const oneDay = 1000 * 60 * 60 * 24;
-            // dacă nu sunt consecutive, încheiem intervalul curent
+            // daca nu sunt consecutive, incheiem intervalul curent
             if (cur.getTime() - prev.getTime() > oneDay) {
                 intervals.push({ start, end: prev });
                 start = cur;
@@ -65,7 +65,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             prev = cur;
         }
 
-        // adăugăm ultimul interval
+        // adaugam ultimul interval
         intervals.push({ start, end: prev });
         return intervals;
     }
@@ -135,7 +135,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 </button>
                 <h2>Selecteaza datele</h2>
                 <form onSubmit={handleSubmit}>
-                    {/* Select camere mai întâi */}
+                    {/* Select camere mai intai */}
                     <div className="rooms-selector">
                         <label>Doresc:</label>
                         <select
@@ -144,17 +144,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                             required
                         >
                             <option value="" disabled>
-                                --- Selectează ---
+                                --- Selecteaza ---
                             </option>
                             {Array.from({ length: roomsCount }, (_, i) => i + 1).map((n) => (
                                 <option key={n} value={n}>
-                                    {n === 1 ? "o cameră" : `${n} camere`}
+                                    {n === 1 ? "o camera" : `${n} camere`}
                                 </option>
                             ))}
                         </select>
                     </div>
 
-                    {/* Date pickers afișate doar după selectarea camerelor */}
+                    {/* Date pickers afisate doar dupa selectarea camerelor */}
                     {selectedRooms !== "" && (
                         <>
                             <div className="date-picker-container">
@@ -163,7 +163,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                                     selected={checkInDate}
                                     onChange={(date) => setCheckInDate(date)}
                                     dateFormat="dd/MM/yyyy"
-                                    placeholderText="Selectează check-in"
+                                    placeholderText="Selecteaza check-in"
                                     minDate={new Date()}
                                     excludeDateIntervals={unavailableIntervals.map((interval) => ({
                                         start: subDays(interval.start, 1),
@@ -179,7 +179,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                                     selected={checkOutDate}
                                     onChange={(date) => setCheckOutDate(date)}
                                     dateFormat="dd/MM/yyyy"
-                                    placeholderText="Selectează check-out"
+                                    placeholderText="Selecteaza check-out"
                                     minDate={checkInDate || new Date()}
                                     maxDate={maxCheckOutDate}
                                     required
@@ -187,7 +187,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                             </div>
 
                             <button className="submit-confirma-interval" type="submit">
-                                Confirmă
+                                Confirma
                             </button>
                         </>
                     )}

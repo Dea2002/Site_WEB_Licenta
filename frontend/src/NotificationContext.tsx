@@ -17,8 +17,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     const [unreadCount, setUnreadCount] = useState(0);
 
     const fetchUnread = useCallback(async () => { // Folosim useCallback pentru stabilitate
-        if (!isAuthenticated || !token) { // Verificăm si token explicit
-            setUnreadCount(0); // Resetăm explicit dacă nu e autentificat sau nu are token
+        if (!isAuthenticated || !token) { // Verificam si token explicit
+            setUnreadCount(0); // Resetam explicit daca nu e autentificat sau nu are token
             return;
         }
         try {
@@ -29,12 +29,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             setUnreadCount(data.unread);
         } catch (error) {
             console.error("Failed to fetch unread count:", error);
-            // Poti alege să resetezi la 0 sau să păstrezi valoarea veche in caz de eroare
+            // Poti alege sa resetezi la 0 sau sa pastrezi valoarea veche in caz de eroare
             // setUnreadCount(0);
         }
     }, [isAuthenticated, token]);
 
-    // la mount si cand tokenul se schimbă
+    // la mount si cand tokenul se schimba
     useEffect(() => {
         fetchUnread();
         // eventual polling la 60s:
@@ -45,13 +45,13 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     // useEffect(() => {
     //     fetchUnread(); // Fetch la mount si la schimbarea auth/token
 
-    //     // Polling - porneste doar dacă e autentificat
+    //     // Polling - porneste doar daca e autentificat
     //     let intervalId: NodeJS.Timeout | null = null;
     //     if (isAuthenticated) {
     //         intervalId = setInterval(fetchUnread, 60000);
     //     }
 
-    //     // Cleanup: opreste intervalul la unmount sau cand se schimbă starea de autentificare
+    //     // Cleanup: opreste intervalul la unmount sau cand se schimba starea de autentificare
     //     return () => {
     //         if (intervalId) {
     //             clearInterval(intervalId);
@@ -59,7 +59,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     //     };
     // }, [fetchUnread, isAuthenticated]);
 
-    // Functia refresh poate fi simplificată pentru a refolosi fetchUnread
+    // Functia refresh poate fi simplificata pentru a refolosi fetchUnread
     const refresh = useCallback(() => {
         fetchUnread();
     }, [fetchUnread]);

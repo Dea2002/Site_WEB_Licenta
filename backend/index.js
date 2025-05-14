@@ -92,7 +92,7 @@ async function run() {
         app.use('/users', userRoutes); // toate requesturile vor avea prefixul /users
 
         const createApartmentsRoutes = require('./routes/apartments'); // Importa rutele pentru utilizatori
-        const apartmentsRoutes = createApartmentsRoutes(apartmentsCollection);
+        const apartmentsRoutes = createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection);
         app.use('/apartments', apartmentsRoutes);
 
         const createFacultyRoutes = require('./routes/faculty');
@@ -712,16 +712,16 @@ async function run() {
         });
 
         app.post('/unavailable_dates/:apartment_id', authenticateToken, async (req, res) => {
-            console.log("ALOOOO");
+
             const apartmentId = req.params.apartment_id;
             if (!req.user || !req.user._id) {
                 return res.status(401).json({ message: 'User not authenticated' });
             }
 
             const requestedRooms = parseInt(req.body.numberOfRooms, 10) || 1;
-            console.log("requestedRooms", requestedRooms);
+
             if (requestedRooms < 1) {
-                return res.status(400).json({ message: 'Număr de camere invalid' });
+                return res.status(400).json({ message: 'Numar de camere invalid' });
             }
 
             const currentUserId = req.user._id.toString();
@@ -751,10 +751,10 @@ async function run() {
                     .toArray();
 
                 // 4) Fetch active rental history PENTRU UTILIZATORUL CURENT, PENTRU ALTE APARTAMENTE
-                // Acestea sunt rezervările confirmate ale utilizatorului curent pentru apartamente diferite de cel verificat (A, C, D...)
+                // Acestea sunt rezervarile confirmate ale utilizatorului curent pentru apartamente diferite de cel verificat (A, C, D...)
                 const userRentalsOnOtherApartments = await reservationHistoryCollection
                     .find({
-                        user: new ObjectId(currentUserId), // Folosește ObjectId dacă 'user' e stocat așa
+                        user: new ObjectId(currentUserId), // Foloseste ObjectId daca 'user' e stocat asa
                         apartament: { $ne: new ObjectId(apartmentId) }, // Apartament diferit de cel curent (B)
                         isActive: true
                     })
@@ -770,48 +770,48 @@ async function run() {
                 // 5) Build a map of date -> usedRooms count
                 const usedRoomsMap = {};
 
-                // A) Procesează rezervările confirmate PENTRU APARTAMENTUL CURENT (B)
+                // A) Proceseaza rezervarile confirmate PENTRU APARTAMENTUL CURENT (B)
                 rentals.forEach(rental => {
-                    const rooms = rental.numberOfRooms || 1; // Sau o valoare default dacă nu e specificat
+                    const rooms = rental.numberOfRooms || 1; // Sau o valoare default daca nu e specificat
                     const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
                     days.forEach(day => {
                         usedRoomsMap[day] = (usedRoomsMap[day] || 0) + rooms;
                     });
                 });
 
-                // B) Procesează TOATE cererile active
+                // B) Proceseaza TOATE cererile active
                 requests.forEach(reqDoc => {
                     const roomsInRequest = reqDoc.numberOfRooms || 1;
                     const daysInRequest = getDatesBetween(new Date(reqDoc.checkIn), new Date(reqDoc.checkOut));
                     const requestApartmentIdStr = reqDoc.apartament.toString();
-                    // Asigură-te că `reqDoc.user` există și este un ObjectId înainte de a apela toString()
+                    // Asigura-te ca `reqDoc.user` exista si este un ObjectId inainte de a apela toString()
                     const requestUserIdStr = reqDoc.user ? (typeof reqDoc.user === 'string' ? reqDoc.user : reqDoc.user.toString()) : null;
 
 
                     daysInRequest.forEach(day => {
                         if (requestApartmentIdStr === apartmentId) {
                             // Cererea este pentru apartamentul curent (B)
-                            // Adaugă numărul de camere solicitate la totalul pentru ziua respectivă
+                            // Adauga numarul de camere solicitate la totalul pentru ziua respectiva
                             usedRoomsMap[day] = (usedRoomsMap[day] || 0) + roomsInRequest;
                         } else if (requestUserIdStr && requestUserIdStr === currentUserId) {
                             // Cererea este pentru un ALT apartament (A, C, D...)
-                            // DAR este făcută de UTILIZATORUL CURENT
-                            // Deci, pentru utilizatorul curent, această zi este ocupată, indiferent de apartamentul B
-                            // Marcăm ziua ca având capacitatea maximă atinsă (pentru utilizatorul curent)
+                            // DAR este facuta de UTILIZATORUL CURENT
+                            // Deci, pentru utilizatorul curent, aceasta zi este ocupata, indiferent de apartamentul B
+                            // Marcam ziua ca avand capacitatea maxima atinsa (pentru utilizatorul curent)
                             usedRoomsMap[day] = capacity;
                         }
-                        // Dacă cererea e pentru alt apartament ȘI alt utilizator, nu afectează direct disponibilitatea
-                        // apartamentului B pentru utilizatorul curent, decât prin faptul că ar putea umple apartamentul B
+                        // Daca cererea e pentru alt apartament sI alt utilizator, nu afecteaza direct disponibilitatea
+                        // apartamentului B pentru utilizatorul curent, decat prin faptul ca ar putea umple apartamentul B
                         // (cazul `requestApartmentIdStr === apartmentId` acoperit mai sus).
                     });
                 });
 
-                // C) Procesează rezervările confirmate ale UTILIZATORULUI CURENT pe ALTE APARTAMENTE
+                // C) Proceseaza rezervarile confirmate ale UTILIZATORULUI CURENT pe ALTE APARTAMENTE
                 userRentalsOnOtherApartments.forEach(rental => {
                     const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
                     days.forEach(day => {
-                        // Utilizatorul curent este ocupat cu o altă rezervare confirmată,
-                        // deci ziua este indisponibilă pentru el pentru apartamentul B.
+                        // Utilizatorul curent este ocupat cu o alta rezervare confirmata,
+                        // deci ziua este indisponibila pentru el pentru apartamentul B.
                         usedRoomsMap[day] = capacity;
                     });
                 });

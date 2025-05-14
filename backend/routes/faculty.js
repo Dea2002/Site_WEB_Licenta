@@ -131,7 +131,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
         try {
             const pipeline = [
-                // 1. Filtrăm după facultate
+                // 1. Filtram dupa facultate
                 {
                     $match: { facultyId }
                 },
@@ -195,34 +195,34 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         const markRequestId = new ObjectId(id);
 
         try {
-            // 1. Găseste cererea
+            // 1. Gaseste cererea
             const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
             if (!markRequest) {
                 return res.status(404).json({
                     message:
-                        'Cererea de actualizare medii nu a fost găsită sau nu mai este pending.'
+                        'Cererea de actualizare medii nu a fost gasita sau nu mai este pending.'
                 });
             }
 
-            // 2. Găseste studentul
+            // 2. Gaseste studentul
             const student = await usersCollection.findOne({
                 _id: new ObjectId(markRequest.studentId)
             });
             if (!student) {
-                return res.status(404).json({ message: 'Studentul nu a fost găsit.' });
+                return res.status(404).json({ message: 'Studentul nu a fost gasit.' });
             }
 
-            // 3. Găseste facultatea din cerere (markRequest.facultyId)
+            // 3. Gaseste facultatea din cerere (markRequest.facultyId)
             const facultyDoc = await facultiesCollection.findOne({
                 _id: new ObjectId(markRequest.facultyId)
             });
             if (!facultyDoc) {
                 return res
                     .status(404)
-                    .json({ message: 'Facultatea asociată nu a fost găsită.' });
+                    .json({ message: 'Facultatea asociata nu a fost gasita.' });
             }
 
-            // 4. Actualizează campul medie_valid al studentului cu valoarea din facultate
+            // 4. Actualizeaza campul medie_valid al studentului cu valoarea din facultate
             const userUpdate = await usersCollection.updateOne(
                 { _id: student._id },
                 { $set: { medie_valid: facultyDoc.medie_valid } }
@@ -251,7 +251,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
             return res
                 .status(200)
-                .json({ message: 'Cererea a fost aprobată si media actualizată.' });
+                .json({ message: 'Cererea a fost aprobata si media actualizata.' });
         } catch (error) {
             console.error("Eroare la acceptarea cererii de actualizare medii:", error);
             return res

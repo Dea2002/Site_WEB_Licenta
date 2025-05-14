@@ -48,14 +48,14 @@ function createNotificationsRoutes(notificationsCollection, notificationService)
                     { $set: { isRead: true } }
                 );
                 if (result.modifiedCount === 0) {
-                    return res.status(404).json({ message: 'Notificare inexistentă.' });
+                    return res.status(404).json({ message: 'Notificare inexistenta.' });
                 }
-                return res.json({ message: 'Notificare marcată ca citită.' });
+                return res.json({ message: 'Notificare marcata ca citita.' });
             } catch (err) {
                 console.error('Error marking notification read:', err);
                 return res
                     .status(500)
-                    .json({ message: 'Eroare internă la actualizarea notificării.' });
+                    .json({ message: 'Eroare interna la actualizarea notificarii.' });
             }
         }
     );
@@ -69,7 +69,7 @@ function createNotificationsRoutes(notificationsCollection, notificationService)
                 _id: new ObjectId(id),
                 receiver: new ObjectId(req.user._id)
             });
-            res.json({ message: 'Notificare stearsă' });
+            res.json({ message: 'Notificare stearsa' });
         }
     );
 

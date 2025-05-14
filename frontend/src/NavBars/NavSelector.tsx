@@ -10,7 +10,7 @@ const NavSelector: React.FC = () => {
     const { pathname } = useLocation();
 
     if (pathname === "/") return null;
-    // Dacă nu esti logat, nu afisăm niciun navbar (sau unul public)
+    // Daca nu esti logat, nu afisam niciun navbar (sau unul public)
     if (!isAuthenticated) return <Bara_navigatie />;
 
     // Alege in functie de role
@@ -20,7 +20,7 @@ const NavSelector: React.FC = () => {
         case "proprietar":
             return <Bara_nav_OwnerDashboard />;
         default:
-            // orice altceva (inclusiv undefined) le tratăm ca “facultate”
+            // orice altceva (inclusiv undefined) le tratam ca “facultate”
             return <Bara_navigatie_facultate />;
     }
 };

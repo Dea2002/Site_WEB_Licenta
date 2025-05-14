@@ -36,8 +36,8 @@ const NotificationDashboard: React.FC = () => {
             setNotifications(resp.data);
 
         } catch (err: any) {
-            console.error('Eroare la fetch notificări:', err);
-            setError('Nu am putut incărca notificările.');
+            console.error('Eroare la fetch notificari:', err);
+            setError('Nu am putut incarca notificarile.');
         }
     };
 
@@ -73,7 +73,7 @@ const NotificationDashboard: React.FC = () => {
             await fetchNotifications();
             refreshUnread();
         } catch (err) {
-            console.error('Eroare la stergerea notificării:', err);
+            console.error('Eroare la stergerea notificarii:', err);
         }
     };
 
@@ -83,13 +83,13 @@ const NotificationDashboard: React.FC = () => {
     return (
         <>
             <div className="notification-dashboard">
-                <h1>Toate Notificările</h1>
+                <h1>Toate Notificarile</h1>
 
                 {error && <p className="error">{error}</p>}
 
                 {!error && (
                     notifications.length === 0
-                        ? <p>Nu ai notificări.</p>
+                        ? <p>Nu ai notificari.</p>
                         : (
                             <table className="notif-table">
                                 <thead>
@@ -114,7 +114,7 @@ const NotificationDashboard: React.FC = () => {
                                                         className="btn-action btn-mark"
                                                         onClick={() => handleMarkAsRead(n._id)}
                                                     >
-                                                        Marchează ca si citit
+                                                        Marcheaza ca si citit
                                                     </button>
                                                 )}
                                                 <button

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef } from 'react';
-import { AuthContext, User } from '../../AuthContext'; // Importăm User
+import { AuthContext, User } from '../../AuthContext'; // Importam User
 import axios from 'axios'; // Pentru request PATCH/PUT
 import './profile_owner.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
@@ -22,7 +22,7 @@ interface ProfileFormState {
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
-    // Stări pentru campurile formularului, initializate cu datele userului
+    // Stari pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: user.fullName,
         email: user.email,
@@ -36,7 +36,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     });
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
 
-    // Adaugă alte campuri pe care vrei să le permiti editării (ex: email - desi e mai complicat)
+    // Adauga alte campuri pe care vrei sa le permiti editarii (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -56,7 +56,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
         try {
             // Presupunem un endpoint /users/me sau /users/:id pentru update
-            // Folosim PATCH pentru actualizări partiale
+            // Folosim PATCH pentru actualizari partiale
             const response = await axios.patch(
                 `http://localhost:5000/users/me`, // Sau `/users/${user.userId}`
                 updatedData,
@@ -76,13 +76,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             } else {
                 // Daca nu vine token nou, ar trebui sa re-fetch user data sau sa actualizam manual contextul
                 // Aici doar afisam mesaj, dar ideal ar fi sa actualizam si user-ul din context
-                setMessage('Profil actualizat. Reimprospătati pagina pentru a vedea toate modificările.');
-                // TODO: Implementează o modalitate de a actualiza user-ul din context fără token nou
+                setMessage('Profil actualizat. Reimprospatati pagina pentru a vedea toate modificarile.');
+                // TODO: Implementeaza o modalitate de a actualiza user-ul din context fara token nou
             }
 
         } catch (err: any) {
             console.error("Eroare la actualizarea profilului:", err);
-            setError(err.response?.data?.message || 'A apărut o eroare la actualizare.');
+            setError(err.response?.data?.message || 'A aparut o eroare la actualizare.');
         } finally {
             setIsLoading(false);
         }
@@ -99,10 +99,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     }
 
 
-    // compară camp cu camp
+    // compara camp cu camp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
-            // @ts-ignore – ca să poţi indexa generic
+            // @ts-ignore – ca sa poţi indexa generic
             value !== initialFormStateRef.current[key]
     );
     return (
@@ -134,7 +134,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="phoneNumber">Număr de telefon:</label>
+                    <label htmlFor="phoneNumber">Numar de telefon:</label>
                     <input
                         type="text"
                         id="phoneNumber"
@@ -152,7 +152,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                     type="submit"
                     disabled={isLoading || !isDirty}
                 >
-                    {isLoading ? 'Se salvează...' : 'Salvează Modificările'}
+                    {isLoading ? 'Se salveaza...' : 'Salveaza Modificarile'}
                 </button>
             </form>
         </div>

@@ -62,7 +62,7 @@ const RentHistory: React.FC = () => {
                 setRentalHistory(historyRes.data || []);
             } catch (err: any) {
                 console.error("Dashboard load error", err);
-                setError("A apărut o eroare la încărcarea dashboard-ului.");
+                setError("A aparut o eroare la incarcarea dashboard-ului.");
             } finally {
                 setLoading(false);
             }
@@ -72,7 +72,7 @@ const RentHistory: React.FC = () => {
     }, [user, token]);
 
     if (loading) {
-        return <div className="dashboard-loading">Se încarcă datele...</div>;
+        return <div className="dashboard-loading">Se incarca datele...</div>;
     }
     if (error) {
         return <div className="dashboard-error">{error}</div>;
@@ -83,32 +83,32 @@ const RentHistory: React.FC = () => {
             <h1>Dashboard Utilizator</h1>
 
             <section className="dashboard-section">
-                <h2>Cerere Curentă de Chirii</h2>
+                <h2>Cerere Curenta de Chirii</h2>
                 {currentRequest ? (
                     <div className="card">
                         <p><strong>ID Cerere:</strong> {currentRequest.id}</p>
-                        <p><strong>Locație:</strong> {currentRequest.apartmentLocation}</p>
+                        <p><strong>Locatie:</strong> {currentRequest.apartmentLocation}</p>
                         <p><strong>Check-in:</strong> {currentRequest.checkIn}</p>
                         <p><strong>Check-out:</strong> {currentRequest.checkOut}</p>
                         <p><strong>Status:</strong> {currentRequest.status}</p>
                     </div>
                 ) : (
-                    <p>Nu există nicio cerere de rezervare activă.</p>
+                    <p>Nu exista nicio cerere de rezervare activa.</p>
                 )}
             </section>
 
             <section className="dashboard-section">
-                <h2>Chirie Actuală</h2>
+                <h2>Chirie Actuala</h2>
                 {currentRental ? (
                     <div className="card">
                         <p><strong>ID Chirii:</strong> {currentRental.id}</p>
-                        <p><strong>Locație:</strong> {currentRental.apartmentLocation}</p>
-                        <p><strong>Început:</strong> {currentRental.startedAt}</p>
-                        <p><strong>Sfârșit:</strong> {currentRental.endsAt}</p>
-                        <p><strong>Chirie Lună:</strong> {currentRental.monthlyRent} RON</p>
+                        <p><strong>Locatie:</strong> {currentRental.apartmentLocation}</p>
+                        <p><strong>inceput:</strong> {currentRental.startedAt}</p>
+                        <p><strong>Sfarsit:</strong> {currentRental.endsAt}</p>
+                        <p><strong>Chirie Luna:</strong> {currentRental.monthlyRent} RON</p>
                     </div>
                 ) : (
-                    <p>Nu există nicio chirie activă.</p>
+                    <p>Nu exista nicio chirie activa.</p>
                 )}
             </section>
 
@@ -119,10 +119,10 @@ const RentHistory: React.FC = () => {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Locație</th>
+                                <th>Locatie</th>
                                 <th>Check-in</th>
                                 <th>Check-out</th>
-                                <th>Total Plătit (RON)</th>
+                                <th>Total Platit (RON)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -138,7 +138,7 @@ const RentHistory: React.FC = () => {
                         </tbody>
                     </table>
                 ) : (
-                    <p>Nu există istoric de chirii.</p>
+                    <p>Nu exista istoric de chirii.</p>
                 )}
             </section>
         </div>

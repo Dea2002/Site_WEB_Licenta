@@ -5,7 +5,7 @@ import { Apartment } from "./types"; // Assuming types.ts defines the Apartment 
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
-import { format, differenceInCalendarDays } from "date-fns";
+import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import "./ApartmentDetails.css"; // Ensure this CSS is imported
 import "leaflet/dist/leaflet.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
@@ -15,7 +15,12 @@ interface selectedDates {
     checkIn: Date;
     checkOut: Date;
 }
-
+interface Colleague {
+    _id: string;
+    fullName: string;
+    checkIn: string;   // ISO date string
+    checkOut: string;  // ISO date string
+}
 const ApartmentDetails: React.FC = () => {
     const { refresh } = useNotifications();
     const { id } = useParams<{ id: string }>();
@@ -23,7 +28,7 @@ const ApartmentDetails: React.FC = () => {
     const [rooms, setRooms] = useState<{ rooms: number }>({ rooms: 0 });
     const [error, setError] = useState("");
     const { isAuthenticated, user, token } = useContext(AuthContext);
-    const navigate = useNavigate();
+    const [colleaguesList, setColleaguesList] = useState<Colleague[]>([]);
 
     // State for popups
     const [showOwnerPop_up, setshowOwnerPop_up] = useState(false);
@@ -50,11 +55,27 @@ const ApartmentDetails: React.FC = () => {
                 .get<Apartment>(`http://localhost:5000/apartments/${id}`)
                 .then((response) => {
                     setApartment(response.data);
+
+                    // apelul pentru colegi
+                    const n = response.data.numberOfRooms;
+                    axios
+                        .get<Colleague[]>(
+                            `http://localhost:5000/apartments/nearest_checkout/${id}`,
+                            { params: { n } }
+                        )
+                        .then((res) => {
+                            setColleaguesList(res.data);
+                        })
+                        .catch((err) => {
+                            console.error("Eroare la preluarea colegilor:", err);
+                        });
                 })
                 .catch((error) => {
                     console.error("Eroare la preluarea detaliilor apartamentului:", error);
                     setError("Apartamentul nu a fost gasit sau a aparut o eroare.");
                 });
+
+
         }
     }, [id]);
 
@@ -358,17 +379,16 @@ const ApartmentDetails: React.FC = () => {
                             <i className="fas fa-users icon-prefix"></i>Colegi de Apartament
                         </h3>
                         <hr className="line-divider" />
-                        <p>
-                            <span>Se accepta colegi:</span> {apartment.colleagues ? "Da" : "Nu"}
-                        </p>
-                        {apartment.colleagues && (
-                            <p>
-                                <span>Nume coleg existent:</span>{" "}
-                                {apartment.colleaguesNames &&
-                                    apartment.colleaguesNames.trim() !== ""
-                                    ? apartment.colleaguesNames
-                                    : "Niciunul momentan"}
-                            </p>
+                        {colleaguesList.length > 0 ? (
+                            colleaguesList.map(col => (
+                                <p key={col._id}>
+                                    <strong>{col.fullName}:</strong>{" "}
+                                    checkIn: {format(parseISO(col.checkIn), "dd-MM-yyyy")};{" "}
+                                    checkOut: {format(parseISO(col.checkOut), "dd-MM-yyyy")}
+                                </p>
+                            ))
+                        ) : (
+                            <p>Niciunul momentan</p>
                         )}
                     </div>
                 </div>
@@ -433,7 +453,7 @@ const ApartmentDetails: React.FC = () => {
                             )}
                             {isAuthenticated && user && !user.faculty_valid && (
                                 <p className="booking-error" style={{ marginTop: "8px" }}>
-                                    Trebuie să îți validezi facultatea înainte de a rezerva.
+                                    Trebuie sa iti validezi facultatea inainte de a rezerva.
                                 </p>
                             )}
                         </div>
