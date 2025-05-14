@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 import "./ReservationPopup.css";
 import { subDays } from "date-fns";
-
+import { AuthContext } from "./AuthContext";
 interface ReservationPopupProps {
     onClose: () => void;
     onDatesSelected?: (checkIn: Date, checkOut: Date, rooms: number) => void;
@@ -25,19 +25,50 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
     const [unavailableIntervals, setUnavailableIntervals] = useState<DateInterval[]>([]);
     const [roomsCount, setRoomsCount] = useState<number>(0);
-    const [selectedRooms, setSelectedRooms] = useState<number>(1);
+    // const [selectedRooms, setSelectedRooms] = useState<number>(1);
+    const [selectedRooms, setSelectedRooms] = useState<number | "">("");
+    const { token, user } = useContext(AuthContext);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (checkInDate && checkOutDate) {
             if (onDatesSelected) {
-                onDatesSelected(checkInDate, checkOutDate, selectedRooms);
+                onDatesSelected(checkInDate, checkOutDate, Number(selectedRooms));
             }
             onClose();
         } else {
             alert("Selecteaza atat data de check-in, cat si data de check-out.");
         }
     };
+    type DateInterval = { start: Date; end: Date };
+    function groupIntoIntervals(dateStrings: string[]): DateInterval[] {
+        if (dateStrings.length === 0) return [];
+
+        // 1. Convertim în Date şi sortăm
+        const dates = dateStrings
+            .map(s => new Date(s))
+            .sort((a, b) => a.getTime() - b.getTime());
+
+        const intervals: DateInterval[] = [];
+        let start = dates[0];
+        let prev = dates[0];
+
+        for (let i = 1; i < dates.length; i++) {
+            const cur = dates[i];
+            // câte ms are o zi?
+            const oneDay = 1000 * 60 * 60 * 24;
+            // dacă nu sunt consecutive, încheiem intervalul curent
+            if (cur.getTime() - prev.getTime() > oneDay) {
+                intervals.push({ start, end: prev });
+                start = cur;
+            }
+            prev = cur;
+        }
+
+        // adăugăm ultimul interval
+        intervals.push({ start, end: prev });
+        return intervals;
+    }
 
     const nextAvailableDate = useMemo(() => {
         if (!checkInDate) return undefined;
@@ -61,31 +92,35 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     useEffect(() => {
 
         // make a get request to local host /testez and console log the response
-        axios
-            .get(`http://localhost:5000/unavailable_dates/${apartmentId}`)
+        axios.post(
+            `http://localhost:5000/unavailable_dates/${apartmentId}`,
+            { numberOfRooms: selectedRooms },
+            { headers: { Authorization: `Bearer ${token}` } },
+        )
             .then((response) => {
                 const data: string[] = response.data;
-                const intervals: DateInterval[] = [];
+                const intervals = groupIntoIntervals(data);
 
-                // iteram prin array-ul primit de la requestul facut
-                for (let i = 0; i < data.length; i += 2) {
-                    intervals.push({
-                        start: new Date(data[i]),
-                        end: new Date(data[i + 1]),
-                    });
-                }
+                // // iteram prin array-ul primit de la requestul facut
+                // for (let i = 0; i < data.length; i += 2) {
+                //     intervals.push({
+                //         start: new Date(data[i]),
+                //         end: new Date(data[i + 1]),
+                //     });
+                // }
                 setUnavailableIntervals(intervals);
             })
             .catch((error) => {
                 console.error("Eroare la preluarea datelor:", error);
             });
+    }, [selectedRooms]);
+    useEffect(() => {
 
         axios
             .get(`http://localhost:5000/apartments/number-of-rooms/${apartmentId}`)
             .then((response) => {
                 const numberOfRooms = response.data.numberOfRooms;
-                const numberOfRooms_busy = response.data.numberOfRooms_busy;
-                setRoomsCount(parseInt(numberOfRooms) - parseInt(numberOfRooms_busy));
+                setRoomsCount(parseInt(numberOfRooms));
             })
             .catch(error => {
                 console.error("Eroare la preluarea numarului de camere:", error);
@@ -100,53 +135,62 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 </button>
                 <h2>Selecteaza datele</h2>
                 <form onSubmit={handleSubmit}>
-                    <div className="date-picker-container">
-                        <label>Check-in:</label>
-                        <DatePicker
-                            selected={checkInDate}
-                            onChange={(date) => setCheckInDate(date)}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="Selecteaza check-in"
-                            minDate={new Date()}
-                            required
-                            excludeDateIntervals={unavailableIntervals.map((interval) => ({
-                                start: subDays(interval.start, 1),
-                                end: interval.end,
-                            }))}
-                        />
-                    </div>
-
-                    <div className="date-picker-container">
-                        <label>Check-out:</label>
-                        <DatePicker
-                            selected={checkOutDate}
-                            onChange={(date) => setCheckOutDate(date)}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="Selecteaza check-out"
-                            minDate={checkInDate || new Date()}
-                            maxDate={maxCheckOutDate}
-                            required
-                        />
-                    </div>
-
-                    {/* NOUL SELECT PENTRU NUMĂR DE CAMERE */}
+                    {/* Select camere mai întâi */}
                     <div className="rooms-selector">
                         <label>Doresc:</label>
                         <select
                             value={selectedRooms}
-                            onChange={(e) => setSelectedRooms(Number(e.target.value))}
+                            onChange={(e) => setSelectedRooms(e.target.value === "" ? "" : Number(e.target.value))}
+                            required
                         >
+                            <option value="" disabled>
+                                --- Selectează ---
+                            </option>
                             {Array.from({ length: roomsCount }, (_, i) => i + 1).map((n) => (
                                 <option key={n} value={n}>
-                                    {n === 1 ? "o camera" : `${n} camere`}
+                                    {n === 1 ? "o cameră" : `${n} camere`}
                                 </option>
                             ))}
                         </select>
                     </div>
 
-                    <button className="submit-confirma-interval" type="submit">
-                        Confirma
-                    </button>
+                    {/* Date pickers afișate doar după selectarea camerelor */}
+                    {selectedRooms !== "" && (
+                        <>
+                            <div className="date-picker-container">
+                                <label>Check-in:</label>
+                                <DatePicker
+                                    selected={checkInDate}
+                                    onChange={(date) => setCheckInDate(date)}
+                                    dateFormat="dd/MM/yyyy"
+                                    placeholderText="Selectează check-in"
+                                    minDate={new Date()}
+                                    excludeDateIntervals={unavailableIntervals.map((interval) => ({
+                                        start: subDays(interval.start, 1),
+                                        end: interval.end,
+                                    }))}
+                                    required
+                                />
+                            </div>
+
+                            <div className="date-picker-container">
+                                <label>Check-out:</label>
+                                <DatePicker
+                                    selected={checkOutDate}
+                                    onChange={(date) => setCheckOutDate(date)}
+                                    dateFormat="dd/MM/yyyy"
+                                    placeholderText="Selectează check-out"
+                                    minDate={checkInDate || new Date()}
+                                    maxDate={maxCheckOutDate}
+                                    required
+                                />
+                            </div>
+
+                            <button className="submit-confirma-interval" type="submit">
+                                Confirmă
+                            </button>
+                        </>
+                    )}
                 </form>
             </div>
         </div>

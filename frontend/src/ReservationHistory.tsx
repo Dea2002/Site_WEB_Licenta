@@ -8,6 +8,7 @@ interface ReservationHistory {
     _id: string;
     client: string;
     apartament: string;
+    numberOfRooms: number;
     checkIn: string;
     checkOut: string;
     clientData: {
@@ -54,15 +55,8 @@ const ReservationHistory: React.FC = () => {
                                     {item.apartamentData.location}
                                 </p>
                                 <p>
-                                    <strong>Check-In:</strong>{" "}
-                                    {new Date(item.checkIn).toLocaleDateString()}
-                                </p>
-                                <p>
-                                    <strong>Check-Out:</strong>{" "}
-                                    {new Date(item.checkOut).toLocaleDateString()}
-                                </p>
-                                {/* <p>
-                                    <strong>ID rezervare:</strong> {item._id}
+                                    <strong>Numarul de camere:</strong>{" "}
+                                    {item.numberOfRooms}
                                 </p>
                                 <p>
                                     <strong>Check-In:</strong>{" "}
@@ -71,8 +65,7 @@ const ReservationHistory: React.FC = () => {
                                 <p>
                                     <strong>Check-Out:</strong>{" "}
                                     {new Date(item.checkOut).toLocaleDateString()}
-                                </p> */}
-                                {/* Afiseaza si alte informatii relevante */}
+                                </p>
                             </div>
                         ))
                     ) : (
