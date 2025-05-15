@@ -53,7 +53,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(user);
         // Cand "user" din context se schimba (dupa login), reconstruim formData
         if (!user) return;
         const newState: ProfileFormState = {
@@ -182,7 +181,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             // @ts-ignore – ca sa poţi indexa generic
             value !== initialFormStateRef.current[key]
     );
-    console.log(profileFormState.medie_valid);
     const validUntil = parseISO(profileFormState.medie_valid!);
     const canEditMedie = isAfter(new Date(), validUntil);
     const formattedMedieValid = profileFormState.medie_valid

@@ -88,7 +88,7 @@ async function run() {
         app.use('/auth', authRoutes);
 
         const createUsersRoutes = require('./routes/users'); // Importa rutele pentru utilizatori
-        const userRoutes = createUsersRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection);
+        const userRoutes = createUsersRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection);
         app.use('/users', userRoutes); // toate requesturile vor avea prefixul /users
 
         const createApartmentsRoutes = require('./routes/apartments'); // Importa rutele pentru utilizatori

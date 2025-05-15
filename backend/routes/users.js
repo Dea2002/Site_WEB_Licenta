@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
 const jwt = require('jsonwebtoken');
 
-function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection) {
+function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection) {
 
     router.get('/', async (req, res) => {
         const users = await usersCollection.find({}).toArray();
@@ -87,6 +87,56 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         }
     });
 
+    router.get('/current-rent/:userId', //authenticateToken,
+        async (req, res) => {
+            const { userId } = req.params;
+            const now = new Date();
+
+            // if (req.user._id !== userId) {
+            //     return res.status(403).json({ message: 'Acces interzis' });
+            // }
+
+            try {
+                // 1) Gaseşte rezervarea activa curenta
+                const currentRent = await reservationHistoryCollection.findOne({
+                    client: new ObjectId(userId),
+                    isActive: true,
+                    checkIn: { $lte: now },
+                    checkOut: { $gte: now }
+                });
+
+                if (!currentRent) {
+                    return res.status(404).json({ message: 'Nu aveţi nicio chirie activa in acest moment.' });
+                }
+
+                // 2) (Opţional) Ia şi detalii despre apartament
+                const apartment = await apartmentsCollection.findOne({
+                    _id: currentRent.apartament
+                }, {
+                    projection: {
+                        location: 1,
+                        price: 1,
+                        image: 1,
+                        numberOfRooms: 1,
+                        ownerId: 1
+                    }
+                });
+
+                // 3) Trimite raspunsul
+                return res.json({
+                    _id: currentRent._id,
+                    apartment: apartment || null,
+                    checkIn: currentRent.checkIn,
+                    checkOut: currentRent.checkOut,
+                    rooms: currentRent.numberOfRooms,
+                    createdAt: currentRent.createdAt
+                });
+            } catch (err) {
+                console.error('Error fetching current rent:', err);
+                return res.status(500).json({ message: 'Eroare interna a serverului.' });
+            }
+        }
+    );
 
     return router;
 }

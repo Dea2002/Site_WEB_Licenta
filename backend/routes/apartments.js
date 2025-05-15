@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { ObjectId } = require('mongodb');
+const authenticateToken = require('../middleware/authenticateToken');
 
 
 function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection) {
@@ -106,6 +107,88 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             return res.status(500).json({ message: 'Eroare interna a serverului' });
         }
     });
+
+    // Lista chiriasilor activi in apartament
+    router.get('/active-renters/:apartmentId', authenticateToken, async (req, res) => {
+        const { apartmentId } = req.params;
+        const now = new Date();
+
+        try {
+            // gasim toate rezervarile active care includ ziua de azi
+            const rents = await reservationHistoryCollection
+                .find({
+                    apartament: new ObjectId(apartmentId),
+                    isActive: true,
+                    checkIn: { $lte: now },
+                    checkOut: { $gte: now }
+                })
+                .toArray();
+
+            // ids unici
+            const uniqueIds = [...new Set(rents.map(r => r.client.toString()))]
+                .map(id => new ObjectId(id));
+
+            // aducem numele
+            const users = await usersCollection
+                .find({ _id: { $in: uniqueIds } })
+                .project({ fullName: 1 })
+                .toArray();
+
+            const mapUser = new Map(users.map(u => [u._id.toString(), u.fullName]));
+
+            // reconstruim raspunsul in ordinea in care apar users (dupa id unic)
+            const result = Array.from(mapUser.entries()).map(([id, fullName]) => ({
+                _id: id,
+                fullName
+            }));
+
+            return res.json(result);
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Eroare interna a serverului' });
+        }
+    }
+    );
+
+    // Anuleaza o rezervare (firma user-ului)
+    router.post('/cancel-rent/:rentId', authenticateToken, async (req, res) => {
+        const { rentId } = req.params;
+        const userId = req.user._id;
+
+        try {
+            const result = await reservationHistoryCollection.updateOne(
+                { _id: new ObjectId(rentId), client: new ObjectId(userId) },
+                { $set: { isActive: false } }
+            );
+            if (result.modifiedCount === 0) {
+                return res.status(404).json({ message: 'Rezervare negasita sau nu aveti permisiunea.' });
+            }
+            return res.json({ message: 'Chiria a fost anulata cu succes.' });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Eroare la anulare.' });
+        }
+    }
+    );
+
+    // Cerere firma curatenie
+    router.post('/apartments/cleaning-request', authenticateToken, async (req, res) => {
+        const userId = req.user._id;
+        const { apartmentId } = req.body;
+        try {
+            await cleaningRequestsCollection.insertOne({
+                apartment: new ObjectId(apartmentId),
+                client: new ObjectId(userId),
+                status: 'pending',
+                createdAt: new Date()
+            });
+            return res.json({ message: 'Cerere trimisa catre firma de curatenie.' });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Eroare la trimiterea cererii.' });
+        }
+    }
+    );
 
 
     return router;
