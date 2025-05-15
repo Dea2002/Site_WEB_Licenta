@@ -94,6 +94,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 return {
                     _id: r.client.toString(),
                     fullName: user.fullName || 'Unknown',
+                    numberOfRooms: r.numberOfRooms,
                     checkIn: r.checkIn,
                     checkOut: r.checkOut
                 };

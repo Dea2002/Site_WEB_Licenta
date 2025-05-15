@@ -18,6 +18,7 @@ interface selectedDates {
 interface Colleague {
     _id: string;
     fullName: string;
+    numberOfRooms: number;
     checkIn: string;   // ISO date string
     checkOut: string;  // ISO date string
 }
@@ -384,7 +385,8 @@ const ApartmentDetails: React.FC = () => {
                                 <p key={col._id}>
                                     <strong>{col.fullName}:</strong>{" "}
                                     checkIn: {format(parseISO(col.checkIn), "dd-MM-yyyy")};{" "}
-                                    checkOut: {format(parseISO(col.checkOut), "dd-MM-yyyy")}
+                                    checkOut: {format(parseISO(col.checkOut), "dd-MM-yyyy")};{" "}
+                                    Numar camere: {col.numberOfRooms}
                                 </p>
                             ))
                         ) : (
