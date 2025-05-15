@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
+import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import './profile_student.css';
 
 interface RentHistoryProps {
@@ -16,59 +17,142 @@ interface RentDetails {
     rentAmount: number;
     // alte detalii
 }
+interface AptInfo {
+    location: string;
+    price: number;
+    numberOfRooms: number;
+}
 
+interface CurrentRent {
+    _id: string;
+    apartment: AptInfo;
+    checkIn: string;
+    checkOut: string;
+    rooms: number;
+    createdAt: string;
+}
+
+interface HistoryEntry {
+    _id: string;
+    apartment: string;
+    checkIn: string;
+    checkOut: string;
+    rooms: number;
+    createdAt: string;
+}
 
 const RentHistory: React.FC<RentHistoryProps> = ({ userId }) => {
-    const [history, setHistory] = useState<RentDetails[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
+    const [currentRent, setCurrentRent] = useState<CurrentRent | null>(null);
+    const [history, setHistory] = useState<HistoryEntry[]>([]);
+    const [loadingCurrent, setLoadingCurrent] = useState(true);
+    const [loadingHistory, setLoadingHistory] = useState(true);
+    const [errorCurrent, setErrorCurrent] = useState<string | null>(null);
+    const [errorHistory, setErrorHistory] = useState<string | null>(null);
 
 
     useEffect(() => {
-        const fetchRentHistory = async () => {
-            setIsLoading(true);
-            setError(null);
-            if (!token) {
-                setError("Utilizator neautentificat.");
-                setIsLoading(false);
-                return;
-            }
-            try {
-                // Adapteaza endpoint-ul la API-ul tau
-                const response = await axios.get(`/api/rentals/history/${userId}`, { // Sau /api/users/me/rental-history
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setHistory(response.data || []); // Asigura-te ca e un array
-            } catch (err: any) {
-                console.error("Error fetching rent history:", err);
-                setError(err.response?.data?.message || "Nu s-a putut incarca istoricul chiriilor.");
-                setHistory([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        if (!token) return;
 
-        fetchRentHistory();
-    }, [userId, token]);
+        // Fetch current rent
+        axios
+            .get<CurrentRent>(`http://localhost:5000/users/current_request`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(({ data }) => {
+                setCurrentRent(data);
+            })
+            .catch(err => {
+                if (err.response?.status === 404) {
+                    setCurrentRent(null);
+                } else {
+                    setErrorCurrent(
+                        err.response?.data?.message || 'Eroare la incarcarea cererii curente.'
+                    );
+                }
+            })
+            .finally(() => setLoadingCurrent(false));
+
+        // Fetch history
+        axios
+            .get<HistoryEntry[]>(`http://localhost:5000/users/reservations_history`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(({ data }) => setHistory(data))
+            .catch(err => {
+                setErrorHistory(
+                    err.response?.data?.message || 'Eroare la incarcarea istoricului.'
+                );
+            })
+            .finally(() => setLoadingHistory(false));
+    }, [token]);
 
     return (
         <div className="profile-section-content">
-            <h2>Istoric Chirii</h2>
-            {isLoading && <p>Se incarca...</p>}
-            {error && <p className="error-message">{error}</p>}
-            {!isLoading && !error && history.length > 0 && (
-                <ul className="rent-history-list">
-                    {history.map(rent => (
-                        <li key={rent._id} className="rent-history-item">
-                            <p><strong>Apartament:</strong> {rent.apartmentName}</p>
-                            <p><strong>Perioada:</strong> {new Date(rent.startDate).toLocaleDateString()} - {new Date(rent.endDate).toLocaleDateString()}</p>
-                            <p><strong>Chirie lunara:</strong> {rent.rentAmount} RON</p>
-                        </li>
-                    ))}
-                </ul>
+            <h2>Cerere Chirii Curente</h2>
+            {loadingCurrent ? (
+                <p>Se incarca…</p>
+            ) : errorCurrent ? (
+                <p className="error-message">{errorCurrent}</p>
+            ) : currentRent ? (
+                (() => {
+                    const ci = parseISO(currentRent.checkIn);
+                    const co = parseISO(currentRent.checkOut);
+                    const nights = differenceInCalendarDays(co, ci) + 1;
+                    return (
+                        <div className="current-rent-card">
+                            <p>
+                                <strong>Locatie:</strong> {currentRent.apartment.location}
+                            </p>
+                            <p>
+                                <strong>Perioada:</strong>{' '}
+                                {format(ci, 'dd-MM-yyyy')} – {format(co, 'dd-MM-yyyy')} ({nights}{' '}
+                                nopti)
+                            </p>
+                            <p>
+                                <strong>Camere:</strong> {currentRent.rooms}
+                            </p>
+                            <p>
+                                <strong>Pret total:</strong>{' '}
+                                {(currentRent.apartment.price * nights * currentRent.rooms).toFixed(2)} RON
+                            </p>
+                        </div>
+                    );
+                })()
+            ) : (
+                <p>Nu aveti nicio cerere de chirie activa.</p>
             )}
-            {!isLoading && !error && history.length === 0 && (
+
+            <hr className='reservation-history-separator-line' />
+
+            <h2>Istoricul Chiriilor</h2>
+            {loadingHistory ? (
+                <p>Se incarca…</p>
+            ) : errorHistory ? (
+                <p className="error-message">{errorHistory}</p>
+            ) : history.length > 0 ? (
+                <ul className="rent-history-list">
+                    {history.map(h => {
+                        const ci = parseISO(h.checkIn);
+                        const co = parseISO(h.checkOut);
+                        const nights = differenceInCalendarDays(co, ci) + 1;
+                        return (
+                            <li key={h._id} className="rent-history-item">
+                                <p>
+                                    <strong>Apartament:</strong> {h.apartment}
+                                </p>
+                                <p>
+                                    <strong>Perioada:</strong> {format(ci, 'dd-MM-yyyy')} –{' '}
+                                    {format(co, 'dd-MM-yyyy')} ({nights} nopti)
+                                </p>
+                                <p>
+                                    <strong>Camere:</strong> {h.rooms}
+                                </p>
+                            </li>
+                        );
+                    })}
+                </ul>
+            ) : (
                 <p>Nu exista istoric de chirii.</p>
             )}
         </div>

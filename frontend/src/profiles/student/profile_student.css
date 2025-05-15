@@ -145,7 +145,7 @@
 .profile-section-content h2 {
     margin-top: 0;
     margin-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 2px dashed #ebe9e9;
     padding-bottom: 0.5rem;
     color: #333;
 }
@@ -221,7 +221,7 @@
     padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 5px;
-    background-color: #fdfdfd;
+    background-color: #f5f2f2;
 }
 
 .rent-history-item p {
@@ -230,4 +230,13 @@
 }
 .rent-history-item p strong {
     color: #444;
+}
+
+.reservation-history-separator-line {
+    border: none; /* scoate bordura implicita */
+    height: 2px; /* grosimea liniei */
+    background-color: rgb(172, 172, 172); /* culoarea */
+    margin: 1rem 0; /* spatiu sus–jos */
+    width: 100%; /* latimea dupa cum vrei */
+    opacity: 1;
 }
