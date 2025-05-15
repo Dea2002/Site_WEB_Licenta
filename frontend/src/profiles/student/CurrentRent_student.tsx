@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './profile_student.css';
-
+import { api } from '../../api';
 interface CurrentRentProps {
     userId: string;
 }
@@ -33,7 +33,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const [rentData, setRentData] = useState<RentDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
     const [activeRenters, setActiveRenters] = useState<UserBrief[]>([]);
     const [isRentersLoading, setIsRentersLoading] = useState(false);
     const [rentersError, setRentersError] = useState<string | null>(null);
@@ -163,6 +163,19 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const monthlyEstimate = pricePerRoom * 30 * numberOfRooms;
 
 
+    async function openChatWith(otherUserId: string) {
+        const { data: conversation } = await api.post<{
+            _id: string;
+            participants: string[];
+            isGroup: boolean;
+            createdAt: string;
+            lastMessageAt: string;
+        }>('/conversations', {
+            participants: [user!._id, otherUserId],
+        });
+        navigate(`/chat/${conversation._id}`);
+    }
+
     // === Afisam datele chiriei curente ===
 
     return (
@@ -231,9 +244,12 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                                 <button
                                     key={u._id}
                                     className="btn-chat-colleague"
-                                    onClick={() => navigate(`/chat/${u._id}`)}
+                                    onClick={() => {
+                                        console.log('Chat cu colegul:', u);
+                                        openChatWith(u._id);
+                                    }}
                                 >
-                                    {u.fullName}
+                                    ${u.fullName}${u._id}
                                 </button>
                             ))
                         }

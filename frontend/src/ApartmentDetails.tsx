@@ -380,7 +380,7 @@ const ApartmentDetails: React.FC = () => {
                             <i className="fas fa-users icon-prefix"></i>Colegi de Apartament
                         </h3>
                         <hr className="line-divider" />
-                        {colleaguesList.length > 0 ? (
+                        {colleaguesList.length > 0 && token != null ? (
                             colleaguesList.map(col => (
                                 <p key={col._id}>
                                     <strong>{col.fullName}:</strong>{" "}

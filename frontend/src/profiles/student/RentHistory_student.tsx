@@ -9,14 +9,7 @@ interface RentHistoryProps {
 }
 
 // Interfata similara cu cea din CurrentRent, poate fi partajata
-interface RentDetails {
-    _id: string;
-    apartmentName: string;
-    startDate: string;
-    endDate: string;
-    rentAmount: number;
-    // alte detalii
-}
+
 interface AptInfo {
     location: string;
     price: number;
@@ -41,8 +34,8 @@ interface HistoryEntry {
     createdAt: string;
 }
 
-const RentHistory: React.FC<RentHistoryProps> = ({ userId }) => {
-    const { token, user } = useContext(AuthContext);
+const RentHistory: React.FC<RentHistoryProps> = () => {
+    const { token } = useContext(AuthContext);
     const [currentRent, setCurrentRent] = useState<CurrentRent | null>(null);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [loadingCurrent, setLoadingCurrent] = useState(true);

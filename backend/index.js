@@ -1,17 +1,26 @@
+require('dotenv').config();
+const http = require('http');
 const express = require('express');
 const bcrypt = require('bcryptjs'); // pentru criptarea parolelor
 const cors = require('cors');
 const jwt = require('jsonwebtoken'); // pentru creare si verificare token-uri JWT
 const rateLimit = require('express-rate-limit');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-
+const { ObjectId } = require('mongodb');
+const { Server } = require('socket.io');
 const authenticateToken = require('./middleware/authenticateToken');
 const verifyAdmin = require('./middleware/verifyAdmin');
+const { connectDB } = require('./db');
 
 const app = express();
 const port = process.env.PORT || 5000;
-
-require('dotenv').config();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173',   // frontend-ul tău
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -29,14 +38,48 @@ app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
 
 
-// mongodb connection
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@inchiriere-apartamente.2qkb7.mongodb.net/?retryWrites=true&w=majority&appName=inchiriere-apartamente`;
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
+// // mongodb connection
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@inchiriere-apartamente.2qkb7.mongodb.net/?retryWrites=true&w=majority&appName=inchiriere-apartamente`;
+// const client = new MongoClient(uri, {
+//     serverApi: {
+//         version: ServerApiVersion.v1,
+//         strict: true,
+//         deprecationErrors: true,
+//     }
+// });
+
+// Socket.IO real-time
+io.on('connection', socket => {
+    console.log('🔌 New socket:', socket.id);
+
+    // clientul intră într-o cameră (conversationId)
+    socket.on('join', conversationId => {
+        socket.join(conversationId);
+        console.log(`Socket ${socket.id} joined ${conversationId}`);
+    });
+
+    // când primește mesaj de la client
+    socket.on('message:send', async ({ conversationId, senderId, text }) => {
+        const db = await connectDB();
+        const messages = db.collection('messages');
+
+        const msg = {
+            conversationId,
+            senderId,
+            text,
+            createdAt: new Date()
+        };
+        // 1) salvează
+        const result = await messages.insertOne(msg);
+        msg._id = result.insertedId;
+
+        // 2) trimite înapoi tuturor din conversație
+        io.to(conversationId).emit('message:new', msg);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔌 Socket disconnected:', socket.id);
+    });
 });
 
 // Utility to generate dates between two dates (inclusive)
@@ -53,11 +96,11 @@ function getDatesBetween(start, end) {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        const database = await connectDB();
         console.log("Conectat la MongoDB!");
 
         // database and collections
-        const database = client.db("inchiriere-apartamente");
+        // const database = client.db("inchiriere-apartamente");
         const usersCollection = database.collection("users");
         const facultiesCollection = database.collection("faculties");
         const apartmentsCollection = database.collection("apartments");
@@ -66,6 +109,8 @@ async function run() {
         const notificationsCollection = database.collection("notifications");
         const markRequestsCollection = database.collection("mark_requests");
         const associationsRequestsCollection = database.collection("association_requests");
+        const conversationsCollection = database.collection("conversations");
+        const messagesCollection = database.collection("messages");
 
         const initNotificationSerivece = require('./utils/notificationService');
         const notificationService = initNotificationSerivece(notificationsCollection);
@@ -79,6 +124,8 @@ async function run() {
         app.locals.notificationsCollection = notificationsCollection;
         app.locals.markRequestsCollection = markRequestsCollection;
         app.locals.associationsRequestsCollection = associationsRequestsCollection;
+        app.locals.conversationsCollection = conversationsCollection;
+        app.locals.messagesCollection = messagesCollection;
 
         // --- Importa rutele ---
         const adminRoutes = require('./routes/admin')(usersCollection, apartmentsCollection);
@@ -102,6 +149,14 @@ async function run() {
         const createNotificationsRoutes = require('./routes/notifications');
         const notificationsRoutes = createNotificationsRoutes(notificationsCollection, notificationService);
         app.use('/notifications', notificationsRoutes);
+
+        const createConversationsRoutes = require('./routes/conversations');
+        const conversationsRoutes = createConversationsRoutes(usersCollection, conversationsCollection);
+        app.use('/conversations', conversationsRoutes);
+
+        const createMessagesRoutes = require('./routes/messages');
+        const messagesRoutes = createMessagesRoutes(usersCollection, messagesCollection, conversationsCollection);
+        app.use('/messages', messagesRoutes);
 
         //!! --- Structura veche ---
 
@@ -837,7 +892,7 @@ async function run() {
 
         //!! --- Sfarsit structura veche ---
 
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`Serverul ruleaza pe http://localhost:${port}`);
         });
     } catch (error) {
