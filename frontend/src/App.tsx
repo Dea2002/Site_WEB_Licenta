@@ -26,9 +26,8 @@ import Profile_owner from "./profiles/owner/Profile_owner";
 import Profile_faculty from "./profiles/faculty/Profile_faculty";
 import NotificationDashboard from "./NotificationDashboard.tsx";
 import NavSelector from "./NavBars/NavSelector.tsx";
-import ConversationList from './components/ConversationList';
-import ChatWindow from './components/ChatWindow';
 import ChatPage from './components/ChatPage';
+
 const App: React.FC = () => {
     return (
         <AuthProvider>

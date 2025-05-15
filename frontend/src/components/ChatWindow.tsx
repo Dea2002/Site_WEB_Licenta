@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
+import { FC, useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { api, socket } from '../api';
 import { format } from 'date-fns';
 
@@ -20,25 +20,26 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
     const [text, setText] = useState<string>('');
 
     useEffect(() => {
-        // 1) Intră în „camera” conversației
+        console.log('🔄 Loading history for', conversationId);
         socket.emit('join', conversationId);
 
-        // 2) Încarcă istoricul
         api.get<Message[]>(`/messages/${conversationId}?limit=100`)
-            .then(res => setMessages(res.data))
-            .catch(console.error);
+            .then(res => {
+                console.log('📨 History response:', res.data);
+                setMessages(res.data);
+            })
+            .catch(err => {
+                console.error('❌ Error loading history:', err);
+            });
 
-        // 3) Ascultă mesaje noi
         const handler = (msg: Message) => {
+            console.log('🆕 New WS message:', msg);
             if (msg.conversationId === conversationId) {
                 setMessages(prev => [...prev, msg]);
             }
         };
         socket.on('message:new', handler);
-
-        return () => {
-            socket.off('message:new', handler);
-        };
+        return () => { socket.off('message:new', handler); };
     }, [conversationId]);
 
     const send = () => {

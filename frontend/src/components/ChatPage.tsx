@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react';
+import { FC, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import ChatWindow from './ChatWindow';
 import { AuthContext } from '../AuthContext';  // presupunem că ai un hook care-ți dă user-ul curent

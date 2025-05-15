@@ -5,25 +5,16 @@ const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
 
 function createMessagesRoutes(usersCollection, messagesCollection, conversationsCollection) {
-    // GET /messages/:conversationId?limit=50
     router.get('/:conversationId', async (req, res) => {
         const { conversationId } = req.params;
-        console.log('conversationId:', conversationId);
-        const limit = parseInt(req.query.limit, 10) || 50;
-        const convoOid = new ObjectId(conversationId);
-
-        // opțional actualizează lastMessageAt
-        await conversationsCollection.updateOne(
-            { _id: convoOid },
-            { $set: { lastMessageAt: new Date() } }
-        );
-
+        if (!ObjectId.isValid(conversationId)) {
+            return res.status(400).json({ message: 'ID invalid' });
+        }
+        // const convoOid = new ObjectId(conversationId);
         const history = await messagesCollection
-            .find({ conversationId: convoOid })
+            .find({ conversationId: conversationId })   // caută exact acelaşi tip
             .sort({ createdAt: 1 })
-            .limit(limit)
             .toArray();
-
         res.json(history);
     });
 
