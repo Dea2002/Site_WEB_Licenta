@@ -4,7 +4,7 @@ const { ObjectId } = require('mongodb');
 const authenticateToken = require('../middleware/authenticateToken');
 
 
-function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection) {
+function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService) {
 
     router.get('/', async (req, res) => {
         const result = await apartmentsCollection.find().toArray();
@@ -172,17 +172,23 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     );
 
     // Cerere firma curatenie
-    router.post('/apartments/cleaning-request', authenticateToken, async (req, res) => {
+    router.post('/cleaning-request', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         const { apartmentId } = req.body;
         try {
-            await cleaningRequestsCollection.insertOne({
-                apartment: new ObjectId(apartmentId),
-                client: new ObjectId(userId),
-                status: 'pending',
-                createdAt: new Date()
-            });
-            return res.json({ message: 'Cerere trimisa catre firma de curatenie.' });
+            const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+            if (!user) {
+                return res.status(404).json({ message: 'Utilizatorul nu a fost gasit.' });
+            }
+
+            const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            if (!apartment) {
+                return res.status(404).json({ message: 'Apartamentul nu a fost gasit.' });
+            }
+
+            notificationService.createNotification(message = `Studentul ${user.fullName} a cerut curatenie pentru apartamentul ${apartment.location}`, receiver = apartment.ownerId);
+
+            return res.json({ message: 'Cerere de curatatorie trimisa catre owner cu succes.' });
         } catch (err) {
             console.error(err);
             return res.status(500).json({ message: 'Eroare la trimiterea cererii.' });
