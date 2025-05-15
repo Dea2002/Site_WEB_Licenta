@@ -2,7 +2,7 @@ import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './profile_student.css';
 
 interface CurrentRentProps {
@@ -118,7 +118,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                 { apartmentId: rentData.apartment._id },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Cerere trimisa firmei de curatenie.');
+            alert('Cerere trimisa proprietarului.');
         } catch {
             alert('Eroare la trimiterea cererii.');
         }
@@ -152,14 +152,15 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         );
     }
     const pricePerRoom = rentData.apartment.price;
+    const numberOfRooms = rentData.rooms;
     const checkInDate = parseISO(rentData.checkIn);
     const checkOutDate = parseISO(rentData.checkOut);
     const nights = differenceInCalendarDays(checkOutDate, checkInDate);
     const totalNights = nights + 1;
-    const totalPrice = pricePerRoom * totalNights;
+    const totalPrice = pricePerRoom * totalNights * numberOfRooms;
     // Daca e mai mult de 30 nopti, pregateste si o estimare pentru 30 nopti (o luna)
     const showMonthlyEstimate = totalNights > 30;
-    const monthlyEstimate = pricePerRoom * 30;
+    const monthlyEstimate = pricePerRoom * 30 * numberOfRooms;
 
 
     // === Afisam datele chiriei curente ===
@@ -215,7 +216,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                         Proprietar
                     </button>
 
-                    <h4>Colegii din apartament:</h4>
+                    <h4>Chat cu colegii de apartament:</h4>
                     {isRentersLoading && <p>Se incarca colegii…</p>}
                     {rentersError && <p className="error-message">{rentersError}</p>}
                     {!isRentersLoading && activeRenters.length === 0 && (
@@ -223,15 +224,19 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     )}
 
                     <div className="colleagues-chat-list">
-                        {activeRenters.map(u => (
-                            <button
-                                key={u._id}
-                                className="btn-chat-colleague"
-                                onClick={() => navigate(`/chat/${u._id}`)}
-                            >
-                                {u.fullName}
-                            </button>
-                        ))}
+                        {activeRenters
+                            // excludem utilizatorul curent
+                            .filter(u => u._id !== userId)
+                            .map(u => (
+                                <button
+                                    key={u._id}
+                                    className="btn-chat-colleague"
+                                    onClick={() => navigate(`/chat/${u._id}`)}
+                                >
+                                    {u.fullName}
+                                </button>
+                            ))
+                        }
                     </div>
                 </div>
             </div>
