@@ -25,7 +25,6 @@ import Profile_student from "./profiles/student/Profile_student";
 import Profile_owner from "./profiles/owner/Profile_owner";
 import Profile_faculty from "./profiles/faculty/Profile_faculty";
 import NotificationDashboard from "./NotificationDashboard.tsx";
-import RentHistory from "./RentHistory";
 import NavSelector from "./NavBars/NavSelector.tsx";
 
 const App: React.FC = () => {
@@ -75,8 +74,7 @@ const App: React.FC = () => {
                     <Route path="/faculty_dashboard/student_marks" element={<FacultyMarks />} />
                     {/* ruta pentru notificari */}
                     <Route path="/notifications" element={<NotificationDashboard />} />
-                    {/* ruta pentru istoric chirii*/}
-                    <Route path="/my-rents" element={<RentHistory />} />
+
                 </Routes>
             </NotificationsProvider >
         </AuthProvider>

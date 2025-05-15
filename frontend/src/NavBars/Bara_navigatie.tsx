@@ -79,13 +79,7 @@ function NavBar() {
                                     />
                                     Chat
                                 </NavDropdown.Item>
-                                <NavDropdown.Item as={Link} to="/my-rents">
-                                    <i
-                                        className="fa-solid fa-comment"
-                                        style={{ marginRight: "6px" }}
-                                    />
-                                    Istoric Chirii
-                                </NavDropdown.Item>
+
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item onClick={handleLogout}>
                                     <i

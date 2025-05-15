@@ -130,7 +130,7 @@ const ApartmentDetails: React.FC = () => {
             refresh(); // Refresh notifications
             alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page
-            // navigate("/my-rents"); // Example navigation
+
         } catch (err: any) {
             setError(
                 err.response?.data?.message || "Eroare la trimiterea cererii. incercati din nou.",
