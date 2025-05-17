@@ -231,7 +231,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     <strong>Camere rezervate:</strong> {rentData.rooms}
                 </p>
                 <p>
-                    <strong>Perioada:</strong>
+                    <strong>Perioada:</strong> ({totalNights} nopti)
                     <br />
                     &emsp;&emsp;checkIn: {format(parseISO(rentData.checkIn), 'dd-MM-yyyy')}
                     <br />
