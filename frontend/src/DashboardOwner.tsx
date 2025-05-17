@@ -12,7 +12,7 @@ const DashboardOwner: React.FC = () => {
 
     useEffect(() => {
         if (user?.email) {
-            axios
+            api
                 .get(`/owner/dashboard/${user._id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
