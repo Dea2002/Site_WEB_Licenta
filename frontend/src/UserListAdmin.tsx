@@ -45,7 +45,7 @@ const UserListAdmin: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:5000/admin/users", {
+            .get("/admin/users", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -63,7 +63,7 @@ const UserListAdmin: React.FC = () => {
     const handleDeleteUser = (userId: string) => {
         if (window.confirm("Esti sigur ca vrei sa stergi acest utilizator?")) {
             axios
-                .delete(`http://localhost:5000/admin/users/${userId}`, {
+                .delete(`/admin/users/${userId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -92,7 +92,7 @@ const UserListAdmin: React.FC = () => {
     const handleAddUser = (e: React.FormEvent) => {
         e.preventDefault();
         axios
-            .post("http://localhost:5000/admin/users", newUserForm, {
+            .post("/admin/users", newUserForm, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

@@ -97,7 +97,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
 
         try {
             const response = await axios.patch(
-                `http://localhost:5000/faculty/edit_profile`,
+                `/faculty/edit_profile`,
                 { userId: faculty._id, ...updatedData },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

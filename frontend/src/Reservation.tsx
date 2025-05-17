@@ -19,7 +19,7 @@ const Reservation: React.FC = () => {
     useEffect(() => {
         if (state && state.apartmentId) {
             axios
-                .get<Apartment>(`http://localhost:5000/apartments/${state.apartmentId}`)
+                .get<Apartment>(`/apartments/${state.apartmentId}`)
                 .then((response) => {
                     setApartment(response.data);
                 })

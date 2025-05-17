@@ -12,7 +12,7 @@ const OwnerApartments: React.FC = () => {
     useEffect(() => {
         if (user?.email) {
             axios
-                .get(`http://localhost:5000/apartments/by-id/${user._id}`, {
+                .get(`/apartments/by-id/${user._id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
                 .then((response) => {

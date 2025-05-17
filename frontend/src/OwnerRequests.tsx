@@ -28,7 +28,7 @@ const OwnerRequests: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:5000/owner/list_reservation_requests/${user!._id}`, {
+            .get(`/owner/list_reservation_requests/${user!._id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {
@@ -43,7 +43,7 @@ const OwnerRequests: React.FC = () => {
         try {
             await axios
                 .post(
-                    `http://localhost:5000/reservation_request/${id}/accept`,
+                    `/reservation_request/${id}/accept`,
                     {},
                     {
                         headers: { Authorization: `Bearer ${token}` },
@@ -63,7 +63,7 @@ const OwnerRequests: React.FC = () => {
         try {
             await axios
                 .post(
-                    `http://localhost:5000/reservation_request/${id}/decline`,
+                    `/reservation_request/${id}/decline`,
                     {},
                     {
                         headers: { Authorization: `Bearer ${token}` },

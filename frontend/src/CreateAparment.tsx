@@ -86,7 +86,7 @@ const OwnerListNewApartment: React.FC = () => {
         try {
             // Assuming 'image' is just a text field for now based on input type="text"
             await axios.post(
-                `http://localhost:5000/new-apartment`,
+                `/new-apartment`,
                 { ownerId: user?._id, ...formData },
                 {
                     headers: {

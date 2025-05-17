@@ -107,7 +107,7 @@ const Register: React.FC = () => {
         const fetchFaculties = async () => {
             try {
                 // Asigura-te ca URL-ul este corect (poate ai un base URL in axios config)
-                const response = await axios.get<FacultyInfo[]>("http://localhost:5000/faculty");
+                const response = await axios.get<FacultyInfo[]>("/faculty");
                 // Presupunand ca backend-ul returneaza direct array-ul [{fullName: '...', abreviere: '...'}, ...]
                 setFacultiesList(response.data);
             } catch (err) {
@@ -241,7 +241,7 @@ const Register: React.FC = () => {
         }
 
         try {
-            await axios.post("http://localhost:5000/auth/register_student", {
+            await axios.post("/auth/register_student", {
                 email,
                 fullName,
                 phoneNumber,
@@ -331,7 +331,7 @@ const Register: React.FC = () => {
             );
 
             // 3. Send data to backend
-            await axios.post("http://localhost:5000/auth/register_faculty", {
+            await axios.post("/auth/register_faculty", {
                 fullName,
                 abreviere,
                 logoUrl,
@@ -401,7 +401,7 @@ const Register: React.FC = () => {
         }
 
         try {
-            await axios.post("http://localhost:5000/auth/register_owner", {
+            await axios.post("/auth/register_owner", {
                 email,
                 fullName,
                 password,

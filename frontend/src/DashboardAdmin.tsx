@@ -17,7 +17,7 @@ const DashboardAdmin: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:5000/admin/stats", {
+            .get("/admin/stats", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

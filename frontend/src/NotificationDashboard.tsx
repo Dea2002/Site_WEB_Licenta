@@ -30,7 +30,7 @@ const NotificationDashboard: React.FC = () => {
         }
         try {
             const resp = await axios.get<Notification[]>(
-                'http://localhost:5000/notifications',
+                '/notifications',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setNotifications(resp.data);
@@ -51,7 +51,7 @@ const NotificationDashboard: React.FC = () => {
     const handleMarkAsRead = async (id: string) => {
         try {
             await axios.put(
-                `http://localhost:5000/notifications/${id}/read`,
+                `/notifications/${id}/read`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -66,7 +66,7 @@ const NotificationDashboard: React.FC = () => {
     const handleDelete = async (id: string) => {
         try {
             await axios.delete(
-                `http://localhost:5000/notifications/${id}`,
+                `/notifications/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

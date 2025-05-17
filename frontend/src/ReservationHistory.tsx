@@ -27,7 +27,7 @@ const ReservationHistory: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:5000/owner/reservation_history/${user!._id}`, {
+            .get(`/owner/reservation_history/${user!._id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {

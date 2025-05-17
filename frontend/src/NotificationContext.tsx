@@ -23,7 +23,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         try {
             const { data } = await axios.get<{ unread: number }>(
-                'http://localhost:5000/notifications/unread-count',
+                '/notifications/unread-count',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setUnreadCount(data.unread);

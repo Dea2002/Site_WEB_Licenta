@@ -37,7 +37,7 @@ const FacultyAssociations: React.FC = () => {
 
         try {
             const response = await axios.get<AssociationRequest[]>(
-                `http://localhost:5000/faculty/get_association_requests/${faculty!._id}`,
+                `/faculty/get_association_requests/${faculty!._id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -58,7 +58,7 @@ const FacultyAssociations: React.FC = () => {
         if (!token) return;
         try {
             await axios.put(
-                `http://localhost:5000/faculty/association/${requestId}/approve`,
+                `/faculty/association/${requestId}/approve`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
 
@@ -73,7 +73,7 @@ const FacultyAssociations: React.FC = () => {
         if (!token) return;
         try {
             await axios.put(
-                `http://localhost:5000/faculty/association/${requestId}/reject`,
+                `/faculty/association/${requestId}/reject`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
 

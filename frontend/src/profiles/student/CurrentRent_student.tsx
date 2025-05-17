@@ -54,7 +54,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                 console.log('Fetching current rent for user:', userId);
                 console.log('Token:', token);
                 const { data } = await axios.get<RentDetails>(
-                    `http://localhost:5000/users/current-rent/${userId}`,
+                    `/users/current-rent/${userId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setRentData(data);
@@ -84,7 +84,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
 
             try {
                 const { data } = await axios.get<UserBrief[]>(
-                    `http://localhost:5000/apartments/active-renters/${rentData.apartment._id}`,
+                    `/apartments/active-renters/${rentData.apartment._id}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setActiveRenters(data);
@@ -101,7 +101,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         if (!rentData) return;
         try {
             await axios.post(
-                `http://localhost:5000/apartments/cancel-rent/${rentData._id}`,
+                `/apartments/cancel-rent/${rentData._id}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -116,7 +116,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         if (!rentData) return;
         try {
             await axios.post(
-                `http://localhost:5000/apartments/cleaning-request`,
+                `/apartments/cleaning-request`,
                 { apartmentId: rentData.apartment._id },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -195,7 +195,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                 apartmentId: string;
                 participants: string[];
                 isGroup: boolean;
-            }>(`http://localhost:5000/conversations/apartment/${apartmentId}?includeOwner=${withOwner}`,
+            }>(`/conversations/apartment/${apartmentId}?includeOwner=${withOwner}`,
                 {
                     participants: participantIds,
                     ownerId: rentData.apartment.ownerId

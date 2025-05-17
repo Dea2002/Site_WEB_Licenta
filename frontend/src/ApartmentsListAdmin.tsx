@@ -14,7 +14,7 @@ const ApartmentsListAdmin: React.FC = () => {
 
     // useEffect(() => {
     //     axios
-    //         .get("http://localhost:5000/admin/apartments", {
+    //         .get("/admin/apartments", {
     //             headers: {
     //                 Authorization: `Bearer ${token}`,
     //             },
@@ -37,7 +37,7 @@ const ApartmentsListAdmin: React.FC = () => {
     // ) => {
     //     axios
     //         .put(
-    //             `http://localhost:5000/admin/apartments/${id}/status`,
+    //             `/admin/apartments/${id}/status`,
     //             { status: newStatus, reason },
     //             {
     //                 headers: {

@@ -57,7 +57,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             // Presupunem un endpoint /users/me sau /users/:id pentru update
             // Folosim PATCH pentru actualizari partiale
             const response = await axios.patch(
-                `http://localhost:5000/users/me`, // Sau `/users/${user.userId}`
+                `/users/me`, // Sau `/users/${user.userId}`
                 updatedData,
                 {
                     headers: {

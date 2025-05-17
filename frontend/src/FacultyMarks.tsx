@@ -51,7 +51,7 @@ const FacultyMarks: React.FC = () => {
 
         try {
             const response = await axios.get<MarkRequest[]>(
-                `http://localhost:5000/faculty/get_mark_requests/${faculty!._id}`
+                `/faculty/get_mark_requests/${faculty!._id}`
             );
 
             setRequests(response.data);
@@ -71,7 +71,7 @@ const FacultyMarks: React.FC = () => {
             console.log("sunt in approve");
 
             await axios.put(
-                `http://localhost:5000/faculty/mark/${requestId}/approve`,
+                `/faculty/mark/${requestId}/approve`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
 
@@ -86,7 +86,7 @@ const FacultyMarks: React.FC = () => {
         if (!token) return;
         try {
             await axios.put(
-                `http://localhost:5000/faculty/mark/${requestId}/reject`,
+                `/faculty/mark/${requestId}/reject`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
 

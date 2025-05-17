@@ -65,7 +65,7 @@ const Home: React.FC = () => {
     // Fetch apartments (existing code)
     useEffect(() => {
         axios
-            .get<Apartment[]>("http://localhost:5000/apartments")
+            .get<Apartment[]>("/apartments")
             .then((response) => {
                 setApartments(response.data);
                 // Apply initial filter from URL param if present
@@ -82,7 +82,7 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get<Apartment[]>("http://localhost:5000/apartments")
+            .get<Apartment[]>("/apartments")
             .then((response) => {
                 setApartments(response.data);
                 // Apply initial location filter IF locationParam exists

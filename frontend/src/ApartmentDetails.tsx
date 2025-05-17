@@ -53,7 +53,7 @@ const ApartmentDetails: React.FC = () => {
         console.log(user)
         if (id) {
             axios
-                .get<Apartment>(`http://localhost:5000/apartments/${id}`)
+                .get<Apartment>(`/apartments/${id}`)
                 .then((response) => {
                     setApartment(response.data);
 
@@ -61,7 +61,7 @@ const ApartmentDetails: React.FC = () => {
                     const n = response.data.numberOfRooms;
                     axios
                         .get<Colleague[]>(
-                            `http://localhost:5000/apartments/nearest_checkout/${id}`,
+                            `/apartments/nearest_checkout/${id}`,
                             { params: { n } }
                         )
                         .then((res) => {
@@ -113,7 +113,7 @@ const ApartmentDetails: React.FC = () => {
         setError(""); // Clear previous errors
         try {
             await axios.post(
-                "http://localhost:5000/create_reservation_request",
+                "/create_reservation_request",
                 {
                     clientId: user._id,
                     apartmentId: id,

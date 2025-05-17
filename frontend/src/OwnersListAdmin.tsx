@@ -18,7 +18,7 @@ const OwnersListAdmin: React.FC = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:5000/admin/owners", {
+            .get("/admin/owners", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

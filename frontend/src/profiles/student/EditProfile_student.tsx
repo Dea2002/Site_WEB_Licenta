@@ -145,7 +145,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         try {
             // 2. Trimiti toate datele catre backend
             const response = await axios.patch(
-                `http://localhost:5000/users/edit_profile`,
+                `/users/edit_profile`,
                 { userId: user._id, ...updatedData },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

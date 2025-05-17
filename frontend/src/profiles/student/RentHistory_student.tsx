@@ -49,7 +49,7 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
 
         // Fetch current rent
         axios
-            .get<CurrentRent>(`http://localhost:5000/users/current_request`, {
+            .get<CurrentRent>(`/users/current_request`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(({ data }) => {
@@ -68,7 +68,7 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
 
         // Fetch history
         axios
-            .get<HistoryEntry[]>(`http://localhost:5000/users/reservations_history`, {
+            .get<HistoryEntry[]>(`/users/reservations_history`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(({ data }) => setHistory(data))

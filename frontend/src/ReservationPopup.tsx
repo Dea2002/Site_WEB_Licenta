@@ -89,7 +89,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
 
         // make a get request to local host /testez and console log the response
         axios.post(
-            `http://localhost:5000/unavailable_dates/${apartmentId}`,
+            `/unavailable_dates/${apartmentId}`,
             { numberOfRooms: selectedRooms },
             { headers: { Authorization: `Bearer ${token}` } },
         )
@@ -113,7 +113,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     useEffect(() => {
 
         axios
-            .get(`http://localhost:5000/apartments/number-of-rooms/${apartmentId}`)
+            .get(`/apartments/number-of-rooms/${apartmentId}`)
             .then((response) => {
                 const numberOfRooms = response.data.numberOfRooms;
                 setRoomsCount(parseInt(numberOfRooms));
