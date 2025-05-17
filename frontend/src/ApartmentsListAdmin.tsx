@@ -68,76 +68,77 @@ const ApartmentsListAdmin: React.FC = () => {
     }
 
     return (
-        <div className="admin-apartments-container">
-            <h1>Lista de Apartamente</h1>
-            {successMessage && <div className="success-message">{successMessage}</div>}
-            <div className="apartments-list">
-                {apartments.map((apartment) => (
-                    <div key={apartment._id} className="apartment-card">
-                        <img
-                            src={`/Poze_apartamente/${apartment.image}`}
-                            alt={apartment.ownerInformation?.fullName}
-                        />
-                        {/* <h2>{apartment.name}</h2> */}
-                        <p>
-                            <strong>Proprietar:</strong> {apartment.ownerInformation?.fullName}
-                        </p>
-                        <p>
-                            <strong>Email:</strong> {apartment.ownerInformation?.email}
-                        </p>
-                        <div className="status-selector">
-                            <label>Status:</label>
-                            <select
-                                value={apartment.status}
-                                onChange={(e) => {
-                                    const newStatus = e.target.value as
-                                        | "disponibil"
-                                        | "indisponibil";
-                                    if (newStatus === "disponibil") {
-                                        // Daca statusul devine disponibil, resetam motivul
-                                        handleStatusChange(apartment._id, newStatus, "");
-                                    } else {
-                                        // Daca statusul devine indisponibil, pastram motivul existent sau cerem un motiv nou
-                                        handleStatusChange(
-                                            apartment._id,
-                                            newStatus,
-                                            apartment.reason || "",
-                                        );
-                                    }
-                                }}
-                            >
-                                <option value="disponibil">Disponibil</option>
-                                <option value="indisponibil">Indisponibil</option>
-                            </select>
-                        </div>
-                        {/* Afisam campul pentru motiv daca apartamentul este indisponibil */}
-                        {apartment.status === "indisponibil" && (
-                            <div className="reason-input">
-                                <label>Motiv:</label>
-                                <input
-                                    type="text"
-                                    value={apartment.reason || ""}
-                                    onChange={(e) => {
-                                        console.log("Tasta");
-                                        const reason = e.target.value;
-                                        handleStatusChange(apartment._id, apartment.status, reason);
-                                    }}
-                                    onKeyPress={(e) => {
-                                        if (e.key === "Enter") {
-                                            handleStatusChange(
-                                                apartment._id,
-                                                apartment.status,
-                                                apartment.reason || "",
-                                            );
-                                        }
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
+        <></>
+        // <div className="admin-apartments-container">
+        //     <h1>Lista de Apartamente</h1>
+        //     {successMessage && <div className="success-message">{successMessage}</div>}
+        //     <div className="apartments-list">
+        //         {apartments.map((apartment) => (
+        //             <div key={apartment._id} className="apartment-card">
+        //                 <img
+        //                     src={`/Poze_apartamente/${apartment.image}`}
+        //                     alt={apartment.ownerInformation?.fullName}
+        //                 />
+        //                 {/* <h2>{apartment.name}</h2> */}
+        //                 <p>
+        //                     <strong>Proprietar:</strong> {apartment.ownerInformation?.fullName}
+        //                 </p>
+        //                 <p>
+        //                     <strong>Email:</strong> {apartment.ownerInformation?.email}
+        //                 </p>
+        //                 <div className="status-selector">
+        //                     <label>Status:</label>
+        //                     <select
+        //                         value={apartment.status}
+        //                         onChange={(e) => {
+        //                             const newStatus = e.target.value as
+        //                                 | "disponibil"
+        //                                 | "indisponibil";
+        //                             if (newStatus === "disponibil") {
+        //                                 // Daca statusul devine disponibil, resetam motivul
+        //                                 handleStatusChange(apartment._id, newStatus, "");
+        //                             } else {
+        //                                 // Daca statusul devine indisponibil, pastram motivul existent sau cerem un motiv nou
+        //                                 handleStatusChange(
+        //                                     apartment._id,
+        //                                     newStatus,
+        //                                     apartment.reason || "",
+        //                                 );
+        //                             }
+        //                         }}
+        //                     >
+        //                         <option value="disponibil">Disponibil</option>
+        //                         <option value="indisponibil">Indisponibil</option>
+        //                     </select>
+        //                 </div>
+        //                 {/* Afisam campul pentru motiv daca apartamentul este indisponibil */}
+        //                 {apartment.status === "indisponibil" && (
+        //                     <div className="reason-input">
+        //                         <label>Motiv:</label>
+        //                         <input
+        //                             type="text"
+        //                             value={apartment.reason || ""}
+        //                             onChange={(e) => {
+        //                                 console.log("Tasta");
+        //                                 const reason = e.target.value;
+        //                                 handleStatusChange(apartment._id, apartment.status, reason);
+        //                             }}
+        //                             onKeyPress={(e) => {
+        //                                 if (e.key === "Enter") {
+        //                                     handleStatusChange(
+        //                                         apartment._id,
+        //                                         apartment.status,
+        //                                         apartment.reason || "",
+        //                                     );
+        //                                 }
+        //                             }}
+        //                         />
+        //                     </div>
+        //                 )}
+        //             </div>
+        //         ))}
+        //     </div>
+        // </div>
     );
 };
 

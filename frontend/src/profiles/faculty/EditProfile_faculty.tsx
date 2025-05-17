@@ -126,7 +126,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
         setError("");
     }
 
-    const handleDateChange = (date: Date | null, event?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
+    const handleDateChange = (date: Date | null) => {
         if (date) {
             setProfilFormState((prevState) => ({
                 ...prevState,
@@ -137,7 +137,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
 
     // parseISO va lua string-ul ISO („yyyy-MM-dd” etc.) si-l transforma in Date
 
-    const semestruDate = parseISO(profileFormState.medie_valid!);
+    // const semestruDate = parseISO(profileFormState.medie_valid!);
     // doar daca azi > semestruDate putem edita
     const canEdit = isAfter(new Date(), initialDate);
     // compara camp cu camp

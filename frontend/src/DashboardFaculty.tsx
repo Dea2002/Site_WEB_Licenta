@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./DashboardFaculty.css";
 

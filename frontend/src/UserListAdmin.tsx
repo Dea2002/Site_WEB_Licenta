@@ -68,7 +68,7 @@ const UserListAdmin: React.FC = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 })
-                .then((response) => {
+                .then(() => {
                     setSuccessMessage("Utilizatorul a fost sters cu succes.");
                     setUsers(users.filter((user) => user._id !== userId));
                     setTimeout(() => setSuccessMessage(""), 3000);
