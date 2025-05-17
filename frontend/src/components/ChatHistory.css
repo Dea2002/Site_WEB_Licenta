@@ -1,0 +1,90 @@
+.chats-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: sans-serif;
+}
+
+.chats-container h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    color: #333;
+}
+
+.chats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.chat-item + .chat-item {
+    margin-top: 0.5rem;
+}
+
+.chat-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f9f9f9;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.chat-link:hover {
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chat-info {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.chat-id {
+    font-weight: bold;
+}
+
+.chat-type {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.chats-loading,
+.chats-error {
+    text-align: center;
+    color: #555;
+    margin-top: 2rem;
+}
+
+.chat-meta {
+    flex: 1;
+    overflow: hidden;
+}
+
+.chat-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-snippet {
+    font-size: 0.9rem;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: #999;
+    white-space: nowrap;
+}

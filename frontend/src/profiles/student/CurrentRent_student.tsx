@@ -182,7 +182,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     async function openApartmentChat() {
         if (!rentData) return;
         const apartmentId = rentData.apartment._id;
-        // strângem ID-urile curente: proprietar + chiriași
+        // strangem ID-urile curente: proprietar + chiriasi
         const participantIds = [
             user!._id,
             rentData.apartment.ownerId,

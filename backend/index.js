@@ -16,7 +16,7 @@ const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',   // frontend-ul tău
+        origin: 'http://localhost:5173',   // frontend-ul tau
         methods: ['GET', 'POST'],
         credentials: true
     }
@@ -52,33 +52,36 @@ app.use('/auth/register', authLimiter);
 io.on('connection', socket => {
     console.log('🔌 New socket:', socket.id);
 
-    // clientul intră într-o cameră (conversationId)
+    // clientul intra intr-o camera (conversationId)
     socket.on('join', conversationId => {
         socket.join(conversationId);
         console.log(`Socket ${socket.id} joined ${conversationId}`);
     });
 
-    // când primește mesaj de la client
+    // cand primeste mesaj de la client
     socket.on('message:send', async ({ conversationId, senderId, text }) => {
         const db = await connectDB();
         const messages = db.collection('messages');
+        const conversations = db.collection('conversations');
 
-        const msg = {
-            conversationId,
-            senderId,
-            text,
-            createdAt: new Date()
-        };
-        // 1) salvează
+        const now = new Date();
+        const msg = { conversationId, senderId, text, createdAt: now };
         const result = await messages.insertOne(msg);
         msg._id = result.insertedId;
 
-        // 2) trimite înapoi tuturor din conversație
+        // 1) emit back to everyone in the room
         io.to(conversationId).emit('message:new', msg);
-    });
 
-    socket.on('disconnect', () => {
-        console.log('🔌 Socket disconnected:', socket.id);
+        // 2) update the conversation’s lastMessageAt & lastMessageText
+        await conversations.updateOne(
+            { _id: new ObjectId(conversationId) },
+            {
+                $set: {
+                    lastMessageAt: now,
+                    lastMessageText: text
+                }
+            }
+        );
     });
 });
 

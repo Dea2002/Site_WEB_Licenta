@@ -2,29 +2,29 @@
 .chat-window {
     display: flex;
     flex-direction: column;
-    width: 100%; /* Sau o lățime fixă, ex: 400px */
-    max-width: 600px; /* Limită lățimea maximă */
-    height: 500px; /* Sau o înălțime potrivită */
-    margin: 20px auto; /* Centrează pe pagină, dacă e cazul */
+    width: 100%; /* Sau o latime fixa, ex: 400px */
+    max-width: 750px; /* Limita latimea maxima */
+    height: 750px; /* Sau o inaltime potrivita */
+    margin: 20px auto; /* Centreaza pe pagina, daca e cazul */
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     background-color: #f9f9f9; /* Un fundal foarte deschis */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    overflow: hidden; /* Previne depășirea conținutului */
+    overflow: hidden; /* Previne depasirea continutului */
 }
 
 /* Containerul pentru mesaje */
 .chat-messages {
-    flex-grow: 1; /* Ocupă spațiul disponibil */
-    overflow-y: auto; /* Scroll vertical când e necesar */
+    flex-grow: 1; /* Ocupa spatiul disponibil */
+    overflow-y: auto; /* Scroll vertical cand e necesar */
     padding: 15px 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Spațiu între grupuri de mesaje/separatoare de dată */
+    gap: 10px; /* Spatiu intre grupuri de mesaje/separatoare de data */
 }
 
-/* Scrollbar personalizat (opțional, pentru un look mai fin) */
+/* Scrollbar personalizat (optional, pentru un look mai fin) */
 .chat-messages::-webkit-scrollbar {
     width: 8px;
 }
@@ -43,7 +43,7 @@
     background: #a1a1a1;
 }
 
-/* Separatorul de dată */
+/* Separatorul de data */
 .date-separator {
     text-align: center;
     margin: 15px 0;
@@ -51,7 +51,7 @@
 .message-day-group {
     display: flex;
     flex-direction: column;
-    /* gap: 4px; /* Poți folosi gap în loc de margin-bottom pe message-item */
+    /* gap: 4px; /* Poti folosi gap in loc de margin-bottom pe message-item */
 }
 .date-separator span {
     background-color: #e9e9eb; /* Un gri deschis pentru fundalul datei */
@@ -71,7 +71,7 @@
 
 .message-content {
     padding: 10px 15px;
-    border-radius: 18px; /* Rotunjire mai pronunțată pentru "bule" */
+    border-radius: 18px; /* Rotunjire mai pronuntata pentru "bule" */
     line-height: 1.4;
     word-wrap: break-word; /* Sparge cuvintele lungi */
 }
@@ -79,36 +79,36 @@
 /* Mesajele mele (trimise de utilizatorul curent) */
 .my-message {
     align-self: flex-end; /* Aliniere la dreapta */
-    margin-bottom: 4px; /* Spațiu între mesaje */
+    margin-bottom: 4px; /* Spatiu intre mesaje */
 }
 
 .my-message .message-content {
     background-color: #007bff; /* Un albastru vibrant (Bootstrap primary) */
     color: white;
-    border-bottom-right-radius: 6px; /* O mică "coadă" specifică mesajelor trimise */
+    border-bottom-right-radius: 6px; /* O mica "coada" specifica mesajelor trimise */
 }
 
-/* Mesajele celorlalți */
+/* Mesajele celorlalti */
 .other-message {
-    align-self: flex-start; /* Aliniere la stânga */
+    align-self: flex-start; /* Aliniere la stanga */
 }
 
 .other-message .message-content {
     background-color: #e9e9eb; /* Un gri deschis, stil Messenger */
     color: #333;
-    border-bottom-left-radius: 6px; /* Coadă specifică mesajelor primite */
+    border-bottom-left-radius: 6px; /* Coada specifica mesajelor primite */
 }
 
 /* Numele expeditorului pentru mesajele altora */
 .message-sender {
     font-size: 0.8rem; /* 12.8px */
     font-weight: 600;
-    color: #666; /* O culoare mai puțin intensă pentru nume */
+    color: #666; /* O culoare mai putin intensa pentru nume */
     margin-bottom: 4px;
 }
 
 .my-message .message-sender {
-    display: none; /* Nu afișăm numele pentru propriile mesaje */
+    display: none; /* Nu afisam numele pentru propriile mesaje */
 }
 
 /* Textul mesajului */
@@ -125,14 +125,14 @@
 }
 
 .my-message .message-timestamp {
-    color: rgba(255, 255, 255, 0.7); /* Mai transparent și alb pentru mesajele mele */
+    color: rgba(255, 255, 255, 0.7); /* Mai transparent si alb pentru mesajele mele */
 }
 
 /* Zona de input */
 .chat-input-area {
     display: flex;
     padding: 12px 15px;
-    background-color: #f0f0f0; /* Fundal ușor diferit pentru input */
+    background-color: #f0f0f0; /* Fundal usor diferit pentru input */
     border-top: 1px solid #dcdcdc;
 }
 
@@ -140,7 +140,7 @@
     flex-grow: 1;
     padding: 10px 15px;
     border: 1px solid #ccc;
-    border-radius: 20px; /* Rotunjire completă pentru input */
+    border-radius: 20px; /* Rotunjire completa pentru input */
     margin-right: 10px;
     font-size: 0.9375rem; /* 15px */
     outline: none;
@@ -157,20 +157,20 @@
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 20px; /* Rotunjire completă și pentru buton */
+    border-radius: 20px; /* Rotunjire completa si pentru buton */
     cursor: pointer;
     font-weight: 500;
     font-size: 0.9375rem; /* 15px */
     transition: background-color 0.2s ease-in-out;
-    white-space: nowrap; /* Previne trecerea textului pe rândul următor */
+    white-space: nowrap; /* Previne trecerea textului pe randul urmator */
 }
 
 .send-button:hover {
-    background-color: #0056b3; /* O nuanță mai închisă la hover */
+    background-color: #0056b3; /* O nuanta mai inchisa la hover */
 }
 
 .send-button:active {
-    background-color: #004085; /* Și mai închisă la apăsare */
+    background-color: #004085; /* si mai inchisa la apasare */
 }
 
 /* Responsive - exemplu simplu pentru ecrane mici */
@@ -178,7 +178,7 @@
     .chat-window {
         margin: 0;
         border-radius: 0;
-        height: 100vh; /* Ocupă tot ecranul pe mobil */
+        height: 100vh; /* Ocupa tot ecranul pe mobil */
         border: none;
     }
 

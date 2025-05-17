@@ -27,6 +27,7 @@ import Profile_faculty from "./profiles/faculty/Profile_faculty";
 import NotificationDashboard from "./NotificationDashboard.tsx";
 import NavSelector from "./NavBars/NavSelector.tsx";
 import ChatPage from './components/ChatPage';
+import ChatHistory from './components/ChatHistory';
 
 const App: React.FC = () => {
     return (
@@ -77,6 +78,9 @@ const App: React.FC = () => {
                     <Route path="/notifications" element={<NotificationDashboard />} />
                     {/* ruta pentru chat */}
                     <Route path="/chat/:conversationId" element={<ChatPage />} />
+                    {/* ruta pentru chat history */}
+                    <Route path="/chat-history" element={<ChatHistory />} />
+
 
                 </Routes>
             </NotificationsProvider >

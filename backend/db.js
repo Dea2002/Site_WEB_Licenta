@@ -17,7 +17,7 @@ const client = new MongoClient(uri, {
 let isConnected = false;
 
 /**
- * Conectează clientul (o singură dată) și returnează instanța de database.
+ * Conecteaza clientul (o singura data) si returneaza instanta de database.
  */
 async function connectDB() {
     if (!isConnected) {
@@ -25,7 +25,7 @@ async function connectDB() {
         isConnected = true;
         console.log('🗄️ MongoDB connected');
     }
-    // a doua dată pur și simplu returnează database
+    // a doua data pur si simplu returneaza database
     return client.db(process.env.DB_NAME || 'inchiriere-apartamente');
 }
 

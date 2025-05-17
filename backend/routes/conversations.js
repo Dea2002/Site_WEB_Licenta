@@ -13,14 +13,14 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         }
         const aptOid = new ObjectId(apartmentId);
 
-        // 1) caută conversația deja creată pentru acest apartament
+        // 1) cauta conversatia deja creata pentru acest apartament
         let convo = await conversationsCollection.findOne({ apartmentId: aptOid });
         if (convo) {
             return res.json(convo);
         }
 
-        // 2) dacă nu există, creează una nouă, cu participanții actuali
-        //    (poți popula participants cu proprietar + chiriași din backend)
+        // 2) daca nu exista, creeaza una noua, cu participantii actuali
+        //    (poti popula participants cu proprietar + chiriasi din backend)
         const now = new Date();
         const doc = {
             apartmentId: aptOid,
@@ -34,7 +34,7 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         return res.status(201).json(doc);
     });
 
-    // GET /conversations/:userId → listează conversațiile în care e user-ul
+    // GET /conversations/:userId → listeaza conversatiile in care e user-ul
     router.get('/:userId', async (req, res) => {
         const userOid = new ObjectId(req.params.userId);
         const list = await conversationsCollection
@@ -44,16 +44,16 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         res.json(list);
     });
 
-    // POST /conversations → creează sau returnează conversația unu-la-unu
+    // POST /conversations → creeaza sau returneaza conversatia unu-la-unu
     // body: { participants: [userId1, userId2] }
     router.post('/', async (req, res) => {
         try {
             let { participants } = req.body;
             if (!Array.isArray(participants) || participants.length < 2) {
-                return res.status(400).json({ message: 'Trebuie să trimiți cel puțin doi participanți.' });
+                return res.status(400).json({ message: 'Trebuie sa trimiti cel putin doi participanti.' });
             }
 
-            // Transformăm în ObjectId
+            // Transformam in ObjectId
             const partOids = participants.map(id => {
                 if (!ObjectId.isValid(id)) throw new Error('ID invalid');
                 return new ObjectId(id);
@@ -61,7 +61,7 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
 
             const isGroup = partOids.length > 2;
 
-            // Căutăm conversație unu-la-unu existentă
+            // Cautam conversatie unu-la-unu existenta
             const existing = await conversationsCollection.findOne({
                 isGroup,
                 participants: { $size: partOids.length, $all: partOids }
@@ -72,13 +72,14 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
                 return res.json(existing);
             }
 
-            // Nu există → creăm una nouă
+            // Nu exista → cream una noua
             const now = new Date();
             const doc = {
                 participants: partOids,
                 isGroup,
                 createdAt: now,
-                lastMessageAt: now
+                lastMessageAt: now,
+                lastMessageText: '',
             };
             const result = await conversationsCollection.insertOne(doc);
             doc._id = result.insertedId;

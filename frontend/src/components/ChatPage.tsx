@@ -1,7 +1,7 @@
 import { FC, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import ChatWindow from './ChatWindow';
-import { AuthContext } from '../AuthContext';  // presupunem că ai un hook care-ți dă user-ul curent
+import { AuthContext } from '../AuthContext';  // presupunem ca ai un hook care-ti da user-ul curent
 
 interface Params {
     [key: string]: string | undefined;

@@ -1,7 +1,7 @@
 import { FC, useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { api, socket } from '../api';
 import { format, parseISO } from 'date-fns';
-import './ChatWindow.css'; // <--- Adaugă importul CSS
+import './ChatWindow.css'; // <--- Adauga importul CSS
 
 interface Message {
     _id: string;
@@ -39,7 +39,7 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
             console.log('🆕 New WS message:', msg);
             if (msg.conversationId === conversationId) {
                 setMessages(prev => [...prev, msg]);
-                // Ar fi bine să preîncarci numele și pentru mesajele noi, dacă e cazul
+                // Ar fi bine sa preincarci numele si pentru mesajele noi, daca e cazul
                 preloadNames([msg]);
             }
         };
@@ -59,7 +59,7 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
         const unknownIds = Array.from(new Set(
             newMsgs
                 .map(m => m.senderId)
-                .filter(id => id && !userNames[id]) // Adăugat check pentru id
+                .filter(id => id && !userNames[id]) // Adaugat check pentru id
         ));
         if (unknownIds.length === 0) return;
 
@@ -71,7 +71,7 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
                 map[u._id] = u.fullName;
             });
             setUserNames(map);
-        }).catch(err => console.error('nu am putut încărca nume useri:', err));
+        }).catch(err => console.error('nu am putut incarca nume useri:', err));
     }
 
     const send = () => {
@@ -140,7 +140,7 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
                     onKeyDown={onKeyDown}
                 />
                 <button className="send-button" onClick={send}>
-                    {/* Poți folosi un SVG icon aici pentru un look mai modern */}
+                    {/* Poti folosi un SVG icon aici pentru un look mai modern */}
                     Trimite
                 </button>
             </div>
