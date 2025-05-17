@@ -41,6 +41,7 @@ export interface Apartment {
         fullName: string;
         email: string;
         phoneNumber: string;
+        _id: string; // id-ul proprietarului
         // alte detalii despre proprietar daca e nevoie
     };
 

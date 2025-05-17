@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { api } from './api';
+import { useNavigate } from 'react-router-dom';
 import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
@@ -23,6 +24,7 @@ interface Colleague {
     checkOut: string;  // ISO date string
 }
 const ApartmentDetails: React.FC = () => {
+    const navigate = useNavigate();
     const { refresh } = useNotifications();
     const { id } = useParams<{ id: string }>();
     const [apartment, setApartment] = useState<Apartment | null>(null);
@@ -187,7 +189,18 @@ const ApartmentDetails: React.FC = () => {
             </div>
         );
     }
-
+    async function openChatWith(otherUserId: string) {
+        const { data: conversation } = await api.post<{
+            _id: string;
+            participants: string[];
+            isGroup: boolean;
+            createdAt: string;
+            lastMessageAt: string;
+        }>('/conversations', {
+            participants: [user!._id, otherUserId],
+        });
+        navigate(`/chat/${conversation._id}`);
+    }
     // Helper function to render selected dates and costs (part of the new right section logic)
     const renderSelectedDatesInfo = () => {
         if (!selectedDates) return null;
@@ -224,6 +237,8 @@ const ApartmentDetails: React.FC = () => {
         const apartmentTotalCost = pricePerNight * nights;
 
         const finalTotalCost = numberOfRooms * (apartmentTotalCost + extraTotalCost);
+
+
 
         return (
             // Using the structured selected-dates-info div from the new layout
@@ -411,7 +426,10 @@ const ApartmentDetails: React.FC = () => {
                                     >
                                         Detalii
                                     </button>
-                                    <button className="owner-section-button chat-btn">Chat</button>{" "}
+                                    <button className="owner-section-button chat-btn"
+                                        onClick={() => openChatWith(apartment!.ownerInformation!._id)}>
+                                        Chat
+                                    </button>{" "}
                                     {/* Original Class */}
                                 </div>
                             </div>

@@ -50,12 +50,12 @@ app.use('/auth/register', authLimiter);
 
 // Socket.IO real-time
 io.on('connection', socket => {
-    console.log('🔌 New socket:', socket.id);
+    // console.log('🔌 New socket:', socket.id);
 
     // clientul intra intr-o camera (conversationId)
     socket.on('join', conversationId => {
         socket.join(conversationId);
-        console.log(`Socket ${socket.id} joined ${conversationId}`);
+        // console.log(`Socket ${socket.id} joined ${conversationId}`);
     });
 
     // cand primeste mesaj de la client
