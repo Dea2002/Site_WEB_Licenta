@@ -1,71 +1,72 @@
-import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
-import { AuthContext } from "./AuthContext";
+// import React, { useEffect, useState, useContext } from "react";
+import React from "react";
+// import axios from "axios";
+// import { AuthContext } from "./AuthContext";
 import "./ApartmentsListAdmin.css";
-import { Apartment } from "./types";
+// import { Apartment } from "./types";
 
 const ApartmentsListAdmin: React.FC = () => {
-    const { token } = useContext(AuthContext);
-    const [apartments, setApartments] = useState<Apartment[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>(""); // Pentru a gestiona erorile
-    const [successMessage, setSuccessMessage] = useState<string>(""); // Stare pentru mesajul de succes
+    // const { token } = useContext(AuthContext);
+    // const [apartments, setApartments] = useState<Apartment[]>([]);
+    // const [loading, setLoading] = useState<boolean>(true);
+    // const [error, setError] = useState<string>(""); // Pentru a gestiona erorile
+    // const [successMessage, setSuccessMessage] = useState<string>(""); // Stare pentru mesajul de succes
 
-    useEffect(() => {
-        axios
-            .get("http://localhost:5000/admin/apartments", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((response) => {
-                setApartments(response.data);
-                console.log(response.data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Eroare la obtinerea apartamentelor:", error);
-                setLoading(false);
-            });
-    }, [token]);
+    // useEffect(() => {
+    //     axios
+    //         .get("http://localhost:5000/admin/apartments", {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //         })
+    //         .then((response) => {
+    //             setApartments(response.data);
+    //             console.log(response.data);
+    //             setLoading(false);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Eroare la obtinerea apartamentelor:", error);
+    //             setLoading(false);
+    //         });
+    // }, [token]);
 
-    const handleStatusChange = (
-        id: string,
-        newStatus: "disponibil" | "indisponibil",
-        reason?: string,
-    ) => {
-        axios
-            .put(
-                `http://localhost:5000/admin/apartments/${id}/status`,
-                { status: newStatus, reason },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                },
-            )
-            .then((response) => {
-                // Actualizeaza apartamentul cu datele primite din backend
-                const updatedApartment = response.data;
-                setApartments((prevApartments) =>
-                    prevApartments.map((apartment) =>
-                        apartment._id === id ? { ...apartment, ...updatedApartment } : apartment,
-                    ),
-                );
-                setSuccessMessage("Statusul a fost actualizat cu succes!");
-                // sterge mesajul dupa 3 secunde
-                setTimeout(() => setSuccessMessage(""), 3000);
-            })
-            .catch((error) => {
-                console.error("Eroare la actualizarea statusului:", error);
-                setError("Nu s-a putut actualiza statusul apartamentului.");
-            });
-    };
+    // const handleStatusChange = (
+    //     id: string,
+    //     newStatus: "disponibil" | "indisponibil",
+    //     reason?: string,
+    // ) => {
+    //     axios
+    //         .put(
+    //             `http://localhost:5000/admin/apartments/${id}/status`,
+    //             { status: newStatus, reason },
+    //             {
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                     "Content-Type": "application/json",
+    //                 },
+    //             },
+    //         )
+    //         .then((response) => {
+    //             // Actualizeaza apartamentul cu datele primite din backend
+    //             const updatedApartment = response.data;
+    //             setApartments((prevApartments) =>
+    //                 prevApartments.map((apartment) =>
+    //                     apartment._id === id ? { ...apartment, ...updatedApartment } : apartment,
+    //                 ),
+    //             );
+    //             setSuccessMessage("Statusul a fost actualizat cu succes!");
+    //             // sterge mesajul dupa 3 secunde
+    //             setTimeout(() => setSuccessMessage(""), 3000);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Eroare la actualizarea statusului:", error);
+    //             setError("Nu s-a putut actualiza statusul apartamentului.");
+    //         });
+    // };
 
-    if (loading) {
-        return <p>Se incarca apartamentele...</p>;
-    }
+    // if (loading) {
+    //     return <p>Se incarca apartamentele...</p>;
+    // }
 
     return (
         <></>
