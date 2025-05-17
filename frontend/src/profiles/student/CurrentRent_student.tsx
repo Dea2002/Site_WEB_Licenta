@@ -51,6 +51,8 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
             }
 
             try {
+                console.log('Fetching current rent for user:', userId);
+                console.log('Token:', token);
                 const { data } = await axios.get<RentDetails>(
                     `http://localhost:5000/users/current-rent/${userId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
@@ -176,6 +178,34 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         navigate(`/chat/${conversation._id}`);
     }
 
+    // handler-ul pentru grup chat
+    async function openApartmentChat() {
+        if (!rentData) return;
+        const apartmentId = rentData.apartment._id;
+        // strângem ID-urile curente: proprietar + chiriași
+        const participantIds = [
+            user!._id,
+            rentData.apartment.ownerId,
+            ...activeRenters.map(r => r._id)
+        ];
+
+        try {
+            const { data: conversation } = await api.post<{
+                _id: string;
+                apartmentId: string;
+                participants: string[];
+                isGroup: boolean;
+            }>(`http://localhost:5000/conversations/apartment/${apartmentId}`,
+                { participants: participantIds },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            navigate(`/chat/${conversation._id}`);
+        } catch (err) {
+            console.error(err);
+            alert('Nu am putut accesa chat-ul de grup.');
+        }
+    }
+
     // === Afisam datele chiriei curente ===
 
     return (
@@ -245,15 +275,22 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                                     key={u._id}
                                     className="btn-chat-colleague"
                                     onClick={() => {
-                                        console.log('Chat cu colegul:', u);
                                         openChatWith(u._id);
                                     }}
                                 >
-                                    ${u.fullName}${u._id}
+                                    {u.fullName}
                                 </button>
                             ))
                         }
                     </div>
+
+                    {/* butonul de grup chat */}
+                    <button
+                        className="btn-chat-group"
+                        onClick={openApartmentChat}
+                    >
+                        Chat grup apartament
+                    </button>
                 </div>
             </div>
         </div>
