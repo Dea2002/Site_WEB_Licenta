@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./DashboardAdmin.css";
@@ -16,7 +16,7 @@ const DashboardAdmin: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios
+        api
             .get("/admin/stats", {
                 headers: {
                     Authorization: `Bearer ${token}`,

@@ -1,6 +1,5 @@
-// frontend/src/Register.tsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from './api';
 import { useNavigate, Link } from "react-router-dom";
 import Bara_navigatie from "./NavBars/Bara_navigatie";
 import "./Register.css"; // Ensure CSS is imported
@@ -107,7 +106,7 @@ const Register: React.FC = () => {
         const fetchFaculties = async () => {
             try {
                 // Asigura-te ca URL-ul este corect (poate ai un base URL in axios config)
-                const response = await axios.get<FacultyInfo[]>("/faculty");
+                const response = await api.get<FacultyInfo[]>("/faculty");
                 // Presupunand ca backend-ul returneaza direct array-ul [{fullName: '...', abreviere: '...'}, ...]
                 setFacultiesList(response.data);
             } catch (err) {
@@ -241,7 +240,7 @@ const Register: React.FC = () => {
         }
 
         try {
-            await axios.post("/auth/register_student", {
+            await api.post("/auth/register_student", {
                 email,
                 fullName,
                 phoneNumber,
@@ -331,7 +330,7 @@ const Register: React.FC = () => {
             );
 
             // 3. Send data to backend
-            await axios.post("/auth/register_faculty", {
+            await api.post("/auth/register_faculty", {
                 fullName,
                 abreviere,
                 logoUrl,
@@ -401,7 +400,7 @@ const Register: React.FC = () => {
         }
 
         try {
-            await axios.post("/auth/register_owner", {
+            await api.post("/auth/register_owner", {
                 email,
                 fullName,
                 password,

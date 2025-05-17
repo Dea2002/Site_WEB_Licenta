@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./OwnerRequests.css";
 
@@ -27,7 +27,7 @@ const OwnerRequests: React.FC = () => {
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
 
     useEffect(() => {
-        axios
+        api
             .get(`/owner/list_reservation_requests/${user!._id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
@@ -41,7 +41,7 @@ const OwnerRequests: React.FC = () => {
 
     const accept = async (id: string) => {
         try {
-            await axios
+            await api
                 .post(
                     `/reservation_request/${id}/accept`,
                     {},
@@ -61,7 +61,7 @@ const OwnerRequests: React.FC = () => {
 
     const decline = async (id: string) => {
         try {
-            await axios
+            await api
                 .post(
                     `/reservation_request/${id}/decline`,
                     {},

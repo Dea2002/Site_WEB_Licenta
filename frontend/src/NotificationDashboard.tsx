@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { parseISO, format } from 'date-fns';
 import "./NotificationDashboard.css";
@@ -29,7 +29,7 @@ const NotificationDashboard: React.FC = () => {
             }
         }
         try {
-            const resp = await axios.get<Notification[]>(
+            const resp = await api.get<Notification[]>(
                 '/notifications',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -50,7 +50,7 @@ const NotificationDashboard: React.FC = () => {
     // Mark as read handler
     const handleMarkAsRead = async (id: string) => {
         try {
-            await axios.put(
+            await api.put(
                 `/notifications/${id}/read`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -65,7 +65,7 @@ const NotificationDashboard: React.FC = () => {
     // Delete handler
     const handleDelete = async (id: string) => {
         try {
-            await axios.delete(
+            await api.delete(
                 `/notifications/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );

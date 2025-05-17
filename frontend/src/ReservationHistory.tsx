@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./ReservationHistory.css";
 
@@ -26,7 +26,7 @@ const ReservationHistory: React.FC = () => {
     const [history, setHistory] = useState<ReservationHistory[]>([]);
 
     useEffect(() => {
-        axios
+        api
             .get(`/owner/reservation_history/${user!._id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })

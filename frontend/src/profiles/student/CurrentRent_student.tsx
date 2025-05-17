@@ -1,6 +1,6 @@
 import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+
 import { AuthContext } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './profile_student.css';
@@ -53,7 +53,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
             try {
                 console.log('Fetching current rent for user:', userId);
                 console.log('Token:', token);
-                const { data } = await axios.get<RentDetails>(
+                const { data } = await api.get<RentDetails>(
                     `/users/current-rent/${userId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -83,7 +83,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
             setRentersError(null);
 
             try {
-                const { data } = await axios.get<UserBrief[]>(
+                const { data } = await api.get<UserBrief[]>(
                     `/apartments/active-renters/${rentData.apartment._id}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -100,7 +100,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const handleCancel = async () => {
         if (!rentData) return;
         try {
-            await axios.post(
+            await api.post(
                 `/apartments/cancel-rent/${rentData._id}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -115,7 +115,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const handleCleaningRequest = async () => {
         if (!rentData) return;
         try {
-            await axios.post(
+            await api.post(
                 `/apartments/cleaning-request`,
                 { apartmentId: rentData.apartment._id },
                 { headers: { Authorization: `Bearer ${token}` } }

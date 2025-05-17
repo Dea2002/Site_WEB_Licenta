@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import axios from 'axios';
+import { api } from './api';
 import { AuthContext } from './AuthContext';
 
 interface NotificationsContextType {
@@ -22,7 +22,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             return;
         }
         try {
-            const { data } = await axios.get<{ unread: number }>(
+            const { data } = await api.get<{ unread: number }>(
                 '/notifications/unread-count',
                 { headers: { Authorization: `Bearer ${token}` } }
             );

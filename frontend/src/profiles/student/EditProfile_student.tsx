@@ -1,6 +1,6 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext, User } from '../../AuthContext'; // Importam User
-import axios from 'axios'; // Pentru request PATCH/PUT
+import { api } from '../../api';
 import './profile_student.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
 import { parseISO, isAfter, format } from "date-fns";
@@ -144,7 +144,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
         try {
             // 2. Trimiti toate datele catre backend
-            const response = await axios.patch(
+            const response = await api.patch(
                 `/users/edit_profile`,
                 { userId: user._id, ...updatedData },
                 { headers: { Authorization: `Bearer ${token}` } }

@@ -1,6 +1,6 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext, Faculty } from '../../AuthContext'; // Importam User
-import axios from 'axios'; // Pentru request PATCH/PUT
+import { api } from '../../api';// Pentru request PATCH/PUT
 import './profile_faculty.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
 import { parseISO, isAfter, addDays } from "date-fns";
@@ -96,7 +96,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ faculty }) => {
         };
 
         try {
-            const response = await axios.patch(
+            const response = await api.patch(
                 `/faculty/edit_profile`,
                 { userId: faculty._id, ...updatedData },
                 { headers: { Authorization: `Bearer ${token}` } }

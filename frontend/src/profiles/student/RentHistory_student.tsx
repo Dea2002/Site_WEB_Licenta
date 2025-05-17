@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import { api } from '../../api';
 import { AuthContext } from '../../AuthContext';
 import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import './profile_student.css';
@@ -48,7 +48,7 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
         if (!token) return;
 
         // Fetch current rent
-        axios
+        api
             .get<CurrentRent>(`/users/current_request`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -67,7 +67,7 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
             .finally(() => setLoadingCurrent(false));
 
         // Fetch history
-        axios
+        api
             .get<HistoryEntry[]>(`/users/reservations_history`, {
                 headers: { Authorization: `Bearer ${token}` }
             })

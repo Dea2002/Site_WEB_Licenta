@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./UserListAdmin.css";
 
@@ -44,7 +44,7 @@ const UserListAdmin: React.FC = () => {
     });
 
     useEffect(() => {
-        axios
+        api
             .get("/admin/users", {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -62,7 +62,7 @@ const UserListAdmin: React.FC = () => {
 
     const handleDeleteUser = (userId: string) => {
         if (window.confirm("Esti sigur ca vrei sa stergi acest utilizator?")) {
-            axios
+            api
                 .delete(`/admin/users/${userId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ const UserListAdmin: React.FC = () => {
     // Pentru adaugarea de useri
     const handleAddUser = (e: React.FormEvent) => {
         e.preventDefault();
-        axios
+        api
             .post("/admin/users", newUserForm, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -245,3 +245,4 @@ const UserListAdmin: React.FC = () => {
 };
 
 export default UserListAdmin;
+

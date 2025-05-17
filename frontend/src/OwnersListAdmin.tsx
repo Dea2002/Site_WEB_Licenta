@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./OwnersListAdmin.css";
 
@@ -17,7 +17,7 @@ const OwnersListAdmin: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        axios
+        api
             .get("/admin/owners", {
                 headers: {
                     Authorization: `Bearer ${token}`,

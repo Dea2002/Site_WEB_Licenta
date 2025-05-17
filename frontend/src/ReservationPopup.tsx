@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
-import axios from "axios";
+import { api } from './api';
 import "react-datepicker/dist/react-datepicker.css";
 import "./ReservationPopup.css";
 import { subDays } from "date-fns";
@@ -88,7 +88,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     useEffect(() => {
 
         // make a get request to local host /testez and console log the response
-        axios.post(
+        api.post(
             `/unavailable_dates/${apartmentId}`,
             { numberOfRooms: selectedRooms },
             { headers: { Authorization: `Bearer ${token}` } },
@@ -112,7 +112,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }, [selectedRooms]);
     useEffect(() => {
 
-        axios
+        api
             .get(`/apartments/number-of-rooms/${apartmentId}`)
             .then((response) => {
                 const numberOfRooms = response.data.numberOfRooms;

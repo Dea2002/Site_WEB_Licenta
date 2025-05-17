@@ -1,10 +1,9 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 import jwt_decode from 'jwt-decode';
-
 const Login: React.FC = () => {
     const [email, setEmail] = useState(""); // Schimbat de la 'username' la 'email'
     const [password, setPassword] = useState("");
@@ -16,7 +15,7 @@ const Login: React.FC = () => {
         e.preventDefault();
         try {
             const payload = { email, password };
-            const response = await axios.post("/auth/login", payload);
+            const response = await api.post("/auth/login", payload);
 
             const { token } = response.data;
 

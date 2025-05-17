@@ -1,7 +1,7 @@
 // frontend/src/Reservation.tsx
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import { api } from './api';
 import Bara_navigatie from "./NavBars/Bara_navigatie";
 import { Apartment } from "./types";
 
@@ -18,7 +18,7 @@ const Reservation: React.FC = () => {
 
     useEffect(() => {
         if (state && state.apartmentId) {
-            axios
+            api
                 .get<Apartment>(`/apartments/${state.apartmentId}`)
                 .then((response) => {
                     setApartment(response.data);

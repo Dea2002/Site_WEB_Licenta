@@ -1,4 +1,3 @@
-// frontend/src/LandingPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";

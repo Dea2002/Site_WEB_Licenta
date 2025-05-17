@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 // Import the CSS file (ensure the path is correct)
 import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you create a new file
@@ -85,7 +85,7 @@ const OwnerListNewApartment: React.FC = () => {
 
         try {
             // Assuming 'image' is just a text field for now based on input type="text"
-            await axios.post(
+            await api.post(
                 `/new-apartment`,
                 { ownerId: user?._id, ...formData },
                 {

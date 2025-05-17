@@ -1,4 +1,3 @@
-// src/components/ChatHistory.tsx
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';

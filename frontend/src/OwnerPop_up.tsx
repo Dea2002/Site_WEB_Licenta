@@ -1,5 +1,3 @@
-// avem nevoie de un component modal pentru sectiunea de pop-up
-
 import React from "react";
 import { LuPhone } from "react-icons/lu";
 import { FiMail } from "react-icons/fi";

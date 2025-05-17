@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from './api';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginModal from "./LoginModal";
 import { Apartment } from "./types"; // Make sure Apartment type includes all relevant fields
@@ -64,7 +64,7 @@ const Home: React.FC = () => {
 
     // Fetch apartments (existing code)
     useEffect(() => {
-        axios
+        api
             .get<Apartment[]>("/apartments")
             .then((response) => {
                 setApartments(response.data);
@@ -81,7 +81,7 @@ const Home: React.FC = () => {
     }, []); // Run only once on mount
 
     useEffect(() => {
-        axios
+        api
             .get<Apartment[]>("/apartments")
             .then((response) => {
                 setApartments(response.data);

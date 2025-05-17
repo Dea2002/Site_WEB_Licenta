@@ -1,6 +1,5 @@
-// Lista cu apartamentele proprietarului care este autentificat
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { Apartment } from "./types";
 import "./OwnerApartments.css";
@@ -11,7 +10,7 @@ const OwnerApartments: React.FC = () => {
 
     useEffect(() => {
         if (user?.email) {
-            axios
+            api
                 .get(`/apartments/by-id/${user._id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./FacultyMarks.css";
 
@@ -50,7 +50,7 @@ const FacultyMarks: React.FC = () => {
         }
 
         try {
-            const response = await axios.get<MarkRequest[]>(
+            const response = await api.get<MarkRequest[]>(
                 `/faculty/get_mark_requests/${faculty!._id}`
             );
 
@@ -70,7 +70,7 @@ const FacultyMarks: React.FC = () => {
         try {
             console.log("sunt in approve");
 
-            await axios.put(
+            await api.put(
                 `/faculty/mark/${requestId}/approve`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
@@ -85,7 +85,7 @@ const FacultyMarks: React.FC = () => {
     const handleReject = async (requestId: string) => {
         if (!token) return;
         try {
-            await axios.put(
+            await api.put(
                 `/faculty/mark/${requestId}/reject`,
                 { header: { Authorization: `Bearer ${token}` } }
             );

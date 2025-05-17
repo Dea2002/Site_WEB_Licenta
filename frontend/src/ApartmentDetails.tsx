@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { api } from './api';
 import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
@@ -52,14 +52,14 @@ const ApartmentDetails: React.FC = () => {
     useEffect(() => {
         console.log(user)
         if (id) {
-            axios
+            api
                 .get<Apartment>(`/apartments/${id}`)
                 .then((response) => {
                     setApartment(response.data);
 
                     // apelul pentru colegi
                     const n = response.data.numberOfRooms;
-                    axios
+                    api
                         .get<Colleague[]>(
                             `/apartments/nearest_checkout/${id}`,
                             { params: { n } }
@@ -112,7 +112,7 @@ const ApartmentDetails: React.FC = () => {
         }
         setError(""); // Clear previous errors
         try {
-            await axios.post(
+            await api.post(
                 "/create_reservation_request",
                 {
                     clientId: user._id,
@@ -143,7 +143,7 @@ const ApartmentDetails: React.FC = () => {
     const handleLocationClick = async (apt: Apartment) => {
         setError(""); // Clear previous errors
         try {
-            const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+            const response = await api.get("https://nominatim.openstreetmap.org/search", {
                 params: {
                     q: apt.location,
                     format: "json",

@@ -1,7 +1,6 @@
-// frontend/src/AuthContext.tsx
 import React, { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
-import axios from "axios";
+import { api } from './api';
 
 export interface User {
     _id: string;
@@ -76,9 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // seteaza header-ul implicit de fiecare data cand tokenul se schimba
     useEffect(() => {
         if (token) {
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         } else {
-            delete axios.defaults.headers.common["Authorization"];
+            delete api.defaults.headers.common["Authorization"];
         }
     }, [token, isAuthenticated]);
 

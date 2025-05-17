@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./FacultyAssociations.css";
 
@@ -36,7 +36,7 @@ const FacultyAssociations: React.FC = () => {
         }
 
         try {
-            const response = await axios.get<AssociationRequest[]>(
+            const response = await api.get<AssociationRequest[]>(
                 `/faculty/get_association_requests/${faculty!._id}`,
                 {
                     headers: {
@@ -57,7 +57,7 @@ const FacultyAssociations: React.FC = () => {
     const handleApprove = async (requestId: string) => {
         if (!token) return;
         try {
-            await axios.put(
+            await api.put(
                 `/faculty/association/${requestId}/approve`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
@@ -72,7 +72,7 @@ const FacultyAssociations: React.FC = () => {
     const handleReject = async (requestId: string) => {
         if (!token) return;
         try {
-            await axios.put(
+            await api.put(
                 `/faculty/association/${requestId}/reject`,
                 { header: { Authorization: `Bearer ${token}` } }
             );

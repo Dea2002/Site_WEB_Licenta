@@ -1,6 +1,6 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AuthContext, User } from '../../AuthContext'; // Importam User
-import axios from 'axios'; // Pentru request PATCH/PUT
+import { api } from '../../api';// Pentru request PATCH/PUT
 import './profile_owner.css'; // Stiluri
 import jwt_decode from 'jwt-decode';
 
@@ -56,7 +56,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         try {
             // Presupunem un endpoint /users/me sau /users/:id pentru update
             // Folosim PATCH pentru actualizari partiale
-            const response = await axios.patch(
+            const response = await api.patch(
                 `/users/me`, // Sau `/users/${user.userId}`
                 updatedData,
                 {
