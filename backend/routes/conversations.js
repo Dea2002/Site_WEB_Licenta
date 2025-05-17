@@ -8,30 +8,62 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
 
     router.post('/apartment/:apartmentId', authenticateToken, async (req, res) => {
         const { apartmentId } = req.params;
+        const includeOwner = req.query.includeOwner === 'true';
+        console.log('includeOwner:', includeOwner);
         if (!ObjectId.isValid(apartmentId)) {
             return res.status(400).json({ message: 'ID apartament invalid' });
         }
-        const aptOid = new ObjectId(apartmentId);
 
-        // 1) cauta conversatia deja creata pentru acest apartament
-        let convo = await conversationsCollection.findOne({ apartmentId: aptOid });
+        // build the filter so that we match exactly one of the two group-chats
+        const filter = {
+            apartmentId: new ObjectId(apartmentId),
+            isGroup: true,
+            includeOwner: includeOwner
+        };
+
+
+        // 1) try to find existing convo of this type
+        let convo = await conversationsCollection.findOne(filter);
+        console.log('Convo:', convo);
         if (convo) {
             return res.json(convo);
         }
+        console.log('Convo not found, creating new one');
+        // 2) else create new
+        const { participants: tenantIds = [], ownerId } = req.body;
+        if (!Array.isArray(tenantIds) || tenantIds.length < 1) {
+            return res
+                .status(400)
+                .json({ message: 'Trebuie să trimiți cel puțin un chiriaș în participants.' });
+        }
 
-        // 2) daca nu exista, creeaza una noua, cu participantii actuali
-        //    (poti popula participants cu proprietar + chiriasi din backend)
+        // ObjectId-ize
+        const tenantsOids = tenantIds.map(id => new ObjectId(id));
+        const participants = [...tenantsOids];
+
+        if (includeOwner) {
+            if (!ownerId || !ObjectId.isValid(ownerId)) {
+                return res
+                    .status(400)
+                    .json({ message: 'Pentru includeOwner=true trebuie să trimiți ownerId valid.' });
+            }
+            participants.push(new ObjectId(ownerId));
+        }
+
         const now = new Date();
         const doc = {
-            apartmentId: aptOid,
-            participants: req.body.participants.map(id => new ObjectId(id)),
+            apartmentId: new ObjectId(apartmentId),
+            participants,
             isGroup: true,
+            includeOwner,
             createdAt: now,
-            lastMessageAt: now
+            lastMessageAt: now,
+            lastMessageText: '',
         };
+
         const result = await conversationsCollection.insertOne(doc);
         doc._id = result.insertedId;
-        return res.status(201).json(doc);
+        res.status(201).json(doc);
     });
 
     // GET /conversations/:userId → listeaza conversatiile in care e user-ul
@@ -91,6 +123,25 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         }
     });
 
+    router.delete('/clear', async (req, res) => {
+        const { confirmation } = req.body;
+        if (confirmation !== 'CONFIRM') {
+            return res
+                .status(400)
+                .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+        }
+        try {
+            const result = await conversationsCollection.deleteMany({});
+            return res.json({
+                message: `Au fost sterse ${result.deletedCount} documente.`,
+            });
+        } catch (err) {
+            console.error('Eroare la stergerea documentelor:', err);
+            return res
+                .status(500)
+                .json({ message: 'Eroare interna la server.' });
+        }
+    });
 
     return router;
 }

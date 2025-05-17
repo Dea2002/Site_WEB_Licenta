@@ -179,24 +179,27 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     }
 
     // handler-ul pentru grup chat
-    async function openApartmentChat() {
+    async function openApartmentChat(withOwner: boolean) {
         if (!rentData) return;
         const apartmentId = rentData.apartment._id;
         // strangem ID-urile curente: proprietar + chiriasi
         const participantIds = [
             user!._id,
-            rentData.apartment.ownerId,
+            ...(withOwner ? [rentData.apartment.ownerId] : []),
             ...activeRenters.map(r => r._id)
         ];
-
+        console.log('with owner:', withOwner);
         try {
             const { data: conversation } = await api.post<{
                 _id: string;
                 apartmentId: string;
                 participants: string[];
                 isGroup: boolean;
-            }>(`http://localhost:5000/conversations/apartment/${apartmentId}`,
-                { participants: participantIds },
+            }>(`http://localhost:5000/conversations/apartment/${apartmentId}?includeOwner=${withOwner}`,
+                {
+                    participants: participantIds,
+                    ownerId: rentData.apartment.ownerId
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             navigate(`/chat/${conversation._id}`);
@@ -287,9 +290,15 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     {/* butonul de grup chat */}
                     <button
                         className="btn-chat-group"
-                        onClick={openApartmentChat}
+                        onClick={() => openApartmentChat(true)}
                     >
-                        Chat grup apartament
+                        Chat grup cu proprietar
+                    </button>
+                    <button
+                        className="btn-chat-group"
+                        onClick={() => openApartmentChat(false)}
+                    >
+                        Chat grup fara proprietar
                     </button>
                 </div>
             </div>

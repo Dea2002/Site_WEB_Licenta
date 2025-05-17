@@ -36,8 +36,7 @@ function createMessagesRoutes(usersCollection, messagesCollection, conversations
                 .status(500)
                 .json({ message: 'Eroare interna la server.' });
         }
-    }
-    );
+    });
 
     return router;
 }
