@@ -74,12 +74,12 @@
     border-radius: 18px; /* Rotunjire mai pronuntata pentru "bule" */
     line-height: 1.4;
     word-wrap: break-word; /* Sparge cuvintele lungi */
+    margin-bottom: 4px;
 }
 
 /* Mesajele mele (trimise de utilizatorul curent) */
 .my-message {
     align-self: flex-end; /* Aliniere la dreapta */
-    margin-bottom: 4px; /* Spatiu intre mesaje */
 }
 
 .my-message .message-content {
