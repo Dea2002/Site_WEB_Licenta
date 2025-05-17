@@ -1,6 +1,7 @@
 import { FC, useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { api, socket } from '../api';
 import { format, parseISO } from 'date-fns';
+import './ChatWindow.css'; // <--- Adaugă importul CSS
 
 interface Message {
     _id: string;
@@ -38,21 +39,30 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
             console.log('🆕 New WS message:', msg);
             if (msg.conversationId === conversationId) {
                 setMessages(prev => [...prev, msg]);
+                // Ar fi bine să preîncarci numele și pentru mesajele noi, dacă e cazul
+                preloadNames([msg]);
             }
         };
         socket.on('message:new', handler);
         return () => { socket.off('message:new', handler); };
     }, [conversationId]);
 
+    useEffect(() => {
+        // Scroll to bottom when new messages arrive or messages are loaded
+        const messageContainer = document.querySelector('.chat-messages');
+        if (messageContainer) {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+    }, [messages]);
+
     function preloadNames(newMsgs: Message[]) {
         const unknownIds = Array.from(new Set(
             newMsgs
                 .map(m => m.senderId)
-                .filter(id => !userNames[id])
+                .filter(id => id && !userNames[id]) // Adăugat check pentru id
         ));
         if (unknownIds.length === 0) return;
 
-        // apelăm batch-ul de useri (trebuie să ai un endpoint de genul GET /users/batch?ids=...)
         api.get<{ _id: string; fullName: string }[]>('/users/batch', {
             params: { ids: unknownIds.join(',') }
         }).then(res => {
@@ -77,48 +87,63 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
     const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') send(); };
     const onChange = (e: ChangeEvent<HTMLInputElement>) => { setText(e.target.value); };
 
-    // ------- grupăm mesajele după data (yyyy-MM-dd) -------
     const grouped: Record<string, Message[]> = messages.reduce((acc, m) => {
         const day = format(parseISO(m.createdAt), 'yyyy-MM-dd');
         (acc[day] = acc[day] || []).push(m);
         return acc;
     }, {} as Record<string, Message[]>);
 
-    // păstrăm ordinea zilelor
     const sortedDays = Object.keys(grouped).sort(
         (a, b) => new Date(a).getTime() - new Date(b).getTime()
     );
 
     return (
-        <div>
-            <div style={{ height: 300, overflowY: 'auto', border: '1px solid #ccc' }}>
+        <div className="chat-window">
+            <div className="chat-messages">
                 {sortedDays.map(day => (
-                    <div key={day}>
-                        {/* header cu data */}
-                        <div style={{
-                            textAlign: 'center',
-                            margin: '8px 0',
-                            fontWeight: 'bold'
-                        }}>
-                            {format(parseISO(day), 'dd MMMM yyyy')}
+                    <div key={day} className="message-day-group">
+                        <div className="date-separator">
+                            <span>{format(parseISO(day), 'dd MMMM yyyy')}</span>
                         </div>
-                        {grouped[day].map(m => (
-                            <div key={m._id} style={{ padding: '4px' }}>
-                                <strong>{userNames[m.senderId] ?? m.senderId}</strong>{' '}
-                                [{format(parseISO(m.createdAt), 'HH:mm')}]:&nbsp;{m.text}
-                            </div>
-                        ))}
+                        {grouped[day].map(m => {
+                            const isMyMessage = m.senderId === userId;
+                            return (
+                                <div
+                                    key={m._id}
+                                    className={`message-item ${isMyMessage ? 'my-message' : 'other-message'}`}
+                                >
+                                    <div className="message-content">
+                                        {!isMyMessage && (
+                                            <div className="message-sender">
+                                                {userNames[m.senderId] ?? m.senderId.substring(0, 8)}
+                                            </div>
+                                        )}
+                                        <div className="message-text">{m.text}</div>
+                                        <div className="message-timestamp">
+                                            {format(parseISO(m.createdAt), 'HH:mm')}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 ))}
             </div>
 
-            <input
-                style={{ width: '80%' }}
-                value={text}
-                onChange={onChange}
-                onKeyDown={onKeyDown}
-            />
-            <button onClick={send}>Trimite</button>
+            <div className="chat-input-area">
+                <input
+                    type="text"
+                    className="chat-input"
+                    placeholder="Scrie un mesaj..."
+                    value={text}
+                    onChange={onChange}
+                    onKeyDown={onKeyDown}
+                />
+                <button className="send-button" onClick={send}>
+                    {/* Poți folosi un SVG icon aici pentru un look mai modern */}
+                    Trimite
+                </button>
+            </div>
         </div>
     );
 };
