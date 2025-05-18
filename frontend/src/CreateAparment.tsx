@@ -33,9 +33,10 @@ const OwnerListNewApartment: React.FC = () => {
         electricityPrice: "",
         airConditioning: false,
         balcony: false,
-        // colleagues: false,
-        // colleaguesNames: "",
-        image: "", // Consider changing input type to 'file' later
+        discount1: 0,
+        discount2: 0,
+        discount3: 0,
+        discount4: 0
     });
 
     const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -55,17 +56,6 @@ const OwnerListNewApartment: React.FC = () => {
         // multiple
         setImageFiles(Array.from(e.target.files));
     };
-
-    // Pentru selectia de fisiere
-    // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     if (e.target.files && e.target.files[0]) {
-    //         setFormData((prevData) => ({
-    //             ...prevData,
-    //             image: e.target.files![0].name, // Store the file name or path
-    //         }));
-    //         console.log("Selected file:", e.target.files[0]);
-    //     }
-    // };
 
     const uploadFile = (file: File): Promise<string> =>
         new Promise((resolve, reject) => {
@@ -140,9 +130,10 @@ const OwnerListNewApartment: React.FC = () => {
                 electricityPrice: "",
                 airConditioning: false,
                 balcony: false,
-                // colleagues: false,
-                // colleaguesNames: "",
-                image: "",
+                discount1: 0,
+                discount2: 0,
+                discount3: 0,
+                discount4: 0
             });
             setImageFiles([]); // Reset image files
             // navigate('/owner/dashboard'); // Example navigation
@@ -354,6 +345,72 @@ const OwnerListNewApartment: React.FC = () => {
                             />
                         </div>
                     </div>
+
+                    {/* Discount in functie de categorie de medie */}
+                    <h2 className="form-section-title">Discount per categorie de medie:</h2>
+                    <div className="utility-cost-box">
+                        <div className="form-group">
+                            <label htmlFor="discount1">Discount pentru categoria 1 (9.50 - 10.00) (%):*</label>
+                            <input
+                                type="number"
+                                id="discount1"
+                                name="discount1"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="ex 5"
+                                value={formData.discount1}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="discount2">Discount pentru categoria 2 (9.00 - 9.49) (%):*</label>
+                            <input
+                                type="number"
+                                id="discount2"
+                                name="discount2"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="ex 5"
+                                value={formData.discount2}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="discount3">Discount pentru categoria 3 (8.50 - 8.99) (%):*</label>
+                            <input
+                                type="number"
+                                id="discount3"
+                                name="discount3"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="ex 5"
+                                value={formData.discount3}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="discount4">Discount pentru categoria 4 (5.00 - 8.49) (%):*</label>
+                            <input
+                                type="number"
+                                id="discount4"
+                                name="discount4"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="ex 5"
+                                value={formData.discount4}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
                     {/* --- Facilitati --- */}
                     <h2 className="form-section-title">Facilitati</h2>
                     {/* Checkbox Grouping */}
