@@ -167,10 +167,7 @@ const Home: React.FC = () => {
             }
         }
 
-        // Boolean Flags
-        // if (currentFilters.available) {
-        //     filtered = filtered.filter((apt) => apt.status === "disponibil");
-        // }
+
         if (currentFilters.petFriendly) {
             filtered = filtered.filter((apt) => apt.petFriendly === true);
         }
@@ -186,9 +183,6 @@ const Home: React.FC = () => {
         if (currentFilters.balcony) {
             filtered = filtered.filter((apt) => apt.balcony === true);
         }
-        // if (currentFilters.acceptsColleagues) {
-        //     filtered = filtered.filter((apt) => apt.colleagues === true);
-        // }
 
         setFilteredApartments(filtered);
     };
@@ -358,15 +352,7 @@ const Home: React.FC = () => {
                         <h4>
                             <i className="fas fa-check"></i> Facilitati
                         </h4>
-                        {/* Keep original available checkbox structure if preferred, or use new one */}
-                        {/* <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.available}
-                                onChange={(e) => handleFilterChange("available", e.target.checked)}
-                            />
-                            Disponibile Acum
-                        </label> */}
+
                         <label>
                             <input
                                 type="checkbox"
@@ -411,16 +397,7 @@ const Home: React.FC = () => {
                             />
                             Accepta Animale
                         </label>
-                        {/* <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.acceptsColleagues}
-                                onChange={(e) =>
-                                    handleFilterChange("acceptsColleagues", e.target.checked)
-                                }
-                            />
-                            Accepta Colegi
-                        </label> */}
+
                     </div>
                     {/* Keep your original button, but have it call the apply function */}
                     <button onClick={handleApplyFiltersAction} className="refresh-button">
@@ -430,49 +407,51 @@ const Home: React.FC = () => {
                 {/* Apartments List Section (existing structure) */}
                 <section className="apartments-list">
                     {filteredApartments.length > 0 ? (
-                        filteredApartments.map((apartment) => (
-                            <div key={apartment._id} className="apartment">
-                                {apartment.images && (
+                        filteredApartments.map((apartment) => {
+                            const imageUrl = apartment.images?.[0] ?? "/Poze_apartamente/placeholder.jpeg";
+                            console.log("Image URL:", imageUrl); // Debugging line
+                            return (
+                                <div key={apartment._id} className="apartment">
                                     <img
-                                        src={`/Poze_apartamente/${apartment.images}`}
+                                        src={imageUrl}
                                         alt={`Apartament in ${apartment.location}`}
                                         width="300"
                                     />
-                                )}
-                                <p style={{ marginTop: "15px" }}>
-                                    <i
-                                        className="fa-solid fa-location-dot"
-                                        style={{ marginRight: "9px" }}
-                                    ></i>
-                                    <strong>: </strong>
-                                    {apartment.location}
-                                </p>
-                                <p>
-                                    <i
-                                        className="fa-solid fa-house-user"
-                                        style={{ marginRight: "4px" }}
-                                    ></i>
-                                    <strong>: </strong>
-                                    {apartment.numberOfRooms}
-                                    {apartment.numberOfRooms === 1 ? " camera" : " camere"}
-                                </p>
-                                <p>
-                                    <strong>Pret :</strong> {apartment.price} RON / noapte
-                                </p>
-                                <button
-                                    className="button-details-apartment"
-                                    onClick={() => handleMoreDetails(apartment._id)}
-                                >
-                                    <span className="details-btn-text">Mai multe detalii</span>
-                                    <span className="details-btn-icon">
-                                        <img
-                                            src="/Poze_apartamente/search.png"
-                                            alt="Detalii Icon"
-                                        />
-                                    </span>
-                                </button>
-                            </div>
-                        ))
+                                    <p style={{ marginTop: "15px" }}>
+                                        <i
+                                            className="fa-solid fa-location-dot"
+                                            style={{ marginRight: "9px" }}
+                                        ></i>
+                                        <strong>: </strong>
+                                        {apartment.location}
+                                    </p>
+                                    <p>
+                                        <i
+                                            className="fa-solid fa-house-user"
+                                            style={{ marginRight: "4px" }}
+                                        ></i>
+                                        <strong>: </strong>
+                                        {apartment.numberOfRooms}
+                                        {apartment.numberOfRooms === 1 ? " camera" : " camere"}
+                                    </p>
+                                    <p>
+                                        <strong>Pret :</strong> {apartment.price} RON / noapte
+                                    </p>
+                                    <button
+                                        className="button-details-apartment"
+                                        onClick={() => handleMoreDetails(apartment._id)}
+                                    >
+                                        <span className="details-btn-text">Mai multe detalii</span>
+                                        <span className="details-btn-icon">
+                                            <img
+                                                src="/Poze_apartamente/search.png"
+                                                alt="Detalii Icon"
+                                            />
+                                        </span>
+                                    </button>
+                                </div>
+                            );
+                        })
                     ) : (
                         <p>Nu s-au gasit apartamente care sa corespunda filtrelor selectate.</p>
                     )}

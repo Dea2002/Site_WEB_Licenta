@@ -1,20 +1,5 @@
 export interface Apartment {
     _id: string; // keep this
-
-    // // maybe remove these
-    // name: string;
-    // description: string;
-    // numberOfRooms: number;
-    // // price: number;
-    // // location: string;
-    // ownername: string;
-    // owneremail: string;
-    // status: string;
-    // totalbooked: number;
-    // image?: string; // `image` is optional
-    // reason?: string; // camp optional
-
-    // new structure
     numberOfRooms: number;
     numberOfBathrooms: number;
     floorNumber: number;
@@ -33,16 +18,16 @@ export interface Apartment {
     electricityPrice: number;
     airConditioning: boolean;
     balcony: boolean;
-    // colleagues: boolean;
-    // colleaguesNames: string;
-    images: [string];
+    discount1: number;
+    discount2: number;
+    discount3: number;
+    images: string[];
 
     ownerInformation?: {
         fullName: string;
         email: string;
         phoneNumber: string;
-        _id: string; // id-ul proprietarului
-        // alte detalii despre proprietar daca e nevoie
+        _id: string; 
     };
 
     latitude: number;

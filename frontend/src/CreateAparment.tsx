@@ -36,7 +36,6 @@ const OwnerListNewApartment: React.FC = () => {
         discount1: 0,
         discount2: 0,
         discount3: 0,
-        discount4: 0
     });
 
     const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -133,7 +132,6 @@ const OwnerListNewApartment: React.FC = () => {
                 discount1: 0,
                 discount2: 0,
                 discount3: 0,
-                discount4: 0
             });
             setImageFiles([]); // Reset image files
             // navigate('/owner/dashboard'); // Example navigation
@@ -390,21 +388,6 @@ const OwnerListNewApartment: React.FC = () => {
                                 step="1"
                                 placeholder="ex 5"
                                 value={formData.discount3}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="discount4">Discount pentru categoria 4 (5.00 - 8.49) (%):*</label>
-                            <input
-                                type="number"
-                                id="discount4"
-                                name="discount4"
-                                min="0"
-                                max="100"
-                                step="1"
-                                placeholder="ex 5"
-                                value={formData.discount4}
                                 onChange={handleChange}
                                 required
                             />

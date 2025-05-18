@@ -6,7 +6,7 @@ import { Apartment } from "./types"; // Assuming types.ts defines the Apartment 
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
-import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import { format, parseISO, differenceInCalendarDays, isAfter } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
@@ -253,8 +253,11 @@ const ApartmentDetails: React.FC = () => {
         const tvPriceMonthly = parseFloat(apartment.TVPrice?.toString() || "0") || 0;
         const waterPriceMonthly = parseFloat(apartment.waterPrice?.toString() || "0") || 0;
         const gasPriceMonthly = parseFloat(apartment.gasPrice?.toString() || "0") || 0;
-        const electricityPriceMonthly =
-            parseFloat(apartment.electricityPrice?.toString() || "0") || 0;
+        const electricityPriceMonthly = parseFloat(apartment.electricityPrice?.toString() || "0") || 0;
+
+        const validUntilDate = parseISO(user!.medie_valid!);
+        const isValid = isAfter(validUntilDate, new Date());
+        const discount = user!.medie!.includes("Categoria 1") ? apartment.discount1 : user!.medie!.includes("Categoria 2") ? apartment.discount2 : user!.medie!.includes("Categoria 3") ? apartment.discount3 : 0;
 
         const dailyInternetCost = internetPriceMonthly / 30;
         const dailyTVCost = tvPriceMonthly / 30;
@@ -262,11 +265,11 @@ const ApartmentDetails: React.FC = () => {
         const dailyGasCost = gasPriceMonthly / 30;
         const dailyElectricityCost = electricityPriceMonthly / 30;
 
-        const extraDailyCost =
-            dailyInternetCost + dailyTVCost + dailyWaterCost + dailyGasCost + dailyElectricityCost;
-        const extraTotalCost = extraDailyCost * nights;
-        const apartmentTotalCost = pricePerNight * nights;
-
+        const extraDailyCost = dailyInternetCost + dailyTVCost + dailyWaterCost + dailyGasCost + dailyElectricityCost;
+        const extraTotalCost = extraDailyCost * nights; // fara reducere
+        const apartmentTotalCost = pricePerNight * nights * numberOfRooms;
+        const discountForTotalCost = apartmentTotalCost * (discount / 100); // discount total
+        const discountedApartmentTotalCost = apartmentTotalCost - discountForTotalCost + extraTotalCost; // pret total cu discount
         const finalTotalCost = numberOfRooms * (apartmentTotalCost + extraTotalCost);
 
 
@@ -291,9 +294,17 @@ const ApartmentDetails: React.FC = () => {
                 <p>
                     <span>Numar camere:</span> {numberOfRooms}
                 </p>
+                <hr className="line-divider short" />
+                {isValid && (<p>
+                    <span> Discount categorie medie: {discount}%</span> -{discountForTotalCost} RON
+                </p>
+                )}
                 <hr className="line-divider short bold" /> {/* Use new divider class */}
                 <p className="total-price">
-                    <span>Pret Total Estimat:</span> {finalTotalCost.toFixed(2)} RON
+                    <span>Pret Total:</span> {finalTotalCost.toFixed(2)} RON
+                </p>
+                <p className="total-price">
+                    <span>Pret Total cu discount:</span> {discountedApartmentTotalCost.toFixed(2)} RON
                 </p>
                 {/* Using original button class and inline style for width */}
                 <button
@@ -363,7 +374,10 @@ const ApartmentDetails: React.FC = () => {
                     {/* Titlu - Locatie si Pret */}
                     <div className="title-location-price">
                         <h2>Apartament in {apartment.location}</h2>
-                        <p className="price-display">{apartment.price} RON / camera / noapte</p>
+                        <p className="price-display">{apartment.price} RON / camera / noapte (fara reducere)</p>
+                        <p>{apartment.price * ((100 - apartment.discount1) / 100)} RON / camera / noapte pentru studentii de categoria 1 ({apartment.discount1}% discount)</p>
+                        <p>{apartment.price * ((100 - apartment.discount2) / 100)} RON / camera / noapte pentru studentii de categoria 2 ({apartment.discount2}% discount)</p>
+                        <p>{apartment.price * ((100 - apartment.discount3) / 100)} RON / camera / noapte pentru studentii de categoria 3 ({apartment.discount3}% discount)</p>
                         <button
                             className="button-map"
                             onClick={() => handleLocationClick(apartment)}
