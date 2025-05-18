@@ -35,7 +35,7 @@ export interface Apartment {
     balcony: boolean;
     colleagues: boolean;
     colleaguesNames: string;
-    image: string;
+    images: [string];
 
     ownerInformation?: {
         fullName: string;

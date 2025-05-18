@@ -4,6 +4,8 @@ import { AuthContext } from "./AuthContext";
 // Import the CSS file (ensure the path is correct)
 import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you create a new file
 import { useNavigate } from "react-router-dom";
+import { storage } from "./firebaseConfig";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const OwnerListNewApartment: React.FC = () => {
     const { user, token } = useContext(AuthContext);
@@ -36,7 +38,9 @@ const OwnerListNewApartment: React.FC = () => {
         image: "", // Consider changing input type to 'file' later
     });
 
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [message, setMessage] = useState("");
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, type, value, checked } = e.target as HTMLInputElement;
@@ -46,16 +50,34 @@ const OwnerListNewApartment: React.FC = () => {
         }));
     };
 
-    // Pentru selectia de fisiere
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFormData((prevData) => ({
-                ...prevData,
-                image: e.target.files![0].name, // Store the file name or path
-            }));
-            console.log("Selected file:", e.target.files[0]);
-        }
+        if (!e.target.files) return;
+        // multiple
+        setImageFiles(Array.from(e.target.files));
     };
+
+    // Pentru selectia de fisiere
+    // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     if (e.target.files && e.target.files[0]) {
+    //         setFormData((prevData) => ({
+    //             ...prevData,
+    //             image: e.target.files![0].name, // Store the file name or path
+    //         }));
+    //         console.log("Selected file:", e.target.files[0]);
+    //     }
+    // };
+
+    const uploadFile = (file: File): Promise<string> =>
+        new Promise((resolve, reject) => {
+            const storageRef = ref(storage, `apartments/${Date.now()}_${file.name}`);
+            const task = uploadBytesResumable(storageRef, file);
+            task.on(
+                "state_changed",
+                () => { },
+                reject,
+                () => getDownloadURL(task.snapshot.ref).then(resolve).catch(reject)
+            );
+        });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,20 +106,17 @@ const OwnerListNewApartment: React.FC = () => {
         // Add more specific validations here...
 
         try {
-            // Assuming 'image' is just a text field for now based on input type="text"
+
+            // upload toate imaginile în paralel
+            const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
+
             await api.post(
                 `/new-apartment`,
-                { ownerId: user?._id, ...formData },
+                { ownerId: user?._id, ...formData, images: imageUrls },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
+                    headers: { Authorization: `Bearer ${token}` }
                 },
             );
-
-            // Assuming the response contains the updated user or relevant data
-            // setUser(response.data.user); // Adjust if needed based on API response
 
             setMessage("Apartament listat cu succes!");
             // Optionally reset form or navigate away
@@ -125,6 +144,7 @@ const OwnerListNewApartment: React.FC = () => {
                 colleaguesNames: "",
                 image: "",
             });
+            setImageFiles([]); // Reset image files
             // navigate('/owner/dashboard'); // Example navigation
         } catch (error: any) {
             console.error("Eroare la listare apartament nou: ", error);
@@ -396,21 +416,22 @@ const OwnerListNewApartment: React.FC = () => {
                         </div>
                     </div>{" "}
                     {/* End checkbox grid */}
+
                     {/* Imagini */}
-                    {/* IMPORTANT: Input type 'file' requires different handling for submission (FormData) */}
                     <div className="form-group">
-                        <label htmlFor="image">Imagine principala:</label>
+                        <label htmlFor="images">Imagini apartament:</label>
                         <input
-                            type="file" // Changed to file
-                            id="image"
-                            name="image"
-                            accept="image/png, image/jpeg, image/webp" // Specify accepted types
-                            // value={formData.image} // Value cannot be controlled for type="file"
-                            onChange={handleFileChange} // Use a dedicated handler for files
-                        // required // Consider if one image is mandatory
+                            type="file"
+                            id="images"
+                            accept="image/*"
+                            multiple
+                            onChange={handleFileChange}
                         />
-                        {/* You might want to show a preview of the selected image here */}
+                        {imageFiles.length > 0 && (
+                            <p>{imageFiles.length} fișier(e) selectat(e)</p>
+                        )}
                     </div>
+
                     {/* --- Colegi --- */}
                     <h2 className="form-section-title">Colegi de apartament</h2>
                     {/* Se permite coleg de apartament? */}

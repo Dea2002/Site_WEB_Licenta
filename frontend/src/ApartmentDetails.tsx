@@ -7,10 +7,10 @@ import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
-import "./ApartmentDetails.css"; // Ensure this CSS is imported
 import "leaflet/dist/leaflet.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
+import "./ApartmentDetails.css"; // Ensure this CSS is imported
 
 interface selectedDates {
     checkIn: Date;
@@ -54,18 +54,16 @@ const ApartmentDetails: React.FC = () => {
     useEffect(() => {
         console.log(user)
         if (id) {
-            api
-                .get<Apartment>(`/apartments/${id}`)
+            api.get<Apartment>(`/apartments/${id}`)
                 .then((response) => {
                     setApartment(response.data);
 
                     // apelul pentru colegi
                     const n = response.data.numberOfRooms;
-                    api
-                        .get<Colleague[]>(
-                            `/apartments/nearest_checkout/${id}`,
-                            { params: { n } }
-                        )
+                    api.get<Colleague[]>(
+                        `/apartments/nearest_checkout/${id}`,
+                        { params: { n } }
+                    )
                         .then((res) => {
                             setColleaguesList(res.data);
                         })
@@ -288,12 +286,15 @@ const ApartmentDetails: React.FC = () => {
                 {/* === Partea stanga (Imagine + Detalii Grupate) === */}
                 <div className="left-section">
                     {/* Imaginea principala */}
-                    <div className="image-container">
-                        {apartment.image && (
-                            <img
-                                src={`/Poze_apartamente/${apartment.image}`}
-                                alt={`Imagine ${apartment.location}`} // Add better alt text
-                            />
+                    <div className="image-gallery">
+                        {apartment.images && apartment.images.length > 0 ? (
+                            apartment.images.map((url, i) => (
+                                <div key={i} className="gallery-item">
+                                    <img src={url} alt={`Poza ${i + 1}`} />
+                                </div>
+                            ))
+                        ) : (
+                            <p>Nu sunt poze disponibile.</p>
                         )}
                     </div>
 
