@@ -43,12 +43,34 @@ const ApartmentDetails: React.FC = () => {
     } | null>(null);
     const [selectedDates, setSelectedDates] = useState<selectedDates | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [blobUrls, setBlobUrls] = useState<string[]>([]);
+
     // Handler to receive dates from ReservationPopup
     const handleDatesSelected = (checkIn: Date, checkOut: Date, rooms: number) => {
         setSelectedDates({ checkIn, checkOut });
         setRooms({ rooms });
         setError(""); // Clear previous booking errors when new dates are selected
     };
+
+    useEffect(() => {
+        if (!apartment?.images?.length) return;
+        Promise.all(
+            apartment.images.map(src =>
+                fetch(src)
+                    .then(res => res.blob())
+                    .then(blob => URL.createObjectURL(blob))
+            )
+        )
+            .then(urls => setBlobUrls(urls))
+            .catch(err => console.error("Nu am putut încărca imaginea:", err));
+    }, [apartment?.images]);
+
+
+    useEffect(() => {
+        return () => {
+            blobUrls.forEach(u => URL.revokeObjectURL(u));
+        };
+    }, [blobUrls]);
 
     // Fetch apartment details
     useEffect(() => {
@@ -88,7 +110,7 @@ const ApartmentDetails: React.FC = () => {
                     setError("Apartamentul nu a fost gasit sau a aparut o eroare.");
                 });
         }
-    }, [id, user]);
+    }, [id]);
 
     // Handle body scroll when popups are open
     useEffect(() => {
@@ -320,8 +342,8 @@ const ApartmentDetails: React.FC = () => {
                                     </button>
                                 )}
                                 <img
-                                    src={apartment.images[currentImageIndex]}
-                                    alt={`Poza ${currentImageIndex + 1} pentru ${apartment.location}`}
+                                    src={blobUrls[currentImageIndex] ?? apartment.images[currentImageIndex]}
+                                    alt={`Poza ${currentImageIndex + 1}`}
                                     className="carousel-image"
                                 />
                                 {apartment.images.length > 1 && (
