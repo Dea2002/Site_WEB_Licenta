@@ -21,7 +21,7 @@ interface Filters {
     elevator: boolean;
     airConditioning: boolean;
     balcony: boolean;
-    acceptsColleagues: boolean;
+    // acceptsColleagues: boolean;
 }
 // --- END: Updated Filters Interface ---
 
@@ -50,7 +50,7 @@ const Home: React.FC = () => {
         elevator: false,
         airConditioning: false,
         balcony: false,
-        acceptsColleagues: false,
+        // acceptsColleagues: false,
     };
     // --- END: Updated Initial Filters State ---
 
@@ -186,9 +186,9 @@ const Home: React.FC = () => {
         if (currentFilters.balcony) {
             filtered = filtered.filter((apt) => apt.balcony === true);
         }
-        if (currentFilters.acceptsColleagues) {
-            filtered = filtered.filter((apt) => apt.colleagues === true);
-        }
+        // if (currentFilters.acceptsColleagues) {
+        //     filtered = filtered.filter((apt) => apt.colleagues === true);
+        // }
 
         setFilteredApartments(filtered);
     };
@@ -411,7 +411,7 @@ const Home: React.FC = () => {
                             />
                             Accepta Animale
                         </label>
-                        <label>
+                        {/* <label>
                             <input
                                 type="checkbox"
                                 checked={filters.acceptsColleagues}
@@ -420,7 +420,7 @@ const Home: React.FC = () => {
                                 }
                             />
                             Accepta Colegi
-                        </label>
+                        </label> */}
                     </div>
                     {/* Keep your original button, but have it call the apply function */}
                     <button onClick={handleApplyFiltersAction} className="refresh-button">
@@ -432,9 +432,9 @@ const Home: React.FC = () => {
                     {filteredApartments.length > 0 ? (
                         filteredApartments.map((apartment) => (
                             <div key={apartment._id} className="apartment">
-                                {apartment.image && (
+                                {apartment.images && (
                                     <img
-                                        src={`/Poze_apartamente/${apartment.image}`}
+                                        src={`/Poze_apartamente/${apartment.images}`}
                                         alt={`Apartament in ${apartment.location}`}
                                         width="300"
                                     />

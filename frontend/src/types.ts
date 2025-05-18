@@ -33,8 +33,8 @@ export interface Apartment {
     electricityPrice: number;
     airConditioning: boolean;
     balcony: boolean;
-    colleagues: boolean;
-    colleaguesNames: string;
+    // colleagues: boolean;
+    // colleaguesNames: string;
     images: [string];
 
     ownerInformation?: {

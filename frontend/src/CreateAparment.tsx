@@ -33,8 +33,8 @@ const OwnerListNewApartment: React.FC = () => {
         electricityPrice: "",
         airConditioning: false,
         balcony: false,
-        colleagues: false,
-        colleaguesNames: "",
+        // colleagues: false,
+        // colleaguesNames: "",
         image: "", // Consider changing input type to 'file' later
     });
 
@@ -140,8 +140,8 @@ const OwnerListNewApartment: React.FC = () => {
                 electricityPrice: "",
                 airConditioning: false,
                 balcony: false,
-                colleagues: false,
-                colleaguesNames: "",
+                // colleagues: false,
+                // colleaguesNames: "",
                 image: "",
             });
             setImageFiles([]); // Reset image files
@@ -312,7 +312,7 @@ const OwnerListNewApartment: React.FC = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="waterPrice">Pret apa (RON/mc):*</label>
+                            <label htmlFor="waterPrice">Pret apa (RON/mc/luna):*</label>
                             <input
                                 type="number"
                                 id="waterPrice"
@@ -326,7 +326,7 @@ const OwnerListNewApartment: React.FC = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="gasPrice">Pret gaz (RON/kWh):*</label>
+                            <label htmlFor="gasPrice">Pret gaz (RON/kWh/luna):*</label>
                             <input
                                 type="number"
                                 id="gasPrice"
@@ -340,7 +340,7 @@ const OwnerListNewApartment: React.FC = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="electricityPrice">Pret curent (RON/kWh):*</label>
+                            <label htmlFor="electricityPrice">Pret curent (RON/kWh/luna):*</label>
                             <input
                                 type="number"
                                 id="electricityPrice"

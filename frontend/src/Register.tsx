@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { api } from './api';
 import { useNavigate, Link } from "react-router-dom";
-import Bara_navigatie from "./NavBars/Bara_navigatie";
 import "./Register.css"; // Ensure CSS is imported
 import { storage } from "./firebaseConfig"; // Import Firebase storage if needed
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -843,24 +842,19 @@ const Register: React.FC = () => {
     };
 
     return (
-        <>
-            {" "}
-            {/* Use Fragment to avoid unnecessary div */}
-            <Bara_navigatie />
-            <div className="register-page-container">
-                <div key={selectedRole || "selection"} className="content-area">
-                    {renderContent()}
-                </div>
-                {selectedRole && (
-                    <p className="login-link-text">
-                        Ai deja un cont?{" "}
-                        <Link to="/login" className="custom-link">
-                            Autentifica-te
-                        </Link>
-                    </p>
-                )}
+        <div className="register-page-container">
+            <div key={selectedRole || "selection"} className="content-area">
+                {renderContent()}
             </div>
-        </>
+            {selectedRole && (
+                <p className="login-link-text">
+                    Ai deja un cont?{" "}
+                    <Link to="/login" className="custom-link">
+                        Autentifica-te
+                    </Link>
+                </p>
+            )}
+        </div>
     );
 };
 

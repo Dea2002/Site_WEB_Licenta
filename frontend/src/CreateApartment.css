@@ -6,10 +6,10 @@ body {
 }
 
 /* Container to manage overall page layout if needed */
-.page-container {
-    /* If Bara_nav_OwnerDashboard has a fixed height, you might need padding-top here */
-    /* padding-top: 60px; /* Example if navbar is 60px high */
-}
+/* .page-container { */
+/* If Bara_nav_OwnerDashboard has a fixed height, you might need padding-top here */
+/* padding-top: 60px; /* Example if navbar is 60px high */
+/* } */
 
 /* Centering container for the form card */
 .form-card-container {

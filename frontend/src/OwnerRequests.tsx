@@ -28,8 +28,7 @@ const OwnerRequests: React.FC = () => {
     const { token, user } = useContext(AuthContext);
     const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
-    const now = new Date();
-    const [validUntil, setValidUntil] = useState<boolean>(false);
+
     useEffect(() => {
         api
             .get(`/owner/list_reservation_requests/${user!._id}`, {

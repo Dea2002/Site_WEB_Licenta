@@ -450,7 +450,7 @@ async function run() {
                 // Actualizeaza documentul apartamentului: seteaza numele clientului in campul "numeColeg"
                 await app.locals.apartmentsCollection.updateOne(
                     { _id: reservationRequest.apartament },
-                    { $set: { colleaguesNames: clientData.fullName } }
+                    // { $set: { colleaguesNames: clientData.fullName } }
                 );
 
                 await reservationHistoryCollection.insertOne(reservationRequest);
