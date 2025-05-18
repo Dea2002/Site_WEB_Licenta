@@ -26,7 +26,7 @@ const LandingPage: React.FC = () => {
             <div className="landing-content">
                 <div className="card_titlu">
                     <h1 className="text-wave">
-                        {"Camine++".split("").map((char, index) => {
+                        {"Student Rent".split("").map((char, index) => {
                             if (char === " ") {
                                 return (
                                     <span key={index} style={{ display: "inline-block" }}>

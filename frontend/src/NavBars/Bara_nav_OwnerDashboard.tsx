@@ -24,6 +24,9 @@ function NavBar() {
                 <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                     {/* Dropdown-uri din partea stanga */}
                     <Nav className="nav nav-underline align-items-center" style={{ gap: "1rem" }}>
+                        <Nav.Link as={Link} to="/owner-dashboard">
+                            Acasa
+                        </Nav.Link>
                         <Nav.Link as={Link} to="/owner/reservation_requests">
                             Cereri
                         </Nav.Link>
