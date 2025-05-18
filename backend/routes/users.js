@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
 const jwt = require('jsonwebtoken');
 
-function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection) {
+function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection, reservationRequestsCollection) {
 
     router.get('/current-rent/:userId', authenticateToken, async (req, res) => {
         const { userId } = req.params;
@@ -137,42 +137,51 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
     router.get('/current_request', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         try {
-            const current = await reservationHistoryCollection.findOne({
-                client: new ObjectId(userId),
-                isActive: true
-            });
-            if (!current) {
-                return res.status(404).json({ message: 'Nu aveti nicio cerere de chirie activa.' });
-            }
-            // (Optional) adauga datele apartamentului
-            const apt = await apartmentsCollection.findOne(
-                { _id: current.apartament },
-                { projection: { location: 1, price: 1, numberOfRooms: 1 } }
+            // 1) Găsim toate cererile active (presupunem un flag isActive)
+            const activeRequests = await reservationRequestsCollection
+                .find({
+                    client: new ObjectId(userId),
+                })
+                .sort({ checkIn: 1 })
+                .toArray();
+            // 2) Pentru fiecare cerere, adăugăm datele apartamentului
+            const result = await Promise.all(
+                activeRequests.map(async r => {
+                    const apt = await apartmentsCollection.findOne(
+                        { _id: r.apartament },
+                        { projection: { location: 1, price: 1, numberOfRooms: 1 } }
+                    );
+                    return {
+                        _id: r._id.toString(),
+                        apartment: {
+                            _id: apt?._id.toString(),
+                            location: apt?.location || '—',
+                            price: apt?.price || 0,
+                            numberOfRooms: apt?.numberOfRooms || 0,
+                        },
+                        checkIn: r.checkIn,
+                        checkOut: r.checkOut,
+                        rooms: r.numberOfRooms,
+                        createdAt: r.createdAt,
+                    };
+                })
             );
 
-            return res.json({
-                _id: current._id,
-                apartment: apt,
-                checkIn: current.checkIn,
-                checkOut: current.checkOut,
-                rooms: current.numberOfRooms,
-                createdAt: current.createdAt
-            });
+            // 3) Returnăm array-ul rezultat
+            return res.json(result);
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ message: 'Eroare interna a serverului.' });
+            return res.status(500).json({ message: 'Eroare internă a serverului.' });
         }
-    }
-    );
+    });
 
     router.get('/reservations_history/', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         try {
-            const past = await reservationHistoryCollection
-                .find({
-                    client: new ObjectId(userId),
-                    // isActive: false
-                })
+            const past = await reservationHistoryCollection.find({
+                client: new ObjectId(userId),
+                // isActive: false
+            })
                 .sort({ checkIn: -1 })
                 .toArray();
 

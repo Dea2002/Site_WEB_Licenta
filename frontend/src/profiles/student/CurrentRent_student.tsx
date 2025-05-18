@@ -51,8 +51,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
             }
 
             try {
-                console.log('Fetching current rent for user:', userId);
-                console.log('Token:', token);
                 const { data } = await api.get<RentDetails>(
                     `/users/current-rent/${userId}`,
                     { headers: { Authorization: `Bearer ${token}` } }

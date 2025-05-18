@@ -10,6 +10,7 @@ import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
+import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import "./ApartmentDetails.css"; // Ensure this CSS is imported
 
 interface selectedDates {
@@ -338,7 +339,7 @@ const ApartmentDetails: React.FC = () => {
                             <>
                                 {apartment.images.length > 1 && (
                                     <button onClick={prevImage} className="carousel-button prev">
-                                        {/* Săgeată stânga */}
+                                        <FaLongArrowAltLeft /> {/* Săgeată stânga */}
                                     </button>
                                 )}
                                 <img
@@ -348,7 +349,7 @@ const ApartmentDetails: React.FC = () => {
                                 />
                                 {apartment.images.length > 1 && (
                                     <button onClick={nextImage} className="carousel-button next">
-                                        {/* Săgeată dreapta */}
+                                        <FaLongArrowAltRight /> {/* Săgeată dreapta */}
                                     </button>
                                 )}
                             </>

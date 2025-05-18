@@ -16,7 +16,7 @@ interface AptInfo {
     numberOfRooms: number;
 }
 
-interface CurrentRent {
+interface CurrentRentRequest {
     _id: string;
     apartment: AptInfo;
     checkIn: string;
@@ -36,7 +36,7 @@ interface HistoryEntry {
 
 const RentHistory: React.FC<RentHistoryProps> = () => {
     const { token } = useContext(AuthContext);
-    const [currentRent, setCurrentRent] = useState<CurrentRent | null>(null);
+    const [currentRentRequests, setCurrentRent] = useState<CurrentRentRequest[]>([]);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [loadingCurrent, setLoadingCurrent] = useState(true);
     const [loadingHistory, setLoadingHistory] = useState(true);
@@ -48,16 +48,16 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
         if (!token) return;
 
         // Fetch current rent
-        api
-            .get<CurrentRent>(`/users/current_request`, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
+        api.get<CurrentRentRequest[]>(`/users/current_request`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
             .then(({ data }) => {
                 setCurrentRent(data);
+                console.log(data);
             })
             .catch(err => {
                 if (err.response?.status === 404) {
-                    setCurrentRent(null);
+                    setCurrentRent([]);
                 } else {
                     setErrorCurrent(
                         err.response?.data?.message || 'Eroare la incarcarea cererii curente.'
@@ -67,10 +67,9 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
             .finally(() => setLoadingCurrent(false));
 
         // Fetch history
-        api
-            .get<HistoryEntry[]>(`/users/reservations_history`, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
+        api.get<HistoryEntry[]>(`/users/reservations_history`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
             .then(({ data }) => setHistory(data))
             .catch(err => {
                 setErrorHistory(
@@ -82,36 +81,41 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
 
     return (
         <div className="profile-section-content">
-            <h2>Cerere Chirii Curente</h2>
+            <h2>Cereri Chirii Curente</h2>
             {loadingCurrent ? (
                 <p>Se incarca…</p>
             ) : errorCurrent ? (
                 <p className="error-message">{errorCurrent}</p>
-            ) : currentRent ? (
-                (() => {
-                    const ci = parseISO(currentRent.checkIn);
-                    const co = parseISO(currentRent.checkOut);
-                    const nights = differenceInCalendarDays(co, ci) + 1;
-                    return (
-                        <div className="current-rent-card">
-                            <p>
-                                <strong>Locatie:</strong> {currentRent.apartment.location}
-                            </p>
-                            <p>
-                                <strong>Perioada:</strong>{' '}
-                                {format(ci, 'dd-MM-yyyy')} – {format(co, 'dd-MM-yyyy')} ({nights}{' '}
-                                nopti)
-                            </p>
-                            <p>
-                                <strong>Camere:</strong> {currentRent.rooms}
-                            </p>
-                            <p>
-                                <strong>Pret total:</strong>{' '}
-                                {(currentRent.apartment.price * nights * currentRent.rooms).toFixed(2)} RON
-                            </p>
-                        </div>
-                    );
-                })()
+            ) : currentRentRequests.length > 0 ? (
+                <ul className="rent-history-list">
+                    {currentRentRequests.map(crr => {
+                        const ci = parseISO(crr.checkIn);
+                        const co = parseISO(crr.checkOut);
+                        const nights = differenceInCalendarDays(co, ci) + 1;
+                        return (
+                            <li key={crr._id} className="rent-history-item">
+                                {/* <div className="current-rent-card"> */}
+                                <p>
+                                    <strong>Locatie:</strong> {crr.apartment.location}
+                                </p>
+                                <p>
+                                    <strong>Perioada:</strong>{' '}
+                                    {format(ci, 'dd-MM-yyyy')} - {format(co, 'dd-MM-yyyy')} ({nights}{' '}
+                                    nopti)
+                                </p>
+                                <p>
+                                    <strong>Camere:</strong> {crr.rooms}
+                                </p>
+                                <p>
+                                    <strong>Pret total:</strong>{' '}
+                                    {(crr.apartment.price * nights * crr.rooms).toFixed(2)} RON
+                                </p>
+                                {/* </div> */}
+                            </li>
+                        );
+                    })}
+                </ul>
+
             ) : (
                 <p>Nu aveti nicio cerere de chirie activa.</p>
             )}
