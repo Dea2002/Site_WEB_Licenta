@@ -42,7 +42,7 @@ const ApartmentDetails: React.FC = () => {
         address: string;
     } | null>(null);
     const [selectedDates, setSelectedDates] = useState<selectedDates | null>(null);
-
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     // Handler to receive dates from ReservationPopup
     const handleDatesSelected = (checkIn: Date, checkOut: Date, rooms: number) => {
         setSelectedDates({ checkIn, checkOut });
@@ -52,14 +52,26 @@ const ApartmentDetails: React.FC = () => {
 
     // Fetch apartment details
     useEffect(() => {
-        console.log(user)
+        console.log(user);
         if (id) {
             api.get<Apartment>(`/apartments/${id}`)
                 .then((response) => {
-                    setApartment(response.data);
+                    const fetchedApartment = response.data;
+                    setApartment(fetchedApartment);
+                    setCurrentImageIndex(0);
+
+                    // NOU: Preîncărcarea imaginilor
+                    if (fetchedApartment.images && fetchedApartment.images.length > 0) {
+                        fetchedApartment.images.forEach(imageUrl => {
+                            const img = new Image(); // Creează un nou element de imagine în memorie
+                            img.src = imageUrl;      // Setarea sursei începe descărcarea
+                            // Nu e nevoie să adaugi 'img' la DOM.
+                            // Browserul îl va păstra în cache odată descărcat.
+                        });
+                    }
 
                     // apelul pentru colegi
-                    const n = response.data.numberOfRooms;
+                    const n = fetchedApartment.numberOfRooms;
                     api.get<Colleague[]>(
                         `/apartments/nearest_checkout/${id}`,
                         { params: { n } }
@@ -75,10 +87,8 @@ const ApartmentDetails: React.FC = () => {
                     console.error("Eroare la preluarea detaliilor apartamentului:", error);
                     setError("Apartamentul nu a fost gasit sau a aparut o eroare.");
                 });
-
-
         }
-    }, [id]);
+    }, [id, user]);
 
     // Handle body scroll when popups are open
     useEffect(() => {
@@ -279,6 +289,21 @@ const ApartmentDetails: React.FC = () => {
         );
     };
 
+    const nextImage = () => {
+        if (apartment && apartment.images) {
+            setCurrentImageIndex((prevIndex) =>
+                prevIndex === apartment.images.length - 1 ? 0 : prevIndex + 1
+            );
+        }
+    };
+
+    const prevImage = () => {
+        if (apartment && apartment.images) {
+            setCurrentImageIndex((prevIndex) =>
+                prevIndex === 0 ? apartment.images.length - 1 : prevIndex - 1
+            );
+        }
+    };
     // Main component render
     return (
         <div className="apartment-details-page">
@@ -286,15 +311,29 @@ const ApartmentDetails: React.FC = () => {
                 {/* === Partea stanga (Imagine + Detalii Grupate) === */}
                 <div className="left-section">
                     {/* Imaginea principala */}
-                    <div className="image-gallery">
+                    <div className="image-carousel-container">
                         {apartment.images && apartment.images.length > 0 ? (
-                            apartment.images.map((url, i) => (
-                                <div key={i} className="gallery-item">
-                                    <img src={url} alt={`Poza ${i + 1}`} />
-                                </div>
-                            ))
+                            <>
+                                {apartment.images.length > 1 && (
+                                    <button onClick={prevImage} className="carousel-button prev">
+                                        {/* Săgeată stânga */}
+                                    </button>
+                                )}
+                                <img
+                                    src={apartment.images[currentImageIndex]}
+                                    alt={`Poza ${currentImageIndex + 1} pentru ${apartment.location}`}
+                                    className="carousel-image"
+                                />
+                                {apartment.images.length > 1 && (
+                                    <button onClick={nextImage} className="carousel-button next">
+                                        {/* Săgeată dreapta */}
+                                    </button>
+                                )}
+                            </>
                         ) : (
-                            <p>Nu sunt poze disponibile.</p>
+                            <div className="no-image-placeholder">
+                                <p>Nu sunt poze disponibile.</p>
+                            </div>
                         )}
                     </div>
 

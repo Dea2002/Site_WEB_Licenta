@@ -6,7 +6,7 @@
     padding: 0 0 50px 0;
     font-family: Arial, sans-serif;
     /* Background Image */
-    background-image: url("/path/to/your/background-image.jpg"); /* !!! UPDATE THIS PATH !!! */
+    /* background-image: url("/path/to/your/background-image.jpg"); /* !!! UPDATE THIS PATH !!! */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -57,22 +57,118 @@
     gap: 25px;
 }
 
-/* --- NEW: Wrapper for image and title/price --- */
-.image-title-wrapper {
-    display: flex; /* Optional: if needed for inner layout */
-    flex-direction: column;
-    gap: 0;
+/* --- STILURI NOI PENTRU CARUSEL --- */
+.image-carousel-container {
+    position: relative; /* Necesar pentru poziționarea absolută a butoanelor */
+    background-color: #fff;
+    padding: 15px; /* Poți ajusta padding-ul */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden; /* Ascunde părțile imaginii care depășesc containerul */
+    display: flex; /* Ajută la centrarea imaginii dacă e mai mică */
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; /* O înălțime minimă pentru placeholder */
 }
 
-/* Image container styling (within wrapper) */
+.image-carousel-container::before {
+    /* Păstrăm bordura interioară dacă dorești */
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1; /* Să fie sub butoane */
+}
+
+.carousel-image {
+    width: 100%;
+    max-width: 830px; /* Sau cât era înainte */
+    height: auto;
+    max-height: 500px; /* Limitează înălțimea maximă */
+    border-radius: 6px; /* Un pic de rotunjire pentru imaginea în sine */
+    object-fit: cover; /* Asigură că imaginea acoperă spațiul fără a se deforma */
+    display: block;
+    z-index: 2; /* Peste ::before */
+}
+
+.no-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777;
+    font-style: italic;
+    min-height: 200px; /* O înălțime pentru placeholder */
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%; /* Butoane rotunde */
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    line-height: 40px; /* Centrează textul vertical */
+    text-align: center;
+    cursor: pointer;
+    z-index: 3; /* Peste imagine și ::before */
+    transition: background-color 0.2s ease;
+    display: flex; /* Pentru centrare perfectă a săgeții */
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.carousel-button.prev {
+    left: 25px; /* Ajustează poziția față de marginea containerului caruselului (luând în calcul padding-ul containerului) */
+}
+
+.carousel-button.next {
+    right: 25px; /* Ajustează poziția */
+}
+
+/* --- ELIMINĂ SAU COMENTEAZĂ STILURILE VECHI PENTRU .image-gallery --- */
+/*
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    object-fit: cover;
+    transition: transform 0.2s;
+}
+.gallery-item img:hover {
+    transform: scale(1.05);
+}
+*/
+/* Vechiul .image-container a fost practic înlocuit de .image-carousel-container */
+/* Comentează sau șterge .image-container dacă nu mai este folosit altundeva */
+/*
 .image-container {
     text-align: center;
     background-color: #fff;
     padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Restore shadow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
     position: relative;
-    /* margin-bottom: 25px; */
 }
 
 .image-container::before {
@@ -83,7 +179,7 @@
     right: 10px;
     bottom: 10px;
     border: 2px solid #e0e0e0;
-    border-radius: 8px; /* Inner rounding */
+    border-radius: 8px; 
     pointer-events: none;
 }
 
@@ -96,6 +192,10 @@
     object-fit: cover;
     display: block;
 }
+*/
+
+/* Restul stilurilor rămân neschimbate */
+/* ... (păstrează celelalte stiluri de la .title-location-price în jos) ... */
 
 .title-location-price {
     background-color: rgba(255, 255, 255, 0.9);
@@ -485,21 +585,4 @@
 .line-image-dates,
 .line-image-info {
     display: none;
-}
-
-.image-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
-    margin-bottom: 16px;
-}
-.gallery-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 4px;
-    object-fit: cover;
-    transition: transform 0.2s;
-}
-.gallery-item img:hover {
-    transform: scale(1.05);
 }
