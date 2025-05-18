@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
+import { isAfter, parseISO } from "date-fns";
 import "./OwnerRequests.css";
 
 interface ReservationRequest {
@@ -13,7 +14,9 @@ interface ReservationRequest {
     clientData: {
         fullName: string;
         email: string;
-
+        faculty: string;
+        medie: string;
+        medie_valid: string;
         // alte campuri dupa nevoie
     };
     apartamentData: {
@@ -25,7 +28,8 @@ const OwnerRequests: React.FC = () => {
     const { token, user } = useContext(AuthContext);
     const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
-
+    const now = new Date();
+    const [validUntil, setValidUntil] = useState<boolean>(false);
     useEffect(() => {
         api
             .get(`/owner/list_reservation_requests/${user!._id}`, {
@@ -85,31 +89,41 @@ const OwnerRequests: React.FC = () => {
             {successMessage && <div className="success-message">{successMessage}</div>}
             {requests.length > 0 ? (
                 <ul className="requests-list">
-                    {requests.map((req) => (
-                        <li key={req._id} className="request-item">
-                            <p>
-                                <strong>Nume client:</strong> {req.clientData.fullName}
-                            </p>
-                            <p>
-                                <strong>Locatia apartamentului:</strong>{" "}
-                                {req.apartamentData.location}
-                            </p>
-                            <p>
-                                <strong>Numarul de camere:</strong>{" "}
-                                {req.numberOfRooms}
-                            </p>
-                            <p>
-                                <strong>Check-In:</strong>{" "}
-                                {new Date(req.checkIn).toLocaleDateString()}
-                            </p>
-                            <p>
-                                <strong>Check-Out:</strong>{" "}
-                                {new Date(req.checkOut).toLocaleDateString()}
-                            </p>
-                            <button onClick={() => accept(req._id)}>Accepta</button>
-                            <button onClick={() => decline(req._id)}>Respinge</button>
-                        </li>
-                    ))}
+                    {requests.map((req) => {
+                        const validUntilDate = parseISO(req.clientData.medie_valid);
+                        const isValid = isAfter(validUntilDate, new Date());
+                        return (
+                            <li key={req._id} className="request-item">
+                                <p>
+                                    <strong>Nume client:</strong> {req.clientData.fullName}
+                                </p>
+                                <p>
+                                    <strong>Facultatea:</strong> {req.clientData.faculty}
+                                </p>
+                                <p>
+                                    <strong>Media:</strong> {req.clientData.medie}, <span className={isValid ? "text-green" : "text-red"}>{isValid ? " validata" : " nevalidata"}</span>
+                                </p>
+                                <p>
+                                    <strong>Locatia apartamentului:</strong>{" "}
+                                    {req.apartamentData.location}
+                                </p>
+                                <p>
+                                    <strong>Numarul de camere:</strong>{" "}
+                                    {req.numberOfRooms}
+                                </p>
+                                <p>
+                                    <strong>Check-In:</strong>{" "}
+                                    {new Date(req.checkIn).toLocaleDateString()}
+                                </p>
+                                <p>
+                                    <strong>Check-Out:</strong>{" "}
+                                    {new Date(req.checkOut).toLocaleDateString()}
+                                </p>
+                                <button onClick={() => accept(req._id)}>Accepta</button>
+                                <button onClick={() => decline(req._id)}>Respinge</button>
+                            </li>
+                        );
+                    })}
                 </ul>
             ) : (
                 <p>Nu exista cereri de rezervare.</p>

@@ -130,7 +130,6 @@ body {
 }
 
 .form-group-checkbox input[type="checkbox"] {
-    margin-right: 10px; /* Space between checkbox and its label */
     width: auto; /* Override default input width */
     /* Optional: Custom checkbox appearance */
     accent-color: #fac67a; /* Modern way to color checkboxes */

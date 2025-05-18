@@ -171,7 +171,7 @@ const OwnerListNewApartment: React.FC = () => {
                 {/* Form for listing a new apartment */}
                 <form onSubmit={handleSubmit} className="list-apartment-form">
                     <div className="form-group">
-                        <label htmlFor="numberOfRooms">Numar camere:</label>
+                        <label htmlFor="numberOfRooms">Numar camere:*</label>
                         <input
                             type="number"
                             id="numberOfRooms"
@@ -184,7 +184,7 @@ const OwnerListNewApartment: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="numberOfBathrooms">Numar bai:</label>
+                        <label htmlFor="numberOfBathrooms">Numar bai:*</label>
                         <input
                             type="number"
                             id="numberOfBathrooms"
@@ -197,7 +197,7 @@ const OwnerListNewApartment: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="floorNumber">Etaj:</label>
+                        <label htmlFor="floorNumber">Etaj:*</label>
                         <input
                             type="number"
                             id="floorNumber"
@@ -211,7 +211,7 @@ const OwnerListNewApartment: React.FC = () => {
                     </div>
                     {/* Locatie */}
                     <div className="form-group">
-                        <label htmlFor="location">Adresa / Locatie:</label>
+                        <label htmlFor="location">Adresa:*</label>
                         <input
                             type="text"
                             id="location"
@@ -224,7 +224,7 @@ const OwnerListNewApartment: React.FC = () => {
                     </div>
                     {/* Pret */}
                     <div className="form-group">
-                        <label htmlFor="price">Pret chirie (€/luna):</label>
+                        <label htmlFor="price">Pret chirie (RON/camera/noapte):*</label>
                         <input
                             type="number"
                             id="price"
@@ -238,7 +238,7 @@ const OwnerListNewApartment: React.FC = () => {
                     </div>
                     {/* Suprafata totala */}
                     <div className="form-group">
-                        <label htmlFor="totalSurface">Suprafata totala (mp):</label>
+                        <label htmlFor="totalSurface">Suprafata totala (mp):*</label>
                         <input
                             type="number"
                             id="totalSurface"
@@ -252,7 +252,7 @@ const OwnerListNewApartment: React.FC = () => {
                     </div>
                     {/* Anul constructiei */}
                     <div className="form-group">
-                        <label htmlFor="constructionYear">Anul constructiei:</label>
+                        <label htmlFor="constructionYear">Anul constructiei:*</label>
                         <input
                             type="number"
                             id="constructionYear"
@@ -284,46 +284,49 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="utility-cost-box">
                         {/* Campurile legate de costuri (internetPrice, TVPrice, waterPrice, etc.) */}
                         <div className="form-group">
-                            <label htmlFor="internetPrice">Pret internet (€/luna):</label>
+                            <label htmlFor="internetPrice">Pret internet (RON/luna):*</label>
                             <input
                                 type="number"
                                 id="internetPrice"
                                 name="internetPrice"
                                 min="0"
                                 step="0.01"
+                                placeholder="ex: 0.05"
                                 value={formData.internetPrice}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="TVPrice">Pret cablu TV (€/luna):</label>
+                            <label htmlFor="TVPrice">Pret cablu TV (RON/luna):*</label>
                             <input
                                 type="number"
                                 id="TVPrice"
                                 name="TVPrice"
                                 min="0"
                                 step="0.01"
+                                placeholder="ex: 0.05"
                                 value={formData.TVPrice}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="waterPrice">Pret apa (€/mc):</label>
+                            <label htmlFor="waterPrice">Pret apa (RON/mc):*</label>
                             <input
                                 type="number"
                                 id="waterPrice"
                                 name="waterPrice"
                                 min="0"
                                 step="0.01"
+                                placeholder="ex: 0.05"
                                 value={formData.waterPrice}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="gasPrice">Pret gaz (€/kWh):</label>
+                            <label htmlFor="gasPrice">Pret gaz (RON/kWh):*</label>
                             <input
                                 type="number"
                                 id="gasPrice"
@@ -337,14 +340,14 @@ const OwnerListNewApartment: React.FC = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="electricityPrice">Pret curent (€/kWh):</label>
+                            <label htmlFor="electricityPrice">Pret curent (RON/kWh):*</label>
                             <input
                                 type="number"
                                 id="electricityPrice"
                                 name="electricityPrice"
                                 min="0"
                                 step="0.001"
-                                placeholder="ex: 0.15"
+                                placeholder="ex: 0.05"
                                 value={formData.electricityPrice}
                                 onChange={handleChange}
                                 required
@@ -419,49 +422,21 @@ const OwnerListNewApartment: React.FC = () => {
 
                     {/* Imagini */}
                     <div className="form-group">
-                        <label htmlFor="images">Imagini apartament:</label>
+                        <h2 className="form-section-title">Imagini apartament:*</h2>
                         <input
                             type="file"
                             id="images"
                             accept="image/*"
                             multiple
                             onChange={handleFileChange}
+                            required
                         />
                         {imageFiles.length > 0 && (
                             <p>{imageFiles.length} fișier(e) selectat(e)</p>
                         )}
                     </div>
 
-                    {/* --- Colegi --- */}
-                    <h2 className="form-section-title">Colegi de apartament</h2>
-                    {/* Se permite coleg de apartament? */}
-                    <div className="form-group form-group-checkbox">
-                        <input
-                            type="checkbox"
-                            id="colleagues"
-                            name="colleagues"
-                            checked={formData.colleagues}
-                            onChange={handleChange}
-                        />
-                        <label htmlFor="colleagues">Se cauta/accepta coleg(i)?</label>
-                    </div>
-                    {/* Show name input only if colleagues checkbox is checked */}
-                    {formData.colleagues && (
-                        <div className="form-group">
-                            <label htmlFor="colleaguesNames">
-                                Nume coleg(i) existent(i) (optional):
-                            </label>
-                            <input
-                                type="text"
-                                id="colleaguesNames"
-                                name="colleaguesNames"
-                                placeholder="ex: Ana Popescu (daca exista deja)"
-                                value={formData.colleaguesNames}
-                                onChange={handleChange}
-                            // required={formData.colleagues} // Make required only if checkbox is checked
-                            />
-                        </div>
-                    )}
+
                     {/* Buton de submit */}
                     <button type="submit" className="submit-apartment">
                         Listeaza Apartamentul

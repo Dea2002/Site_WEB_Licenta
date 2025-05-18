@@ -43,3 +43,10 @@
 .request-item strong {
     color: #333;
 }
+
+.text-green {
+    color: green;
+}
+.text-red {
+    color: red;
+}
