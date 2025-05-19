@@ -28,6 +28,7 @@ import NotificationDashboard from "./NotificationDashboard.tsx";
 import NavSelector from "./NavBars/NavSelector.tsx";
 import ChatPage from './components/ChatPage';
 import ChatHistory from './components/ChatHistory';
+import OwnerApartmentDetails from './OwnerApartmentDetails';
 
 const App: React.FC = () => {
     return (
@@ -64,6 +65,9 @@ const App: React.FC = () => {
                     <Route path="/owner-dashboard/list_apartment" element={<OwnerListNewApartment />} />
                     {/* Ruta pentru pagina cu lista apartamentelor proprietarului */}
                     <Route path="/owner/apartments" element={<OwnerApartments />} />
+                    {/* ruta pentru a vedea concret un apartament din calitatea de owner */}
+                    <Route path="/owner/apartments/:apartmentId" element={<OwnerApartmentDetails />} />
+                    {/* Ruta pentru pagina cu detaliile apartamentului */}
                     {/* Ruta pentru pagina cu lista de cereri de rezervare pentru proprietar */}
                     <Route path="/owner/reservation_requests" element={<OwnerRequests />} />
                     {/* Ruta pentru pagina cu istoricul rezervarilor pentru proprietar */}

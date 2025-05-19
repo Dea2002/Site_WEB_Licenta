@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { Apartment } from "./types";
@@ -9,7 +10,7 @@ const OwnerApartments: React.FC = () => {
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [loading, setLoading] = useState<boolean>(true); // Stare pentru încărcare
     const [error, setError] = useState<string | null>(null); // Stare pentru erori
-
+    const navigate = useNavigate();
     useEffect(() => {
         if (user?._id && token) { // Verifică user._id și token
             setLoading(true);
@@ -49,7 +50,12 @@ const OwnerApartments: React.FC = () => {
                             : "/Poze_apartamente/placeholder.jpeg"; // Un placeholder dacă nu există imagini
 
                         return (
-                            <div key={apartment._id} className="apartment-owner-card">
+                            <div
+                                key={apartment._id}
+                                className="apartment-owner-card"
+                                style={{ cursor: "pointer" }}           // make it clear it’s clickable
+                                onClick={() => navigate(`/owner/apartments/${apartment._id}`)}  // ← navigate on click
+                            >
                                 <img
                                     src={imageUrl} // Folosește primul URL din Firebase Storage
                                     alt={`Apartament în ${apartment.location}`} // Un alt text mai descriptiv
@@ -58,8 +64,6 @@ const OwnerApartments: React.FC = () => {
                                     <strong>Locație: </strong>
                                     {apartment.location}
                                 </p>
-                                {/* Poți adăuga aici și alte detalii pe scurt, dacă dorești */}
-                                {/* <p><strong>Preț: </strong>{apartment.price} RON</p> */}
                             </div>
                         );
                     })
@@ -67,7 +71,7 @@ const OwnerApartments: React.FC = () => {
                     <p>Nu ai apartamente listate momentan.</p>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

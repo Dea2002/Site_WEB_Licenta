@@ -1,0 +1,170 @@
+.apartment-details-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apartment-details-container h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.back-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+.apartment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .apartment-content {
+        flex-direction: row;
+    }
+}
+
+.apartment-image-gallery {
+    flex: 1; /* Ocupă spațiu disponibil */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aliniază imaginea sus */
+}
+
+.main-apartment-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 400px; /* Limitează înălțimea maximă */
+    border-radius: 8px;
+    object-fit: cover; /* Asigură acoperirea fără distorsionare */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.apartment-info {
+    flex: 1.5; /* Ocupă mai mult spațiu decât galeria */
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.apartment-info p {
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.apartment-info p strong {
+    color: #333;
+}
+
+.price-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Permite trecerea pe rândul următor pe ecrane mici */
+    gap: 0.5rem; /* Spațiu între elemente */
+}
+
+.price-section strong {
+    margin-right: 0.5rem;
+}
+
+.price-input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100px; /* Sau o lățime potrivită */
+    margin-right: 0.3rem;
+}
+
+.edit-button,
+.save-button,
+.cancel-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease-in-out;
+    margin-left: 0.5rem;
+}
+
+.edit-button {
+    background-color: #211c84;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+}
+
+.save-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.save-button:hover:not(:disabled) {
+    background-color: #1e7e34;
+}
+
+.save-button:disabled {
+    background-color: #a1d9a0;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.cancel-button:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+.cancel-button:disabled {
+    background-color: #f8d7da;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: #d8000c; /* Roșu pentru erori */
+    background-color: #ffd2d2; /* Fundal deschis roșu */
+    border: 1px solid #d8000c;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 1rem;
+    text-align: center;
+}
+.edit-error {
+    /* O clasă specifică pentru erorile de la editare, dacă vrei stilizare diferită */
+    width: 100%; /* Să ocupe toată lățimea în flex container */
+    margin-top: 0.5rem;
+    font-size: 0.9em;
+}
+
+/* Loader similar cu cel din OwnerApartments */
+.apartment-details-container p:first-child:not(.error-message) {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #555;
+}
