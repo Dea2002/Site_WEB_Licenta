@@ -23,6 +23,10 @@ interface RentDetails {
     checkOut: string;  // ISO date
     rooms: number;
     createdAt: string;
+    numberOfNights: number;
+    priceRent: number;
+    discount: number;
+    priceUtilities: number;
 }
 interface UserBrief {
     _id: string;
@@ -238,6 +242,10 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     <br />
                     &emsp;&emsp;checkOut: {format(parseISO(rentData.checkOut), 'dd-MM-yyyy')}
 
+                </p>
+
+                <p>
+                    <strong>Pret: </strong>{rentData.priceRent * rentData.numberOfNights * ((100 - rentData.discount) / 100) + rentData.priceUtilities * rentData.numberOfNights} RON
                 </p>
 
                 {/* --- Butoane actiuni --- */}

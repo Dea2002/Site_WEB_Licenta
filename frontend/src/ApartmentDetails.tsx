@@ -153,6 +153,10 @@ const ApartmentDetails: React.FC = () => {
                     numberOfRooms: rooms.rooms,
                     checkIn: format(selectedDates.checkIn, "yyyy-MM-dd"),
                     checkOut: format(selectedDates.checkOut, "yyyy-MM-dd"),
+                    priceRent: apartment!.price,
+                    priceUtilities: (parseFloat(apartment!.internetPrice?.toString() || "0") + parseFloat(apartment!.TVPrice?.toString() || "0") + parseFloat(apartment!.waterPrice?.toString() || "0") + parseFloat(apartment!.gasPrice?.toString() || "0") + parseFloat(apartment!.electricityPrice?.toString() || "0")) / 30,
+                    discount: user!.medie!.includes("Categoria 1") ? apartment!.discount1 : user!.medie!.includes("Categoria 2") ? apartment!.discount2 : user!.medie!.includes("Categoria 3") ? apartment!.discount3 : 0,
+                    numberOfNights: Math.max(1, differenceInCalendarDays(selectedDates.checkOut, selectedDates.checkIn))
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -303,9 +307,9 @@ const ApartmentDetails: React.FC = () => {
                 <p className="total-price">
                     <span>Pret Total:</span> {finalTotalCost.toFixed(2)} RON
                 </p>
-                <p className="total-price">
+                {isValid && (<p className="total-price">
                     <span>Pret Total cu discount:</span> {discountedApartmentTotalCost.toFixed(2)} RON
-                </p>
+                </p>)}
                 {/* Using original button class and inline style for width */}
                 <button
                     className="owner-section-button" // Your original class
