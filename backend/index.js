@@ -346,7 +346,7 @@ async function run() {
                 return res.status(403).json({ message: 'Doar clientii pot face cereri de rezervare' });
             }
 
-            const { clientId, apartmentId, numberOfRooms, checkIn, checkOut } = req.body; // extrag datele din request
+            const { clientId, apartmentId, numberOfRooms, checkIn, checkOut, priceRent, priceUtilities, discount, numberOfNights } = req.body; // extrag datele din request
             const clientObjectId = new ObjectId(clientId); // creez un obiect de tip ObjectId pentru client
             const apartmentObjectId = new ObjectId(apartmentId);
             const apartmentObject = await apartmentsCollection.findOne({ _id: apartmentObjectId }); // caut apartamentul in baza de date
@@ -373,7 +373,11 @@ async function run() {
                 apartament: apartmentObjectId,
                 numberOfRooms: parseInt(numberOfRooms),
                 checkIn: newCheckIn,
-                checkOut: newCheckOut
+                checkOut: newCheckOut,
+                priceRent,
+                priceUtilities,
+                discount,
+                numberOfNights
             };
 
             await reservationRequestsCollection.insertOne(newReservationRequest);
@@ -440,18 +444,14 @@ async function run() {
 
                 // adaug campul isActive si mut documentul in colectia de istoric de rezervari
                 reservationRequest.isActive = true;
+                console.log(reservationRequest);
 
                 // Populeaza datele clientului si apartamentului inainte de inserare in istoric
-                const clientData = await app.locals.usersCollection.findOne({ _id: reservationRequest.client });
-                const apartamentData = await app.locals.apartmentsCollection.findOne({ _id: reservationRequest.apartament });
+                const clientData = await usersCollection.findOne({ _id: reservationRequest.client });
+                const apartamentData = await apartmentsCollection.findOne({ _id: reservationRequest.apartament });
                 reservationRequest.clientData = clientData;
                 reservationRequest.apartamentData = apartamentData;
 
-                // Actualizeaza documentul apartamentului: seteaza numele clientului in campul "numeColeg"
-                await app.locals.apartmentsCollection.updateOne(
-                    { _id: reservationRequest.apartament },
-                    // { $set: { colleaguesNames: clientData.fullName } }
-                );
 
                 await reservationHistoryCollection.insertOne(reservationRequest);
                 notificationService.createNotification(message = `Cererea de rezervare pentru apartamentul de la locatia: ${apartamentData.location}, a fost acceptata!`, receiver = reservationRequest.client);

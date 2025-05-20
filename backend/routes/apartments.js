@@ -11,6 +11,63 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         res.send(result);
     });
 
+    router.get('/rentals/:apartmentId/history', authenticateToken, async (req, res) => {
+
+        try {
+            console.log("Request to get rental history for apartment:", req.params.apartmentId);
+
+            const { apartmentId } = req.params;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
+            // Pas Opțional, dar Recomandat: Verifică dacă utilizatorul curent este proprietarul apartamentului
+            const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            console.log("Apartment found:", apartment);
+            if (!apartment) {
+                return res.status(404).json({ message: "Apartamentul nu a fost găsit." });
+            }
+
+            // req.user._id ar trebui să fie setat de authMiddleware
+            if (apartment.ownerId.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ message: "Neautorizat să accesați istoricul chiriilor pentru acest apartament." });
+            }
+
+            const query = { apartament: new ObjectId(apartmentId) };
+
+            const totalRentals = await reservationHistoryCollection.countDocuments(query);
+            console.log("Total rentals found:", totalRentals);
+            if (totalRentals === 0) {
+                return res.json({
+                    rentals: [],
+                    currentPage: 1,
+                    totalPages: 0,
+                    totalRentals: 0
+                });
+            }
+
+            const rentals = await reservationHistoryCollection.find(query)
+                .sort({ startDate: -1 }) // Sortează descrescător după data de început
+                .skip(skip)
+                .limit(limit)
+                // .populate('tenant._id', 'name email') // Dacă tenant._id este ObjectId ref la User
+                // Sau doar .select() dacă tenant este subdocument
+                .toArray(); // Folosește .lean() pentru performanță când nu modifici documentele
+
+            const totalPages = Math.ceil(totalRentals / limit);
+
+            res.json({
+                rentals,
+                currentPage: page,
+                totalPages,
+                totalRentals
+            });
+
+        } catch (error) {
+            console.error('Eroare la preluarea istoricului chiriei:', error);
+            res.status(500).json({ message: 'Eroare interna a serverului' });
+        }
+    });
 
     router.get('/by-id/:id', async (req, res) => {
         const id = req.params.id;

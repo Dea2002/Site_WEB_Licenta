@@ -155,7 +155,7 @@ const ApartmentDetails: React.FC = () => {
                     checkOut: format(selectedDates.checkOut, "yyyy-MM-dd"),
                     priceRent: apartment!.price,
                     priceUtilities: (parseFloat(apartment!.internetPrice?.toString() || "0") + parseFloat(apartment!.TVPrice?.toString() || "0") + parseFloat(apartment!.waterPrice?.toString() || "0") + parseFloat(apartment!.gasPrice?.toString() || "0") + parseFloat(apartment!.electricityPrice?.toString() || "0")) / 30,
-                    discount: user!.medie!.includes("Categoria 1") ? apartment!.discount1 : user!.medie!.includes("Categoria 2") ? apartment!.discount2 : user!.medie!.includes("Categoria 3") ? apartment!.discount3 : 0,
+                    discount: isAfter(new Date(), parseISO(user!.medie_valid!)) ? 0 : user!.medie!.includes("Categoria 1") ? apartment!.discount1 : user!.medie!.includes("Categoria 2") ? apartment!.discount2 : user!.medie!.includes("Categoria 3") ? apartment!.discount3 : 0,
                     numberOfNights: Math.max(1, differenceInCalendarDays(selectedDates.checkOut, selectedDates.checkIn))
                 },
                 {

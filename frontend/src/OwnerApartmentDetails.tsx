@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback, ChangeEvent, FormE
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
-import { Apartment, Discount, UtilityPrice, Rental, PaginatedRentals } from "./types";
+import { Apartment, Discount, UtilityPrice, Rental } from "./types";
 import "./OwnerApartmentDetails.css"; // Asigură-te că CSS-ul este actualizat
 
 // O listă predefinită de facilități posibile
@@ -12,6 +12,8 @@ const ALL_POSSIBLE_FACILITIES = [
     "Permite animale", "Zonă de lucru dedicată", "Piscină", "Sală de fitness"
 ];
 
+interface PaginatedRentals {
+};
 
 const OwnerApartmentDetails: React.FC = () => {
     const { token } = useContext(AuthContext);
@@ -97,9 +99,10 @@ const OwnerApartmentDetails: React.FC = () => {
         if (!apartmentId || !token) return;
         setLoadingRentals(true);
         try {
-            const response = await api.get<PaginatedRentals>(`/rentals/apartment/${apartmentId}/history?page=${page}&limit=10`, {
+            const response = await api.get<PaginatedRentals>(`/apartments/rentals/${apartmentId}/history?page=${page}&limit=10`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log("Istoricul chiriilor:", response.data);
             setRentalHistory(response.data);
             setRentalHistoryPage(response.data.currentPage);
         } catch (err) {
@@ -532,13 +535,15 @@ const OwnerApartmentDetails: React.FC = () => {
                     {!loadingRentals && rentalHistory && rentalHistory.rentals.length > 0 ? (
                         <>
                             <ul>
-                                {rentalHistory.rentals.map(rental => (
-                                    <li key={rental._id}>
-                                        Chiriaș: {rental.tenant.name} (ID: {rental.tenant._id}) <br />
-                                        Perioada: {new Date(rental.startDate).toLocaleDateString()} - {new Date(rental.endDate).toLocaleDateString()} <br />
-                                        Status: {rental.status}
-                                    </li>
-                                ))}
+                                {rentalHistory.rentals.map(rental => {
+                                    console.log(typeof rental.priceRent);
+                                    console.log("my rental:", rental);
+                                    return (<li key={rental._id}>
+                                        Chiriaș: {rental.clientData.fullName} <br />
+                                        Perioada: {new Date(rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut).toLocaleDateString()} <br />
+                                        Pret: {parseInt(rental.priceRent) * ((100 - rental.discount) / 100) * rental.nights * rental.numberOfRooms + rental.priceUtilities * rental.nights} RON <br />
+                                    </li>);
+                                })}
                             </ul>
                             <div className="pagination-controls">
                                 <button onClick={() => fetchRentalHistory(rentalHistoryPage - 1)} disabled={rentalHistoryPage <= 1 || loadingRentals} className="general-button">Anterior</button>
