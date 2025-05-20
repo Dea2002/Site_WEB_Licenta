@@ -46,7 +46,7 @@
     cursor: pointer;
     font-size: 0.9em;
     transition: background-color 0.2s ease;
-    margin-right: 8px; /* Spațiere între butoane */
+    margin-right: 8px; /* Spatiere intre butoane */
 }
 .general-button:last-child {
     margin-right: 0;
@@ -161,7 +161,7 @@
 }
 .existing-image-item {
     position: relative;
-    width: 150px; /* Ajustează după nevoie */
+    width: 150px; /* Ajusteaza dupa nevoie */
     height: 100px;
 }
 .existing-image-item img {

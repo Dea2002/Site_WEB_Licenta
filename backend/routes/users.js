@@ -137,14 +137,14 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
     router.get('/current_request', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         try {
-            // 1) Găsim toate cererile active (presupunem un flag isActive)
+            // 1) Gasim toate cererile active (presupunem un flag isActive)
             const activeRequests = await reservationRequestsCollection
                 .find({
                     client: new ObjectId(userId),
                 })
                 .sort({ checkIn: 1 })
                 .toArray();
-            // 2) Pentru fiecare cerere, adăugăm datele apartamentului
+            // 2) Pentru fiecare cerere, adaugam datele apartamentului
             const result = await Promise.all(
                 activeRequests.map(async r => {
                     const apt = await apartmentsCollection.findOne(
@@ -167,11 +167,11 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 })
             );
 
-            // 3) Returnăm array-ul rezultat
+            // 3) Returnam array-ul rezultat
             return res.json(result);
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ message: 'Eroare internă a serverului.' });
+            return res.status(500).json({ message: 'Eroare interna a serverului.' });
         }
     });
 

@@ -96,7 +96,7 @@ const OwnerListNewApartment: React.FC = () => {
 
         try {
 
-            // upload toate imaginile în paralel
+            // upload toate imaginile in paralel
             const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
 
             await api.post(
@@ -472,7 +472,7 @@ const OwnerListNewApartment: React.FC = () => {
                             required
                         />
                         {imageFiles.length > 0 && (
-                            <p>{imageFiles.length} fișier(e) selectat(e)</p>
+                            <p>{imageFiles.length} fisier(e) selectat(e)</p>
                         )}
                     </div>
 

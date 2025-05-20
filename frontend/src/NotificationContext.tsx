@@ -36,11 +36,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // la mount si cand tokenul se schimba
     useEffect(() => {
-        fetchUnread();
-        // eventual polling la 60s:
-        const id = setInterval(fetchUnread, 60000);
-        return () => clearInterval(id);
-    }, [isAuthenticated, token]);
+        if (isAuthenticated && token) {
+            fetchUnread();
+            // eventual polling la 60s:
+            const id = setInterval(fetchUnread, 60000);
+            return () => clearInterval(id);
+        }
+        setUnreadCount(0); // Resetam la 0 daca nu e autentificat
+    }, [isAuthenticated, token, fetchUnread]);
 
     // useEffect(() => {
     //     fetchUnread(); // Fetch la mount si la schimbarea auth/token

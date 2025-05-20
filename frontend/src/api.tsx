@@ -7,6 +7,16 @@ export const api = axios.create({
     baseURL: BACKEND_URL
 });
 
+// înainte de fiecare request, adaugă header-ul automat
+api.interceptors.request.use(config => {
+    const token = localStorage.getItem('token');   // sau de unde ți-l ții
+    if (token) {
+        config.headers = config.headers ?? {};
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 export const socket = io(BACKEND_URL, {
     transports: ['websocket'],
     withCredentials: true

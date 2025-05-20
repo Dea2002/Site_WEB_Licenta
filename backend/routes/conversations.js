@@ -34,7 +34,7 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         if (!Array.isArray(tenantIds) || tenantIds.length < 1) {
             return res
                 .status(400)
-                .json({ message: 'Trebuie să trimiți cel puțin un chiriaș în participants.' });
+                .json({ message: 'Trebuie sa trimiti cel putin un chirias in participants.' });
         }
 
         // ObjectId-ize
@@ -45,7 +45,7 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
             if (!ownerId || !ObjectId.isValid(ownerId)) {
                 return res
                     .status(400)
-                    .json({ message: 'Pentru includeOwner=true trebuie să trimiți ownerId valid.' });
+                    .json({ message: 'Pentru includeOwner=true trebuie sa trimiti ownerId valid.' });
             }
             participants.push(new ObjectId(ownerId));
         }

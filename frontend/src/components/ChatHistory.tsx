@@ -35,7 +35,7 @@ const ChatHistory: React.FC = () => {
             .then(res => setConversations(res.data))
             .catch(err => {
                 console.error('Error loading conversations:', err);
-                setError('Nu am putut încărca conversațiile.');
+                setError('Nu am putut incarca conversatiile.');
             })
             .finally(() => setLoading(false));
     }, [user, token]);
@@ -66,22 +66,22 @@ const ChatHistory: React.FC = () => {
                 });
             })
             .catch(err => {
-                console.error('Nu am putut încărca nume useri:', err);
+                console.error('Nu am putut incarca nume useri:', err);
             });
     }, [conversations, userNames, user]);
 
-    if (loading) return <p className="chats-loading">Se încarcă conversațiile…</p>;
+    if (loading) return <p className="chats-loading">Se incarca conversatiile…</p>;
     if (error) return <p className="chats-error">{error}</p>;
 
     return (
         <div className="chats-container">
-            <h1>Conversațiile mele</h1>
+            <h1>Conversatiile mele</h1>
             {conversations.length === 0 ? (
-                <p>Nu ai nicio conversație activă.</p>
+                <p>Nu ai nicio conversatie activa.</p>
             ) : (
                 <ul className="chats-list">
                     {conversations.map(conv => {
-                        // dacă nu există titlu custom, compunem din ceilalți participanți
+                        // daca nu exista titlu custom, compunem din ceilalti participanti
                         const title =
                             conv.title ||
                             conv.participants

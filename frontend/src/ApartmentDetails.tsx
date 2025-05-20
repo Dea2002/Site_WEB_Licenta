@@ -54,7 +54,7 @@ const ApartmentDetails: React.FC = () => {
             )
         )
             .then(urls => setBlobUrls(urls))
-            .catch(err => console.error("Nu am putut încărca imaginea:", err));
+            .catch(err => console.error("Nu am putut incarca imaginea:", err));
     }, [apartment?.images]);
 
 
@@ -74,13 +74,13 @@ const ApartmentDetails: React.FC = () => {
                     setApartment(fetchedApartment);
                     setCurrentImageIndex(0);
 
-                    // NOU: Preîncărcarea imaginilor
+                    // NOU: Preincarcarea imaginilor
                     if (fetchedApartment.images && fetchedApartment.images.length > 0) {
                         fetchedApartment.images.forEach(imageUrl => {
-                            const img = new Image(); // Creează un nou element de imagine în memorie
-                            img.src = imageUrl;      // Setarea sursei începe descărcarea
-                            // Nu e nevoie să adaugi 'img' la DOM.
-                            // Browserul îl va păstra în cache odată descărcat.
+                            const img = new Image(); // Creeaza un nou element de imagine in memorie
+                            img.src = imageUrl;      // Setarea sursei incepe descarcarea
+                            // Nu e nevoie sa adaugi 'img' la DOM.
+                            // Browserul il va pastra in cache odata descarcat.
                         });
                     }
 
@@ -245,7 +245,7 @@ const ApartmentDetails: React.FC = () => {
             // Afiseaza un mesaj default sau nimic daca nu sunt selectate datele
             return (
                 <div className="selected-dates-info">
-                    <p>Selectați perioada și numărul de camere pentru a vedea costul.</p>
+                    <p>Selectati perioada si numarul de camere pentru a vedea costul.</p>
                     <button
                         className="owner-section-button"
                         onClick={selectInterval}
@@ -291,7 +291,7 @@ const ApartmentDetails: React.FC = () => {
                 </p>
                 {!bookingCosts.userHasValidDiscount && bookingCosts.discountPercentage > 0 && (
                     <p className="info-text" style={{ fontSize: "0.8em", marginTop: "5px" }}>
-                        (Prețul nu include reducerea de student deoarece media nu este validă sau nu se aplică.)
+                        (Pretul nu include reducerea de student deoarece media nu este valida sau nu se aplica.)
                     </p>
                 )}
 
@@ -339,7 +339,7 @@ const ApartmentDetails: React.FC = () => {
                             <>
                                 {apartment.images.length > 1 && (
                                     <button onClick={prevImage} className="carousel-button prev">
-                                        <FaLongArrowAltLeft /> {/* Săgeată stânga */}
+                                        <FaLongArrowAltLeft /> {/* Sageata stanga */}
                                     </button>
                                 )}
                                 <img
@@ -349,7 +349,7 @@ const ApartmentDetails: React.FC = () => {
                                 />
                                 {apartment.images.length > 1 && (
                                     <button onClick={nextImage} className="carousel-button next">
-                                        <FaLongArrowAltRight /> {/* Săgeată dreapta */}
+                                        <FaLongArrowAltRight /> {/* Sageata dreapta */}
                                     </button>
                                 )}
                             </>

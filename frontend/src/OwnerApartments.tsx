@@ -8,11 +8,11 @@ import "./OwnerApartments.css";
 const OwnerApartments: React.FC = () => {
     const { token, user } = useContext(AuthContext);
     const [apartments, setApartments] = useState<Apartment[]>([]);
-    const [loading, setLoading] = useState<boolean>(true); // Stare pentru încărcare
+    const [loading, setLoading] = useState<boolean>(true); // Stare pentru incarcare
     const [error, setError] = useState<string | null>(null); // Stare pentru erori
     const navigate = useNavigate();
     useEffect(() => {
-        if (user?._id && token) { // Verifică user._id și token
+        if (user?._id && token) { // Verifica user._id si token
             setLoading(true);
             setError(null);
             api.get(`/apartments/by-id/${user._id}`, {
@@ -22,16 +22,16 @@ const OwnerApartments: React.FC = () => {
                 setLoading(false);
             }).catch((error) => {
                 console.error("Eroare la preluarea apartamentelor:", error);
-                setError("Nu s-au putut încărca apartamentele.");
+                setError("Nu s-au putut incarca apartamentele.");
                 setLoading(false);
             });
         } else {
-            setLoading(false); // Oprește încărcarea dacă nu există user sau token
+            setLoading(false); // Opreste incarcarea daca nu exista user sau token
         }
     }, [user, token]);
 
     if (loading) {
-        return <div className="owner-apartments-container"><p>Se încarcă apartamentele...</p></div>;
+        return <div className="owner-apartments-container"><p>Se incarca apartamentele...</p></div>;
     }
 
     if (error) {
@@ -44,10 +44,10 @@ const OwnerApartments: React.FC = () => {
             <div className="apartments-owner-list">
                 {apartments.length > 0 ? (
                     apartments.map((apartment) => {
-                        // Verifică dacă apartment.images există și este un array cu cel puțin un element
+                        // Verifica daca apartment.images exista si este un array cu cel putin un element
                         const imageUrl = apartment.images && apartment.images.length > 0
                             ? apartment.images[0] // Ia primul URL din array
-                            : "/Poze_apartamente/placeholder.jpeg"; // Un placeholder dacă nu există imagini
+                            : "/Poze_apartamente/placeholder.jpeg"; // Un placeholder daca nu exista imagini
 
                         return (
                             <div
@@ -57,11 +57,11 @@ const OwnerApartments: React.FC = () => {
                                 onClick={() => navigate(`/owner/apartments/${apartment._id}`)}  // ← navigate on click
                             >
                                 <img
-                                    src={imageUrl} // Folosește primul URL din Firebase Storage
-                                    alt={`Apartament în ${apartment.location}`} // Un alt text mai descriptiv
+                                    src={imageUrl} // Foloseste primul URL din Firebase Storage
+                                    alt={`Apartament in ${apartment.location}`} // Un alt text mai descriptiv
                                 />
                                 <p>
-                                    <strong>Locație: </strong>
+                                    <strong>Locatie: </strong>
                                     {apartment.location}
                                 </p>
                             </div>

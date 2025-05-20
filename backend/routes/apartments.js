@@ -21,16 +21,16 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
 
-            // Pas Opțional, dar Recomandat: Verifică dacă utilizatorul curent este proprietarul apartamentului
+            // Pas Optional, dar Recomandat: Verifica daca utilizatorul curent este proprietarul apartamentului
             const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
             console.log("Apartment found:", apartment);
             if (!apartment) {
-                return res.status(404).json({ message: "Apartamentul nu a fost găsit." });
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
             }
 
-            // req.user._id ar trebui să fie setat de authMiddleware
+            // req.user._id ar trebui sa fie setat de authMiddleware
             if (apartment.ownerId.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ message: "Neautorizat să accesați istoricul chiriilor pentru acest apartament." });
+                return res.status(403).json({ message: "Neautorizat sa accesati istoricul chiriilor pentru acest apartament." });
             }
 
             const query = { apartament: new ObjectId(apartmentId) };
@@ -47,12 +47,12 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             }
 
             const rentals = await reservationHistoryCollection.find(query)
-                .sort({ startDate: -1 }) // Sortează descrescător după data de început
+                .sort({ startDate: -1 }) // Sorteaza descrescator dupa data de inceput
                 .skip(skip)
                 .limit(limit)
-                // .populate('tenant._id', 'name email') // Dacă tenant._id este ObjectId ref la User
-                // Sau doar .select() dacă tenant este subdocument
-                .toArray(); // Folosește .lean() pentru performanță când nu modifici documentele
+                // .populate('tenant._id', 'name email') // Daca tenant._id este ObjectId ref la User
+                // Sau doar .select() daca tenant este subdocument
+                .toArray(); // Foloseste .lean() pentru performanta cand nu modifici documentele
 
             const totalPages = Math.ceil(totalRentals / limit);
 
