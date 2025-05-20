@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { api } from './api';
 import { useNavigate } from 'react-router-dom';
@@ -12,18 +12,9 @@ import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import "./ApartmentDetails.css"; // Ensure this CSS is imported
+import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/RentalDetailsTypes"; // Adjust the import path as necessary
 
-interface selectedDates {
-    checkIn: Date;
-    checkOut: Date;
-}
-interface Colleague {
-    _id: string;
-    fullName: string;
-    numberOfRooms: number;
-    checkIn: string;   // ISO date string
-    checkOut: string;  // ISO date string
-}
+
 const ApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const { refresh } = useNotifications();
@@ -42,7 +33,7 @@ const ApartmentDetails: React.FC = () => {
         lng: number;
         address: string;
     } | null>(null);
-    const [selectedDates, setSelectedDates] = useState<selectedDates | null>(null);
+    const [selectedDates, setSelectedDates] = useState<SelectedDates | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [blobUrls, setBlobUrls] = useState<string[]>([]);
 
@@ -75,7 +66,7 @@ const ApartmentDetails: React.FC = () => {
 
     // Fetch apartment details
     useEffect(() => {
-        console.log(user);
+
         if (id) {
             api.get<Apartment>(`/apartments/${id}`)
                 .then((response) => {
@@ -131,13 +122,24 @@ const ApartmentDetails: React.FC = () => {
         setShowReservationPopup(true);
     };
 
+    // Use useMemo to calculate costs only when relevant state changes
+    const bookingCosts = useMemo(() => {
+        return calculateBookingCosts(apartment, selectedDates, rooms.rooms);
+    }, [apartment, user, selectedDates, rooms.rooms]);
+
     // Function to send reservation request
     const makeReservation = async () => {
-        if (!selectedDates) {
-            setError("Selectati mai intai intervalul dorit.");
-            setShowReservationPopup(true); // Re-open popup if no dates selected
+        if (!apartment) {
+            setError("Apartamentul nu a fost gasit.");
             return;
         }
+
+        if (!selectedDates || !bookingCosts) {
+            setError("Selectati mai intai intervalul dorit si asigurati-va ca datele sunt valide.");
+            setShowReservationPopup(true);
+            return;
+        }
+
         if (!isAuthenticated || !user || !token) {
             setError("Trebuie sa fiti autentificat pentru a trimite o cerere de rezervare.");
             // Consider navigating to login: navigate('/login');
@@ -150,18 +152,19 @@ const ApartmentDetails: React.FC = () => {
                 {
                     clientId: user._id,
                     apartmentId: id,
-                    numberOfRooms: rooms.rooms,
+                    numberOfRooms: bookingCosts.numberOfRooms,
                     checkIn: format(selectedDates.checkIn, "yyyy-MM-dd"),
                     checkOut: format(selectedDates.checkOut, "yyyy-MM-dd"),
-                    priceRent: apartment!.price,
-                    priceUtilities: (parseFloat(apartment!.internetPrice?.toString() || "0") + parseFloat(apartment!.TVPrice?.toString() || "0") + parseFloat(apartment!.waterPrice?.toString() || "0") + parseFloat(apartment!.gasPrice?.toString() || "0") + parseFloat(apartment!.electricityPrice?.toString() || "0")) / 30,
-                    discount: isAfter(new Date(), parseISO(user!.medie_valid!)) ? 0 : user!.medie!.includes("Categoria 1") ? apartment!.discount1 : user!.medie!.includes("Categoria 2") ? apartment!.discount2 : user!.medie!.includes("Categoria 3") ? apartment!.discount3 : 0,
-                    numberOfNights: Math.max(1, differenceInCalendarDays(selectedDates.checkOut, selectedDates.checkIn))
+                    priceRent: apartment.price, // Pretul de baza per noapte per camera
+                    priceUtilities: bookingCosts.totalDailyUtilityCost, // Costul zilnic al utilitatilor
+                    discount: bookingCosts.discountPercentage, // Procentajul de discount aplicat
+                    numberOfNights: bookingCosts.nights
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             );
+
             // Handle successful request submission
             console.log("Reservation request sent successfully!");
             refresh(); // Refresh notifications
@@ -238,88 +241,70 @@ const ApartmentDetails: React.FC = () => {
     }
     // Helper function to render selected dates and costs (part of the new right section logic)
     const renderSelectedDatesInfo = () => {
-        if (!selectedDates) return null;
-
-        // Ensure calculation handles potential NaN/nulls gracefully
-        const checkInDate = selectedDates.checkIn;
-        const checkOutDate = selectedDates.checkOut;
-
-        if (!checkInDate || !checkOutDate || checkOutDate <= checkInDate) {
+        if (!selectedDates || !bookingCosts) { // Verificam si bookingCosts
+            // Afiseaza un mesaj default sau nimic daca nu sunt selectate datele
+            return (
+                <div className="selected-dates-info">
+                    <p>Selectați perioada și numărul de camere pentru a vedea costul.</p>
+                    <button
+                        className="owner-section-button"
+                        onClick={selectInterval}
+                        style={{
+                            width: "161px",
+                            marginTop: "15px",
+                            display: "block",
+                            margin: "15px auto 0 auto",
+                        }}
+                    >
+                        Selecteaza Perioada
+                    </button>
+                </div>
+            );
+        }
+        if (bookingCosts.nights <= 0) {
             return <p className="error booking-error">Interval de date invalid.</p>;
         }
 
-        const nights = Math.max(1, differenceInCalendarDays(checkOutDate, checkInDate));
-        const nightsText = nights === 1 ? "1 noapte" : `${nights} nopti`;
-
-        const numberOfRooms = rooms.rooms;
-        const pricePerNight = parseFloat(apartment.price?.toString() || "0") || 0;
-        const internetPriceMonthly = parseFloat(apartment.internetPrice?.toString() || "0") || 0;
-        const tvPriceMonthly = parseFloat(apartment.TVPrice?.toString() || "0") || 0;
-        const waterPriceMonthly = parseFloat(apartment.waterPrice?.toString() || "0") || 0;
-        const gasPriceMonthly = parseFloat(apartment.gasPrice?.toString() || "0") || 0;
-        const electricityPriceMonthly = parseFloat(apartment.electricityPrice?.toString() || "0") || 0;
-
-        const validUntilDate = parseISO(user!.medie_valid!);
-        const isValid = isAfter(validUntilDate, new Date());
-        const discount = user!.medie!.includes("Categoria 1") ? apartment.discount1 : user!.medie!.includes("Categoria 2") ? apartment.discount2 : user!.medie!.includes("Categoria 3") ? apartment.discount3 : 0;
-
-        const dailyInternetCost = internetPriceMonthly / 30;
-        const dailyTVCost = tvPriceMonthly / 30;
-        const dailyWaterCost = waterPriceMonthly / 30;
-        const dailyGasCost = gasPriceMonthly / 30;
-        const dailyElectricityCost = electricityPriceMonthly / 30;
-
-        const extraDailyCost = dailyInternetCost + dailyTVCost + dailyWaterCost + dailyGasCost + dailyElectricityCost;
-        const extraTotalCost = extraDailyCost * nights; // fara reducere
-        const apartmentTotalCost = pricePerNight * nights * numberOfRooms;
-        const discountForTotalCost = apartmentTotalCost * (discount / 100); // discount total
-        const discountedApartmentTotalCost = apartmentTotalCost - discountForTotalCost + extraTotalCost; // pret total cu discount
-        const finalTotalCost = numberOfRooms * (apartmentTotalCost + extraTotalCost);
-
-
+        const nightsText = bookingCosts.nights === 1 ? "1 noapte" : `${bookingCosts.nights} nopti`;
 
         return (
-            // Using the structured selected-dates-info div from the new layout
             <div className="selected-dates-info">
-                <p>
-                    <span>Check-in:</span> {format(checkInDate, "dd/MM/yyyy")}
-                </p>
-                <p>
-                    <span>Check-out:</span> {format(checkOutDate, "dd/MM/yyyy")}
-                </p>
-                <hr className="line-divider short" /> {/* Use new divider class */}
-                <p>
-                    <span>Pret Cazare / camera ({nightsText}):</span> {apartmentTotalCost.toFixed(2)} RON
-                </p>
-                <p>
-                    <span>Costuri Extra Estim. ({nightsText}):</span> {extraTotalCost.toFixed(2)}{" "}
-                    RON
-                </p>
-                <p>
-                    <span>Numar camere:</span> {numberOfRooms}
-                </p>
+                <p><span>Check-in:</span> {format(selectedDates.checkIn, "dd/MM/yyyy")}</p>
+                <p><span>Check-out:</span> {format(selectedDates.checkOut, "dd/MM/yyyy")}</p>
                 <hr className="line-divider short" />
-                {isValid && (<p>
-                    <span> Discount categorie medie: {discount}%</span> -{discountForTotalCost} RON
-                </p>
+                <p><span>Pret Cazare / camera ({nightsText}):</span> {bookingCosts.baseApartmentCostForPeriod.toFixed(2)} RON</p>
+                <p><span>Costuri Extra Estim. ({nightsText}):</span> {(bookingCosts.totalUtilityCostForPeriod / bookingCosts.numberOfRooms).toFixed(2)} RON</p>
+                <p><span>Numar camere:</span> {bookingCosts.numberOfRooms}</p>
+                <hr className="line-divider short" />
+                <p><span>Total Cazare ({bookingCosts.numberOfRooms} camere):</span> {bookingCosts.totalApartmentCostForPeriodAllRooms.toFixed(2)} RON</p>
+                <p><span>Total Utilitati ({bookingCosts.numberOfRooms} camere):</span> {bookingCosts.totalUtilityCostForPeriod.toFixed(2)} RON</p>
+
+                <hr className="line-divider short" />
+                {bookingCosts.userHasValidDiscount && bookingCosts.discountPercentage > 0 && (
+                    <p>
+                        <span>Discount categorie medie ({bookingCosts.discountPercentage}%):</span> -{bookingCosts.discountAmount.toFixed(2)} RON
+                    </p>
                 )}
-                <hr className="line-divider short bold" /> {/* Use new divider class */}
+                <hr className="line-divider short bold" />
                 <p className="total-price">
-                    <span>Pret Total:</span> {finalTotalCost.toFixed(2)} RON
+                    <span>Pret Total:</span> {bookingCosts.userHasValidDiscount ? bookingCosts.finalCostWithDiscount.toFixed(2) : bookingCosts.finalCostWithoutDiscount.toFixed(2)} RON
                 </p>
-                {isValid && (<p className="total-price">
-                    <span>Pret Total cu discount:</span> {discountedApartmentTotalCost.toFixed(2)} RON
-                </p>)}
-                {/* Using original button class and inline style for width */}
+                {!bookingCosts.userHasValidDiscount && bookingCosts.discountPercentage > 0 && (
+                    <p className="info-text" style={{ fontSize: "0.8em", marginTop: "5px" }}>
+                        (Prețul nu include reducerea de student deoarece media nu este validă sau nu se aplică.)
+                    </p>
+                )}
+
+
                 <button
-                    className="owner-section-button" // Your original class
+                    className="owner-section-button"
                     onClick={selectInterval}
                     style={{
                         width: "161px",
                         marginTop: "15px",
                         display: "block",
                         margin: "15px auto 0 auto",
-                    }} // Your original width + centering margin
+                    }}
                 >
                     Modifica intervalul
                 </button>
