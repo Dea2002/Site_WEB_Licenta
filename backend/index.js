@@ -367,17 +367,18 @@ async function run() {
                     return res.status(400).json({ message: 'Datele pentru check-in si check-out se suprapun cu o cerere existenta' });
                 }
             }
-
+            const finalPrice = (priceRent * ((100 - discount) / 100) * numberOfRooms + priceUtilities) * numberOfNights;
             const newReservationRequest = {
                 client: clientObjectId,
                 apartament: apartmentObjectId,
                 numberOfRooms: parseInt(numberOfRooms),
                 checkIn: newCheckIn,
                 checkOut: newCheckOut,
-                priceRent,
+                priceRent: parseInt(priceRent),
                 priceUtilities,
                 discount,
-                numberOfNights
+                numberOfNights,
+                finalPrice: parseFloat(finalPrice.toFixed(3))
             };
 
             await reservationRequestsCollection.insertOne(newReservationRequest);
@@ -386,6 +387,46 @@ async function run() {
             notificationService.createNotification(message = `${req.user.fullName} a facut o cerere de rezervare pentru apartamentul de la locatia: ${apartmentObject.location}`, receiver = apartmentObject.ownerId);
 
             res.status(200).json({ message: 'Am facut cerere de rezervare' });
+        });
+
+        app.delete('/requests/clear', async (req, res) => {
+            const { confirmation } = req.body;
+            if (confirmation !== 'CONFIRM') {
+                return res
+                    .status(400)
+                    .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+            }
+            try {
+                const result = await reservationRequestsCollection.deleteMany({});
+                return res.json({
+                    message: `Au fost sterse ${result.deletedCount} documente.`,
+                });
+            } catch (err) {
+                console.error('Eroare la stergerea documentelor:', err);
+                return res
+                    .status(500)
+                    .json({ message: 'Eroare interna la server.' });
+            }
+        });
+
+        app.delete('/history/clear', async (req, res) => {
+            const { confirmation } = req.body;
+            if (confirmation !== 'CONFIRM') {
+                return res
+                    .status(400)
+                    .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+            }
+            try {
+                const result = await reservationHistoryCollection.deleteMany({});
+                return res.json({
+                    message: `Au fost sterse ${result.deletedCount} documente.`,
+                });
+            } catch (err) {
+                console.error('Eroare la stergerea documentelor:', err);
+                return res
+                    .status(500)
+                    .json({ message: 'Eroare interna la server.' });
+            }
         });
 
         /* returneaza toate cererile de rezervare pentru un proprietar */

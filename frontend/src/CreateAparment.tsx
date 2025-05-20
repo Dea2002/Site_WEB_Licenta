@@ -21,16 +21,16 @@ const OwnerListNewApartment: React.FC = () => {
         parking: false,
         petFriendly: false,
         location: "",
-        price: "",
+        price: 0,
         totalSurface: "",
         elevator: false,
         constructionYear: "",
         renovationYear: "",
-        internetPrice: "",
-        TVPrice: "",
-        waterPrice: "",
-        gasPrice: "",
-        electricityPrice: "",
+        internetPrice: 0.0,
+        TVPrice: 0.0,
+        waterPrice: 0.0,
+        gasPrice: 0.0,
+        electricityPrice: 0.0,
         airConditioning: false,
         balcony: false,
         discount1: 0,
@@ -88,7 +88,7 @@ const OwnerListNewApartment: React.FC = () => {
             setMessage("Anul renovarii este invalid.");
             return;
         }
-        if (parseFloat(formData.price) <= 0) {
+        if (formData.price <= 0) {
             setMessage("Pretul trebuie sa fie pozitiv.");
             return;
         }
@@ -117,16 +117,16 @@ const OwnerListNewApartment: React.FC = () => {
                 parking: false,
                 petFriendly: false,
                 location: "",
-                price: "",
+                price: 0,
                 totalSurface: "",
                 elevator: false,
                 constructionYear: "",
                 renovationYear: "",
-                internetPrice: "",
-                TVPrice: "",
-                waterPrice: "",
-                gasPrice: "",
-                electricityPrice: "",
+                internetPrice: 0.0,
+                TVPrice: 0.0,
+                waterPrice: 0.0,
+                gasPrice: 0.0,
+                electricityPrice: 0.0,
                 airConditioning: false,
                 balcony: false,
                 discount1: 0,

@@ -536,12 +536,11 @@ const OwnerApartmentDetails: React.FC = () => {
                         <>
                             <ul>
                                 {rentalHistory.rentals.map(rental => {
-                                    console.log(typeof rental.priceRent);
                                     console.log("my rental:", rental);
                                     return (<li key={rental._id}>
                                         Chiriaș: {rental.clientData.fullName} <br />
                                         Perioada: {new Date(rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut).toLocaleDateString()} <br />
-                                        Pret: {parseInt(rental.priceRent) * ((100 - rental.discount) / 100) * rental.nights * rental.numberOfRooms + rental.priceUtilities * rental.nights} RON <br />
+                                        Pret: {rental.finalPrice} RON <br />
                                     </li>);
                                 })}
                             </ul>

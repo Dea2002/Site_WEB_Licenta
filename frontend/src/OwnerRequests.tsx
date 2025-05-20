@@ -9,8 +9,12 @@ interface ReservationRequest {
     client: string;
     apartament: string;
     numberOfRooms: number;
+    numberOfNights: number;
     checkIn: string;
     checkOut: string;
+    priceRent: number;
+    priceUtilities: number;
+    discount: number;
     clientData: {
         fullName: string;
         email: string;
@@ -89,6 +93,8 @@ const OwnerRequests: React.FC = () => {
             {requests.length > 0 ? (
                 <ul className="requests-list">
                     {requests.map((req) => {
+                        console.log(req);
+                        const totalPrice = (req.priceRent * ((100 - req.discount) / 100) * req.numberOfRooms + req.priceUtilities) * req.numberOfNights;
                         const validUntilDate = parseISO(req.clientData.medie_valid);
                         const isValid = isAfter(validUntilDate, new Date());
                         return (
@@ -117,6 +123,9 @@ const OwnerRequests: React.FC = () => {
                                 <p>
                                     <strong>Check-Out:</strong>{" "}
                                     {new Date(req.checkOut).toLocaleDateString()}
+                                </p>
+                                <p>
+                                    <strong>Pret: </strong> {totalPrice.toFixed(2)} RON
                                 </p>
                                 <button onClick={() => accept(req._id)}>Accepta</button>
                                 <button onClick={() => decline(req._id)}>Respinge</button>
