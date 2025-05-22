@@ -170,20 +170,20 @@ const OwnerApartmentDetails: React.FC = () => {
         }
     }, [apartmentId, token]);
 
-    // const fetchCurrentRentals = useCallback(async () => {
-    //     if (!apartmentId || !token) return;
-    //     setLoadingRentals(true);
-    //     try {
-    //         const response = await api.get<Rental[]>(`/rentals/apartment/${apartmentId}/current`, {
-    //             headers: { Authorization: `Bearer ${token}` }
-    //         });
-    //         setCurrentRentals(response.data);
-    //     } catch (err) {
-    //         console.error("Eroare la preluarea chiriilor actuale:", err);
-    //     } finally {
-    //         setLoadingRentals(false);
-    //     }
-    // }, [apartmentId, token]);
+    const fetchCurrentRentals = useCallback(async () => {
+        if (!apartmentId || !token) return;
+        setLoadingRentals(true);
+        try {
+            const response = await api.get<Rental[]>(`/apartments/rentals/${apartmentId}/current-and-upcoming`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setCurrentRentals(response.data);
+        } catch (err) {
+            console.error("Eroare la preluarea chiriilor actuale:", err);
+        } finally {
+            setLoadingRentals(false);
+        }
+    }, [apartmentId, token]);
 
     const fetchRentalHistory = useCallback(async (page: number = 1) => {
         if (!apartmentId || !token) return;
@@ -208,10 +208,10 @@ const OwnerApartmentDetails: React.FC = () => {
 
     useEffect(() => {
         if (apartment?._id) {
-            // fetchCurrentRentals();
+            fetchCurrentRentals();
             fetchRentalHistory(1);
         }
-    }, [apartment?._id, /* fetchCurrentRentals */, fetchRentalHistory]);
+    }, [apartment?._id, fetchCurrentRentals, fetchRentalHistory]);
 
 
     // --- GENERIC SAVE FUNCTION ---
@@ -470,7 +470,7 @@ const OwnerApartmentDetails: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("Chiria a fost anulata.");
-            // fetchCurrentRentals(); // Reincarca lista de chirii actuale
+            fetchCurrentRentals(); // Reincarca lista de chirii actuale
             fetchRentalHistory(rentalHistoryPage); // Reincarca si istoricul
         } catch (err: any) {
             console.error("Eroare la anularea chiriei:", err);
@@ -716,8 +716,8 @@ const OwnerApartmentDetails: React.FC = () => {
                                 <li key={rental._id}>
                                     Chirias: {rental.tenant?.name || rental.clientData?.fullName || "N/A"} <br />
                                     Perioada: {new Date(rental.checkIn || rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut || rental.checkOut).toLocaleDateString()} <br />
-                                    Status: {rental.status}
-                                    {(rental.status === 'active' || rental.status === 'upcoming' || rental.status === 'pending_approval') && (
+                                    Status: {rental.derivedStatus}
+                                    {(rental.derivedStatus === 'active' || rental.derivedStatus === 'upcoming' || rental.derivedStatus === 'pending_approval') && (
                                         <button onClick={() => handleCancelRental(rental._id)} disabled={isSaving.cancelRental} className="cancel-rental-button general-button">
                                             {isSaving.cancelRental ? "Anul..." : "Anuleaza Chiria"}
                                         </button>
@@ -739,7 +739,7 @@ const OwnerApartmentDetails: React.FC = () => {
                                         Chirias: {rental.clientData?.fullName || rental.tenant?.name || "N/A"} <br />
                                         Perioada: {new Date(rental.checkIn || rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut || rental.checkOut).toLocaleDateString()} <br />
                                         Pret final: {rental.finalPrice} RON <br />
-                                        Status: {rental.status}
+                                        Status: {rental.derivedStatus}
                                     </li>
                                 ))}
                             </ul>

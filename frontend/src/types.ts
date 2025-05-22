@@ -64,7 +64,7 @@ export interface Rental {
     checkIn: string; // Sau startDate
     checkOut: string; // Sau endDate
     finalPrice: number; // Sau totalPriceAgreed
-    status:
+    derivedStatus:
         | "active"
         | "upcoming"
         | "past"
@@ -84,4 +84,5 @@ export interface PaginatedRentals {
     currentPage: number;
     totalPages: number;
     totalRentals: number;
+    derivedStatus: string;
 }

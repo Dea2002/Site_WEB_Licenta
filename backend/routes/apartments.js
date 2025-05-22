@@ -12,31 +12,33 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     });
 
     router.get('/rentals/:apartmentId/history', authenticateToken, async (req, res) => {
-
         try {
-            console.log("Request to get rental history for apartment:", req.params.apartmentId);
-
             const { apartmentId } = req.params;
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
 
-            // Pas Optional, dar Recomandat: Verifica daca utilizatorul curent este proprietarul apartamentului
             const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
-            console.log("Apartment found:", apartment);
             if (!apartment) {
-                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
+                return res.status(404).json({ message: "Apartamentul nu a fost găsit." });
             }
-
-            // req.user._id ar trebui sa fie setat de authMiddleware
             if (apartment.ownerId.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ message: "Neautorizat sa accesati istoricul chiriilor pentru acest apartament." });
+                return res.status(403).json({ message: "Neautorizat să accesați istoricul." });
             }
 
-            const query = { apartament: new ObjectId(apartmentId) };
+            const currentDate = new Date();
+
+            // Construim interogarea pentru istoric
+            const query = {
+                apartament: new ObjectId(apartmentId), // Filtrăm după ID-ul apartamentului
+                $or: [
+                    { isActive: false },             // Toate chiriile anulate (isActive este false)
+                    { checkOut: { $lt: currentDate } } // Sau chiriile care s-au încheiat (checkOut este în trecut)
+                ]
+            };
 
             const totalRentals = await reservationHistoryCollection.countDocuments(query);
-            console.log("Total rentals found:", totalRentals);
+
             if (totalRentals === 0) {
                 return res.json({
                     rentals: [],
@@ -47,17 +49,32 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             }
 
             const rentals = await reservationHistoryCollection.find(query)
-                .sort({ startDate: -1 }) // Sorteaza descrescator dupa data de inceput
+                .sort({ checkOut: -1 }) // Sortează după data de sfârșit, cele mai recente încheiate/anulate primele
                 .skip(skip)
                 .limit(limit)
-                // .populate('tenant._id', 'name email') // Daca tenant._id este ObjectId ref la User
-                // Sau doar .select() daca tenant este subdocument
-                .toArray(); // Foloseste .lean() pentru performanta cand nu modifici documentele
+                .toArray();
 
             const totalPages = Math.ceil(totalRentals / limit);
 
+            // Poți adăuga un câmp `derivedStatus` la fiecare rental în frontend sau aici pe backend
+            // pentru o afișare mai clară în UI (ex: "Completed", "Cancelled", "Active")
+            const processedRentals = rentals.map(rental => {
+                let derivedStatus = "Unknown";
+                if (!rental.isActive) {
+                    derivedStatus = "Cancelled"; // Presupunem că isActive: false înseamnă anulat
+                } else if (new Date(rental.checkOut) < currentDate) {
+                    derivedStatus = "Completed";
+                } else if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate) {
+                    derivedStatus = "Active";
+                } else if (new Date(rental.checkIn) > currentDate) {
+                    derivedStatus = "Upcoming";
+                }
+                return { ...rental, derivedStatus };
+            });
+
+
             res.json({
-                rentals,
+                rentals: processedRentals, // Trimitem chiriile procesate
                 currentPage: page,
                 totalPages,
                 totalRentals
@@ -65,7 +82,52 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
         } catch (error) {
             console.error('Eroare la preluarea istoricului chiriei:', error);
-            res.status(500).json({ message: 'Eroare interna a serverului' });
+            res.status(500).json({ message: 'Eroare internă a serverului la preluarea istoricului.' });
+        }
+    });
+
+    router.get('/rentals/:apartmentId/current-and-upcoming', authenticateToken, async (req, res) => {
+        try {
+            const { apartmentId } = req.params;
+
+            const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            if (!apartment) {
+                return res.status(404).json({ message: "Apartamentul nu a fost găsit." });
+            }
+            if (apartment.ownerId.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ message: "Neautorizat." });
+            }
+
+            const currentDate = new Date();
+
+            // Construim interogarea pentru chiriile active și viitoare
+            const query = {
+                apartament: new ObjectId(apartmentId), // ID-ul apartamentului
+                isActive: true,                       // Doar cele care sunt active (nu anulate)
+                checkOut: { $gte: currentDate }       // Și a căror dată de checkOut este azi sau în viitor
+            };
+
+            const rentals = await reservationHistoryCollection.find(query)
+                .sort({ checkIn: 1 }) // Sortează după data de început, cele mai apropiate primele
+                .toArray();
+
+            // Și aici poți adăuga `derivedStatus` dacă e util
+            const processedRentals = rentals.map(rental => {
+                let derivedStatus = "Unknown";
+                if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate && rental.isActive) { // isActive e deja filtrat true
+                    derivedStatus = "Active";
+                } else if (new Date(rental.checkIn) > currentDate && rental.isActive) {
+                    derivedStatus = "Upcoming";
+                }
+                return { ...rental, derivedStatus };
+            });
+
+
+            res.json(processedRentals); // Returnează array-ul de închirieri
+
+        } catch (error) {
+            console.error('Eroare la preluarea chiriilor curente și viitoare:', error);
+            res.status(500).json({ message: 'Eroare internă a serverului.' });
         }
     });
 
