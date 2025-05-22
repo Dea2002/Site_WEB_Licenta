@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { storage } from "./firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
-// 1. Definește starea inițială a formularului
+// 1. Defineste starea initiala a formularului
 const initialFormData = {
     numberOfRooms: "",
     numberOfBathrooms: "",
@@ -54,13 +54,13 @@ const initialFormData = {
     },
 };
 
-// Definirea tipului pentru formData pentru o mai bună verificare a tipurilor
+// Definirea tipului pentru formData pentru o mai buna verificare a tipurilor
 type FormData = typeof initialFormData;
 type FacilityKey = keyof FormData['facilities'];
 type DiscountKey = keyof FormData['discounts'];
 type UtilityKey = keyof FormData['utilities'];
 
-// 2. Definește opțiunile pentru facilități
+// 2. Defineste optiunile pentru facilitati
 const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'parking', label: 'Parcare inclusa' },
     { id: 'videoSurveillance', label: 'Supraveghere video' },
@@ -98,7 +98,7 @@ const OwnerListNewApartment: React.FC = () => {
         const { name, type, value } = e.target;
         const checked = (e.target as HTMLInputElement).checked; // Specific pentru checkboxes
 
-        // Verifică dacă `name` aparține unui sub-obiect (facilities, discounts, utilities)
+        // Verifica daca `name` apartine unui sub-obiect (facilities, discounts, utilities)
         if (name in formData.facilities) {
             setFormData(prevData => ({
                 ...prevData,
@@ -124,11 +124,11 @@ const OwnerListNewApartment: React.FC = () => {
                 },
             }));
         } else {
-            // Câmpuri de la primul nivel (numberOfRooms, location, price, etc.)
+            // Campuri de la primul nivel (numberOfRooms, location, price, etc.)
             setFormData(prevData => ({
                 ...prevData,
                 [name]: type === 'number' || e.target.type === 'number'
-                    ? (name === 'price' || name === 'totalSurface' ? parseFloat(value) : parseInt(value, 10)) // price și totalSurface pot fi float
+                    ? (name === 'price' || name === 'totalSurface' ? parseFloat(value) : parseInt(value, 10)) // price si totalSurface pot fi float
                     : value,
             }));
         }
@@ -184,49 +184,51 @@ const OwnerListNewApartment: React.FC = () => {
             const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
 
 
-            //!!!!! Construiește payload-ul final pentru API
-            // Asigură-te că trimiți datele în formatul așteptat de backend
-            // (aplatizează `discounts`, `utilities`, `facilities` dacă e necesar, sau trimite-le ca obiecte)
-            // Exemplu: backend-ul așteaptă cheile direct (discount1, parking, internetPrice)
-            const payload = {
-                ownerId: user?._id,
-                numberOfRooms: parseInt(formData.numberOfRooms) || 0,
-                numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
-                floorNumber: parseInt(formData.floorNumber) || 0, // Poate fi și negativ (demisol)
-                location: formData.location,
-                price: formData.price,
-                totalSurface: parseFloat(formData.totalSurface) || 0,
-                constructionYear: parseInt(formData.constructionYear) || 0,
-                renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null, // Trimite null dacă e gol
-                // Extrage valorile din obiectele imbricate
-                ...formData.discounts,
-                ...formData.utilities,
-                ...formData.facilities,
-                images: imageUrls,
-            };
-
-            // SAU dacă backend-ul așteaptă obiectele `discounts`, `utilities`, `facilities`:
+            //!!!!! Construieste payload-ul final pentru API
+            // Asigura-te ca trimiti datele in formatul asteptat de backend
+            // (aplatizeaza `discounts`, `utilities`, `facilities` daca e necesar, sau trimite-le ca obiecte)
+            // Exemplu: backend-ul asteapta cheile direct (discount1, parking, internetPrice)
             // const payload = {
             //     ownerId: user?._id,
             //     numberOfRooms: parseInt(formData.numberOfRooms) || 0,
             //     numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
-            //     floorNumber: parseInt(formData.floorNumber) || 0,
+            //     floorNumber: parseInt(formData.floorNumber) || 0, // Poate fi si negativ (demisol)
             //     location: formData.location,
             //     price: formData.price,
             //     totalSurface: parseFloat(formData.totalSurface) || 0,
             //     constructionYear: parseInt(formData.constructionYear) || 0,
-            //     renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null,
-            //     discounts: formData.discounts,
-            //     utilities: formData.utilities,
-            //     facilities: formData.facilities,
+            //     renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null, // Trimite null daca e gol
+            //     // Extrage valorile din obiectele imbricate
+            //     ...formData.discounts,
+            //     ...formData.utilities,
+            //     ...formData.facilities,
             //     images: imageUrls,
             // };
+
+            // SAU daca backend-ul asteapta obiectele `discounts`, `utilities`, `facilities`:
+            const payload = {
+                ownerId: user?._id,
+                numberOfRooms: parseInt(formData.numberOfRooms) || 0,
+                numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
+                floorNumber: parseInt(formData.floorNumber) || 0,
+                location: formData.location,
+                price: formData.price,
+                totalSurface: parseFloat(formData.totalSurface) || 0,
+                constructionYear: parseInt(formData.constructionYear) || 0,
+                renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null,
+                discounts: formData.discounts,
+                utilities: formData.utilities,
+                facilities: formData.facilities,
+                images: imageUrls,
+            };
 
             await api.post(`/new-apartment`, payload,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setMessage("Apartament listat cu succes!");
+            // scroll to top
+            window.scrollTo(0, 0);
             // Optionally reset form or navigate away
             setFormData(initialFormData); // Reset form data
             setImageFiles([]); // Reset image files

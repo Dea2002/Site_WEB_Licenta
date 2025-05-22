@@ -49,11 +49,11 @@ export const calculateBookingCosts = (
     const nights = Math.max(1, differenceInCalendarDays(dates.checkOut, dates.checkIn));
     const pricePerNight = apartment.price || 0;
 
-    const internetPriceMonthly = apartment.internetPrice || 0;
-    const tvPriceMonthly = apartment.TVPrice || 0;
-    const waterPriceMonthly = apartment.waterPrice || 0;
-    const gasPriceMonthly = apartment.gasPrice || 0;
-    const electricityPriceMonthly = apartment.electricityPrice || 0;
+    const internetPriceMonthly = apartment.utilities.internetPrice || 0;
+    const tvPriceMonthly = apartment.utilities.TVPrice || 0;
+    const waterPriceMonthly = apartment.utilities.waterPrice || 0;
+    const gasPriceMonthly = apartment.utilities.gasPrice || 0;
+    const electricityPriceMonthly = apartment.utilities.electricityPrice || 0;
 
     const dailyInternetCost = internetPriceMonthly / 30;
     const dailyTVCost = tvPriceMonthly / 30;
@@ -73,9 +73,9 @@ export const calculateBookingCosts = (
         const validUntilDate = parseISO(user.medie_valid);
         userHasValidDiscount = isAfter(validUntilDate, new Date());
         if (userHasValidDiscount) {
-            if (user.medie.includes("Categoria 1")) discountPercentage = apartment.discount1 ?? 0;
-            else if (user.medie.includes("Categoria 2")) discountPercentage = apartment.discount2 ?? 0;
-            else if (user.medie.includes("Categoria 3")) discountPercentage = apartment.discount3 ?? 0;
+            if (user.medie.includes("Categoria 1")) discountPercentage = apartment.discounts.discount1 ?? 0;
+            else if (user.medie.includes("Categoria 2")) discountPercentage = apartment.discounts.discount2 ?? 0;
+            else if (user.medie.includes("Categoria 3")) discountPercentage = apartment.discounts.discount3 ?? 0;
         }
     }
 

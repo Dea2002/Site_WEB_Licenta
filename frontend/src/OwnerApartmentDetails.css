@@ -147,6 +147,8 @@
     max-width: 100px;
 }
 .utility-price-item-edit label {
+    min-width: 120px; /* Aliniaza etichetele */
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -312,4 +314,21 @@
 }
 .delete-apartment-button:disabled {
     background-color: #f8d7da;
+}
+
+.facility-checkbox-label {
+    display: block; /* Sau flex, pentru aliniere mai buna daca adaugi iconite */
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.facility-checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.utility-price-item-edit input[type="number"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100px; /* Sau o latime potrivita */
 }
