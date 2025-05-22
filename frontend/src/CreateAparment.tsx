@@ -7,47 +7,131 @@ import { useNavigate } from "react-router-dom";
 import { storage } from "./firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
-const OwnerListNewApartment: React.FC = () => {
-    const { user, token } = useContext(AuthContext);
-    const navigate = useNavigate();
-
-    // useEffect(() => { ... }, [user, token]); // Your existing useEffect
-
-    const [formData, setFormData] = useState({
-        // ... your initial form data state
-        numberOfRooms: "",
-        numberOfBathrooms: "",
-        floorNumber: "",
-        parking: false,
-        petFriendly: false,
-        location: "",
-        price: 0,
-        totalSurface: "",
-        elevator: false,
-        constructionYear: "",
-        renovationYear: "",
+// 1. Definește starea inițială a formularului
+const initialFormData = {
+    numberOfRooms: "",
+    numberOfBathrooms: "",
+    floorNumber: "",
+    location: "",
+    price: 0,
+    totalSurface: "",
+    constructionYear: "",
+    renovationYear: "", // Optional
+    discounts: {
+        discount1: 0,
+        discount2: 0,
+        discount3: 0,
+    },
+    utilities: {
         internetPrice: 0.0,
         TVPrice: 0.0,
         waterPrice: 0.0,
         gasPrice: 0.0,
         electricityPrice: 0.0,
+    },
+    facilities: {
+        wifi: false,
+        parking: false,
         airConditioning: false,
+        tvCable: false,
+        laundryMachine: false,
+        fullKitchen: false,
         balcony: false,
-        discount1: 0,
-        discount2: 0,
-        discount3: 0,
-    });
+        petFriendly: false,
+        pool: false,
+        gym: false,
+        elevator: false,
+        terrace: false,
+        bikeStorage: false,
+        storageRoom: false,
+        rooftop: false,
+        fireAlarm: false,
+        smokeDetector: false,
+        intercom: false,
+        videoSurveillance: false,
+        soundproofing: false,
+        underfloorHeating: false,
+    },
+};
 
+// Definirea tipului pentru formData pentru o mai bună verificare a tipurilor
+type FormData = typeof initialFormData;
+type FacilityKey = keyof FormData['facilities'];
+type DiscountKey = keyof FormData['discounts'];
+type UtilityKey = keyof FormData['utilities'];
+
+// 2. Definește opțiunile pentru facilități
+const facilityOptions: { id: FacilityKey; label: string }[] = [
+    { id: 'parking', label: 'Parcare inclusa' },
+    { id: 'videoSurveillance', label: 'Supraveghere video' },
+    { id: 'wifi', label: 'Wi-Fi' },
+    { id: 'airConditioning', label: 'Aer Conditionat' },
+    { id: 'tvCable', label: 'TV Cablu' },
+    { id: 'laundryMachine', label: 'Masina de spalat rufe' },
+    { id: 'fullKitchen', label: 'Bucatarie complet utilata' },
+    { id: 'fireAlarm', label: 'Alarma de incendiu' },
+    { id: 'smokeDetector', label: 'Detector de fum' },
+    { id: 'balcony', label: 'Balcon' },
+    { id: 'terrace', label: 'Terasa' },
+    { id: 'soundproofing', label: 'Izolat fonic' },
+    { id: 'underfloorHeating', label: 'Incalzire in pardoseala' },
+    { id: 'petFriendly', label: 'Permite animale' },
+    { id: 'elevator', label: 'Lift' },
+    { id: 'pool', label: 'Piscina' },
+    { id: 'gym', label: 'Sala de fitness' },
+    { id: 'bikeStorage', label: 'Parcare biciclete' },
+    { id: 'storageRoom', label: 'Camera depozitare' },
+    { id: 'rooftop', label: 'Acces acoperis' },
+    { id: 'intercom', label: 'Interfon' },
+];
+
+const OwnerListNewApartment: React.FC = () => {
+    const { user, token } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const [formData, setFormData] = useState<FormData>(initialFormData);
     const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [message, setMessage] = useState("");
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, type, value, checked } = e.target as HTMLInputElement;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: type === "checkbox" ? checked : value,
-        }));
+        const { name, type, value } = e.target;
+        const checked = (e.target as HTMLInputElement).checked; // Specific pentru checkboxes
+
+        // Verifică dacă `name` aparține unui sub-obiect (facilities, discounts, utilities)
+        if (name in formData.facilities) {
+            setFormData(prevData => ({
+                ...prevData,
+                facilities: {
+                    ...prevData.facilities,
+                    [name as FacilityKey]: checked, // Doar pentru checkboxes
+                },
+            }));
+        } else if (name in formData.discounts) {
+            setFormData(prevData => ({
+                ...prevData,
+                discounts: {
+                    ...prevData.discounts,
+                    [name as DiscountKey]: parseFloat(value) || 0,
+                },
+            }));
+        } else if (name in formData.utilities) {
+            setFormData(prevData => ({
+                ...prevData,
+                utilities: {
+                    ...prevData.utilities,
+                    [name as UtilityKey]: parseFloat(value) || 0,
+                },
+            }));
+        } else {
+            // Câmpuri de la primul nivel (numberOfRooms, location, price, etc.)
+            setFormData(prevData => ({
+                ...prevData,
+                [name]: type === 'number' || e.target.type === 'number'
+                    ? (name === 'price' || name === 'totalSurface' ? parseFloat(value) : parseInt(value, 10)) // price și totalSurface pot fi float
+                    : value,
+            }));
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,40 +183,52 @@ const OwnerListNewApartment: React.FC = () => {
             // upload toate imaginile in paralel
             const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
 
-            await api.post(
-                `/new-apartment`,
-                { ownerId: user?._id, ...formData, images: imageUrls },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                },
+
+            //!!!!! Construiește payload-ul final pentru API
+            // Asigură-te că trimiți datele în formatul așteptat de backend
+            // (aplatizează `discounts`, `utilities`, `facilities` dacă e necesar, sau trimite-le ca obiecte)
+            // Exemplu: backend-ul așteaptă cheile direct (discount1, parking, internetPrice)
+            const payload = {
+                ownerId: user?._id,
+                numberOfRooms: parseInt(formData.numberOfRooms) || 0,
+                numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
+                floorNumber: parseInt(formData.floorNumber) || 0, // Poate fi și negativ (demisol)
+                location: formData.location,
+                price: formData.price,
+                totalSurface: parseFloat(formData.totalSurface) || 0,
+                constructionYear: parseInt(formData.constructionYear) || 0,
+                renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null, // Trimite null dacă e gol
+                // Extrage valorile din obiectele imbricate
+                ...formData.discounts,
+                ...formData.utilities,
+                ...formData.facilities,
+                images: imageUrls,
+            };
+
+            // SAU dacă backend-ul așteaptă obiectele `discounts`, `utilities`, `facilities`:
+            // const payload = {
+            //     ownerId: user?._id,
+            //     numberOfRooms: parseInt(formData.numberOfRooms) || 0,
+            //     numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
+            //     floorNumber: parseInt(formData.floorNumber) || 0,
+            //     location: formData.location,
+            //     price: formData.price,
+            //     totalSurface: parseFloat(formData.totalSurface) || 0,
+            //     constructionYear: parseInt(formData.constructionYear) || 0,
+            //     renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null,
+            //     discounts: formData.discounts,
+            //     utilities: formData.utilities,
+            //     facilities: formData.facilities,
+            //     images: imageUrls,
+            // };
+
+            await api.post(`/new-apartment`, payload,
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setMessage("Apartament listat cu succes!");
             // Optionally reset form or navigate away
-            setFormData({
-                // Reset form
-                numberOfRooms: "",
-                numberOfBathrooms: "",
-                floorNumber: "",
-                parking: false,
-                petFriendly: false,
-                location: "",
-                price: 0,
-                totalSurface: "",
-                elevator: false,
-                constructionYear: "",
-                renovationYear: "",
-                internetPrice: 0.0,
-                TVPrice: 0.0,
-                waterPrice: 0.0,
-                gasPrice: 0.0,
-                electricityPrice: 0.0,
-                airConditioning: false,
-                balcony: false,
-                discount1: 0,
-                discount2: 0,
-                discount3: 0,
-            });
+            setFormData(initialFormData); // Reset form data
             setImageFiles([]); // Reset image files
             // navigate('/owner/dashboard'); // Example navigation
         } catch (error: any) {
@@ -162,11 +258,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="numberOfRooms">Numar camere:*</label>
                         <input
-                            type="number"
-                            id="numberOfRooms"
-                            name="numberOfRooms"
-                            min="1"
-                            step="1"
+                            type="number" id="numberOfRooms" name="numberOfRooms"
+                            min="1" step="1"
                             value={formData.numberOfRooms}
                             onChange={handleChange}
                             required
@@ -175,11 +268,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="numberOfBathrooms">Numar bai:*</label>
                         <input
-                            type="number"
-                            id="numberOfBathrooms"
-                            name="numberOfBathrooms"
-                            min="1"
-                            step="1"
+                            type="number" id="numberOfBathrooms" name="numberOfBathrooms"
+                            min="1" step="1"
                             value={formData.numberOfBathrooms}
                             onChange={handleChange}
                             required
@@ -188,11 +278,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="floorNumber">Etaj:*</label>
                         <input
-                            type="number"
-                            id="floorNumber"
-                            name="floorNumber" /* Add min/max if applicable */
-                            min="0"
-                            step="1"
+                            type="number" id="floorNumber" name="floorNumber"
+                            min="0" step="1"
                             value={formData.floorNumber}
                             onChange={handleChange}
                             required
@@ -202,9 +289,7 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="location">Adresa:*</label>
                         <input
-                            type="text"
-                            id="location"
-                            name="location"
+                            type="text" id="location" name="location"
                             placeholder="ex: Str. Exemplu Nr. 10, Bucuresti"
                             value={formData.location}
                             onChange={handleChange}
@@ -215,11 +300,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="price">Pret chirie (RON/camera/noapte):*</label>
                         <input
-                            type="number"
-                            id="price"
-                            name="price"
-                            min="0"
-                            step="1"
+                            type="number" id="price" name="price"
+                            min="0" step="1"
                             value={formData.price}
                             onChange={handleChange}
                             required
@@ -229,11 +311,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="totalSurface">Suprafata totala (mp):*</label>
                         <input
-                            type="number"
-                            id="totalSurface"
-                            name="totalSurface"
-                            min="1"
-                            step="0.1"
+                            type="number" id="totalSurface" name="totalSurface"
+                            min="1" step="0.1"
                             value={formData.totalSurface}
                             onChange={handleChange}
                             required
@@ -243,12 +322,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="constructionYear">Anul constructiei:*</label>
                         <input
-                            type="number"
-                            id="constructionYear"
-                            name="constructionYear"
-                            min="1800"
-                            max={new Date().getFullYear()}
-                            step="1"
+                            type="number" id="constructionYear" name="constructionYear"
+                            min="1800" max={new Date().getFullYear()} step="1"
                             value={formData.constructionYear}
                             onChange={handleChange}
                             required
@@ -258,12 +333,8 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="form-group">
                         <label htmlFor="renovationYear">Anul renovarii (optional):</label>
                         <input
-                            type="number"
-                            id="renovationYear"
-                            name="renovationYear"
-                            min="1800"
-                            max={new Date().getFullYear()}
-                            step="1"
+                            type="number" id="renovationYear" name="renovationYear"
+                            min="1800" max={new Date().getFullYear()} step="1"
                             value={formData.renovationYear}
                             onChange={handleChange}
                         />
@@ -275,13 +346,10 @@ const OwnerListNewApartment: React.FC = () => {
                         <div className="form-group">
                             <label htmlFor="internetPrice">Pret internet (RON/luna):*</label>
                             <input
-                                type="number"
-                                id="internetPrice"
-                                name="internetPrice"
-                                min="0"
-                                step="0.01"
+                                type="number" id="internetPrice" name="internetPrice"
+                                min="0" step="0.01"
                                 placeholder="ex: 0.05"
-                                value={formData.internetPrice}
+                                value={formData.utilities.internetPrice}
                                 onChange={handleChange}
                                 required
                             />
@@ -295,7 +363,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 min="0"
                                 step="0.01"
                                 placeholder="ex: 0.05"
-                                value={formData.TVPrice}
+                                value={formData.utilities.TVPrice}
                                 onChange={handleChange}
                                 required
                             />
@@ -309,7 +377,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 min="0"
                                 step="0.01"
                                 placeholder="ex: 0.05"
-                                value={formData.waterPrice}
+                                value={formData.utilities.waterPrice}
                                 onChange={handleChange}
                                 required
                             />
@@ -323,7 +391,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 min="0"
                                 step="0.001"
                                 placeholder="ex: 0.05"
-                                value={formData.gasPrice}
+                                value={formData.utilities.gasPrice}
                                 onChange={handleChange}
                                 required
                             />
@@ -337,7 +405,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 min="0"
                                 step="0.001"
                                 placeholder="ex: 0.05"
-                                value={formData.electricityPrice}
+                                value={formData.utilities.electricityPrice}
                                 onChange={handleChange}
                                 required
                             />
@@ -357,7 +425,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 max="100"
                                 step="1"
                                 placeholder="ex 5"
-                                value={formData.discount1}
+                                value={formData.discounts.discount1}
                                 onChange={handleChange}
                                 required
                             />
@@ -372,7 +440,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 max="100"
                                 step="1"
                                 placeholder="ex 5"
-                                value={formData.discount2}
+                                value={formData.discounts.discount2}
                                 onChange={handleChange}
                                 required
                             />
@@ -387,78 +455,29 @@ const OwnerListNewApartment: React.FC = () => {
                                 max="100"
                                 step="1"
                                 placeholder="ex 5"
-                                value={formData.discount3}
+                                value={formData.discounts.discount3}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
                     </div>
 
-                    {/* --- Facilitati --- */}
+                    {/* --- Facilitati (generate dinamic) --- */}
                     <h2 className="form-section-title">Facilitati</h2>
-                    {/* Checkbox Grouping */}
                     <div className="form-group-checkbox-grid">
-                        {/* Parcare */}
-                        <div className="form-group form-group-checkbox">
-                            <input
-                                type="checkbox"
-                                id="parking"
-                                name="parking"
-                                checked={formData.parking}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="parking">Parcare inclusa</label>
-                        </div>
-
-                        {/* Pet friendly */}
-                        <div className="form-group form-group-checkbox">
-                            <input
-                                type="checkbox"
-                                id="petFriendly"
-                                name="petFriendly"
-                                checked={formData.petFriendly}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="petFriendly">Accepta animale</label>
-                        </div>
-
-                        {/* Lift */}
-                        <div className="form-group form-group-checkbox">
-                            <input
-                                type="checkbox"
-                                id="elevator"
-                                name="elevator"
-                                checked={formData.elevator}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="elevator">Lift</label>
-                        </div>
-
-                        {/* Aer conditionat */}
-                        <div className="form-group form-group-checkbox">
-                            <input
-                                type="checkbox"
-                                id="airConditioning"
-                                name="airConditioning"
-                                checked={formData.airConditioning}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="airConditioning">Aer conditionat</label>
-                        </div>
-
-                        {/* Balcon */}
-                        <div className="form-group form-group-checkbox">
-                            <input
-                                type="checkbox"
-                                id="balcony"
-                                name="balcony"
-                                checked={formData.balcony}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="balcony">Balcon</label>
-                        </div>
-                    </div>{" "}
-                    {/* End checkbox grid */}
+                        {facilityOptions.map(facility => (
+                            <div className="form-group form-group-checkbox" key={facility.id}>
+                                <input
+                                    type="checkbox"
+                                    id={facility.id}
+                                    name={facility.id} // Numele este cheia din formData.facilities
+                                    checked={formData.facilities[facility.id]}
+                                    onChange={handleChange}
+                                />
+                                <label htmlFor={facility.id}>{facility.label}</label>
+                            </div>
+                        ))}
+                    </div>
 
                     {/* Imagini */}
                     <div className="form-group">
