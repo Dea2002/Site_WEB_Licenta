@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, ChangeEvent, FormEvent } from "react";
+import React, { useState, useEffect, useContext, useCallback, ChangeEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
@@ -52,9 +52,6 @@ const OwnerApartmentDetails: React.FC = () => {
     const [editableDiscount1, setEditableDiscount1] = useState<string>("");
     const [editableDiscount2, setEditableDiscount2] = useState<string>("");
     const [editableDiscount3, setEditableDiscount3] = useState<string>("");
-    const [isEditingDiscount1, setIsEditingDiscount1] = useState<boolean>(false);
-    const [isEditingDiscount2, setIsEditingDiscount2] = useState<boolean>(false);
-    const [isEditingDiscount3, setIsEditingDiscount3] = useState<boolean>(false);
 
     // O singura stare pentru a controla editarea intregii sectiuni de discounturi
     const [isEditingDiscounts, setIsEditingDiscounts] = useState<boolean>(false);

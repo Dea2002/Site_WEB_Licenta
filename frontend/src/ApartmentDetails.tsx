@@ -6,7 +6,7 @@ import { Apartment } from "./types"; // Assuming types.ts defines the Apartment 
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
-import { format, parseISO, differenceInCalendarDays, isAfter } from "date-fns";
+import { format, parseISO } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
@@ -364,9 +364,9 @@ const ApartmentDetails: React.FC = () => {
                     <div className="title-location-price">
                         <h2>Apartament in {apartment.location}</h2>
                         <p className="price-display">{apartment.price} RON / camera / noapte (fara reducere)</p>
-                        <p>{apartment.price * ((100 - apartment.discount1) / 100)} RON / camera / noapte pentru studentii de categoria 1 ({apartment.discount1}% discount)</p>
-                        <p>{apartment.price * ((100 - apartment.discount2) / 100)} RON / camera / noapte pentru studentii de categoria 2 ({apartment.discount2}% discount)</p>
-                        <p>{apartment.price * ((100 - apartment.discount3) / 100)} RON / camera / noapte pentru studentii de categoria 3 ({apartment.discount3}% discount)</p>
+                        <p>{apartment.price * ((100 - apartment.discounts.discount1) / 100)} RON / camera / noapte pentru studentii de categoria 1 ({apartment.discounts.discount1}% discount)</p>
+                        <p>{apartment.price * ((100 - apartment.discounts.discount2) / 100)} RON / camera / noapte pentru studentii de categoria 2 ({apartment.discounts.discount2}% discount)</p>
+                        <p>{apartment.price * ((100 - apartment.discounts.discount3) / 100)} RON / camera / noapte pentru studentii de categoria 3 ({apartment.discounts.discount3}% discount)</p>
                         <button
                             className="button-map"
                             onClick={() => handleLocationClick(apartment)}
@@ -413,20 +413,20 @@ const ApartmentDetails: React.FC = () => {
                         </h3>
                         <hr className="line-divider" />
                         <p>
-                            <span>Parcare:</span> {apartment.parking ? "Da" : "Nu"}
+                            <span>Parcare:</span> {apartment.facilities.parking ? "Da" : "Nu"}
                         </p>
                         <p>
                             <span>Prietenos cu animalele:</span>{" "}
-                            {apartment.petFriendly ? "Da" : "Nu"}
+                            {apartment.facilities.petFriendly ? "Da" : "Nu"}
                         </p>
                         <p>
-                            <span>Lift:</span> {apartment.elevator ? "Da" : "Nu"}
+                            <span>Lift:</span> {apartment.facilities.elevator ? "Da" : "Nu"}
                         </p>
                         <p>
-                            <span>Aer conditionat:</span> {apartment.airConditioning ? "Da" : "Nu"}
+                            <span>Aer conditionat:</span> {apartment.facilities.airConditioning ? "Da" : "Nu"}
                         </p>
                         <p>
-                            <span>Balcon:</span> {apartment.balcony ? "Da" : "Nu"}
+                            <span>Balcon:</span> {apartment.facilities.balcony ? "Da" : "Nu"}
                         </p>
                     </div>
 
@@ -438,20 +438,20 @@ const ApartmentDetails: React.FC = () => {
                         </h3>
                         <hr className="line-divider" />
                         <p>
-                            <span>Internet:</span> {apartment.internetPrice ?? "N/A"} RON
+                            <span>Internet:</span> {apartment.utilities.internetPrice ?? "N/A"} RON
                         </p>
                         <p>
-                            <span>TV:</span> {apartment.TVPrice ?? "N/A"} RON
+                            <span>TV:</span> {apartment.utilities.TVPrice ?? "N/A"} RON
                         </p>
                         <p>
-                            <span>Apa (estimat):</span> {apartment.waterPrice ?? "N/A"} RON
+                            <span>Apa (estimat):</span> {apartment.utilities.waterPrice ?? "N/A"} RON
                         </p>
                         <p>
-                            <span>Gaz (estimat):</span> {apartment.gasPrice ?? "N/A"} RON
+                            <span>Gaz (estimat):</span> {apartment.utilities.gasPrice ?? "N/A"} RON
                         </p>
                         <p>
                             <span>Electricitate (estimat):</span>{" "}
-                            {apartment.electricityPrice ?? "N/A"} RON
+                            {apartment.utilities.electricityPrice ?? "N/A"} RON
                         </p>
                     </div>
 

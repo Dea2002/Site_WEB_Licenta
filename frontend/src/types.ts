@@ -1,3 +1,5 @@
+import { User } from "./AuthContext";
+
 export interface Apartment {
     _id: string; // keep this
     numberOfRooms: number;
@@ -60,7 +62,7 @@ export interface Rental {
     _id: string;
     apartmentId: string;
     // Am adaptat la ce ai folosit in mapare: rental.clientData.fullName etc.
-    clientData: ClientData; // Sau tenant: TenantInfo daca asa e structura
+    clientData: User; // Sau tenant: TenantInfo daca asa e structura
     checkIn: string; // Sau startDate
     checkOut: string; // Sau endDate
     finalPrice: number; // Sau totalPriceAgreed

@@ -16,11 +16,29 @@ interface Filters {
     minSurface: string;
     maxSurface: string;
     available: boolean;
-    petFriendly: boolean;
-    parking: boolean;
-    elevator: boolean;
-    airConditioning: boolean;
-    balcony: boolean;
+    facilities: {
+        wifi: boolean;
+        parking: boolean;
+        airConditioning: boolean;
+        tvCable: boolean;
+        laundryMachine: boolean;
+        fullKitchen: boolean;
+        balcony: boolean;
+        petFriendly: boolean;
+        pool: boolean;
+        gym: boolean;
+        elevator: boolean;
+        terrace: boolean;
+        bikeStorage: boolean;
+        storageRoom: boolean;
+        rooftop: boolean;
+        fireAlarm: boolean;
+        smokeDetector: boolean;
+        intercom: boolean;
+        videoSurveillance: boolean;
+        soundproofing: boolean;
+        underfloorHeating: boolean;
+    };
     // acceptsColleagues: boolean;
 }
 // --- END: Updated Filters Interface ---
@@ -45,11 +63,29 @@ const Home: React.FC = () => {
         minSurface: "",
         maxSurface: "",
         available: false, // Default to showing all initially
-        petFriendly: false,
-        parking: false,
-        elevator: false,
-        airConditioning: false,
-        balcony: false,
+        facilities: {
+            wifi: false,
+            parking: false,
+            airConditioning: false,
+            tvCable: false,
+            laundryMachine: false,
+            fullKitchen: false,
+            balcony: false,
+            petFriendly: false,
+            pool: false,
+            gym: false,
+            elevator: false,
+            terrace: false,
+            bikeStorage: false,
+            storageRoom: false,
+            rooftop: false,
+            fireAlarm: false,
+            smokeDetector: false,
+            intercom: false,
+            videoSurveillance: false,
+            soundproofing: false,
+            underfloorHeating: false,
+        },
         // acceptsColleagues: false,
     };
     // --- END: Updated Initial Filters State ---
@@ -168,20 +204,20 @@ const Home: React.FC = () => {
         }
 
 
-        if (currentFilters.petFriendly) {
-            filtered = filtered.filter((apt) => apt.petFriendly === true);
+        if (currentFilters.facilities.petFriendly) {
+            filtered = filtered.filter((apt) => apt.facilities.petFriendly === true);
         }
-        if (currentFilters.parking) {
-            filtered = filtered.filter((apt) => apt.parking === true);
+        if (currentFilters.facilities.parking) {
+            filtered = filtered.filter((apt) => apt.facilities.parking === true);
         }
-        if (currentFilters.elevator) {
-            filtered = filtered.filter((apt) => apt.elevator === true);
+        if (currentFilters.facilities.elevator) {
+            filtered = filtered.filter((apt) => apt.facilities.elevator === true);
         }
-        if (currentFilters.airConditioning) {
-            filtered = filtered.filter((apt) => apt.airConditioning === true);
+        if (currentFilters.facilities.airConditioning) {
+            filtered = filtered.filter((apt) => apt.facilities.airConditioning === true);
         }
-        if (currentFilters.balcony) {
-            filtered = filtered.filter((apt) => apt.balcony === true);
+        if (currentFilters.facilities.balcony) {
+            filtered = filtered.filter((apt) => apt.facilities.balcony === true);
         }
 
         setFilteredApartments(filtered);
@@ -192,12 +228,23 @@ const Home: React.FC = () => {
         applyFilters(apartments, filters);
     };
 
-    // Function to update a specific filter value
-    const handleFilterChange = (filterName: keyof Filters, value: string | boolean) => {
-        setFilters((prevFilters) => ({
-            ...prevFilters,
-            [filterName]: value,
-        }));
+    // Function to update a specific filter value, supporting both top-level and facilities keys
+    const handleFilterChange = (filterName: keyof Filters | keyof Filters["facilities"], value: string | boolean) => {
+        setFilters((prevFilters) => {
+            if (filterName in prevFilters.facilities) {
+                return {
+                    ...prevFilters,
+                    facilities: {
+                        ...prevFilters.facilities,
+                        [filterName]: value as boolean,
+                    },
+                };
+            }
+            return {
+                ...prevFilters,
+                [filterName]: value,
+            };
+        });
         // Note: Filtering does NOT happen automatically here anymore
     };
 
@@ -356,7 +403,7 @@ const Home: React.FC = () => {
                         <label>
                             <input
                                 type="checkbox"
-                                checked={filters.parking}
+                                checked={filters.facilities.parking}
                                 onChange={(e) => handleFilterChange("parking", e.target.checked)}
                             />
                             Parcare
@@ -364,7 +411,7 @@ const Home: React.FC = () => {
                         <label>
                             <input
                                 type="checkbox"
-                                checked={filters.elevator}
+                                checked={filters.facilities.elevator}
                                 onChange={(e) => handleFilterChange("elevator", e.target.checked)}
                             />
                             Lift
@@ -372,7 +419,7 @@ const Home: React.FC = () => {
                         <label>
                             <input
                                 type="checkbox"
-                                checked={filters.balcony}
+                                checked={filters.facilities.balcony}
                                 onChange={(e) => handleFilterChange("balcony", e.target.checked)}
                             />
                             Balcon
@@ -380,7 +427,7 @@ const Home: React.FC = () => {
                         <label>
                             <input
                                 type="checkbox"
-                                checked={filters.airConditioning}
+                                checked={filters.facilities.airConditioning}
                                 onChange={(e) =>
                                     handleFilterChange("airConditioning", e.target.checked)
                                 }
@@ -390,7 +437,7 @@ const Home: React.FC = () => {
                         <label>
                             <input
                                 type="checkbox"
-                                checked={filters.petFriendly}
+                                checked={filters.facilities.petFriendly}
                                 onChange={(e) =>
                                     handleFilterChange("petFriendly", e.target.checked)
                                 }
