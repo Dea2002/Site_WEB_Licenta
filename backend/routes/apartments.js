@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { ObjectId } = require('mongodb');
 const authenticateToken = require('../middleware/authenticateToken');
-
+const { bucket, getBucket } = require('../config/firebaseAdmin');
 
 function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService) {
 
@@ -20,20 +20,20 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
             if (!apartment) {
-                return res.status(404).json({ message: "Apartamentul nu a fost găsit." });
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
             }
             if (apartment.ownerId.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ message: "Neautorizat să accesați istoricul." });
+                return res.status(403).json({ message: "Neautorizat sa accesati istoricul." });
             }
 
             const currentDate = new Date();
 
             // Construim interogarea pentru istoric
             const query = {
-                apartament: new ObjectId(apartmentId), // Filtrăm după ID-ul apartamentului
+                apartament: new ObjectId(apartmentId), // Filtram dupa ID-ul apartamentului
                 $or: [
                     { isActive: false },             // Toate chiriile anulate (isActive este false)
-                    { checkOut: { $lt: currentDate } } // Sau chiriile care s-au încheiat (checkOut este în trecut)
+                    { checkOut: { $lt: currentDate } } // Sau chiriile care s-au incheiat (checkOut este in trecut)
                 ]
             };
 
@@ -49,19 +49,19 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             }
 
             const rentals = await reservationHistoryCollection.find(query)
-                .sort({ checkOut: -1 }) // Sortează după data de sfârșit, cele mai recente încheiate/anulate primele
+                .sort({ checkOut: -1 }) // Sorteaza dupa data de sfarsit, cele mai recente incheiate/anulate primele
                 .skip(skip)
                 .limit(limit)
                 .toArray();
 
             const totalPages = Math.ceil(totalRentals / limit);
 
-            // Poți adăuga un câmp `derivedStatus` la fiecare rental în frontend sau aici pe backend
-            // pentru o afișare mai clară în UI (ex: "Completed", "Cancelled", "Active")
+            // Poti adauga un camp `derivedStatus` la fiecare rental in frontend sau aici pe backend
+            // pentru o afisare mai clara in UI (ex: "Completed", "Cancelled", "Active")
             const processedRentals = rentals.map(rental => {
                 let derivedStatus = "Unknown";
                 if (!rental.isActive) {
-                    derivedStatus = "Cancelled"; // Presupunem că isActive: false înseamnă anulat
+                    derivedStatus = "Cancelled"; // Presupunem ca isActive: false inseamna anulat
                 } else if (new Date(rental.checkOut) < currentDate) {
                     derivedStatus = "Completed";
                 } else if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate) {
@@ -82,7 +82,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
         } catch (error) {
             console.error('Eroare la preluarea istoricului chiriei:', error);
-            res.status(500).json({ message: 'Eroare internă a serverului la preluarea istoricului.' });
+            res.status(500).json({ message: 'Eroare interna a serverului la preluarea istoricului.' });
         }
     });
 
@@ -92,7 +92,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
             if (!apartment) {
-                return res.status(404).json({ message: "Apartamentul nu a fost găsit." });
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
             }
             if (apartment.ownerId.toString() !== req.user._id.toString()) {
                 return res.status(403).json({ message: "Neautorizat." });
@@ -100,18 +100,18 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             const currentDate = new Date();
 
-            // Construim interogarea pentru chiriile active și viitoare
+            // Construim interogarea pentru chiriile active si viitoare
             const query = {
                 apartament: new ObjectId(apartmentId), // ID-ul apartamentului
                 isActive: true,                       // Doar cele care sunt active (nu anulate)
-                checkOut: { $gte: currentDate }       // Și a căror dată de checkOut este azi sau în viitor
+                checkOut: { $gte: currentDate }       // si a caror data de checkOut este azi sau in viitor
             };
 
             const rentals = await reservationHistoryCollection.find(query)
-                .sort({ checkIn: 1 }) // Sortează după data de început, cele mai apropiate primele
+                .sort({ checkIn: 1 }) // Sorteaza dupa data de inceput, cele mai apropiate primele
                 .toArray();
 
-            // Și aici poți adăuga `derivedStatus` dacă e util
+            // si aici poti adauga `derivedStatus` daca e util
             const processedRentals = rentals.map(rental => {
                 let derivedStatus = "Unknown";
                 if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate && rental.isActive) { // isActive e deja filtrat true
@@ -123,11 +123,11 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             });
 
 
-            res.json(processedRentals); // Returnează array-ul de închirieri
+            res.json(processedRentals); // Returneaza array-ul de inchirieri
 
         } catch (error) {
-            console.error('Eroare la preluarea chiriilor curente și viitoare:', error);
-            res.status(500).json({ message: 'Eroare internă a serverului.' });
+            console.error('Eroare la preluarea chiriilor curente si viitoare:', error);
+            res.status(500).json({ message: 'Eroare interna a serverului.' });
         }
     });
 
@@ -137,6 +137,238 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         const result = await apartmentsCollection.find(query).toArray();
         res.send(result);
 
+    });
+
+    router.put('/:apartmentId/add-images', authenticateToken, async (req, res) => {
+        const { apartmentId } = req.params;
+        const { newImageUrlsToAdd } = req.body; // Ar trebui sa fie un array de string-uri (URL-uri)
+        const userId = req.user._id; // ID-ul utilizatorului autentificat, setat de authenticateToken
+
+        // 1. Validare input
+        if (!ObjectId.isValid(apartmentId)) {
+            return res.status(400).json({ message: "ID apartament invalid." });
+        }
+        if (!newImageUrlsToAdd || !Array.isArray(newImageUrlsToAdd) || newImageUrlsToAdd.some(url => typeof url !== 'string')) {
+            return res.status(400).json({ message: "Lista de URL-uri noi este invalida sau lipseste. Trebuie sa fie un array de string-uri." });
+        }
+        if (newImageUrlsToAdd.length === 0) {
+            // Tehnic, nu e o eroare, dar frontend-ul nu ar trebui sa trimita un array gol.
+            // Poti alege sa returnezi apartamentul existent sau un mesaj specific.
+            const existingApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            if (!existingApartment) return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
+            return res.status(200).json(existingApartment); // Returneaza apartamentul neschimbat
+        }
+
+        try {
+            // Obtine colectia (daca nu e definita global in fisier)
+
+
+            // 2. Verifica existenta apartamentului si proprietarul
+            const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+
+            if (!apartment) {
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
+            }
+
+            // Asigura-te ca utilizatorul autentificat este proprietarul apartamentului
+            if (apartment.ownerId.toString() !== userId.toString()) {
+                return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
+            }
+
+            // 3. Actualizeaza documentul in MongoDB
+            // Adauga noile URL-uri la array-ul existent `images`.
+            // Folosim `$addToSet` cu `$each` pentru a adauga fiecare element din array-ul `newImageUrlsToAdd`
+            // la array-ul `images`, doar daca elementul nu exista deja in `images`.
+            // Acest lucru previne adaugarea de URL-uri duplicate.
+            const updateResult = await apartmentsCollection.updateOne(
+                { _id: new ObjectId(apartmentId) },
+                { $addToSet: { images: { $each: newImageUrlsToAdd } } }
+                // Alternativ, daca vrei sa permiti duplicate sau ordinea e importanta si vrei sa adaugi la sfarsit:
+                // { $push: { images: { $each: newImageUrlsToAdd } } }
+            );
+
+            if (updateResult.matchedCount === 0) {
+                // Acest caz nu ar trebui sa se intample datorita verificarii `apartment` de mai sus.
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit pentru actualizare (match count)." });
+            }
+
+            // Chiar daca modifiedCount este 0 (ex: toate URL-urile existau deja si s-a folosit $addToSet),
+            // operatiunea este considerata un succes.
+
+            // 4. Preluam si returnam documentul actualizat pentru a fi consistent cu frontend-ul
+            const updatedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            if (!updatedApartment) {
+                // Caz improbabil daca updateResult.matchedCount era 1
+                return res.status(404).json({ message: "Apartamentul actualizat nu a putut fi regasit." });
+            }
+
+            res.status(200).json(updatedApartment);
+
+        } catch (error) {
+            console.error("Eroare la adaugarea imaginilor in MongoDB pentru apartamentul", apartmentId, ":", error);
+            res.status(500).json({ message: "Eroare server la adaugarea imaginilor." });
+        }
+    });
+
+    router.put('/:apartmentId/remove-image-reference', authenticateToken, async (req, res) => {
+        // Sau router.delete('/:apartmentId/image-reference' ... ) daca preferi metoda DELETE
+        const { apartmentId } = req.params;
+        const { imageUrlToDelete } = req.body;
+        const userId = req.user._id;
+
+        if (!ObjectId.isValid(apartmentId)) {
+            return res.status(400).json({ message: "ID apartament invalid." });
+        }
+        if (!imageUrlToDelete) {
+            return res.status(400).json({ message: "URL-ul imaginii este necesar." });
+        }
+
+        try {
+            const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            if (!apartment) {
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
+            }
+            if (apartment.ownerId.toString() !== userId.toString()) {
+                return res.status(403).json({ message: "Neautorizat." });
+            }
+
+            // Doar actualizeaza MongoDB
+            const result = await apartmentsCollection.updateOne(
+                { _id: new ObjectId(apartmentId) },
+                { $pull: { images: imageUrlToDelete } }
+            );
+
+            if (result.matchedCount === 0) {
+                // Ar trebui sa fie prins de verificarea apartment de mai sus
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit pentru actualizare (MongoDB)." });
+            }
+
+            const updatedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            res.status(200).json({ message: "Referinta imaginii a fost stearsa.", apartment: updatedApartment });
+
+        } catch (error) {
+            console.error("Eroare la stergerea referintei imaginii din MongoDB:", error);
+            res.status(500).json({ message: "Eroare server la actualizarea listei de imagini." });
+        }
+    });
+
+    router.put('/:apartmentId', authenticateToken, async (req, res) => {
+        const { apartmentId } = req.params;
+        const updates = req.body; // Campurile de actualizat trimise de frontend
+        const userId = req.user._id; // ID-ul utilizatorului autentificat
+
+        if (!ObjectId.isValid(apartmentId)) {
+            return res.status(400).json({ message: "ID apartament invalid." });
+        }
+
+        try {
+            // Gaseste apartamentul pentru a verifica proprietarul
+            const apartmentToUpdate = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+
+            if (!apartmentToUpdate) {
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
+            }
+
+            // Verifica daca utilizatorul autentificat este proprietarul apartamentului
+            if (apartmentToUpdate.ownerId.toString() !== userId.toString()) {
+                return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
+            }
+
+            // Construieste obiectul de actualizare pentru MongoDB ($set)
+            // Validam si curatam `updates` pentru a preveni injectarea de campuri nedorite
+            // si pentru a asigura tipurile corecte
+            const updatePayload = {};
+            const allowedRootFields = [
+                'price', 'renovationYear', 'images',
+                // Nu permitem actualizarea directa a campurilor ca numberOfRooms aici,
+                // daca nu sunt explicit gestionate.
+                // Adauga aici si alte campuri de la radacina pe care le permiti a fi actualizate direct.
+            ];
+            const allowedNestedObjects = ['discounts', 'utilities', 'facilities'];
+
+            for (const key in updates) {
+                if (allowedRootFields.includes(key)) {
+                    // Pentru campurile numerice de la radacina, asigura-te ca sunt numere daca nu sunt null
+                    if (['price', 'renovationYear'].includes(key)) {
+                        updatePayload[key] = (updates[key] === null || updates[key] === undefined) ? null : Number(updates[key]);
+                    } else {
+                        updatePayload[key] = updates[key]; // ex: images
+                    }
+                } else if (allowedNestedObjects.includes(key) && typeof updates[key] === 'object' && updates[key] !== null) {
+                    // Pentru obiecte nested, le preluam asa cum sunt, dar ideal ar fi sa validam si structura lor interna
+                    updatePayload[key] = {}; // Initializam pentru a evita probleme cu prototype pollution
+
+                    if (key === 'discounts') {
+                        const d = updates.discounts;
+                        updatePayload.discounts = {
+                            discount1: (d.discount1 === null || d.discount1 === undefined) ? null : Number(d.discount1),
+                            discount2: (d.discount2 === null || d.discount2 === undefined) ? null : Number(d.discount2),
+                            discount3: (d.discount3 === null || d.discount3 === undefined) ? null : Number(d.discount3),
+                        };
+                    } else if (key === 'utilities') {
+                        const u = updates.utilities;
+                        updatePayload.utilities = {
+                            internetPrice: (u.internetPrice === null || u.internetPrice === undefined) ? null : Number(u.internetPrice),
+                            TVPrice: (u.TVPrice === null || u.TVPrice === undefined) ? null : Number(u.TVPrice),
+                            waterPrice: (u.waterPrice === null || u.waterPrice === undefined) ? null : Number(u.waterPrice),
+                            gasPrice: (u.gasPrice === null || u.gasPrice === undefined) ? null : Number(u.gasPrice),
+                            electricityPrice: (u.electricityPrice === null || u.electricityPrice === undefined) ? null : Number(u.electricityPrice),
+                        };
+                    } else if (key === 'facilities') {
+                        // Aici preluam direct obiectul `facilities` trimis de frontend,
+                        // presupunand ca frontend-ul trimite structura corecta cu valori booleene.
+                        // Poti adauga validare suplimentara pentru cheile permise in `facilities`
+                        const f = updates.facilities;
+                        const validFacilitiesPayload = {};
+                        const allowedFacilityKeys = [ // Cheile definite in interfata ta
+                            'wifi', 'parking', 'airConditioning', 'tvCable', 'laundryMachine',
+                            'fullKitchen', 'balcony', 'petFriendly', 'pool', 'gym', 'elevator',
+                            'terrace', 'bikeStorage', 'storageRoom', 'rooftop', 'fireAlarm',
+                            'smokeDetector', 'intercom', 'videoSurveillance', 'soundproofing',
+                            'underfloorHeating'
+                        ];
+                        for (const facilityKey in f) {
+                            if (allowedFacilityKeys.includes(facilityKey) && typeof f[facilityKey] === 'boolean') {
+                                validFacilitiesPayload[facilityKey] = f[facilityKey];
+                            }
+                        }
+                        updatePayload.facilities = validFacilitiesPayload;
+                    }
+                }
+                // Ignoram alte campuri pentru securitate
+            }
+
+            if (Object.keys(updatePayload).length === 0) {
+                return res.status(400).json({ message: "Niciun camp valid de actualizat furnizat." });
+            }
+
+            // Adauga `updatedAt` daca doresti
+            // updatePayload.updatedAt = new Date();
+
+            const result = await apartmentsCollection.updateOne(
+                { _id: new ObjectId(apartmentId) },
+                { $set: updatePayload }
+            );
+
+            if (result.matchedCount === 0) {
+                // Acest caz nu ar trebui sa se intample din cauza verificarii `apartmentToUpdate` de mai sus
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit pentru actualizare (match)." });
+            }
+
+            if (result.modifiedCount === 0 && result.matchedCount === 1) {
+                // Nicio modificare efectiva, dar requestul a fost ok. Returnam apartamentul existent.
+                const notModifiedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+                return res.status(200).json(notModifiedApartment);
+            }
+
+            // Preluam si returnam documentul actualizat
+            const updatedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            res.status(200).json(updatedApartment);
+
+        } catch (error) {
+            console.error("Eroare la actualizarea apartamentului:", error);
+            res.status(500).json({ message: "Eroare server la actualizarea apartamentului." });
+        }
     });
 
     router.get('/:id', async (req, res) => {
@@ -315,6 +547,96 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     }
     );
 
+
+    router.delete('/:apartmentId', authenticateToken, async (req, res) => {
+        const { apartmentId } = req.params;
+        const userId = req.user._id;
+
+        if (!ObjectId.isValid(apartmentId)) {
+            return res.status(400).json({ message: "ID apartament invalid." });
+        }
+
+        try {
+            const bucket = getBucket(); // Obtine instanta bucket-ului Firebase
+
+            // 1. Gaseste apartamentul pentru a verifica proprietarul sI pentru a obtine lista de imagini
+            const apartmentToDelete = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+
+            if (!apartmentToDelete) {
+                return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
+            }
+
+            if (apartmentToDelete.ownerId.toString() !== userId.toString()) {
+                return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
+            }
+
+            // 2. sterge imaginile asociate din Firebase Storage
+            if (apartmentToDelete.images && apartmentToDelete.images.length > 0) {
+                console.log(`incep stergerea a ${apartmentToDelete.images.length} imagini din Firebase pentru apartamentul ${apartmentId}...`);
+                const deletePromises = apartmentToDelete.images.map(async (imageUrl) => {
+                    try {
+                        // Extrage calea fisierului din URL (aceeasi logica ca la stergerea individuala)
+                        let filePathInFirebase;
+                        const url = new URL(imageUrl);
+                        const pathName = url.pathname;
+                        const parts = pathName.split('/o/');
+                        if (parts.length > 1) {
+                            filePathInFirebase = decodeURIComponent(parts[1]);
+                        } else {
+                            const potentialPath = imageUrl.split(`${bucket.name}/`)[1]?.split('?')[0];
+                            if (potentialPath) {
+                                filePathInFirebase = decodeURIComponent(potentialPath);
+                            } else {
+                                console.warn(`Nu s-a putut extrage calea din URL-ul: ${imageUrl} pentru apartamentul ${apartmentId}. Imaginea nu va fi stearsa din Firebase.`);
+                                return; // Treci la urmatoarea imagine daca nu se poate extrage calea
+                            }
+                        }
+
+                        if (filePathInFirebase) {
+                            await bucket.file(filePathInFirebase).delete();
+                            console.log(`Imaginea ${filePathInFirebase} stearsa cu succes din Firebase.`);
+                        }
+                    } catch (storageError) {
+                        // Logheaza eroarea dar continua procesul de stergere a celorlalte imagini si a documentului din DB
+                        // Poti alege o strategie mai stricta daca stergerea din Firebase este critica.
+                        if (storageError.code === 404) {
+                            console.warn(`Imaginea la URL ${imageUrl} (cale: ${filePathInFirebase || 'necunoscuta'}) nu a fost gasita in Firebase Storage pentru apartamentul ${apartmentId}.`);
+                        } else {
+                            console.error(`Eroare la stergerea imaginii ${imageUrl} (cale: ${filePathInFirebase || 'necunoscuta'}) din Firebase pentru apartamentul ${apartmentId}:`, storageError);
+                        }
+                    }
+                });
+
+                // Asteapta finalizarea tuturor promisiunilor de stergere din Firebase
+                // Folosim Promise.allSettled pentru a continua chiar daca unele stergeri esueaza,
+                // pentru a ne asigura ca incercam sa stergem documentul din DB.
+                const results = await Promise.allSettled(deletePromises);
+                results.forEach(result => {
+                    if (result.status === 'rejected') {
+                        console.error("O operatiune de stergere a imaginii din Firebase a esuat:", result.reason);
+                    }
+                });
+            } else {
+                console.log(`Apartamentul ${apartmentId} nu are imagini asociate in Firebase de sters.`);
+            }
+
+            // 3. sterge documentul apartamentului din MongoDB
+            const deleteResult = await apartmentsCollection.deleteOne({ _id: new ObjectId(apartmentId) });
+
+            if (deleteResult.deletedCount === 0) {
+                // Ar fi ciudat sa ajungem aici daca findOne a functionat, dar e o verificare de siguranta
+                console.warn(`Apartamentul ${apartmentId} a fost gasit dar nu a putut fi sters din MongoDB.`);
+                return res.status(500).json({ message: "Apartamentul a fost gasit dar nu a putut fi sters din baza de date." });
+            }
+
+            console.log(`Apartamentul ${apartmentId} si imaginile asociate (daca existau) au fost sterse.`);
+            res.status(200).json({ message: "Apartamentul si imaginile asociate au fost sterse cu succes." });
+
+        } catch (error) {
+            console.error(`Eroare generala la stergerea apartamentului ${apartmentId}:`, error);
+            res.status(500).json({ message: "Eroare server la stergerea apartamentului." });
+        }
+    });
 
     return router;
 }

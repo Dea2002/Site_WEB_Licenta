@@ -23,7 +23,7 @@ async function connectDB() {
     if (!isConnected) {
         await client.connect();
         isConnected = true;
-        console.log('🗄️ MongoDB connected');
+        console.log('MongoDB connected');
     }
     // a doua data pur si simplu returneaza database
     return client.db(process.env.DB_NAME || 'inchiriere-apartamente');

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext, useCallback, ChangeEvent } from
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
+import { ref, deleteObject, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "./firebaseConfig";
 import { Apartment, PaginatedRentals, Rental } from "./types";
 import "./OwnerApartmentDetails.css"; // Asigura-te ca CSS-ul este actualizat
 
@@ -331,46 +333,171 @@ const OwnerApartmentDetails: React.FC = () => {
             return newPreviews;
         });
     };
+
+    const uploadSingleFileToFirebase = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            // Creeaza o cale unica pentru fiecare imagine, poate include si ID-ul apartamentului daca e disponibil
+            // si daca vrei sa organizezi fisierele pe apartament.
+            // Pentru moment, folosim o cale simpla cu timestamp.
+            const filePath = `apartments/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, filePath);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on(
+                "state_changed",
+                () => {
+                    // Poti adauga logica pentru progresul upload-ului aici daca doresti
+                    // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    // console.log('Upload is ' + progress + '% done');
+                },
+                (error) => {
+                    // Gestioneaza erorile de upload Firebase aici
+                    console.error("Eroare Firebase la upload fisier:", error);
+                    switch (error.code) {
+                        case 'storage/unauthorized':
+                            reject(new Error("Utilizatorul nu are permisiunea de a accesa obiectul. Verificati regulile de securitate Firebase Storage."));
+                            break;
+                        case 'storage/canceled':
+                            reject(new Error("Upload-ul a fost anulat de utilizator."));
+                            break;
+                        case 'storage/unknown':
+                        default:
+                            reject(new Error("Eroare necunoscuta la upload-ul fisierului in Firebase Storage."));
+                            break;
+                    }
+                },
+                async () => {
+                    // Upload-ul s-a finalizat cu succes
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(downloadURL);
+                    } catch (getUrlError) {
+                        console.error("Eroare la obtinerea URL-ului de descarcare:", getUrlError);
+                        reject(getUrlError);
+                    }
+                }
+            );
+        });
+    };
+
+
     const uploadImages = async () => {
-        if (imageFiles.length === 0 || !apartment) return;
+        if (imageFiles.length === 0 || !apartment) {
+            if (imageFiles.length === 0) alert("Va rugam selectati cel putin o imagine.");
+            return;
+        }
+
         setIsUploadingImages(true);
         setError(null);
-        const formData = new FormData();
-        imageFiles.forEach(file => formData.append('images', file)); // 'images' trebuie sa fie numele asteptat de backend
+        let newImageUrls: string[] = [];
 
         try {
-            const response = await api.post<Apartment>(`/apartments/${apartment._id}/images`, formData, {
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-            });
-            setApartment(response.data); // Backend-ul ar trebui sa returneze apartamentul actualizat cu noile URL-uri
+            // Pasul 1: incarca toate fisierele selectate in Firebase Storage
+            // si colecteaza URL-urile lor.
+            // `Promise.all` asteapta ca toate promisiunile de upload sa se rezolve.
+            const uploadPromises = imageFiles.map(file => uploadSingleFileToFirebase(file));
+            newImageUrls = await Promise.all(uploadPromises);
+
+            console.log("URL-uri noi obtinute din Firebase:", newImageUrls);
+
+            if (newImageUrls.length === 0) {
+                // Acest caz nu ar trebui sa se intample daca imageFiles avea elemente
+                // si nu au fost erori la upload-ul individual.
+                throw new Error("Niciun URL de imagine nu a fost generat.");
+            }
+
+            // Pasul 2: Trimite URL-urile noi catre backend pentru a fi adaugate in MongoDB.
+            // Backend-ul ar trebui sa combine aceste URL-uri noi cu cele existente.
+            // Presupunem un endpoint PUT care accepta un array de URL-uri noi.
+            const response = await api.put<Apartment>(
+                `/apartments/${apartment._id}/add-images`, // Endpoint nou sau ajusteaza cel existent
+                { newImageUrlsToAdd: newImageUrls }, // Trimitem array-ul de URL-uri
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setApartment(response.data); // Backend-ul returneaza apartamentul actualizat
+
+            // Curata starea fisierelor si preview-urilor locale
+            imagePreviews.forEach(url => URL.revokeObjectURL(url));
             setImageFiles([]);
-            imagePreviews.forEach(url => URL.revokeObjectURL(url)); // Clean up
             setImagePreviews([]);
-            alert("Imaginile au fost incarcate cu succes!");
+
+            alert(`${newImageUrls.length} imagini incarcate si adaugate cu succes!`);
+
         } catch (err: any) {
-            console.error("Eroare la incarcarea imaginilor:", err);
-            setError(err.response?.data?.message || "Eroare la incarcarea imaginilor.");
+            console.error("Eroare in procesul de incarcare a imaginilor:", err);
+            // Daca eroarea vine de la backend (are `err.response`)
+            if (err.response && err.response.data && err.response.data.message) {
+                setError(err.response.data.message);
+            }
+            // Daca eroarea vine de la `uploadSingleFileToFirebase` (este deja un Error object)
+            else if (err instanceof Error) {
+                setError(err.message);
+            }
+            // Fallback
+            else {
+                setError("Eroare la incarcarea imaginilor. Va rugam incercati din nou.");
+            }
+
+            // IMPORTANT: Daca unele imagini s-au incarcat in Firebase dar request-ul la backend a esuat,
+            // acele imagini vor ramane in Firebase Storage fara a fi referentiate in MongoDB.
+            // Ai putea adauga o logica de cleanup aici, desi e complexa.
+            // De ex., ai putea incerca sa stergi `newImageUrls` din Firebase daca pasul 2 esueaza.
+            // Sau sa ai un sistem de curatare a fisierelor orfane.
+            if (newImageUrls.length > 0 && err.response) { // Daca avem URL-uri dar backend-ul a esuat
+                console.warn("Imagini incarcate in Firebase, dar eroare la salvarea referintelor in DB:", newImageUrls);
+                // Aici ai putea implementa o logica de rollback/stergere din Firebase
+            }
+
         } finally {
             setIsUploadingImages(false);
         }
     };
+
     const deleteExistingImage = async (imageUrl: string) => {
-        if (!apartment || !window.confirm("Sigur doriti sa stergeti aceasta imagine?")) return;
-        setIsSaving(prev => ({ ...prev, deleteImage: true }));
+        if (!apartment || !window.confirm("Sigur doriti sa stergeti aceasta imagine si din spatiul de stocare? Aceasta actiune este ireversibila.")) return;
+
+        // Seteaza o cheie de salvare specifica pentru aceasta operatiune
+        const savingKey = `deleteImage_${imageUrl}`;
+        setIsSaving(prev => ({ ...prev, [savingKey]: true }));
+        setError(null);
+
         try {
-            // Presupunem un endpoint care primeste URL-ul imaginii de sters
-            // sau trimitem intreaga lista de imagini actualizata la endpoint-ul PUT general
-            const updatedImages = apartment.images.filter(img => img !== imageUrl);
-            const response = await api.put<Apartment>(`/apartments/${apartment._id}`, { images: updatedImages }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setApartment(response.data);
-            alert("Imagine stearsa cu succes!");
-        } catch (err: any) {
-            console.error("Eroare la stergerea imaginii:", err);
-            setError(err.response?.data?.message || "Eroare la stergerea imaginii.");
+
+            // --- Pasul 1: sterge din Firebase Storage (Client-side) ---
+            // Extrage referinta la fisier din URL.
+            // Firebase Storage URL-urile pot fi parsate direct de functia ref.
+            const imageRef = ref(storage, imageUrl); // imageUrl ar trebui sa fie URL-ul complet gs:// sau https://
+
+            await deleteObject(imageRef);
+            console.log("Imagine stearsa cu succes din Firebase Storage.");
+
+            // Noul endpoint pe backend: DELETE /api/apartments/:apartmentId/images
+            // Trimitem URL-ul imaginii in corpul request-ului sau ca query param
+            // Aici folosim corpul request-ului
+            const response = await api.put<{ apartment: Apartment }>( // Sau un endpoint DELETE dedicat
+                `/apartments/${apartment._id}/remove-image-reference`, // Endpoint nou/ajustat
+                { imageUrlToDelete: imageUrl }, // Trimitem URL-ul in corpul request-ului
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setApartment(response.data.apartment); // Presupunand ca backend-ul returneaza apartamentul actualizat
+            alert("Imaginea a fost stearsa cu succes!");
+
+        } catch (error: any) {
+            console.error("Eroare la stergerea imaginii:", error);
+            if (error.code === 'storage/object-not-found') {
+                // Daca fisierul nu a fost gasit in Storage, s-ar putea sa vrem totusi
+                // sa incercam sa stergem referinta din DB.
+                console.warn("Imaginea nu a fost gasita in Firebase Storage, se incearca stergerea referintei din DB.");
+                // Poti re-incerca doar pasul 2 aici sau sa gestionezi altfel.
+                // Pentru simplitate, vom afisa o eroare generala.
+                setError("Imaginea nu a fost gasita in spatiul de stocare, dar referinta ar putea fi inca in baza de date.");
+            } else {
+                setError(error.response?.data?.message || error.message || "Nu s-a putut sterge imaginea.");
+            }
         } finally {
-            setIsSaving(prev => ({ ...prev, deleteImage: false }));
+            setIsSaving(prev => ({ ...prev, [savingKey]: false }));
         }
     };
 
@@ -643,27 +770,27 @@ const OwnerApartmentDetails: React.FC = () => {
 
             {/* --- Utility Prices Section --- */}
             <section className="details-section">
-                <h2>Preturi Utilitati (RON/luna sau per unitate)</h2>
+                <h2>Preturi Utilitati (RON/luna)</h2>
                 {isEditingUtilityPrices ? (
                     <div className="edit-mode-form">
                         <div className="utility-price-item-edit">
-                            <label htmlFor="internetPriceEdit">Internet:</label>
+                            <label htmlFor="internetPriceEdit"><strong>Internet:</strong></label>
                             <input id="internetPriceEdit" type="number" placeholder="Pret Internet" value={editableInternetPrice} onChange={e => setEditableInternetPrice(e.target.value)} disabled={isSaving['Preturi Utilitati']} />
                         </div>
                         <div className="utility-price-item-edit">
-                            <label htmlFor="tvPriceEdit">TV:</label>
+                            <label htmlFor="tvPriceEdit"><strong>TV:</strong></label>
                             <input id="tvPriceEdit" type="number" placeholder="Pret TV" value={editableTVPrice} onChange={e => setEditableTVPrice(e.target.value)} disabled={isSaving['Preturi Utilitati']} />
                         </div>
                         <div className="utility-price-item-edit">
-                            <label htmlFor="waterPriceEdit">Apa:</label>
+                            <label htmlFor="waterPriceEdit"><strong>Apa:</strong></label>
                             <input id="waterPriceEdit" type="number" placeholder="Pret Apa" value={editableWaterPrice} onChange={e => setEditableWaterPrice(e.target.value)} disabled={isSaving['Preturi Utilitati']} />
                         </div>
                         <div className="utility-price-item-edit">
-                            <label htmlFor="gasPriceEdit">Gaz:</label>
+                            <label htmlFor="gasPriceEdit"><strong>Gaz:</strong></label>
                             <input id="gasPriceEdit" type="number" placeholder="Pret Gaz" value={editableGasPrice} onChange={e => setEditableGasPrice(e.target.value)} disabled={isSaving['Preturi Utilitati']} />
                         </div>
                         <div className="utility-price-item-edit">
-                            <label htmlFor="electricityPriceEdit">Electricitate:</label>
+                            <label htmlFor="electricityPriceEdit"><strong>Electricitate:</strong></label>
                             <input id="electricityPriceEdit" type="number" placeholder="Pret Electricitate" value={editableElectricityPrice} onChange={e => setEditableElectricityPrice(e.target.value)} disabled={isSaving['Preturi Utilitati']} />
                         </div>
                         <div className="form-actions">
@@ -673,11 +800,11 @@ const OwnerApartmentDetails: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        <p>Internet: {apartment.utilities?.internetPrice ?? "N/A"} RON</p>
-                        <p>TV: {apartment.utilities?.TVPrice ?? "N/A"} RON</p>
-                        <p>Apa: {apartment.utilities?.waterPrice ?? "N/A"} RON</p>
-                        <p>Gaz: {apartment.utilities?.gasPrice ?? "N/A"} RON</p>
-                        <p>Electricitate: {apartment.utilities?.electricityPrice ?? "N/A"} RON</p>
+                        <p><strong>Internet:</strong> {apartment.utilities?.internetPrice ?? "N/A"} RON</p>
+                        <p><strong>TV:</strong> {apartment.utilities?.TVPrice ?? "N/A"} RON</p>
+                        <p><strong>Apa:</strong> {apartment.utilities?.waterPrice ?? "N/A"} RON</p>
+                        <p><strong>Gaz:</strong> {apartment.utilities?.gasPrice ?? "N/A"} RON</p>
+                        <p><strong>Electricitate:</strong> {apartment.utilities?.electricityPrice ?? "N/A"} RON</p>
                         <button onClick={() => setIsEditingUtilityPrices(true)} className="edit-button general-button">Modifica Preturi Utilitati</button>
                     </>
                 )}
