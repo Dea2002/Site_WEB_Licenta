@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback, ChangeEvent } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { ref, deleteObject, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -42,6 +42,7 @@ const OwnerApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
 
     const [apartment, setApartment] = useState<Apartment | null>(null);
+    const [conversationId, setConversationId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState<Record<string, boolean>>({}); // Pentru stari de salvare per sectiune
@@ -121,7 +122,6 @@ const OwnerApartmentDetails: React.FC = () => {
             });
             const aptData = response.data;
             setApartment(aptData);
-            console.log("Detalii apartament:", aptData);
 
             setEditableMainPrice(parseNumericField(aptData.price));
             if (aptData.discounts) {
@@ -201,6 +201,31 @@ const OwnerApartmentDetails: React.FC = () => {
         }
     }, [apartmentId, token]);
 
+    const fetchConversationId = useCallback(async (currentApartmentId: string) => {
+        if (!currentApartmentId || !token) return;
+
+        try {
+            // Presupunem că API-ul returnează direct un string sau un obiect cu o proprietate ce conține string-ul
+            // Exemplu: { conversationId: "stringul_tau_aici" }
+            // Sau direct: "stringul_tau_aici"
+            const response = await api.post( // Ajustează tipul răspunsului
+                `/conversations/apartment/${currentApartmentId}?includeOwner=true`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setConversationId(response.data._id);
+
+        } catch (err: any) {
+            console.error("Eroare la preluarea ID-ului conversației:", err);
+            if (err.response && err.response.status === 404) {
+                // Poate că e normal ca un apartament să nu aibă încă o conversație
+                setConversationId(null);
+            } else {
+                console.error(err.response?.data?.message || "Nu s-a putut încărca ID-ul conversației.");
+            }
+        }
+    }, [token]);
+
     useEffect(() => {
         fetchApartmentData();
     }, [fetchApartmentData]);
@@ -209,8 +234,9 @@ const OwnerApartmentDetails: React.FC = () => {
         if (apartment?._id) {
             fetchCurrentRentals();
             fetchRentalHistory(1);
+            fetchConversationId(apartment._id);
         }
-    }, [apartment?._id, fetchCurrentRentals, fetchRentalHistory]);
+    }, [apartment?._id, fetchCurrentRentals, fetchRentalHistory, fetchConversationId]);
 
 
     // --- GENERIC SAVE FUNCTION ---
@@ -345,11 +371,7 @@ const OwnerApartmentDetails: React.FC = () => {
 
             uploadTask.on(
                 "state_changed",
-                () => {
-                    // Poti adauga logica pentru progresul upload-ului aici daca doresti
-                    // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    // console.log('Upload is ' + progress + '% done');
-                },
+                () => { },
                 (error) => {
                     // Gestioneaza erorile de upload Firebase aici
                     console.error("Eroare Firebase la upload fisier:", error);
@@ -397,8 +419,6 @@ const OwnerApartmentDetails: React.FC = () => {
             // `Promise.all` asteapta ca toate promisiunile de upload sa se rezolve.
             const uploadPromises = imageFiles.map(file => uploadSingleFileToFirebase(file));
             newImageUrls = await Promise.all(uploadPromises);
-
-            console.log("URL-uri noi obtinute din Firebase:", newImageUrls);
 
             if (newImageUrls.length === 0) {
                 // Acest caz nu ar trebui sa se intample daca imageFiles avea elemente
@@ -470,8 +490,6 @@ const OwnerApartmentDetails: React.FC = () => {
             const imageRef = ref(storage, imageUrl); // imageUrl ar trebui sa fie URL-ul complet gs:// sau https://
 
             await deleteObject(imageRef);
-            console.log("Imagine stearsa cu succes din Firebase Storage.");
-
             // Noul endpoint pe backend: DELETE /api/apartments/:apartmentId/images
             // Trimitem URL-ul imaginii in corpul request-ului sau ca query param
             // Aici folosim corpul request-ului
@@ -632,6 +650,14 @@ const OwnerApartmentDetails: React.FC = () => {
             <button onClick={() => navigate("/owner/apartments")} className="back-button general-button">
                 ← inapoi la lista
             </button>
+            {conversationId && (
+                <button
+                    onClick={() => navigate(`/chat/${conversationId}`)} // Exemplu de navigare
+                    className="general-button"
+                >
+                    Vezi Conversația
+                </button>
+            )}
             <h1>Editare Apartament: {apartment.location}</h1>
             {error && <p className="error-message global-error-details">{error}</p>}
 
@@ -838,8 +864,12 @@ const OwnerApartmentDetails: React.FC = () => {
                         <ul>
                             {currentRentals.map(rental => (
                                 <li key={rental._id}>
-                                    Chirias: {rental.tenant?.name || rental.clientData?.fullName || "N/A"} <br />
-                                    Perioada: {new Date(rental.checkIn || rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut || rental.checkOut).toLocaleDateString()} <br />
+                                    Chirias:{" "}
+                                    <Link to={`/chat/${rental.clientData._id}`} /* className="chat-link" */>
+                                        {rental.clientData?.fullName || "N/A"}
+                                    </Link>
+                                    <br />
+                                    Perioada: {new Date(rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut).toLocaleDateString()} <br />
                                     Status: {rental.derivedStatus}
                                     {(rental.derivedStatus === 'active' || rental.derivedStatus === 'upcoming' || rental.derivedStatus === 'pending_approval') && (
                                         <button onClick={() => handleCancelRental(rental._id)} disabled={isSaving.cancelRental} className="cancel-rental-button general-button">
@@ -860,7 +890,7 @@ const OwnerApartmentDetails: React.FC = () => {
                             <ul>
                                 {rentalHistory.rentals.map(rental => (
                                     <li key={rental._id}>
-                                        Chirias: {rental.clientData?.fullName || rental.tenant?.name || "N/A"} <br />
+                                        Chirias: {rental.clientData?.fullName || "N/A"} <br />
                                         Perioada: {new Date(rental.checkIn || rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut || rental.checkOut).toLocaleDateString()} <br />
                                         Pret final: {rental.finalPrice} RON <br />
                                         Status: {rental.derivedStatus}

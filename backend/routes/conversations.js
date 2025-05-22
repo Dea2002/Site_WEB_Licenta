@@ -9,7 +9,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
     router.post('/apartment/:apartmentId', authenticateToken, async (req, res) => {
         const { apartmentId } = req.params;
         const includeOwner = req.query.includeOwner === 'true';
-        console.log('includeOwner:', includeOwner);
         if (!ObjectId.isValid(apartmentId)) {
             return res.status(400).json({ message: 'ID apartament invalid' });
         }
@@ -24,11 +23,9 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
 
         // 1) try to find existing convo of this type
         let convo = await conversationsCollection.findOne(filter);
-        console.log('Convo:', convo);
         if (convo) {
             return res.json(convo);
         }
-        console.log('Convo not found, creating new one');
         // 2) else create new
         const { participants: tenantIds = [], ownerId } = req.body;
         if (!Array.isArray(tenantIds) || tenantIds.length < 1) {
