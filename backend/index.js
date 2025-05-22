@@ -363,9 +363,9 @@ async function run() {
                 const existingCheckOut = new Date(reservation.checkOut);
 
                 // conditia de suprapunere a datelor
-                if (newCheckIn <= existingCheckOut && newCheckOut >= existingCheckIn) {
-                    return res.status(400).json({ message: 'Datele pentru check-in si check-out se suprapun cu o cerere existenta' });
-                }
+                // if (newCheckIn <= existingCheckOut && newCheckOut >= existingCheckIn) {
+                //     return res.status(400).json({ message: 'Datele pentru check-in si check-out se suprapun cu o cerere existenta' });
+                // }
             }
             const finalPrice = (priceRent * ((100 - discount) / 100) * numberOfRooms + priceUtilities) * numberOfNights;
             const newReservationRequest = {

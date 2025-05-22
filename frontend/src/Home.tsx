@@ -456,7 +456,6 @@ const Home: React.FC = () => {
                     {filteredApartments.length > 0 ? (
                         filteredApartments.map((apartment) => {
                             const imageUrl = apartment.images?.[0] ?? "/Poze_apartamente/placeholder.jpeg";
-                            console.log("Image URL:", imageUrl); // Debugging line
                             return (
                                 <div key={apartment._id} className="apartment">
                                     <img
