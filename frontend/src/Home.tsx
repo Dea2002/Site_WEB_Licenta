@@ -160,9 +160,9 @@ const Home: React.FC = () => {
     // --- START: Updated Filter Application Logic ---
     // Renamed to applyFilters to be clearer
     const applyFilters = (apartmentsToFilter: Apartment[], currentFilters: Filters) => {
-        let filtered = [...apartmentsToFilter]; // Lucrează pe o copie pentru a nu modifica originalul direct aici
+        let filtered = [...apartmentsToFilter]; // Lucreaza pe o copie pentru a nu modifica originalul direct aici
 
-        // 1. Filtru Locație
+        // 1. Filtru Locatie
         if (currentFilters.location.trim() !== "") {
             const searchTerm = currentFilters.location.toLowerCase();
             filtered = filtered.filter((apt) =>
@@ -170,7 +170,7 @@ const Home: React.FC = () => {
             );
         }
 
-        // 2. Filtru Interval Preț
+        // 2. Filtru Interval Pret
         const minPrice = parseFloat(currentFilters.minPrice);
         const maxPrice = parseFloat(currentFilters.maxPrice);
         if (!isNaN(minPrice) && minPrice >= 0) {
@@ -178,16 +178,16 @@ const Home: React.FC = () => {
         }
         if (!isNaN(maxPrice) && maxPrice >= 0) {
             if (!isNaN(minPrice) && maxPrice < minPrice && currentFilters.minPrice.trim() !== "") {
-                // Afișează o avertizare sau gestionează cazul în UI, dar nu aplica filtrul maxPrice greșit
-                console.warn("Prețul maxim este mai mic decât prețul minim. Filtrul pentru preț maxim nu va fi aplicat.");
+                // Afiseaza o avertizare sau gestioneaza cazul in UI, dar nu aplica filtrul maxPrice gresit
+                console.warn("Pretul maxim este mai mic decat pretul minim. Filtrul pentru pret maxim nu va fi aplicat.");
             } else {
                 filtered = filtered.filter((apt) => apt.price <= maxPrice);
             }
         }
 
-        // 3. Filtru Număr Camere
+        // 3. Filtru Numar Camere
         if (currentFilters.numberOfRooms && currentFilters.numberOfRooms !== "") {
-            const aptRooms = (apt: Apartment) => Number(apt.numberOfRooms); // Funcție helper pentru a converti la număr
+            const aptRooms = (apt: Apartment) => Number(apt.numberOfRooms); // Functie helper pentru a converti la numar
 
             if (currentFilters.numberOfRooms.endsWith("+")) {
                 const minRooms = parseInt(currentFilters.numberOfRooms.replace("+", ""), 10);
@@ -202,7 +202,7 @@ const Home: React.FC = () => {
             }
         }
 
-        // 4. Filtru Număr Băi
+        // 4. Filtru Numar Bai
         if (currentFilters.numberOfBathrooms && currentFilters.numberOfBathrooms !== "") {
             const aptBaths = (apt: Apartment) => Number(apt.numberOfBathrooms);
 
@@ -219,7 +219,7 @@ const Home: React.FC = () => {
             }
         }
 
-        // 5. Filtru Interval Suprafață
+        // 5. Filtru Interval Suprafata
         const minSurface = parseFloat(currentFilters.minSurface);
         const maxSurface = parseFloat(currentFilters.maxSurface);
         if (!isNaN(minSurface) && minSurface >= 0) {
@@ -227,29 +227,29 @@ const Home: React.FC = () => {
         }
         if (!isNaN(maxSurface) && maxSurface >= 0) {
             if (!isNaN(minSurface) && maxSurface < minSurface && currentFilters.minSurface.trim() !== "") {
-                console.warn("Suprafața maximă este mai mică decât suprafața minimă. Filtrul pentru suprafață maximă nu va fi aplicat.");
+                console.warn("Suprafata maxima este mai mica decat suprafata minima. Filtrul pentru suprafata maxima nu va fi aplicat.");
             } else {
                 filtered = filtered.filter((apt) => Number(apt.totalSurface) <= maxSurface);
             }
         }
 
-        // 6. Filtru Disponibilitate (dacă îl vei folosi)
+        // 6. Filtru Disponibilitate (daca il vei folosi)
         // Momentan, currentFilters.available este un boolean, dar nu ai logica de filtrare pentru el.
-        // Va trebui să adaugi un câmp `isAvailable` sau similar în `Apartment`
-        // și să filtrezi pe baza lui dacă `currentFilters.available` este true.
-        // Exemplu (necesită câmpul `isAvailable` în `Apartment`):
+        // Va trebui sa adaugi un camp `isAvailable` sau similar in `Apartment`
+        // si sa filtrezi pe baza lui daca `currentFilters.available` este true.
+        // Exemplu (necesita campul `isAvailable` in `Apartment`):
         // if (currentFilters.available) {
         //     filtered = filtered.filter((apt) => apt.isAvailable === true);
         // }
 
 
-        // 7. Filtru Facilități (dinamic)
-        // Iterăm peste toate opțiunile de facilități definite
+        // 7. Filtru Facilitati (dinamic)
+        // Iteram peste toate optiunile de facilitati definite
         facilityOptions.forEach(facilityOption => {
-            // Verificăm dacă această facilitate este selectată în filtrele curente
+            // Verificam daca aceasta facilitate este selectata in filtrele curente
             if (currentFilters.facilities[facilityOption.id]) {
-                // Filtrăm apartamentele care au această facilitate setată pe true
-                // Asigură-te că apt.facilities există înainte de a accesa proprietățile
+                // Filtram apartamentele care au aceasta facilitate setata pe true
+                // Asigura-te ca apt.facilities exista inainte de a accesa proprietatile
                 filtered = filtered.filter(apt => apt.facilities && apt.facilities[facilityOption.id] === true);
             }
         });
@@ -264,12 +264,12 @@ const Home: React.FC = () => {
 
     // Function to update a specific filter value, supporting both top-level and facilities keys
     const handleFilterChange = (
-        filterName: keyof Omit<Filters, 'facilities'> | FacilityKey, // Permite chei de la rădăcină SAU chei din facilities
+        filterName: keyof Omit<Filters, 'facilities'> | FacilityKey, // Permite chei de la radacina SAU chei din facilities
         value: string | boolean
     ) => {
         setFilters((prevFilters) => {
-            // Verificăm dacă filterName este o cheie validă a obiectului facilities
-            // O metodă mai sigură decât 'in' este să verifici dacă cheia este în facilityOptions
+            // Verificam daca filterName este o cheie valida a obiectului facilities
+            // O metoda mai sigura decat 'in' este sa verifici daca cheia este in facilityOptions
             const isFacilityKey = facilityOptions.some(opt => opt.id === filterName);
 
             if (isFacilityKey) {
@@ -439,18 +439,18 @@ const Home: React.FC = () => {
                     {/* Facilities Group - generat dinamic */}
                     <div className="filter-group check-group">
                         <h4>
-                            <i className="fas fa-check"></i> Facilități
+                            <i className="fas fa-check"></i> Facilitati
                         </h4>
                         {facilityOptions.map((facility) => (
                             <label key={facility.id}>
                                 <input
                                     type="checkbox"
-                                    // Accesează valoarea checked din filters.facilities folosind id-ul facilității
+                                    // Acceseaza valoarea checked din filters.facilities folosind id-ul facilitatii
                                     checked={filters.facilities[facility.id]}
-                                    // La schimbare, pasează id-ul facilității și noua valoare booleană
+                                    // La schimbare, paseaza id-ul facilitatii si noua valoare booleana
                                     onChange={(e) => handleFilterChange(facility.id, e.target.checked)}
                                 />
-                                {facility.label} {/* Afișează eticheta prietenoasă */}
+                                {facility.label} {/* Afiseaza eticheta prietenoasa */}
                             </label>
                         ))}
                     </div>

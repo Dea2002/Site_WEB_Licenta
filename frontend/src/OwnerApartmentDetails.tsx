@@ -205,10 +205,10 @@ const OwnerApartmentDetails: React.FC = () => {
         if (!currentApartmentId || !token) return;
 
         try {
-            // Presupunem că API-ul returnează direct un string sau un obiect cu o proprietate ce conține string-ul
+            // Presupunem ca API-ul returneaza direct un string sau un obiect cu o proprietate ce contine string-ul
             // Exemplu: { conversationId: "stringul_tau_aici" }
             // Sau direct: "stringul_tau_aici"
-            const response = await api.post( // Ajustează tipul răspunsului
+            const response = await api.post( // Ajusteaza tipul raspunsului
                 `/conversations/apartment/${currentApartmentId}?includeOwner=true`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -216,12 +216,12 @@ const OwnerApartmentDetails: React.FC = () => {
             setConversationId(response.data._id);
 
         } catch (err: any) {
-            console.error("Eroare la preluarea ID-ului conversației:", err);
+            console.error("Eroare la preluarea ID-ului conversatiei:", err);
             if (err.response && err.response.status === 404) {
-                // Poate că e normal ca un apartament să nu aibă încă o conversație
+                // Poate ca e normal ca un apartament sa nu aiba inca o conversatie
                 setConversationId(null);
             } else {
-                console.error(err.response?.data?.message || "Nu s-a putut încărca ID-ul conversației.");
+                console.error(err.response?.data?.message || "Nu s-a putut incarca ID-ul conversatiei.");
             }
         }
     }, [token]);
@@ -655,7 +655,7 @@ const OwnerApartmentDetails: React.FC = () => {
                     onClick={() => navigate(`/chat/${conversationId}`)} // Exemplu de navigare
                     className="general-button"
                 >
-                    Vezi Conversația
+                    Vezi Conversatia
                 </button>
             )}
             <h1>Editare Apartament: {apartment.location}</h1>

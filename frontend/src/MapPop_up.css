@@ -14,26 +14,26 @@
 }
 .map-popup-content {
     background: white;
-    padding: 20px; /* Mărește padding-ul puțin */
+    padding: 20px; /* Mareste padding-ul putin */
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90vw; /* Lățime mai mare */
-    max-width: 1200px; /* Lățime maximă */
-    height: 85vh; /* Înălțime mai mare */
+    width: 90vw; /* Latime mai mare */
+    max-width: 1200px; /* Latime maxima */
+    height: 85vh; /* inaltime mai mare */
     max-height: 800px;
-    display: flex; /* Permite aranjarea internă */
+    display: flex; /* Permite aranjarea interna */
     flex-direction: column; /* Stack elementele vertical */
-    position: relative; /* Pentru poziționarea butonului de close */
+    position: relative; /* Pentru pozitionarea butonului de close */
 }
 
-/* Schimbă .popup-close în .map-popup-close */
+/* Schimba .popup-close in .map-popup-close */
 .map-popup-close {
     position: absolute;
     top: 10px;
     right: 15px;
     background: transparent;
     border: none;
-    font-size: 24px; /* Mărește fontul pentru X */
+    font-size: 24px; /* Mareste fontul pentru X */
     font-weight: bold;
     color: #888;
     cursor: pointer;
@@ -46,20 +46,20 @@
 
 .map-layout-container {
     display: flex;
-    flex-grow: 1; /* Ocupă spațiul rămas */
+    flex-grow: 1; /* Ocupa spatiul ramas */
     overflow: hidden; /* Previne scroll-uri nedorite */
-    gap: 15px; /* Spațiu între lista POI și hartă */
-    margin-top: 10px; /* Spațiu sub adresa */
+    gap: 15px; /* Spatiu intre lista POI si harta */
+    margin-top: 10px; /* Spatiu sub adresa */
 }
 
 .poi-list-container {
-    width: 300px; /* Lățimea listei POI */
-    flex-shrink: 0; /* Nu se micșorează */
+    width: 300px; /* Latimea listei POI */
+    flex-shrink: 0; /* Nu se micsoreaza */
     display: flex;
     flex-direction: column;
     border-right: 1px solid #eee;
     padding-right: 15px;
-    overflow-y: auto; /* Scroll dacă lista e prea lungă */
+    overflow-y: auto; /* Scroll daca lista e prea lunga */
 }
 
 .poi-list-container h3 {
@@ -106,7 +106,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    flex-grow: 1; /* Ocupă spațiul rămas în container */
+    flex-grow: 1; /* Ocupa spatiul ramas in container */
 }
 
 .poi-list li {
@@ -125,27 +125,27 @@
 
 .poi-list li:hover,
 .poi-list li.selected {
-    background-color: #e6f2ff; /* O culoare de hover/selecție */
+    background-color: #e6f2ff; /* O culoare de hover/selectie */
 }
 .poi-list li.selected {
     font-weight: bold;
 }
 
 .poi-list-icon {
-    color: #007bff; /* Culoarea iconiței din listă */
-    width: 18px; /* Lățime fixă pentru aliniere */
+    color: #007bff; /* Culoarea iconitei din lista */
+    width: 18px; /* Latime fixa pentru aliniere */
     text-align: center;
 }
 
 .poi-name {
-    flex-grow: 1; /* Numele ocupă spațiul disponibil */
+    flex-grow: 1; /* Numele ocupa spatiul disponibil */
     color: #333;
 }
 
 .poi-distance {
     font-size: 0.85em;
     color: #777;
-    white-space: nowrap; /* Previne trecerea pe rândul următor */
+    white-space: nowrap; /* Previne trecerea pe randul urmator */
 }
 .loading-text,
 .no-results {
@@ -156,9 +156,9 @@
 }
 
 .map-container-wrapper {
-    flex-grow: 1; /* Harta ocupă restul spațiului */
+    flex-grow: 1; /* Harta ocupa restul spatiului */
     display: flex;
-    flex-direction: column; /* Pentru a plasa adresa deasupra hărții */
+    flex-direction: column; /* Pentru a plasa adresa deasupra hartii */
 }
 
 .map-address-display {
@@ -167,16 +167,16 @@
     font-size: 0.95em;
 }
 
-/* Stiluri pentru iconițele custom (dacă nu ai setat deja în CSS global) */
+/* Stiluri pentru iconitele custom (daca nu ai setat deja in CSS global) */
 .custom-marker-icon i {
-    /* Poți adăuga umbre sau alte efecte aici */
+    /* Poti adauga umbre sau alte efecte aici */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
-.apartment-icon i {
-    /* Poți stiliza specific iconița apartamentului */
-    /* ... */
-}
-.poi-icon i {
-    /* Poți stiliza specific iconițele POI */
-    /* ... */
-}
+/* .apartment-icon i { */
+/* Poti stiliza specific iconita apartamentului */
+/* ... */
+/* } */
+/* .poi-icon i { */
+/* Poti stiliza specific iconitele POI */
+/* ... */
+/* } */

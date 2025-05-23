@@ -239,7 +239,7 @@ const ApartmentDetails: React.FC = () => {
                 const parsedLat = parseFloat(lat);
                 const parsedLng = parseFloat(lon);
 
-                if (!isNaN(parsedLat) && !isNaN(parsedLng)) { // Verificare importantă
+                if (!isNaN(parsedLat) && !isNaN(parsedLng)) { // Verificare importanta
                     setSelectedMapData({
                         lat: parsedLat,
                         lng: parsedLng,
@@ -247,7 +247,7 @@ const ApartmentDetails: React.FC = () => {
                     });
                 } else {
                     console.error("Coordonate invalide primite de la Nominatim:", lat, lon);
-                    setError("Nu s-au putut obține coordonate valide pentru hartă.");
+                    setError("Nu s-au putut obtine coordonate valide pentru harta.");
                 }
             }
         } catch (error) {
