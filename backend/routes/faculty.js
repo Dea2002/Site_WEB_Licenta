@@ -10,7 +10,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     router.get('/', async (req, res) => {
         const faculties = await facultiesCollection.find({}).toArray();
         res.send(faculties);
-
     });
 
     //! functie care sterge o cerere de asociere cu facultatea

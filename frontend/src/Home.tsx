@@ -5,8 +5,14 @@ import LoginModal from "./LoginModal";
 import { Apartment } from "./types"; // Make sure Apartment type includes all relevant fields
 import "./style.css"; // Your existing CSS for Home
 import MapModal from "./MapModal"; // Assuming this is used elsewhere or for future use
-
+import { Faculty } from "./AuthContext";
 // --- START: Updated Filters Interface ---
+
+interface TenantFacultyInfo {
+    apartmentId: string; // ID-ul apartamentului la care se referă chiriașul
+    faculty: string;     // Numele facultății chiriașului
+    // Poți adăuga și clientId dacă e relevant pentru alte scopuri, dar nu e strict necesar doar pentru acest filtru
+}
 interface Filters {
     location: string;
     minPrice: string;
@@ -45,6 +51,7 @@ interface Filters {
         underfloorHeating: boolean;
     };
     minConstructionYear: string;
+    tenantFaculty: string;
     // acceptsColleagues: boolean;
 }
 type FacilityKey = keyof Filters['facilities'];
@@ -78,6 +85,12 @@ const Home: React.FC = () => {
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [filteredApartments, setFilteredApartments] = useState<Apartment[]>([]);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+    const [allFaculties, setAllFaculties] = useState<Faculty[]>([]); // Stare pentru a stoca toate facultățile
+    const [loadingFaculties, setLoadingFaculties] = useState<boolean>(false);
+    const [activeTenantFaculties, setActiveTenantFaculties] = useState<TenantFacultyInfo[]>([]);
+    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(true); // Setează inițial pe true
+
     // const { isAuthenticated, token } = useContext(AuthContext);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -123,6 +136,7 @@ const Home: React.FC = () => {
             underfloorHeating: false,
         },
         minConstructionYear: "",
+        tenantFaculty: "",
         // acceptsColleagues: false,
     };
     // --- END: Updated Initial Filters State ---
@@ -141,6 +155,7 @@ const Home: React.FC = () => {
             .get<Apartment[]>("/apartments")
             .then((response) => {
                 setApartments(response.data);
+                console.log("Apartamente preluate:", response.data);
                 // Apply initial filter from URL param if present
                 if (locationParam.trim() !== "") {
                     applyFilters(response.data, { ...filters, location: locationParam });
@@ -151,7 +166,38 @@ const Home: React.FC = () => {
             .catch((error) => {
                 console.error("Eroare la preluarea datelor:", error);
             });
-    }, []); // Run only once on mount
+
+        setLoadingFaculties(true);
+        api.get<Faculty[]>("/faculty/")
+            .then(response => {
+                setAllFaculties(response.data);
+            })
+            .catch(error => {
+                console.error("Eroare la preluarea listei de facultăți:", error);
+                setAllFaculties([]);
+            })
+            .finally(() => {
+                setLoadingFaculties(false);
+            });
+
+        // Fetch pentru datele despre facultățile chiriașilor activi
+        setLoadingTenantData(true);
+        api.get<TenantFacultyInfo[]>("/apartments/rentals/active-tenant-faculties-summary") // Endpoint ipotetic, vezi mai jos
+            .then(response => {
+                setActiveTenantFaculties(response.data);
+                console.log("Facultăți chiriași activi:", response.data);
+                // După ce avem și aceste date, am putea re-aplica filtrele dacă e necesar
+                // și dacă un filtru de facultate era deja activ (ex: din URL)
+                // Dar, de obicei, utilizatorul aplică filtrele după ce pagina s-a încărcat.
+            })
+            .catch(error => {
+                console.error("Eroare la preluarea facultăților chiriașilor:", error);
+                setActiveTenantFaculties([]);
+            })
+            .finally(() => {
+                setLoadingTenantData(false);
+            });
+    }, [locationParam]); // Run only once on mount
 
     useEffect(() => {
         api
@@ -291,6 +337,26 @@ const Home: React.FC = () => {
                 const constructionYear = Number(apt.constructionYear); // Asigură-te că apt.constructionYear e număr
                 return !isNaN(constructionYear) && constructionYear >= minYear;
             });
+        }
+
+        // 10. Filtru Facultate Chiriași
+        if (currentFilters.tenantFaculty.trim() !== "") {
+            const searchFaculty = currentFilters.tenantFaculty.toLowerCase();
+
+            // Obține ID-urile apartamentelor care au cel puțin un chiriaș cu facultatea dorită
+            const apartmentIdsWithMatchingTenants = new Set(
+                activeTenantFaculties // <-- AICI ESTE FOLOSITĂ STAREA
+                    .filter(tf => tf.faculty.toLowerCase() === searchFaculty)
+                    .map(tf => tf.apartmentId)
+            );
+
+            if (loadingTenantData && apartments.length > 0) {
+                console.warn("Datele despre facultățile chiriașilor se încarcă încă. Filtrul de facultate ar putea fi aplicat pe date incomplete.");
+                // Aici ai putea alege să NU aplici filtrul de facultate dacă datele încă se încarcă,
+                // sau să informezi utilizatorul. Momentan, va filtra pe ce e disponibil în activeTenantFaculties.
+            }
+
+            filtered = filtered.filter(apt => apartmentIdsWithMatchingTenants.has(apt._id));
         }
 
         setFilteredApartments(filtered);
@@ -449,7 +515,31 @@ const Home: React.FC = () => {
                         </div>
                     </div>
 
-
+                    {/* Faculty Filter */}
+                    <div className="filter-group">
+                        <label htmlFor="filter-tenant-faculty">
+                            <i className="fas fa-graduation-cap"></i> Facultate Chiriași Act.:
+                        </label>
+                        <select
+                            id="filter-tenant-faculty"
+                            value={filters.tenantFaculty} // Valoarea selectată
+                            onChange={(e) => handleFilterChange("tenantFaculty", e.target.value)}
+                            disabled={loadingFaculties} // Dezactivează cât timp se încarcă facultățile
+                        >
+                            <option value="">Toate facultățile</option> {/* Opțiune pentru a nu filtra */}
+                            {loadingFaculties ? (
+                                <option disabled>Se încarcă facultățile...</option>
+                            ) : (
+                                allFaculties.map(faculty => (
+                                    // Folosim fullName ca valoare și ca text afișat.
+                                    // Dacă ai un ID și vrei să-l folosești, setează value={faculty._id}
+                                    <option key={faculty._id || faculty.fullName} value={faculty.fullName}>
+                                        {faculty.fullName}
+                                    </option>
+                                ))
+                            )}
+                        </select>
+                    </div>
 
 
                     {/* Apartment Specs Group */}

@@ -495,7 +495,7 @@ const ApartmentDetails: React.FC = () => {
                         {colleaguesList.length > 0 && token != null ? (
                             colleaguesList.map(col => (
                                 <p key={col._id}>
-                                    <strong>{col.fullName}:</strong>{" "}
+                                    <strong>{col.faculty}:</strong>{" "}
                                     checkIn: {format(parseISO(col.checkIn), "dd-MM-yyyy")};{" "}
                                     checkOut: {format(parseISO(col.checkOut), "dd-MM-yyyy")};{" "}
                                     Numar camere: {col.numberOfRooms}

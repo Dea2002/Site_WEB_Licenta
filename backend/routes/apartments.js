@@ -86,6 +86,52 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         }
     });
 
+
+    router.get('/rentals/active-tenant-faculties-summary', async (req, res) => {
+        try {
+            const currentDate = new Date();
+            const query = {
+                isActive: true,                       // Doar cele active (nu anulate)
+                checkOut: { $gte: currentDate },      // A căror dată de checkOut este azi sau în viitor
+                "clientData.faculty": { $exists: true, $ne: null, $ne: "" } // Doar cele unde facultatea e specificată
+            };
+            const activeRentals = await reservationHistoryCollection.find(query)
+                .project({
+                    apartament: 1, // ID-ul apartamentului din chirie
+                    "clientData.faculty": 1, // Numele facultății din clientData
+                    _id: 0 // Nu avem nevoie de ID-ul chiriei aici
+                })
+                .toArray();
+            // Transformă datele în formatul așteptat de frontend (TenantFacultyInfo)
+            // Și elimină duplicatele (un apartament poate avea mai mulți chiriași de la aceeași facultate)
+            const facultySummaryMap = new Map(); // apartmentId -> Set de facultăți
+
+            activeRentals.forEach(rental => {
+                const apartmentIdStr = rental.apartament.toString();
+                const facultyName = rental.clientData.faculty;
+
+                if (facultyName) {
+                    if (!facultySummaryMap.has(apartmentIdStr)) {
+                        facultySummaryMap.set(apartmentIdStr, new Set());
+                    }
+                    facultySummaryMap.get(apartmentIdStr).add(facultyName);
+                }
+            });
+            const result = [];
+            facultySummaryMap.forEach((faculties, aptId) => {
+                faculties.forEach(faculty => {
+                    result.push({ apartmentId: aptId, faculty: faculty });
+                });
+            });
+
+            res.json(result);
+
+        } catch (error) {
+            console.error("Eroare la preluarea sumarului facultăților chiriașilor activi:", error);
+            res.status(500).json({ message: "Eroare server." });
+        }
+    });
+
     router.get('/rentals/:apartmentId/current-and-upcoming', authenticateToken, async (req, res) => {
         try {
             const { apartmentId } = req.params;

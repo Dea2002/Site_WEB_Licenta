@@ -14,6 +14,7 @@ export interface Colleague {
     numberOfRooms: number;
     checkIn: string;
     checkOut: string;
+    faculty: string;
 }
 
 export interface BookingCostDetails {
