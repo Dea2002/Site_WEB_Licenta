@@ -93,20 +93,20 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             const currentDate = new Date();
             const query = {
                 isActive: true,                       // Doar cele active (nu anulate)
-                checkIn: { $lte: currentDate },           // A căror dată de checkIn este azi sau în trecut
-                checkOut: { $gte: currentDate },      // A căror dată de checkOut este azi sau în viitor
-                "clientData.faculty": { $exists: true, $ne: null, $ne: "" } // Doar cele unde facultatea e specificată
+                checkIn: { $lte: currentDate },           // A caror data de checkIn este azi sau in trecut
+                checkOut: { $gte: currentDate },      // A caror data de checkOut este azi sau in viitor
+                "clientData.faculty": { $exists: true, $ne: null, $ne: "" } // Doar cele unde facultatea e specificata
             };
             const activeRentals = await reservationHistoryCollection.find(query)
                 .project({
                     apartament: 1, // ID-ul apartamentului din chirie
-                    "clientData.faculty": 1, // Numele facultății din clientData
+                    "clientData.faculty": 1, // Numele facultatii din clientData
                     _id: 0 // Nu avem nevoie de ID-ul chiriei aici
                 })
                 .toArray();
-            // Transformă datele în formatul așteptat de frontend (TenantFacultyInfo)
-            // Și elimină duplicatele (un apartament poate avea mai mulți chiriași de la aceeași facultate)
-            const facultySummaryMap = new Map(); // apartmentId -> Set de facultăți
+            // Transforma datele in formatul asteptat de frontend (TenantFacultyInfo)
+            // si elimina duplicatele (un apartament poate avea mai multi chiriasi de la aceeasi facultate)
+            const facultySummaryMap = new Map(); // apartmentId -> Set de facultati
 
             activeRentals.forEach(rental => {
                 const apartmentIdStr = rental.apartament.toString();
@@ -129,7 +129,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             res.json(result);
 
         } catch (error) {
-            console.error("Eroare la preluarea sumarului facultăților chiriașilor activi:", error);
+            console.error("Eroare la preluarea sumarului facultatilor chiriasilor activi:", error);
             res.status(500).json({ message: "Eroare server." });
         }
     });

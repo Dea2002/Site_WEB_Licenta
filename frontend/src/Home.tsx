@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { api } from './api';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginModal from "./LoginModal";
@@ -9,9 +9,9 @@ import { Faculty } from "./AuthContext";
 // --- START: Updated Filters Interface ---
 
 interface TenantFacultyInfo {
-    apartmentId: string; // ID-ul apartamentului la care se referă chiriașul
-    faculty: string;     // Numele facultății chiriașului
-    // Poți adăuga și clientId dacă e relevant pentru alte scopuri, dar nu e strict necesar doar pentru acest filtru
+    apartmentId: string; // ID-ul apartamentului la care se refera chiriasul
+    faculty: string;     // Numele facultatii chiriasului
+    // Poti adauga si clientId daca e relevant pentru alte scopuri, dar nu e strict necesar doar pentru acest filtru
 }
 interface Filters {
     location: string;
@@ -86,62 +86,73 @@ const Home: React.FC = () => {
     const [filteredApartments, setFilteredApartments] = useState<Apartment[]>([]);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-    const [allFaculties, setAllFaculties] = useState<Faculty[]>([]); // Stare pentru a stoca toate facultățile
+    const [allFaculties, setAllFaculties] = useState<Faculty[]>([]); // Stare pentru a stoca toate facultatile
     const [loadingFaculties, setLoadingFaculties] = useState<boolean>(false);
     const [activeTenantFaculties, setActiveTenantFaculties] = useState<TenantFacultyInfo[]>([]);
-    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(true); // Setează inițial pe true
+    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(true); // Seteaza initial pe true
+
+    const [sortCriteria, setSortCriteria] = useState<string>("date_desc"); // Default: cele mai noi
+    const [searchParams, setSearchParams] = useSearchParams(); // Adaugam setSearchParams
+    const locationParam = searchParams.get("location") || "";
 
     // const { isAuthenticated, token } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const locationParam = searchParams.get("location") || "";
 
     // --- START: Updated Initial Filters State ---
-    const initialFilters: Filters = {
-        // Define initial state separately for resetting
-        location: locationParam,
-        minPrice: "",
-        maxPrice: "",
-        numberOfRooms: "",
-        numberOfBathrooms: "",
-        minSurface: "",
-        maxSurface: "",
-        available: false, // Default to showing all initially
+    const initialFilters: Filters = useMemo(() => ({ // Folosim useMemo pentru initialFilters
+        location: searchParams.get("location") || "",
+        minPrice: searchParams.get("minPrice") || "",
+        maxPrice: searchParams.get("maxPrice") || "",
+        numberOfRooms: searchParams.get("numberOfRooms") || "",
+        numberOfBathrooms: searchParams.get("numberOfBathrooms") || "",
+        minSurface: searchParams.get("minSurface") || "",
+        maxSurface: searchParams.get("maxSurface") || "",
+        available: searchParams.get("available") === 'true',
         discounts: {
-            discount1: false,
-            discount2: false,
-            discount3: false,
+            discount1: searchParams.get("d1") === 'true',
+            discount2: searchParams.get("d2") === 'true',
+            discount3: searchParams.get("d3") === 'true',
         },
-        facilities: {
-            wifi: false,
-            parking: false,
-            airConditioning: false,
-            tvCable: false,
-            laundryMachine: false,
-            fullKitchen: false,
-            balcony: false,
-            petFriendly: false,
-            pool: false,
-            gym: false,
-            elevator: false,
-            terrace: false,
-            bikeStorage: false,
-            storageRoom: false,
-            rooftop: false,
-            fireAlarm: false,
-            smokeDetector: false,
-            intercom: false,
-            videoSurveillance: false,
-            soundproofing: false,
-            underfloorHeating: false,
-        },
-        minConstructionYear: "",
-        tenantFaculty: "",
-        // acceptsColleagues: false,
-    };
+        facilities: facilityOptions.reduce((acc, opt) => {
+            acc[opt.id] = searchParams.get(opt.id) === 'true';
+            return acc;
+        }, {} as Filters['facilities']),
+        minConstructionYear: searchParams.get("minConstructionYear") || "",
+        tenantFaculty: searchParams.get("tenantFaculty") || "",
+    }), [searchParams]); // Recalculeaza doar daca searchParams se schimba
     // --- END: Updated Initial Filters State ---
 
     const [filters, setFilters] = useState<Filters>(initialFilters);
+
+    // Sincronizeaza starea filters cu searchParams la schimbarea initialFilters (ex: navigare directa cu URL)
+    useEffect(() => {
+        setFilters(initialFilters);
+    }, [initialFilters]);
+
+    // Functie pentru a actualiza URL-ul cu filtrele curente
+    const updateURLWithFilters = (currentFilters: Filters) => {
+        const params = new URLSearchParams();
+        if (currentFilters.location) params.set("location", currentFilters.location);
+        if (currentFilters.minPrice) params.set("minPrice", currentFilters.minPrice);
+        if (currentFilters.maxPrice) params.set("maxPrice", currentFilters.maxPrice);
+        if (currentFilters.numberOfRooms) params.set("numberOfRooms", currentFilters.numberOfRooms);
+        if (currentFilters.numberOfBathrooms) params.set("numberOfBathrooms", currentFilters.numberOfBathrooms);
+        if (currentFilters.minSurface) params.set("minSurface", currentFilters.minSurface);
+        if (currentFilters.maxSurface) params.set("maxSurface", currentFilters.maxSurface);
+        if (currentFilters.minConstructionYear) params.set("minConstructionYear", currentFilters.minConstructionYear);
+        if (currentFilters.tenantFaculty) params.set("tenantFaculty", currentFilters.tenantFaculty);
+        if (currentFilters.discounts.discount1) params.set("d1", "true");
+        if (currentFilters.discounts.discount2) params.set("d2", "true");
+        if (currentFilters.discounts.discount3) params.set("d3", "true");
+
+        facilityOptions.forEach(opt => {
+            if (currentFilters.facilities[opt.id]) {
+                params.set(opt.id, "true");
+            }
+        });
+        // Adauga si alte filtre daca e necesar
+        setSearchParams(params, { replace: true }); // replace: true pentru a nu umple istoricul browserului
+    };
 
     const [selectedMapData, setSelectedMapData] = useState<{
         lat: number;
@@ -149,72 +160,143 @@ const Home: React.FC = () => {
         address: string;
     } | null>(null);
 
-    // Fetch apartments (existing code)
     useEffect(() => {
-        api
-            .get<Apartment[]>("/apartments")
-            .then((response) => {
-                setApartments(response.data);
-                console.log("Apartamente preluate:", response.data);
-                // Apply initial filter from URL param if present
-                if (locationParam.trim() !== "") {
-                    applyFilters(response.data, { ...filters, location: locationParam });
-                } else {
-                    setFilteredApartments(response.data);
-                }
-            })
-            .catch((error) => {
-                console.error("Eroare la preluarea datelor:", error);
-            });
+        const fetchData = async () => {
 
-        setLoadingFaculties(true);
-        api.get<Faculty[]>("/faculty/")
-            .then(response => {
-                setAllFaculties(response.data);
-            })
-            .catch(error => {
-                console.error("Eroare la preluarea listei de facultăți:", error);
-                setAllFaculties([]);
-            })
-            .finally(() => {
+            setLoadingFaculties(true);
+            setLoadingTenantData(true);
+            try {
+                const [apartmentsResponse, facultiesResponse, tenantFacultiesResponse] = await Promise.all([
+                    api.get<Apartment[]>("/apartments"),
+                    api.get<Faculty[]>("/faculty/"),
+                    api.get<TenantFacultyInfo[]>("/apartments/rentals/active-tenant-faculties-summary")
+                ]);
+
+                const fetchedApartments = apartmentsResponse.data;
+                setApartments(fetchedApartments);
+                setAllFaculties(facultiesResponse.data);
+                setActiveTenantFaculties(tenantFacultiesResponse.data);
+
+                console.log("Apartamente:", fetchedApartments);
+                console.log("Facultati dropdown:", facultiesResponse.data);
+                console.log("Facultati chiriasi:", tenantFacultiesResponse.data);
+
+                // Aplicam filtrele initiale (care pot veni din URL via initialFilters)
+                applyFilters(fetchedApartments, filters); // Folosim starea 'filters' care e sincronizata cu URL-ul
+
+            } catch (error) {
+                console.error("Eroare la preluarea datelor initiale:", error);
+                setApartments([]); setFilteredApartments([]); setAllFaculties([]); setActiveTenantFaculties([]);
+            } finally {
+
                 setLoadingFaculties(false);
-            });
-
-        // Fetch pentru datele despre facultățile chiriașilor activi
-        setLoadingTenantData(true);
-        api.get<TenantFacultyInfo[]>("/apartments/rentals/active-tenant-faculties-summary") // Endpoint ipotetic, vezi mai jos
-            .then(response => {
-                setActiveTenantFaculties(response.data);
-                console.log("Facultăți chiriași activi:", response.data);
-                // După ce avem și aceste date, am putea re-aplica filtrele dacă e necesar
-                // și dacă un filtru de facultate era deja activ (ex: din URL)
-                // Dar, de obicei, utilizatorul aplică filtrele după ce pagina s-a încărcat.
-            })
-            .catch(error => {
-                console.error("Eroare la preluarea facultăților chiriașilor:", error);
-                setActiveTenantFaculties([]);
-            })
-            .finally(() => {
                 setLoadingTenantData(false);
-            });
-    }, [locationParam]); // Run only once on mount
+            }
+        };
+        fetchData();
+    }, [filters]);
+
 
     useEffect(() => {
-        api
-            .get<Apartment[]>("/apartments")
-            .then((response) => {
-                setApartments(response.data);
-                // Apply initial location filter IF locationParam exists
-                if (locationParam.trim() !== "") {
-                    applyFilters(response.data, { ...initialFilters, location: locationParam });
-                } else {
-                    setFilteredApartments(response.data); // Otherwise, show all initially
-                }
-            })
-            .catch((error) => {
-                console.error("Eroare la preluarea datelor:", error);
-            });
-    }, []); // Runs once
+        const fetchData = async () => {
+            setLoadingFaculties(true);
+            setLoadingTenantData(true);
+            try {
+                const [apartmentsResponse, facultiesResponse, tenantFacultiesResponse] = await Promise.all([
+                    api.get<Apartment[]>("/apartments"),
+                    api.get<Faculty[]>("/faculty/"),
+                    api.get<TenantFacultyInfo[]>("/apartments/rentals/active-tenant-faculties-summary") // Ruta corectata
+                ]);
+
+                setApartments(apartmentsResponse.data);
+                setAllFaculties(facultiesResponse.data);
+                setActiveTenantFaculties(tenantFacultiesResponse.data);
+
+            } catch (error) {
+                console.error("Eroare la preluarea datelor initiale:", error);
+                // Gestioneaza erorile corespunzator
+            } finally {
+                setLoadingFaculties(false);
+                setLoadingTenantData(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Fetch apartments (existing code)
+    // useEffect(() => {
+    //     api
+    //         .get<Apartment[]>("/apartments")
+    //         .then((response) => {
+    //             setApartments(response.data);
+    //             console.log("Apartamente preluate:", response.data);
+    //             // Apply initial filter from URL param if present
+    //             if (locationParam.trim() !== "") {
+    //                 applyFilters(response.data, { ...filters, location: locationParam });
+    //             } else {
+    //                 setFilteredApartments(response.data);
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             console.error("Eroare la preluarea datelor:", error);
+    //         });
+
+    //     setLoadingFaculties(true);
+    //     api.get<Faculty[]>("/faculty/")
+    //         .then(response => {
+    //             setAllFaculties(response.data);
+    //         })
+    //         .catch(error => {
+    //             console.error("Eroare la preluarea listei de facultati:", error);
+    //             setAllFaculties([]);
+    //         })
+    //         .finally(() => {
+    //             setLoadingFaculties(false);
+    //         });
+
+    //     // Fetch pentru datele despre facultatile chiriasilor activi
+    //     setLoadingTenantData(true);
+    //     api.get<TenantFacultyInfo[]>("/apartments/rentals/active-tenant-faculties-summary") // Endpoint ipotetic, vezi mai jos
+    //         .then(response => {
+    //             setActiveTenantFaculties(response.data);
+    //             console.log("Facultati chiriasi activi:", response.data);
+    //             // Dupa ce avem si aceste date, am putea re-aplica filtrele daca e necesar
+    //             // si daca un filtru de facultate era deja activ (ex: din URL)
+    //             // Dar, de obicei, utilizatorul aplica filtrele dupa ce pagina s-a incarcat.
+    //         })
+    //         .catch(error => {
+    //             console.error("Eroare la preluarea facultatilor chiriasilor:", error);
+    //             setActiveTenantFaculties([]);
+    //         })
+    //         .finally(() => {
+    //             setLoadingTenantData(false);
+    //         });
+    // }, [locationParam]); // Run only once on mount
+
+    useEffect(() => {
+        if (apartments.length > 0) { // Aplica doar daca datele initiale s-au incarcat
+            applyFilters(apartments, filters);
+        } else if (apartments.length === 0) {
+            setFilteredApartments([]); // Daca nu sunt apartamente, lista filtrata e goala
+        }
+    }, [apartments, filters, activeTenantFaculties]);
+
+    // useEffect(() => {
+    //     api
+    //         .get<Apartment[]>("/apartments")
+    //         .then((response) => {
+    //             setApartments(response.data);
+    //             // Apply initial location filter IF locationParam exists
+    //             if (locationParam.trim() !== "") {
+    //                 applyFilters(response.data, { ...initialFilters, location: locationParam });
+    //             } else {
+    //                 setFilteredApartments(response.data); // Otherwise, show all initially
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             console.error("Eroare la preluarea datelor:", error);
+    //         });
+    // }, []); // Runs once
 
     // --- START: Updated Filter Application Logic ---
     // Renamed to applyFilters to be clearer
@@ -319,12 +401,12 @@ const Home: React.FC = () => {
                 apt.discounts && typeof apt.discounts.discount1 === 'number' && apt.discounts.discount1 > 0
             );
         }
-        if (currentFilters.discounts.discount2) { // Adaugă și pentru celelalte dacă ai checkbox-uri
+        if (currentFilters.discounts.discount2) { // Adauga si pentru celelalte daca ai checkbox-uri
             filtered = filtered.filter(apt =>
                 apt.discounts && typeof apt.discounts.discount2 === 'number' && apt.discounts.discount2 > 0
             );
         }
-        if (currentFilters.discounts.discount3) { // Adaugă și pentru celelalte
+        if (currentFilters.discounts.discount3) { // Adauga si pentru celelalte
             filtered = filtered.filter(apt =>
                 apt.discounts && typeof apt.discounts.discount3 === 'number' && apt.discounts.discount3 > 0
             );
@@ -332,18 +414,18 @@ const Home: React.FC = () => {
 
         // 9. Filtru An Constructie
         const minYear = parseInt(currentFilters.minConstructionYear, 10);
-        if (!isNaN(minYear) && minYear > 0) { // Verifică și > 0 pentru a evita anii negativi dacă min e setat greșit
+        if (!isNaN(minYear) && minYear > 0) { // Verifica si > 0 pentru a evita anii negativi daca min e setat gresit
             filtered = filtered.filter(apt => {
-                const constructionYear = Number(apt.constructionYear); // Asigură-te că apt.constructionYear e număr
+                const constructionYear = Number(apt.constructionYear); // Asigura-te ca apt.constructionYear e numar
                 return !isNaN(constructionYear) && constructionYear >= minYear;
             });
         }
 
-        // 10. Filtru Facultate Chiriași
+        // 10. Filtru Facultate Chiriasi
         if (currentFilters.tenantFaculty.trim() !== "") {
             const searchFacultyLower = currentFilters.tenantFaculty.toLowerCase();
 
-            // Set de ID-uri ale apartamentelor care au cel puțin un chiriaș de la facultatea căutată
+            // Set de ID-uri ale apartamentelor care au cel putin un chirias de la facultatea cautata
             const apartmentsWithMatchingFacultyTenant = new Set<string>();
             activeTenantFaculties.forEach(tf => {
                 if (tf.faculty.toLowerCase() === searchFacultyLower) {
@@ -351,20 +433,20 @@ const Home: React.FC = () => {
                 }
             });
 
-            // Set de ID-uri ale apartamentelor care au *orice* chiriaș activ/viitor
+            // Set de ID-uri ale apartamentelor care au *orice* chirias activ/viitor
             const apartmentsWithAnyActiveTenant = new Set<string>(
                 activeTenantFaculties.map(tf => tf.apartmentId)
             );
 
-            if (loadingTenantData && apartmentsToFilter.length > 0) { // Verifică și apartmentsToFilter pentru a nu filtra prematur
-                console.warn("Datele despre facultățile chiriașilor se încarcă încă. Filtrul de facultate ar putea fi aplicat pe date incomplete.");
+            if (loadingTenantData && apartmentsToFilter.length > 0) { // Verifica si apartmentsToFilter pentru a nu filtra prematur
+                console.warn("Datele despre facultatile chiriasilor se incarca inca. Filtrul de facultate ar putea fi aplicat pe date incomplete.");
             }
 
             filtered = filtered.filter(apt => {
-                // Condiția 1: Apartamentul are un chiriaș de la facultatea selectată
+                // Conditia 1: Apartamentul are un chirias de la facultatea selectata
                 const hasTenantFromSelectedFaculty = apartmentsWithMatchingFacultyTenant.has(apt._id);
 
-                // Condiția 2: Apartamentul este complet liber (nu are niciun chiriaș activ/viitor)
+                // Conditia 2: Apartamentul este complet liber (nu are niciun chirias activ/viitor)
                 const isCompletelyVacant = !apartmentsWithAnyActiveTenant.has(apt._id);
 
                 return hasTenantFromSelectedFaculty || isCompletelyVacant;
@@ -386,7 +468,7 @@ const Home: React.FC = () => {
     ) => {
         setFilters((prevFilters) => {
             const isFacilityKey = facilityOptions.some(opt => opt.id === filterName);
-            // Verificăm dacă filterName este o cheie a obiectului discounts
+            // Verificam daca filterName este o cheie a obiectului discounts
             const isDiscountKey = filterName === 'discount1' || filterName === 'discount2' || filterName === 'discount3';
 
             if (isFacilityKey) {
@@ -406,26 +488,134 @@ const Home: React.FC = () => {
                     },
                 };
             } else {
-                // Pentru cheile de la rădăcină (location, minPrice, etc.)
+                // Pentru cheile de la radacina (location, minPrice, etc.)
                 return {
                     ...prevFilters,
-                    // Asigură-te că TypeScript știe că filterName este o cheie validă aici
+                    // Asigura-te ca TypeScript stie ca filterName este o cheie valida aici
                     [filterName as keyof Omit<Filters, 'facilities' | 'discounts'>]: value,
                 };
             }
         });
     };
+
     // Reset Filters Function
     const handleResetFilters = () => {
-        const resetState = { ...initialFilters, location: locationParam };
-        setFilters(resetState);
-        // Apply the reset filters immediately to update the list
-        applyFilters(apartments, resetState);
+        // Resetam la starea initiala derivata din searchParams (sau la valori default daca searchParams sunt goale)
+        const params = new URLSearchParams(location.search);
+        const resetState: Filters = {
+            location: params.get("location") || "",
+            minPrice: params.get("minPrice") || "",
+            maxPrice: params.get("maxPrice") || "",
+            numberOfRooms: params.get("numberOfRooms") || "",
+            numberOfBathrooms: params.get("numberOfBathrooms") || "",
+            minSurface: params.get("minSurface") || "",
+            maxSurface: params.get("maxSurface") || "",
+            available: params.get("available") === 'true',
+            discounts: {
+                discount1: params.get("d1") === 'true',
+                discount2: params.get("d2") === 'true',
+                discount3: params.get("d3") === 'true',
+            },
+            facilities: facilityOptions.reduce((acc, opt) => {
+                acc[opt.id] = params.get(opt.id) === 'true';
+                return acc;
+            }, {} as Filters['facilities']),
+            minConstructionYear: params.get("minConstructionYear") || "",
+            tenantFaculty: params.get("tenantFaculty") || "",
+        };
+        // Daca vrem resetare completa la valorile default, ignorand URL-ul:
+        // const resetState = { ...initialFilters, location: "" }; // Sau pastram locationParam daca e relevant
+        setFilters(initialFilters); // Resetam la valorile default absolute
+        setSearchParams({}, { replace: true }); // Curatam URL-ul
     };
 
     const handleMoreDetails = (id: string) => {
         navigate(`/apartment/${id}`);
     };
+
+    // --- Logica pentru Sortare ---
+    const sortedAndFilteredApartments = useMemo(() => {
+        let sortableArray = [...filteredApartments];
+
+        const getDiscountedPrice = (apt: Apartment, discountField: keyof Apartment['discounts']): number => {
+            if (apt.discounts && typeof apt.discounts[discountField] === 'number' && apt.discounts[discountField] > 0) {
+                return apt.price * (1 - (apt.discounts[discountField] / 100));
+            }
+            return apt.price; // Sau un numar foarte mare daca vrei ca cele fara discount sa fie la sfarsit
+        };
+
+        // Functie pentru a determina daca un apartament este disponibil ACUM
+        // Aceasta este o simplificare. intr-o aplicatie reala, ai verifica chiriile active.
+        const isApartmentAvailableNow = (apt: Apartment): boolean => {
+            // Placeholder: Trebuie sa implementezi logica reala aici
+            // De ex., verifici `activeTenantFaculties` sau un camp `apt.currentBookings`
+            const hasActiveBooking = activeTenantFaculties.some(tf => tf.apartmentId === apt._id); // Simplificare grosolana
+            return !hasActiveBooking;
+        };
+
+
+        switch (sortCriteria) {
+            case 'price_asc':
+                sortableArray.sort((a, b) => a.price - b.price);
+                break;
+            case 'price_desc':
+                sortableArray.sort((a, b) => b.price - a.price);
+                break;
+            case 'd1_asc': // Pret cu discount categoria 1 (crescator)
+                sortableArray.sort((a, b) => getDiscountedPrice(a, 'discount1') - getDiscountedPrice(b, 'discount1'));
+                break;
+            case 'd1_desc':
+                sortableArray.sort((a, b) => getDiscountedPrice(b, 'discount1') - getDiscountedPrice(a, 'discount1'));
+                break;
+            case 'd2_asc':
+                sortableArray.sort((a, b) => getDiscountedPrice(a, 'discount2') - getDiscountedPrice(b, 'discount2'));
+                break;
+            case 'd2_desc':
+                sortableArray.sort((a, b) => getDiscountedPrice(b, 'discount2') - getDiscountedPrice(a, 'discount2'));
+                break;
+            case 'd3_asc':
+                sortableArray.sort((a, b) => getDiscountedPrice(a, 'discount3') - getDiscountedPrice(b, 'discount3'));
+                break;
+            case 'd3_desc':
+                sortableArray.sort((a, b) => getDiscountedPrice(b, 'discount3') - getDiscountedPrice(a, 'discount3'));
+                break;
+            case 'construction_desc': // Cele mai noi cladiri primele
+                sortableArray.sort((a, b) => Number(b.constructionYear) - Number(a.constructionYear));
+                break;
+            case 'construction_asc': // Cele mai vechi cladiri primele
+                sortableArray.sort((a, b) => Number(a.constructionYear) - Number(b.constructionYear));
+                break;
+            case 'surface_asc':
+                sortableArray.sort((a, b) => Number(a.totalSurface) - Number(b.totalSurface));
+                break;
+            case 'surface_desc':
+                sortableArray.sort((a, b) => Number(b.totalSurface) - Number(a.totalSurface));
+                break;
+            case 'rooms_asc':
+                sortableArray.sort((a, b) => Number(a.numberOfRooms) - Number(b.numberOfRooms));
+                break;
+            case 'rooms_desc':
+                sortableArray.sort((a, b) => Number(b.numberOfRooms) - Number(a.numberOfRooms));
+                break;
+            case 'availability': // Apartamentele disponibile primele
+                sortableArray.sort((a, b) => {
+                    const availableA = isApartmentAvailableNow(a);
+                    const availableB = isApartmentAvailableNow(b);
+                    if (availableA && !availableB) return -1; // A vine inaintea lui B
+                    if (!availableA && availableB) return 1;  // B vine inaintea lui A
+                    return 0; // Ordinea nu se schimba daca ambele sunt la fel
+                });
+                break;
+            case 'date_desc': // Cele mai noi adaugate (presupunand createdAt)
+            default:
+                // sortableArray.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+                break;
+        }
+        return sortableArray;
+    }, [filteredApartments, sortCriteria, activeTenantFaculties]); // Adaugam activeTenantFaculties pentru sortarea dupa disponibilitate
+
+
+
 
     // Render component (existing code structure)
     return (
@@ -504,7 +694,7 @@ const Home: React.FC = () => {
                                     checked={filters.discounts.discount1}
                                     onChange={(e) => handleFilterChange("discount1", e.target.checked)}
                                 />
-                                Oferă discount categoria 1
+                                Ofera discount categoria 1
                             </label>
                             <label style={{ marginTop: '10px', display: 'block' }}>
                                 <input
@@ -513,7 +703,7 @@ const Home: React.FC = () => {
                                     checked={filters.discounts.discount2}
                                     onChange={(e) => handleFilterChange("discount2", e.target.checked)}
                                 />
-                                Oferă discount categoria 2
+                                Ofera discount categoria 2
                             </label>
                             <label style={{ marginTop: '10px', display: 'block' }}>
                                 <input
@@ -522,7 +712,7 @@ const Home: React.FC = () => {
                                     checked={filters.discounts.discount3}
                                     onChange={(e) => handleFilterChange("discount3", e.target.checked)}
                                 />
-                                Oferă discount categoria 3
+                                Ofera discount categoria 3
                             </label>
                         </div>
                     </div>
@@ -530,21 +720,21 @@ const Home: React.FC = () => {
                     {/* Faculty Filter */}
                     <div className="filter-group">
                         <label htmlFor="filter-tenant-faculty">
-                            <i className="fas fa-graduation-cap"></i> Facultate Chiriași Act.:
+                            <i className="fas fa-graduation-cap"></i> Facultate Chiriasi Act.:
                         </label>
                         <select
                             id="filter-tenant-faculty"
-                            value={filters.tenantFaculty} // Valoarea selectată
+                            value={filters.tenantFaculty} // Valoarea selectata
                             onChange={(e) => handleFilterChange("tenantFaculty", e.target.value)}
-                            disabled={loadingFaculties} // Dezactivează cât timp se încarcă facultățile
+                            disabled={loadingFaculties} // Dezactiveaza cat timp se incarca facultatile
                         >
-                            <option value="">Toate facultățile</option> {/* Opțiune pentru a nu filtra */}
+                            <option value="">Toate facultatile</option> {/* Optiune pentru a nu filtra */}
                             {loadingFaculties ? (
-                                <option disabled>Se încarcă facultățile...</option>
+                                <option disabled>Se incarca facultatile...</option>
                             ) : (
                                 allFaculties.map(faculty => (
-                                    // Folosim fullName ca valoare și ca text afișat.
-                                    // Dacă ai un ID și vrei să-l folosești, setează value={faculty._id}
+                                    // Folosim fullName ca valoare si ca text afisat.
+                                    // Daca ai un ID si vrei sa-l folosesti, seteaza value={faculty._id}
                                     <option key={faculty._id || faculty.fullName} value={faculty.fullName}>
                                         {faculty.fullName}
                                     </option>
@@ -619,7 +809,7 @@ const Home: React.FC = () => {
                         </div>
                         <div className="sub-filter construction-year-range">
                             <label>An Constructie:</label>
-                            <div className="year-inputs"> {/* Poți folosi o clasă similară cu price-inputs/surface-inputs */}
+                            <div className="year-inputs"> {/* Poti folosi o clasa similara cu price-inputs/surface-inputs */}
                                 <input
                                     type="number"
                                     id="filter-min-construction-year"
@@ -657,10 +847,33 @@ const Home: React.FC = () => {
                         Aplica Filtrele {/* Changed text slightly */}
                     </button>
                 </aside>
+
+                <div className="sort-options">
+                    <label htmlFor="sort-criteria">Sorteaza dupa: </label>
+                    <select id="sort-criteria" value={sortCriteria} onChange={(e) => setSortCriteria(e.target.value)}>
+                        <option value="date_desc">Cele mai noi</option>
+                        <option value="price_asc">Pret (crescator)</option>
+                        <option value="price_desc">Pret (descrescator)</option>
+                        <option value="d1_asc">Pret Discount Cat. 1 (cresc.)</option>
+                        <option value="d1_desc">Pret Discount Cat. 1 (desc.)</option>
+                        <option value="d2_asc">Pret Discount Cat. 2 (cresc.)</option>
+                        <option value="d2_desc">Pret Discount Cat. 2 (desc.)</option>
+                        <option value="d3_asc">Pret Discount Cat. 3 (cresc.)</option>
+                        <option value="d3_desc">Pret Discount Cat. 3 (desc.)</option>
+                        <option value="construction_desc">An constructie (noi-vechi)</option>
+                        <option value="construction_asc">An constructie (vechi-noi)</option>
+                        <option value="surface_desc">Suprafata (mare-mica)</option>
+                        <option value="surface_asc">Suprafata (mica-mare)</option>
+                        <option value="rooms_desc">Nr. Camere (multe-putine)</option>
+                        <option value="rooms_asc">Nr. Camere (putine-multe)</option>
+                        <option value="availability">Disponibilitate (libere primele)</option>
+                    </select>
+                </div>
+
                 {/* Apartments List Section (existing structure) */}
                 <section className="apartments-list">
-                    {filteredApartments.length > 0 ? (
-                        filteredApartments.map((apartment) => {
+                    {sortedAndFilteredApartments.length > 0 ? (
+                        sortedAndFilteredApartments.map((apartment) => {
                             const imageUrl = apartment.images?.[0] ?? "/Poze_apartamente/placeholder.jpeg";
                             return (
                                 <div key={apartment._id} className="apartment">
