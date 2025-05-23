@@ -236,14 +236,19 @@ const ApartmentDetails: React.FC = () => {
 
             if (response.data.length > 0) {
                 const { lat, lon } = response.data[0];
-                setSelectedMapData({
-                    lat: parseFloat(lat),
-                    lng: parseFloat(lon),
-                    address: apt.location,
-                });
-            } else {
-                console.error("Nu s-au gasit coordonate pentru adresa data");
-                setError("Nu s-au putut gasi coordonatele pentru aceasta locatie.");
+                const parsedLat = parseFloat(lat);
+                const parsedLng = parseFloat(lon);
+
+                if (!isNaN(parsedLat) && !isNaN(parsedLng)) { // Verificare importantă
+                    setSelectedMapData({
+                        lat: parsedLat,
+                        lng: parsedLng,
+                        address: apt.location,
+                    });
+                } else {
+                    console.error("Coordonate invalide primite de la Nominatim:", lat, lon);
+                    setError("Nu s-au putut obține coordonate valide pentru hartă.");
+                }
             }
         } catch (error) {
             console.error("Eroare la obtinerea coordonatelor:", error);
@@ -589,7 +594,7 @@ const ApartmentDetails: React.FC = () => {
                     onClose={() => setshowOwnerPop_up(false)}
                 />
             )}
-            {selectedMapData && (
+            {selectedMapData && typeof selectedMapData.lat === 'number' && typeof selectedMapData.lng === 'number' && (
                 <MapPop_up
                     lat={selectedMapData.lat}
                     lng={selectedMapData.lng}

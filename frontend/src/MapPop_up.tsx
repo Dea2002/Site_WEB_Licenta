@@ -77,30 +77,62 @@ interface MapPopUpProps {
 }
 
 // Componentă mică pentru a accesa instanța hărții și a o re-centra/re-ajusta zoom-ul
-const MapEffect: React.FC<{ center: LatLngExpression, zoom: number, pois: POI[], apartmentPos: LatLngExpression }> = ({ center, zoom, pois, apartmentPos }) => {
+const MapEffect: React.FC<{
+    apartmentPos: LatLngExpression;
+    pois: POI[];
+    selectedPoiForRoute: POI | null; // Adăugăm POI-ul selectat pentru rută
+    initialCenter: LatLngExpression; // Centrul inițial al apartamentului
+    initialZoom: number;          // Zoom-ul inițial
+}> = ({ apartmentPos, pois, selectedPoiForRoute, initialCenter, initialZoom }) => {
     const map = useMap();
+
     useEffect(() => {
+        // Invalidează dimensiunea la fiecare schimbare relevantă
         map.invalidateSize();
-        if (pois.length > 0) {
+
+        if (selectedPoiForRoute) {
+            // Dacă un POI este selectat pentru rută, doar ne asigurăm că și POI-ul este vizibil,
+            // dar nu facem un fitBounds agresiv care să includă *toate* POI-urile.
+            // Putem centra pe apartament sau pe o medie între apartament și POI.
+            // Sau, pur și simplu, nu schimbăm vizualizarea dacă utilizatorul a navigat manual.
+            // Pentru moment, lăsăm utilizatorul să controleze zoom-ul/centrul după ce a selectat un POI
+            // sau putem centra pe POI-ul selectat dacă dorim.
+            // map.setView([selectedPoiForRoute.lat, selectedPoiForRoute.lng], map.getZoom()); // Exemplu: centrează pe POI
+        } else if (pois.length > 0) {
+            // Când se încarcă o listă NOUĂ de POI-uri (dar niciunul nu e selectat pentru rută încă),
+            // facem fitBounds pentru a le include pe toate.
             const bounds = L.latLngBounds([apartmentPos]);
             pois.forEach(poi => bounds.extend([poi.lat, poi.lng]));
-            map.fitBounds(bounds, { padding: [50, 50] }); // Adaugă padding
+            map.fitBounds(bounds, { padding: [50, 50] });
         } else {
-            map.setView(center, zoom);
+            // Dacă nu sunt POI-uri afișate (ex: la prima încărcare sau după reset), centrează pe apartament.
+            map.setView(initialCenter, initialZoom);
         }
-    }, [center, zoom, map, pois, apartmentPos]);
+    }, [map, apartmentPos, pois, selectedPoiForRoute, initialCenter, initialZoom]); // Adăugăm selectedPoiForRoute și initial props
+
     return null;
 };
 
 
 const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
+
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+        console.error("MapPop_up a primit lat/lng invalid:", lat, lng);
+        // Poți returna un mesaj de eroare sau null pentru a nu randa harta
+        return <div className="popup-overlay" onClick={onClose}><div className="map-popup-content">Eroare: Coordonate invalide pentru hartă.</div></div>;
+    }
+
+
+    // initialMapZoom și initialCenter sunt folosite în MapEffect
+    const initialMapZoom = 16;
+
     const apartmentPosition: LatLngExpression = [lat, lng];
     const [mapZoom, setMapZoom] = useState(16); // Stare pentru zoom-ul inițial
-
     const [activePoiType, setActivePoiType] = useState<string | null>(null);
     const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
     const [loadingPois, setLoadingPois] = useState<boolean>(false);
-    const [selectedPoi, setSelectedPoi] = useState<POI | null>(null); // Pentru a desena ruta
+    const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
+    const [routePolyline, setRoutePolyline] = useState<LatLngExpression[] | null>(null);
 
 
     // Funcție pentru a calcula distanța (Haversine) - în metri
@@ -122,7 +154,8 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
         if (!lat || !lng) return;
         setLoadingPois(true);
         setPointsOfInterest([]); // Resetează POI-urile anterioare
-        setSelectedPoi(null); // Resetează POI-ul selectat pentru rută
+        setSelectedPoi(null);       // <-- IMPORTANT: Resetează POI-ul selectat
+        setRoutePolyline(null);
         setActivePoiType(category.id);
 
         // Determină raza de căutare (ex: 2km = 2000m)
@@ -193,7 +226,7 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
 
 
     // Pentru a desena ruta când un POI este selectat
-    const [routePolyline, setRoutePolyline] = useState<LatLngExpression[] | null>(null);
+
     const handlePoiClick = async (poi: POI) => {
         setSelectedPoi(poi);
         setRoutePolyline(null); // Resetează ruta anterioară
@@ -220,7 +253,7 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
         <div className="popup-overlay" onClick={onClose}>
             <div className="map-popup-content" onClick={(e) => e.stopPropagation()}> {/* Clasă diferită pentru conținutul hărții */}
                 <button className="popup-close map-popup-close" onClick={onClose}> {/* Clasă diferită pentru butonul de close */}
-                    × {/* Simbol X mai elegant */}
+                    x {/* Simbol X mai elegant */}
                 </button>
 
                 <div className="map-layout-container">
@@ -266,7 +299,7 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
                             style={{ height: "100%", width: "100%" }} // Ajustat pentru a umple wrapper-ul
                         // ref={mapRef} // `whenCreated` este depreciat, folosim `useMap` în componenta `MapEffect`
                         >
-                            <MapEffect center={apartmentPosition} zoom={mapZoom} pois={pointsOfInterest} apartmentPos={apartmentPosition} />
+                            <MapEffect initialCenter={apartmentPosition} initialZoom={initialMapZoom} pois={pointsOfInterest} apartmentPos={apartmentPosition} selectedPoiForRoute={selectedPoi} />
                             <TileLayer
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
