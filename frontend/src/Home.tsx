@@ -93,7 +93,7 @@ const Home: React.FC = () => {
 
     const [sortCriteria, setSortCriteria] = useState<string>("date_desc"); // Default: cele mai noi
     const [searchParams, setSearchParams] = useSearchParams(); // Adaugam setSearchParams
-    const locationParam = searchParams.get("location") || "";
+    // const locationParam = searchParams.get("location") || "";
 
     // const { isAuthenticated, token } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -458,7 +458,8 @@ const Home: React.FC = () => {
 
     // Handler for explicit button click or Enter key
     const handleApplyFiltersAction = () => {
-        applyFilters(apartments, filters);
+        updateURLWithFilters(filters);
+        // applyFilters(apartments, filters);
     };
 
     // Function to update a specific filter value, supporting both top-level and facilities keys
@@ -501,28 +502,28 @@ const Home: React.FC = () => {
     // Reset Filters Function
     const handleResetFilters = () => {
         // Resetam la starea initiala derivata din searchParams (sau la valori default daca searchParams sunt goale)
-        const params = new URLSearchParams(location.search);
-        const resetState: Filters = {
-            location: params.get("location") || "",
-            minPrice: params.get("minPrice") || "",
-            maxPrice: params.get("maxPrice") || "",
-            numberOfRooms: params.get("numberOfRooms") || "",
-            numberOfBathrooms: params.get("numberOfBathrooms") || "",
-            minSurface: params.get("minSurface") || "",
-            maxSurface: params.get("maxSurface") || "",
-            available: params.get("available") === 'true',
-            discounts: {
-                discount1: params.get("d1") === 'true',
-                discount2: params.get("d2") === 'true',
-                discount3: params.get("d3") === 'true',
-            },
-            facilities: facilityOptions.reduce((acc, opt) => {
-                acc[opt.id] = params.get(opt.id) === 'true';
-                return acc;
-            }, {} as Filters['facilities']),
-            minConstructionYear: params.get("minConstructionYear") || "",
-            tenantFaculty: params.get("tenantFaculty") || "",
-        };
+        // const params = new URLSearchParams(location.search);
+        // const resetState: Filters = {
+        //     location: params.get("location") || "",
+        //     minPrice: params.get("minPrice") || "",
+        //     maxPrice: params.get("maxPrice") || "",
+        //     numberOfRooms: params.get("numberOfRooms") || "",
+        //     numberOfBathrooms: params.get("numberOfBathrooms") || "",
+        //     minSurface: params.get("minSurface") || "",
+        //     maxSurface: params.get("maxSurface") || "",
+        //     available: params.get("available") === 'true',
+        //     discounts: {
+        //         discount1: params.get("d1") === 'true',
+        //         discount2: params.get("d2") === 'true',
+        //         discount3: params.get("d3") === 'true',
+        //     },
+        //     facilities: facilityOptions.reduce((acc, opt) => {
+        //         acc[opt.id] = params.get(opt.id) === 'true';
+        //         return acc;
+        //     }, {} as Filters['facilities']),
+        //     minConstructionYear: params.get("minConstructionYear") || "",
+        //     tenantFaculty: params.get("tenantFaculty") || "",
+        // };
         // Daca vrem resetare completa la valorile default, ignorand URL-ul:
         // const resetState = { ...initialFilters, location: "" }; // Sau pastram locationParam daca e relevant
         setFilters(initialFilters); // Resetam la valorile default absolute

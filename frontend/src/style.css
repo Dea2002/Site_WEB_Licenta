@@ -163,7 +163,7 @@ body::before {
     margin: 0;
 }
 .filter-group input[type="number"] {
-    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* Spec/Check Group Headers */
@@ -418,3 +418,4 @@ body::before {
     font-size: 0.9em;
     cursor: pointer;
 }
+
