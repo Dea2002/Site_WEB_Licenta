@@ -41,6 +41,30 @@ interface Filters {
     };
     // acceptsColleagues: boolean;
 }
+type FacilityKey = keyof Filters['facilities'];
+const facilityOptions: { id: FacilityKey; label: string }[] = [
+    { id: 'parking', label: 'Parcare inclusa' },
+    { id: 'videoSurveillance', label: 'Supraveghere video' },
+    { id: 'wifi', label: 'Wi-Fi' },
+    { id: 'airConditioning', label: 'Aer Conditionat' },
+    { id: 'tvCable', label: 'TV Cablu' },
+    { id: 'laundryMachine', label: 'Masina de spalat rufe' },
+    { id: 'fullKitchen', label: 'Bucatarie complet utilata' },
+    { id: 'fireAlarm', label: 'Alarma de incendiu' },
+    { id: 'smokeDetector', label: 'Detector de fum' },
+    { id: 'balcony', label: 'Balcon' },
+    { id: 'terrace', label: 'Terasa' },
+    { id: 'soundproofing', label: 'Izolat fonic' },
+    { id: 'underfloorHeating', label: 'Incalzire in pardoseala' },
+    { id: 'petFriendly', label: 'Permite animale' },
+    { id: 'elevator', label: 'Lift' },
+    { id: 'pool', label: 'Piscina' },
+    { id: 'gym', label: 'Sala de fitness' },
+    { id: 'bikeStorage', label: 'Parcare biciclete' },
+    { id: 'storageRoom', label: 'Camera depozitare' },
+    { id: 'rooftop', label: 'Acces acoperis' },
+    { id: 'intercom', label: 'Interfon' },
+];
 // --- END: Updated Filters Interface ---
 
 const Home: React.FC = () => {
@@ -136,89 +160,99 @@ const Home: React.FC = () => {
     // --- START: Updated Filter Application Logic ---
     // Renamed to applyFilters to be clearer
     const applyFilters = (apartmentsToFilter: Apartment[], currentFilters: Filters) => {
-        let filtered = apartmentsToFilter;
+        let filtered = [...apartmentsToFilter]; // Lucrează pe o copie pentru a nu modifica originalul direct aici
 
-        // Location
+        // 1. Filtru Locație
         if (currentFilters.location.trim() !== "") {
+            const searchTerm = currentFilters.location.toLowerCase();
             filtered = filtered.filter((apt) =>
-                apt.location.toLowerCase().includes(currentFilters.location.toLowerCase()),
+                apt.location.toLowerCase().includes(searchTerm)
             );
         }
 
-        // Price Range
+        // 2. Filtru Interval Preț
         const minPrice = parseFloat(currentFilters.minPrice);
         const maxPrice = parseFloat(currentFilters.maxPrice);
         if (!isNaN(minPrice) && minPrice >= 0) {
             filtered = filtered.filter((apt) => apt.price >= minPrice);
         }
         if (!isNaN(maxPrice) && maxPrice >= 0) {
-            if (!isNaN(minPrice) && maxPrice < minPrice) {
-                console.warn("Max price is less than min price, ignoring max price.");
+            if (!isNaN(minPrice) && maxPrice < minPrice && currentFilters.minPrice.trim() !== "") {
+                // Afișează o avertizare sau gestionează cazul în UI, dar nu aplica filtrul maxPrice greșit
+                console.warn("Prețul maxim este mai mic decât prețul minim. Filtrul pentru preț maxim nu va fi aplicat.");
             } else {
                 filtered = filtered.filter((apt) => apt.price <= maxPrice);
             }
         }
 
-        // Number of Rooms
+        // 3. Filtru Număr Camere
         if (currentFilters.numberOfRooms && currentFilters.numberOfRooms !== "") {
+            const aptRooms = (apt: Apartment) => Number(apt.numberOfRooms); // Funcție helper pentru a converti la număr
+
             if (currentFilters.numberOfRooms.endsWith("+")) {
                 const minRooms = parseInt(currentFilters.numberOfRooms.replace("+", ""), 10);
                 if (!isNaN(minRooms)) {
-                    filtered = filtered.filter((apt) => apt.numberOfRooms >= minRooms);
+                    filtered = filtered.filter((apt) => aptRooms(apt) >= minRooms);
                 }
             } else {
                 const exactRooms = parseInt(currentFilters.numberOfRooms, 10);
-                filtered = filtered.filter((apt) => Number(apt.numberOfRooms) === exactRooms);
+                if (!isNaN(exactRooms)) {
+                    filtered = filtered.filter((apt) => aptRooms(apt) === exactRooms);
+                }
             }
         }
 
-        // Number of Bathrooms
+        // 4. Filtru Număr Băi
         if (currentFilters.numberOfBathrooms && currentFilters.numberOfBathrooms !== "") {
+            const aptBaths = (apt: Apartment) => Number(apt.numberOfBathrooms);
+
             if (currentFilters.numberOfBathrooms.endsWith("+")) {
                 const minBaths = parseInt(currentFilters.numberOfBathrooms.replace("+", ""), 10);
                 if (!isNaN(minBaths)) {
-                    filtered = filtered.filter((apt) => apt.numberOfBathrooms >= minBaths);
+                    filtered = filtered.filter((apt) => aptBaths(apt) >= minBaths);
                 }
             } else {
                 const exactBaths = parseInt(currentFilters.numberOfBathrooms, 10);
                 if (!isNaN(exactBaths)) {
-                    filtered = filtered.filter(
-                        (apt) => Number(apt.numberOfBathrooms) === exactBaths,
-                    );
+                    filtered = filtered.filter((apt) => aptBaths(apt) === exactBaths);
                 }
             }
         }
 
-        // Surface Area Range
+        // 5. Filtru Interval Suprafață
         const minSurface = parseFloat(currentFilters.minSurface);
         const maxSurface = parseFloat(currentFilters.maxSurface);
         if (!isNaN(minSurface) && minSurface >= 0) {
-            filtered = filtered.filter((apt) => apt.totalSurface >= minSurface);
+            filtered = filtered.filter((apt) => Number(apt.totalSurface) >= minSurface);
         }
         if (!isNaN(maxSurface) && maxSurface >= 0) {
-            if (!isNaN(minSurface) && maxSurface < minSurface) {
-                console.warn("Max surface is less than min surface, ignoring max surface.");
+            if (!isNaN(minSurface) && maxSurface < minSurface && currentFilters.minSurface.trim() !== "") {
+                console.warn("Suprafața maximă este mai mică decât suprafața minimă. Filtrul pentru suprafață maximă nu va fi aplicat.");
             } else {
-                filtered = filtered.filter((apt) => apt.totalSurface <= maxSurface);
+                filtered = filtered.filter((apt) => Number(apt.totalSurface) <= maxSurface);
             }
         }
 
+        // 6. Filtru Disponibilitate (dacă îl vei folosi)
+        // Momentan, currentFilters.available este un boolean, dar nu ai logica de filtrare pentru el.
+        // Va trebui să adaugi un câmp `isAvailable` sau similar în `Apartment`
+        // și să filtrezi pe baza lui dacă `currentFilters.available` este true.
+        // Exemplu (necesită câmpul `isAvailable` în `Apartment`):
+        // if (currentFilters.available) {
+        //     filtered = filtered.filter((apt) => apt.isAvailable === true);
+        // }
 
-        if (currentFilters.facilities.petFriendly) {
-            filtered = filtered.filter((apt) => apt.facilities.petFriendly === true);
-        }
-        if (currentFilters.facilities.parking) {
-            filtered = filtered.filter((apt) => apt.facilities.parking === true);
-        }
-        if (currentFilters.facilities.elevator) {
-            filtered = filtered.filter((apt) => apt.facilities.elevator === true);
-        }
-        if (currentFilters.facilities.airConditioning) {
-            filtered = filtered.filter((apt) => apt.facilities.airConditioning === true);
-        }
-        if (currentFilters.facilities.balcony) {
-            filtered = filtered.filter((apt) => apt.facilities.balcony === true);
-        }
+
+        // 7. Filtru Facilități (dinamic)
+        // Iterăm peste toate opțiunile de facilități definite
+        facilityOptions.forEach(facilityOption => {
+            // Verificăm dacă această facilitate este selectată în filtrele curente
+            if (currentFilters.facilities[facilityOption.id]) {
+                // Filtrăm apartamentele care au această facilitate setată pe true
+                // Asigură-te că apt.facilities există înainte de a accesa proprietățile
+                filtered = filtered.filter(apt => apt.facilities && apt.facilities[facilityOption.id] === true);
+            }
+        });
 
         setFilteredApartments(filtered);
     };
@@ -229,23 +263,30 @@ const Home: React.FC = () => {
     };
 
     // Function to update a specific filter value, supporting both top-level and facilities keys
-    const handleFilterChange = (filterName: keyof Filters | keyof Filters["facilities"], value: string | boolean) => {
+    const handleFilterChange = (
+        filterName: keyof Omit<Filters, 'facilities'> | FacilityKey, // Permite chei de la rădăcină SAU chei din facilities
+        value: string | boolean
+    ) => {
         setFilters((prevFilters) => {
-            if (filterName in prevFilters.facilities) {
+            // Verificăm dacă filterName este o cheie validă a obiectului facilities
+            // O metodă mai sigură decât 'in' este să verifici dacă cheia este în facilityOptions
+            const isFacilityKey = facilityOptions.some(opt => opt.id === filterName);
+
+            if (isFacilityKey) {
                 return {
                     ...prevFilters,
                     facilities: {
                         ...prevFilters.facilities,
-                        [filterName]: value as boolean,
+                        [filterName as FacilityKey]: value as boolean, // Type assertion
                     },
                 };
+            } else {
+                return {
+                    ...prevFilters,
+                    [filterName as keyof Omit<Filters, 'facilities'>]: value, // Type assertion
+                };
             }
-            return {
-                ...prevFilters,
-                [filterName]: value,
-            };
         });
-        // Note: Filtering does NOT happen automatically here anymore
     };
 
     // Reset Filters Function
@@ -308,7 +349,7 @@ const Home: React.FC = () => {
                     {/* Price Range Filter */}
                     <div className="filter-group">
                         <label>
-                            <i className="fas fa-dollar-sign"></i> Pret (RON/noapte):
+                            <i className="fas fa-dollar-sign"></i> Pret (RON/camera/noapte):
                         </label>
                         <div className="price-inputs">
                             <input
@@ -394,58 +435,26 @@ const Home: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    {/* Amenities/Policies Group */}
+
+                    {/* Facilities Group - generat dinamic */}
                     <div className="filter-group check-group">
                         <h4>
-                            <i className="fas fa-check"></i> Facilitati
+                            <i className="fas fa-check"></i> Facilități
                         </h4>
-
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.facilities.parking}
-                                onChange={(e) => handleFilterChange("parking", e.target.checked)}
-                            />
-                            Parcare
-                        </label>
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.facilities.elevator}
-                                onChange={(e) => handleFilterChange("elevator", e.target.checked)}
-                            />
-                            Lift
-                        </label>
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.facilities.balcony}
-                                onChange={(e) => handleFilterChange("balcony", e.target.checked)}
-                            />
-                            Balcon
-                        </label>
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.facilities.airConditioning}
-                                onChange={(e) =>
-                                    handleFilterChange("airConditioning", e.target.checked)
-                                }
-                            />
-                            Aer Conditionat
-                        </label>
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={filters.facilities.petFriendly}
-                                onChange={(e) =>
-                                    handleFilterChange("petFriendly", e.target.checked)
-                                }
-                            />
-                            Accepta Animale
-                        </label>
-
+                        {facilityOptions.map((facility) => (
+                            <label key={facility.id}>
+                                <input
+                                    type="checkbox"
+                                    // Accesează valoarea checked din filters.facilities folosind id-ul facilității
+                                    checked={filters.facilities[facility.id]}
+                                    // La schimbare, pasează id-ul facilității și noua valoare booleană
+                                    onChange={(e) => handleFilterChange(facility.id, e.target.checked)}
+                                />
+                                {facility.label} {/* Afișează eticheta prietenoasă */}
+                            </label>
+                        ))}
                     </div>
+
                     {/* Keep your original button, but have it call the apply function */}
                     <button onClick={handleApplyFiltersAction} className="refresh-button">
                         Aplica Filtrele {/* Changed text slightly */}
