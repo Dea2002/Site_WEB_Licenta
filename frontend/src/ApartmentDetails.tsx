@@ -15,6 +15,35 @@ import "./ApartmentDetails.css"; // Ensure this CSS is imported
 import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/RentalDetailsTypes"; // Adjust the import path as necessary
 
 
+interface FacilityMap {
+    key: keyof Apartment['facilities']; // 'wifi' | 'parking' | ...
+    label: string;                     // "Wi-Fi", "Parcare Gratuita"
+}
+
+const ALL_POSSIBLE_FACILITIES_MAP: FacilityMap[] = [
+    { key: 'parking', label: 'Parcare inclusa' },
+    { key: 'videoSurveillance', label: 'Supraveghere video' },
+    { key: 'wifi', label: 'Wi-Fi' },
+    { key: 'airConditioning', label: 'Aer Conditionat' },
+    { key: 'tvCable', label: 'TV Cablu' },
+    { key: 'laundryMachine', label: 'Masina de spalat rufe' },
+    { key: 'fullKitchen', label: 'Bucatarie complet utilata' },
+    { key: 'fireAlarm', label: 'Alarma de incendiu' },
+    { key: 'smokeDetector', label: 'Detector de fum' },
+    { key: 'balcony', label: 'Balcon' },
+    { key: 'terrace', label: 'Terasa' },
+    { key: 'soundproofing', label: 'Izolat fonic' },
+    { key: 'underfloorHeating', label: 'Incalzire in pardoseala' },
+    { key: 'petFriendly', label: 'Permite animale' },
+    { key: 'elevator', label: 'Lift' },
+    { key: 'pool', label: 'Piscina' },
+    { key: 'gym', label: 'Sala de fitness' },
+    { key: 'bikeStorage', label: 'Parcare biciclete' },
+    { key: 'storageRoom', label: 'Camera depozitare' },
+    { key: 'rooftop', label: 'Acces acoperis' },
+    { key: 'intercom', label: 'Interfon' },
+];
+
 const ApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const { refresh } = useNotifications();
@@ -24,6 +53,9 @@ const ApartmentDetails: React.FC = () => {
     const [error, setError] = useState("");
     const { isAuthenticated, user, token } = useContext(AuthContext);
     const [colleaguesList, setColleaguesList] = useState<Colleague[]>([]);
+
+    // stari pentru facilitati
+    const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
 
     // State for popups
     const [showOwnerPop_up, setshowOwnerPop_up] = useState(false);
@@ -73,6 +105,17 @@ const ApartmentDetails: React.FC = () => {
                     const fetchedApartment = response.data;
                     setApartment(fetchedApartment);
                     setCurrentImageIndex(0);
+
+                    // Initializare facilitati bazate pe obiectul aptData.facilities
+                    const initialFacilitiesLabels: string[] = [];
+                    if (fetchedApartment.facilities) { // Verifica daca obiectul facilities exista
+                        ALL_POSSIBLE_FACILITIES_MAP.forEach(facilityMapItem => {
+                            if (fetchedApartment.facilities[facilityMapItem.key] === true) {
+                                initialFacilitiesLabels.push(facilityMapItem.label);
+                            }
+                        });
+                    }
+                    setSelectedFacilities(initialFacilitiesLabels);
 
                     // NOU: Preincarcarea imaginilor
                     if (fetchedApartment.images && fetchedApartment.images.length > 0) {
@@ -411,23 +454,8 @@ const ApartmentDetails: React.FC = () => {
                         <h3>
                             <i className="fas fa-check-circle icon-prefix"></i>Facilitati
                         </h3>
-                        <hr className="line-divider" />
-                        <p>
-                            <span>Parcare:</span> {apartment.facilities.parking ? "Da" : "Nu"}
-                        </p>
-                        <p>
-                            <span>Prietenos cu animalele:</span>{" "}
-                            {apartment.facilities.petFriendly ? "Da" : "Nu"}
-                        </p>
-                        <p>
-                            <span>Lift:</span> {apartment.facilities.elevator ? "Da" : "Nu"}
-                        </p>
-                        <p>
-                            <span>Aer conditionat:</span> {apartment.facilities.airConditioning ? "Da" : "Nu"}
-                        </p>
-                        <p>
-                            <span>Balcon:</span> {apartment.facilities.balcony ? "Da" : "Nu"}
-                        </p>
+
+                        <ul className="facilities-list-display">{selectedFacilities.map(label => <li key={label}>{label}</li>)}</ul>
                     </div>
 
                     {/* Grup Costuri Extra Estimate (Lunare / Zilnice - clarificam) */}
