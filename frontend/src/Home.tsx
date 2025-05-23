@@ -44,6 +44,7 @@ interface Filters {
         soundproofing: boolean;
         underfloorHeating: boolean;
     };
+    minConstructionYear: string;
     // acceptsColleagues: boolean;
 }
 type FacilityKey = keyof Filters['facilities'];
@@ -121,6 +122,7 @@ const Home: React.FC = () => {
             soundproofing: false,
             underfloorHeating: false,
         },
+        minConstructionYear: "",
         // acceptsColleagues: false,
     };
     // --- END: Updated Initial Filters State ---
@@ -280,6 +282,15 @@ const Home: React.FC = () => {
             filtered = filtered.filter(apt =>
                 apt.discounts && typeof apt.discounts.discount3 === 'number' && apt.discounts.discount3 > 0
             );
+        }
+
+        // 9. Filtru An Constructie
+        const minYear = parseInt(currentFilters.minConstructionYear, 10);
+        if (!isNaN(minYear) && minYear > 0) { // Verifică și > 0 pentru a evita anii negativi dacă min e setat greșit
+            filtered = filtered.filter(apt => {
+                const constructionYear = Number(apt.constructionYear); // Asigură-te că apt.constructionYear e număr
+                return !isNaN(constructionYear) && constructionYear >= minYear;
+            });
         }
 
         setFilteredApartments(filtered);
@@ -501,6 +512,20 @@ const Home: React.FC = () => {
                                     onChange={(e) =>
                                         handleFilterChange("maxSurface", e.target.value)
                                     }
+                                />
+                            </div>
+                        </div>
+                        <div className="sub-filter construction-year-range">
+                            <label>An Constructie:</label>
+                            <div className="year-inputs"> {/* Poți folosi o clasă similară cu price-inputs/surface-inputs */}
+                                <input
+                                    type="number"
+                                    id="filter-min-construction-year"
+                                    placeholder="Min An"
+                                    min="1800" // Un an minim rezonabil
+                                    max={new Date().getFullYear()} // Anul curent ca maxim
+                                    value={filters.minConstructionYear}
+                                    onChange={(e) => handleFilterChange("minConstructionYear", e.target.value)}
                                 />
                             </div>
                         </div>
