@@ -16,6 +16,11 @@ interface Filters {
     minSurface: string;
     maxSurface: string;
     available: boolean;
+    discounts: {
+        discount1: boolean;
+        discount2: boolean;
+        discount3: boolean;
+    },
     facilities: {
         wifi: boolean;
         parking: boolean;
@@ -42,6 +47,7 @@ interface Filters {
     // acceptsColleagues: boolean;
 }
 type FacilityKey = keyof Filters['facilities'];
+type DiscountKey = keyof Filters['discounts'];
 const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'parking', label: 'Parcare inclusa' },
     { id: 'videoSurveillance', label: 'Supraveghere video' },
@@ -63,7 +69,7 @@ const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'bikeStorage', label: 'Parcare biciclete' },
     { id: 'storageRoom', label: 'Camera depozitare' },
     { id: 'rooftop', label: 'Acces acoperis' },
-    { id: 'intercom', label: 'Interfon' },
+    { id: 'intercom', label: 'Interfon' }
 ];
 // --- END: Updated Filters Interface ---
 
@@ -87,6 +93,11 @@ const Home: React.FC = () => {
         minSurface: "",
         maxSurface: "",
         available: false, // Default to showing all initially
+        discounts: {
+            discount1: false,
+            discount2: false,
+            discount3: false,
+        },
         facilities: {
             wifi: false,
             parking: false,
@@ -254,6 +265,23 @@ const Home: React.FC = () => {
             }
         });
 
+        // 8. Filtru Discounturi
+        if (currentFilters.discounts.discount1) {
+            filtered = filtered.filter(apt =>
+                apt.discounts && typeof apt.discounts.discount1 === 'number' && apt.discounts.discount1 > 0
+            );
+        }
+        if (currentFilters.discounts.discount2) { // Adaugă și pentru celelalte dacă ai checkbox-uri
+            filtered = filtered.filter(apt =>
+                apt.discounts && typeof apt.discounts.discount2 === 'number' && apt.discounts.discount2 > 0
+            );
+        }
+        if (currentFilters.discounts.discount3) { // Adaugă și pentru celelalte
+            filtered = filtered.filter(apt =>
+                apt.discounts && typeof apt.discounts.discount3 === 'number' && apt.discounts.discount3 > 0
+            );
+        }
+
         setFilteredApartments(filtered);
     };
 
@@ -264,31 +292,40 @@ const Home: React.FC = () => {
 
     // Function to update a specific filter value, supporting both top-level and facilities keys
     const handleFilterChange = (
-        filterName: keyof Omit<Filters, 'facilities'> | FacilityKey, // Permite chei de la radacina SAU chei din facilities
+        filterName: keyof Omit<Filters, 'facilities' | 'discounts'> | FacilityKey | DiscountKey,
         value: string | boolean
     ) => {
         setFilters((prevFilters) => {
-            // Verificam daca filterName este o cheie valida a obiectului facilities
-            // O metoda mai sigura decat 'in' este sa verifici daca cheia este in facilityOptions
             const isFacilityKey = facilityOptions.some(opt => opt.id === filterName);
+            // Verificăm dacă filterName este o cheie a obiectului discounts
+            const isDiscountKey = filterName === 'discount1' || filterName === 'discount2' || filterName === 'discount3';
 
             if (isFacilityKey) {
                 return {
                     ...prevFilters,
                     facilities: {
                         ...prevFilters.facilities,
-                        [filterName as FacilityKey]: value as boolean, // Type assertion
+                        [filterName as FacilityKey]: value as boolean,
+                    },
+                };
+            } else if (isDiscountKey) { // <-- BLOC NOU PENTRU DISCOUNTURI
+                return {
+                    ...prevFilters,
+                    discounts: {
+                        ...prevFilters.discounts,
+                        [filterName as DiscountKey]: value as boolean,
                     },
                 };
             } else {
+                // Pentru cheile de la rădăcină (location, minPrice, etc.)
                 return {
                     ...prevFilters,
-                    [filterName as keyof Omit<Filters, 'facilities'>]: value, // Type assertion
+                    // Asigură-te că TypeScript știe că filterName este o cheie validă aici
+                    [filterName as keyof Omit<Filters, 'facilities' | 'discounts'>]: value,
                 };
             }
         });
     };
-
     // Reset Filters Function
     const handleResetFilters = () => {
         const resetState = { ...initialFilters, location: locationParam };
@@ -355,7 +392,7 @@ const Home: React.FC = () => {
                             <input
                                 type="number"
                                 id="filter-min-price"
-                                placeholder="Min"
+                                placeholder="Min RON"
                                 min="0"
                                 value={filters.minPrice}
                                 onChange={(e) => handleFilterChange("minPrice", e.target.value)}
@@ -364,13 +401,46 @@ const Home: React.FC = () => {
                             <input
                                 type="number"
                                 id="filter-max-price"
-                                placeholder="Max"
+                                placeholder="Max RON"
                                 min="0"
                                 value={filters.maxPrice}
                                 onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
                             />
                         </div>
+                        <div className="filter-group check-group">
+                            <label style={{ marginTop: '10px', display: 'block' }}>
+                                <input
+                                    type="checkbox"
+                                    id="filter-discount-cat1"
+                                    checked={filters.discounts.discount1}
+                                    onChange={(e) => handleFilterChange("discount1", e.target.checked)}
+                                />
+                                Oferă discount categoria 1
+                            </label>
+                            <label style={{ marginTop: '10px', display: 'block' }}>
+                                <input
+                                    type="checkbox"
+                                    id="filter-discount-cat2"
+                                    checked={filters.discounts.discount2}
+                                    onChange={(e) => handleFilterChange("discount2", e.target.checked)}
+                                />
+                                Oferă discount categoria 2
+                            </label>
+                            <label style={{ marginTop: '10px', display: 'block' }}>
+                                <input
+                                    type="checkbox"
+                                    id="filter-discount-cat3"
+                                    checked={filters.discounts.discount3}
+                                    onChange={(e) => handleFilterChange("discount3", e.target.checked)}
+                                />
+                                Oferă discount categoria 3
+                            </label>
+                        </div>
                     </div>
+
+
+
+
                     {/* Apartment Specs Group */}
                     <div className="filter-group spec-group">
                         <h4>
