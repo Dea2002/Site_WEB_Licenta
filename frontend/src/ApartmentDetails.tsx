@@ -426,7 +426,6 @@ const ApartmentDetails: React.FC = () => {
                         <h3>
                             <i className="fas fa-info-circle icon-prefix"></i>Detalii Principale
                         </h3>
-                        <hr className="line-divider" />
                         <p>
                             <span>Numar de camere:</span> {apartment.numberOfRooms}
                         </p>
@@ -464,7 +463,7 @@ const ApartmentDetails: React.FC = () => {
                             <i className="fas fa-coins icon-prefix"></i>Costuri Extra Estimate
                             (lunar)
                         </h3>
-                        <hr className="line-divider" />
+
                         <p>
                             <span>Internet:</span> {apartment.utilities.internetPrice ?? "N/A"} RON
                         </p>
@@ -488,7 +487,6 @@ const ApartmentDetails: React.FC = () => {
                         <h3>
                             <i className="fas fa-users icon-prefix"></i>Colegi de Apartament
                         </h3>
-                        <hr className="line-divider" />
                         {colleaguesList.length > 0 && token != null ? (
                             colleaguesList.map(col => (
                                 <p key={col._id}>
