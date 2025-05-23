@@ -3,6 +3,7 @@ const router = express.Router();
 const { ObjectId } = require('mongodb');
 const authenticateToken = require('../middleware/authenticateToken');
 const { bucket, getBucket } = require('../config/firebaseAdmin');
+const { check } = require('express-validator');
 
 function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService) {
 
@@ -92,6 +93,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             const currentDate = new Date();
             const query = {
                 isActive: true,                       // Doar cele active (nu anulate)
+                checkIn: { $lte: currentDate },           // A căror dată de checkIn este azi sau în trecut
                 checkOut: { $gte: currentDate },      // A căror dată de checkOut este azi sau în viitor
                 "clientData.faculty": { $exists: true, $ne: null, $ne: "" } // Doar cele unde facultatea e specificată
             };

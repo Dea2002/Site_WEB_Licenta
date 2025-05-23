@@ -341,22 +341,34 @@ const Home: React.FC = () => {
 
         // 10. Filtru Facultate Chiriași
         if (currentFilters.tenantFaculty.trim() !== "") {
-            const searchFaculty = currentFilters.tenantFaculty.toLowerCase();
+            const searchFacultyLower = currentFilters.tenantFaculty.toLowerCase();
 
-            // Obține ID-urile apartamentelor care au cel puțin un chiriaș cu facultatea dorită
-            const apartmentIdsWithMatchingTenants = new Set(
-                activeTenantFaculties // <-- AICI ESTE FOLOSITĂ STAREA
-                    .filter(tf => tf.faculty.toLowerCase() === searchFaculty)
-                    .map(tf => tf.apartmentId)
+            // Set de ID-uri ale apartamentelor care au cel puțin un chiriaș de la facultatea căutată
+            const apartmentsWithMatchingFacultyTenant = new Set<string>();
+            activeTenantFaculties.forEach(tf => {
+                if (tf.faculty.toLowerCase() === searchFacultyLower) {
+                    apartmentsWithMatchingFacultyTenant.add(tf.apartmentId);
+                }
+            });
+
+            // Set de ID-uri ale apartamentelor care au *orice* chiriaș activ/viitor
+            const apartmentsWithAnyActiveTenant = new Set<string>(
+                activeTenantFaculties.map(tf => tf.apartmentId)
             );
 
-            if (loadingTenantData && apartments.length > 0) {
+            if (loadingTenantData && apartmentsToFilter.length > 0) { // Verifică și apartmentsToFilter pentru a nu filtra prematur
                 console.warn("Datele despre facultățile chiriașilor se încarcă încă. Filtrul de facultate ar putea fi aplicat pe date incomplete.");
-                // Aici ai putea alege să NU aplici filtrul de facultate dacă datele încă se încarcă,
-                // sau să informezi utilizatorul. Momentan, va filtra pe ce e disponibil în activeTenantFaculties.
             }
 
-            filtered = filtered.filter(apt => apartmentIdsWithMatchingTenants.has(apt._id));
+            filtered = filtered.filter(apt => {
+                // Condiția 1: Apartamentul are un chiriaș de la facultatea selectată
+                const hasTenantFromSelectedFaculty = apartmentsWithMatchingFacultyTenant.has(apt._id);
+
+                // Condiția 2: Apartamentul este complet liber (nu are niciun chiriaș activ/viitor)
+                const isCompletelyVacant = !apartmentsWithAnyActiveTenant.has(apt._id);
+
+                return hasTenantFromSelectedFaculty || isCompletelyVacant;
+            });
         }
 
         setFilteredApartments(filtered);
