@@ -572,13 +572,21 @@ async function run() {
         // create an apartment
         app.post('/new-apartment', async (req, res) => {
             const { ownerId, ...rest } = req.body;
+            try {
+                const newApartment = {
+                    ownerId: new ObjectId(ownerId),
+                    ...rest,
+                    createdAt: new Date()
+                };
 
-            // get the ownerId from requirementBody and replace it with the ObjectId from it and place it the first in the whole json
-            requirementBody = { ownerId: new ObjectId(ownerId), ...rest };
+                //requirementBody.numberofrooms = parseInt(requirementBody.numberofrooms);
+                const result = await apartmentsCollection.insertOne(newApartment);
+                res.send(result);
 
-            //requirementBody.numberofrooms = parseInt(requirementBody.numberofrooms);
-            const result = await apartmentsCollection.insertOne(requirementBody);
-            res.send(result);
+            } catch (error) {
+                console.error('Eroare la adaugarea apartamentului:', error);
+                res.status(500).json({ message: 'Eroare interna a serverului' });
+            }
         })
 
 

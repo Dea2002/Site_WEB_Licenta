@@ -628,6 +628,41 @@ const Home: React.FC = () => {
                 {/* === START: Enhanced Filters Sidebar JSX === */}
                 <aside className="filters-sidebar">
                     {" "}
+                    <div className="filters-header">
+                        <div className="sort-options-sidebar"> {/* Adauga o clasa specifica daca vrei stilizare diferita în sidebar */}
+                            <h2> {/* Poti adauga un titlu si aici daca doresti */}
+                                <i className="fas fa-sort-amount-down"></i> Sorteaza Rezultatele
+                            </h2>
+                            <div className="filter-group"> {/* Poti refolosi clasa .filter-group pentru consistenta vizuala */}
+                                <hr />
+                                {/* <hr className="line-divider short" /> */}
+
+                                <label htmlFor="sort-criteria-sidebar">Dupa: </label>
+                                <select
+                                    id="sort-criteria-sidebar"
+                                    value={sortCriteria}
+                                    onChange={(e) => setSortCriteria(e.target.value)}
+                                >
+                                    <option value="date_desc">Cele mai noi</option>
+                                    <option value="price_asc">Pret (crescator)</option>
+                                    <option value="price_desc">Pret (descrescator)</option>
+                                    <option value="d1_asc">Pret Discount Cat. 1 (cresc.)</option>
+                                    <option value="d1_desc">Pret Discount Cat. 1 (desc.)</option>
+                                    <option value="d2_asc">Pret Discount Cat. 2 (cresc.)</option>
+                                    <option value="d2_desc">Pret Discount Cat. 2 (desc.)</option>
+                                    <option value="d3_asc">Pret Discount Cat. 3 (cresc.)</option>
+                                    <option value="d3_desc">Pret Discount Cat. 3 (desc.)</option>
+                                    <option value="construction_desc">An constructie (noi-vechi)</option>
+                                    <option value="construction_asc">An constructie (vechi-noi)</option>
+                                    <option value="surface_desc">Suprafata (mare-mica)</option>
+                                    <option value="surface_asc">Suprafata (mica-mare)</option>
+                                    <option value="rooms_desc">Nr. Camere (multe-putine)</option>
+                                    <option value="rooms_asc">Nr. Camere (putine-multe)</option>
+                                    <option value="availability">Disponibilitate (libere primele)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     {/* Keep your class */}
                     <div className="filters-header">
                         {" "}
@@ -849,27 +884,7 @@ const Home: React.FC = () => {
                     </button>
                 </aside>
 
-                <div className="sort-options">
-                    <label htmlFor="sort-criteria">Sorteaza dupa: </label>
-                    <select id="sort-criteria" value={sortCriteria} onChange={(e) => setSortCriteria(e.target.value)}>
-                        <option value="date_desc">Cele mai noi</option>
-                        <option value="price_asc">Pret (crescator)</option>
-                        <option value="price_desc">Pret (descrescator)</option>
-                        <option value="d1_asc">Pret Discount Cat. 1 (cresc.)</option>
-                        <option value="d1_desc">Pret Discount Cat. 1 (desc.)</option>
-                        <option value="d2_asc">Pret Discount Cat. 2 (cresc.)</option>
-                        <option value="d2_desc">Pret Discount Cat. 2 (desc.)</option>
-                        <option value="d3_asc">Pret Discount Cat. 3 (cresc.)</option>
-                        <option value="d3_desc">Pret Discount Cat. 3 (desc.)</option>
-                        <option value="construction_desc">An constructie (noi-vechi)</option>
-                        <option value="construction_asc">An constructie (vechi-noi)</option>
-                        <option value="surface_desc">Suprafata (mare-mica)</option>
-                        <option value="surface_asc">Suprafata (mica-mare)</option>
-                        <option value="rooms_desc">Nr. Camere (multe-putine)</option>
-                        <option value="rooms_asc">Nr. Camere (putine-multe)</option>
-                        <option value="availability">Disponibilitate (libere primele)</option>
-                    </select>
-                </div>
+
 
                 {/* Apartments List Section (existing structure) */}
                 <section className="apartments-list">
