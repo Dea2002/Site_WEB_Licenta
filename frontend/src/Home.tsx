@@ -49,6 +49,7 @@ interface Filters {
         videoSurveillance: boolean;
         soundproofing: boolean;
         underfloorHeating: boolean;
+        furniture: boolean;
     };
     minConstructionYear: string;
     tenantFaculty: string;
@@ -63,6 +64,7 @@ const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'airConditioning', label: 'Aer Conditionat' },
     { id: 'tvCable', label: 'TV Cablu' },
     { id: 'laundryMachine', label: 'Masina de spalat rufe' },
+    { id: 'furniture', label: 'Mobilat' },
     { id: 'fullKitchen', label: 'Bucatarie complet utilata' },
     { id: 'fireAlarm', label: 'Alarma de incendiu' },
     { id: 'smokeDetector', label: 'Detector de fum' },

@@ -13,36 +13,9 @@ import { useNotifications } from "./NotificationContext";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import "./ApartmentDetails.css"; // Ensure this CSS is imported
 import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/RentalDetailsTypes"; // Adjust the import path as necessary
+import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
 
 
-interface FacilityMap {
-    key: keyof Apartment['facilities']; // 'wifi' | 'parking' | ...
-    label: string;                     // "Wi-Fi", "Parcare Gratuita"
-}
-
-const ALL_POSSIBLE_FACILITIES_MAP: FacilityMap[] = [
-    { key: 'parking', label: 'Parcare inclusa' },
-    { key: 'videoSurveillance', label: 'Supraveghere video' },
-    { key: 'wifi', label: 'Wi-Fi' },
-    { key: 'airConditioning', label: 'Aer Conditionat' },
-    { key: 'tvCable', label: 'TV Cablu' },
-    { key: 'laundryMachine', label: 'Masina de spalat rufe' },
-    { key: 'fullKitchen', label: 'Bucatarie complet utilata' },
-    { key: 'fireAlarm', label: 'Alarma de incendiu' },
-    { key: 'smokeDetector', label: 'Detector de fum' },
-    { key: 'balcony', label: 'Balcon' },
-    { key: 'terrace', label: 'Terasa' },
-    { key: 'soundproofing', label: 'Izolat fonic' },
-    { key: 'underfloorHeating', label: 'Incalzire in pardoseala' },
-    { key: 'petFriendly', label: 'Permite animale' },
-    { key: 'elevator', label: 'Lift' },
-    { key: 'pool', label: 'Piscina' },
-    { key: 'gym', label: 'Sala de fitness' },
-    { key: 'bikeStorage', label: 'Parcare biciclete' },
-    { key: 'storageRoom', label: 'Camera depozitare' },
-    { key: 'rooftop', label: 'Acces acoperis' },
-    { key: 'intercom', label: 'Interfon' },
-];
 
 const ApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
