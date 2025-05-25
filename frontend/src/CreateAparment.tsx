@@ -126,7 +126,7 @@ const OwnerListNewApartment: React.FC = () => {
     const [showMapConfirmation, setShowMapConfirmation] = useState(false);
     const [mapCenter, setMapCenter] = useState<LatLngExpression | null>(null); // [lat, lng]
     const [mapMarkerPosition, setMapMarkerPosition] = useState<LatLngExpression | null>(null);
-
+    const [addressVerified, setAddressVerified] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, type, value } = e.target;
@@ -137,10 +137,12 @@ const OwnerListNewApartment: React.FC = () => {
             setShowMapConfirmation(false);
             setMapMarkerPosition(null);
             setGeocodingError("");
+            setAddressVerified(false);
             setFormData(prevData => ({
                 ...prevData,
                 latitude: null,
                 longitude: null,
+                location: value,
             }));
         }
 
@@ -173,8 +175,8 @@ const OwnerListNewApartment: React.FC = () => {
             // Campuri de la primul nivel (numberOfRooms, location, price, etc.)
             setFormData(prevData => ({
                 ...prevData,
-                [name]: type === 'number' || e.target.type === 'number'
-                    ? (name === 'price' || name === 'totalSurface' ? parseFloat(value) : parseInt(value, 10)) // price si totalSurface pot fi float
+                [name]: type === 'number' || e.target.type === 'number' || name === 'price' || name === 'totalSurface'
+                    ? parseFloat(value) || (type === 'number' ? 0 : "") // Asigura-te ca e numar sau string gol daca e cazul
                     : value,
             }));
         }
@@ -201,6 +203,7 @@ const OwnerListNewApartment: React.FC = () => {
     const handleGeocodeAddress = async () => {
         if (!formData.location.trim()) {
             setGeocodingError("Va rugam introduceti o adresa.");
+            setAddressVerified(false);
             setShowMapConfirmation(false);
             return;
         }
@@ -208,6 +211,7 @@ const OwnerListNewApartment: React.FC = () => {
         setGeocodingError("");
         setShowMapConfirmation(false);
         setMapMarkerPosition(null);
+        setAddressVerified(false);
         setFormData(prev => ({ ...prev, latitude: null, longitude: null }));
 
 
@@ -235,18 +239,22 @@ const OwnerListNewApartment: React.FC = () => {
                     setMapCenter([latNum, lonNum]);
                     setMapMarkerPosition([latNum, lonNum]);
                     setShowMapConfirmation(true);
+                    setAddressVerified(true);
                     setMessage(`Adresa gasita: ${display_name}. Verificati pe harta.`);
+                    setGeocodingError("");
                 } else {
                     throw new Error("Coordonate invalide primite de la serviciul de geocodare.");
                 }
             } else {
                 setGeocodingError("Adresa nu a putut fi gasita. incercati sa fiti mai specific (ex: adaugati orasul).");
                 setShowMapConfirmation(false);
+                setAddressVerified(false);
             }
         } catch (error: any) {
             console.error("Geocoding error:", error);
             setGeocodingError(error.message || "Eroare la verificarea adresei.");
             setShowMapConfirmation(false);
+            setAddressVerified(false);
         } finally {
             setIsGeocoding(false);
         }
@@ -256,6 +264,22 @@ const OwnerListNewApartment: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(""); // Clear previous messages
+        setGeocodingError("");
+
+
+        // Validare obligatorie pentru adresa verificata
+        if (!addressVerified || !formData.latitude || !formData.longitude) {
+            setMessage(""); // Sterge mesajul de succes anterior, daca exista
+            setGeocodingError("Adresa trebuie verificată pe hartă înainte de a continua. Apăsați 'Verifică Adresa pe Hartă'.");
+            // Optional: scroll la campul de adresa sau la butonul de verificare
+            const locationInput = document.getElementById('location');
+            if (locationInput) locationInput.focus();
+            else {
+                const geocodeButton = document.querySelector('.geocode-button') as HTMLElement;
+                geocodeButton?.focus();
+            }
+            return;
+        }
 
         // Basic Validation Example (add more as needed)
         if (
@@ -284,29 +308,6 @@ const OwnerListNewApartment: React.FC = () => {
             // upload toate imaginile in paralel
             const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
 
-
-            //!!!!! Construieste payload-ul final pentru API
-            // Asigura-te ca trimiti datele in formatul asteptat de backend
-            // (aplatizeaza `discounts`, `utilities`, `facilities` daca e necesar, sau trimite-le ca obiecte)
-            // Exemplu: backend-ul asteapta cheile direct (discount1, parking, internetPrice)
-            // const payload = {
-            //     ownerId: user?._id,
-            //     numberOfRooms: parseInt(formData.numberOfRooms) || 0,
-            //     numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
-            //     floorNumber: parseInt(formData.floorNumber) || 0, // Poate fi si negativ (demisol)
-            //     location: formData.location,
-            //     price: formData.price,
-            //     totalSurface: parseFloat(formData.totalSurface) || 0,
-            //     constructionYear: parseInt(formData.constructionYear) || 0,
-            //     renovationYear: formData.renovationYear ? parseInt(formData.renovationYear) : null, // Trimite null daca e gol
-            //     // Extrage valorile din obiectele imbricate
-            //     ...formData.discounts,
-            //     ...formData.utilities,
-            //     ...formData.facilities,
-            //     images: imageUrls,
-            // };
-
-            // SAU daca backend-ul asteapta obiectele `discounts`, `utilities`, `facilities`:
             const payload = {
                 ownerId: user?._id,
                 numberOfRooms: parseInt(formData.numberOfRooms) || 0,
@@ -331,10 +332,13 @@ const OwnerListNewApartment: React.FC = () => {
 
             window.scrollTo(0, 0);
             setMessage("Apartament listat cu succes!");
-            // scroll to top
-            // Optionally reset form or navigate away
+
             setFormData(initialFormData); // Reset form data
             setImageFiles([]); // Reset image files
+            setShowMapConfirmation(false);
+            setMapMarkerPosition(null);
+            setAddressVerified(false); // Reseteaza starea de verificare dupa submit
+            setGeocodingError("");
             // navigate('/owner/dashboard'); // Example navigation
         } catch (error: any) {
             console.error("Eroare la listare apartament nou: ", error);
@@ -414,6 +418,12 @@ const OwnerListNewApartment: React.FC = () => {
                         >
                             {isGeocoding ? "Se verifica..." : "Verifica Adresa pe Harta"}
                         </button>
+                        {formData.location.trim() && !addressVerified && !geocodingError && !isGeocoding && (
+                            // Afiseaza acest mesaj doar daca adresa e completata, nu e verificata, nu e eroare si nu se geocodeaza
+                            <small id="location-help" className="form-text text-warning" style={{ display: 'block', marginTop: '5px' }}>
+                                Vă rugăm să verificați adresa pe hartă.
+                            </small>
+                        )}
                     </div>
 
                     {/* Afisare Harta de Confirmare */}
@@ -439,7 +449,7 @@ const OwnerListNewApartment: React.FC = () => {
                     )}
 
                     {/* Campuri (optionale) pentru a afisa lat/lng - pot fi read-only */}
-                    {formData.latitude && formData.longitude && (
+                    {formData.latitude && formData.longitude && addressVerified && (
                         <div className="coordinates-display form-group" style={{ display: "flex", gap: "20px" }}>
                             <div>
                                 <label htmlFor="latitude_display">Latitudine:</label>
@@ -653,7 +663,7 @@ const OwnerListNewApartment: React.FC = () => {
 
 
                     {/* Buton de submit */}
-                    <button type="submit" className="submit-apartment" disabled={isGeocoding || !formData.latitude}>
+                    <button type="submit" className="submit-apartment" disabled={isGeocoding || !addressVerified}>
                         Listeaza Apartamentul
                     </button>
                 </form>
