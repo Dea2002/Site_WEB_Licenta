@@ -598,7 +598,7 @@ const Home: React.FC = () => {
                 break;
             case 'date_desc': // Cele mai noi adaugate (presupunand createdAt)
             default:
-                // sortableArray.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+                sortableArray.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
                 break;
         }
         return sortableArray;

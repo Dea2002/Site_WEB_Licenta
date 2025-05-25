@@ -57,6 +57,7 @@ export interface Apartment {
 
     latitude: number;
     longitude: number;
+    createdAt: string;
 }
 
 export interface Rental {
