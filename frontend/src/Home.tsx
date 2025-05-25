@@ -9,6 +9,16 @@ import { Faculty } from "./AuthContext";
 import { University } from "./types";
 
 
+interface ProximityPoiFilter {
+    enabled: boolean;
+    maxDistance: string; // "0.5", "1", "2", ""
+    // Optional: Stare pentru a stoca daca verificarea e in curs sau rezultatul
+    isChecking?: boolean;
+    found?: boolean | null; // null = not checked, true = found, false = not found
+}
+
+type ProximityPoiType = 'supermarket' | 'pharmacy' | 'busStop' | 'tramStop' | 'subwayStation' | 'park';
+
 interface NominatimResult {
     place_id: number;
     licence: string;
@@ -71,9 +81,27 @@ interface Filters {
     tenantFaculty: string;
     selectedUniversityId: string; // ID-ul universitatii selectate
     maxDistanceToUniversity: string; // Distanta in km (ex: "1", "3", "5", "" pentru oricare)
+    proximityPois: Record<ProximityPoiType, ProximityPoiFilter>;
 
     // acceptsColleagues: boolean;
 }
+
+interface PoiOption {
+    id: ProximityPoiType;
+    label: string;
+    overpassQueryTags: string[]; // Poate fi un array de tag-uri, ex: ["amenity=pharmacy", "dispensing=yes"]
+    // Sau un singur tag: ["shop=supermarket"]
+}
+
+const poiOptions: PoiOption[] = [
+    { id: 'supermarket', label: 'Supermarket', overpassQueryTags: ['shop=supermarket'] },
+    { id: 'pharmacy', label: 'Farmacie', overpassQueryTags: ['amenity=pharmacy'] },
+    { id: 'busStop', label: 'Statie Autobuz', overpassQueryTags: ['highway=bus_stop'] },
+    { id: 'tramStop', label: 'Statie Tramvai', overpassQueryTags: ['railway=tram_stop'] },
+    { id: 'subwayStation', label: 'Statie Metrou', overpassQueryTags: ['railway=station', 'station=subway'] }, // Uneori necesita combinatii
+    { id: 'park', label: 'Parc', overpassQueryTags: ['leisure=park'] },
+];
+
 type FacilityKey = keyof Filters['facilities'];
 type DiscountKey = keyof Filters['discounts'];
 const facilityOptions: { id: FacilityKey; label: string }[] = [
@@ -120,35 +148,48 @@ const Home: React.FC = () => {
     const [loadingFoundUniversities, setLoadingFoundUniversities] = useState<boolean>(false);
     const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
 
+    const [isCheckingPois, setIsCheckingPois] = useState(false);
     // const locationParam = searchParams.get("location") || "";
 
     // const { isAuthenticated, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
     // --- START: Updated Initial Filters State ---
-    const initialFilters: Filters = useMemo(() => ({ // Folosim useMemo pentru initialFilters
-        location: searchParams.get("location") || "",
-        minPrice: searchParams.get("minPrice") || "",
-        maxPrice: searchParams.get("maxPrice") || "",
-        numberOfRooms: searchParams.get("numberOfRooms") || "",
-        numberOfBathrooms: searchParams.get("numberOfBathrooms") || "",
-        minSurface: searchParams.get("minSurface") || "",
-        maxSurface: searchParams.get("maxSurface") || "",
-        available: searchParams.get("available") === 'true',
-        discounts: {
-            discount1: searchParams.get("d1") === 'true',
-            discount2: searchParams.get("d2") === 'true',
-            discount3: searchParams.get("d3") === 'true',
-        },
-        facilities: facilityOptions.reduce((acc, opt) => {
-            acc[opt.id] = searchParams.get(opt.id) === 'true';
-            return acc;
-        }, {} as Filters['facilities']),
-        minConstructionYear: searchParams.get("minConstructionYear") || "",
-        tenantFaculty: searchParams.get("tenantFaculty") || "",
-        selectedUniversityId: searchParams.get("universityId") || "",     // NOU
-        maxDistanceToUniversity: searchParams.get("maxDistance") || "", // NOU
-    }), [searchParams]); // Recalculeaza doar daca searchParams se schimba
+    const initialFilters: Filters = useMemo(() => {
+        const baseFilters = {
+            location: searchParams.get("location") || "",
+            minPrice: searchParams.get("minPrice") || "",
+            maxPrice: searchParams.get("maxPrice") || "",
+            numberOfRooms: searchParams.get("numberOfRooms") || "",
+            numberOfBathrooms: searchParams.get("numberOfBathrooms") || "",
+            minSurface: searchParams.get("minSurface") || "",
+            maxSurface: searchParams.get("maxSurface") || "",
+            available: searchParams.get("available") === 'true',
+            discounts: {
+                discount1: searchParams.get("d1") === 'true',
+                discount2: searchParams.get("d2") === 'true',
+                discount3: searchParams.get("d3") === 'true',
+            },
+            facilities: facilityOptions.reduce((acc, opt) => {
+                acc[opt.id] = searchParams.get(opt.id) === 'true';
+                return acc;
+            }, {} as Filters['facilities']),
+            minConstructionYear: searchParams.get("minConstructionYear") || "",
+            tenantFaculty: searchParams.get("tenantFaculty") || "",
+            selectedUniversityId: searchParams.get("universityId") || "",     // NOU
+            maxDistanceToUniversity: searchParams.get("maxDistance") || "", // NOU
+            proximityPois: {} as Record<ProximityPoiType, ProximityPoiFilter>,
+        };
+        // Initializam proximityPois
+        poiOptions.forEach(poiOpt => {
+            baseFilters.proximityPois[poiOpt.id] = {
+                enabled: searchParams.get(`${poiOpt.id}_enabled`) === 'true',
+                maxDistance: searchParams.get(`${poiOpt.id}_dist`) || "",
+            };
+        });
+        return baseFilters;
+
+    }, [searchParams]); // Recalculeaza doar daca searchParams se schimba
     // --- END: Updated Initial Filters State ---
 
     const [filters, setFilters] = useState<Filters>(initialFilters);
@@ -179,9 +220,71 @@ const Home: React.FC = () => {
                 params.set(opt.id, "true");
             }
         });
+
+        // Adaugam filtrele POI la URL
+        poiOptions.forEach(poiOpt => {
+            const poiFilter = currentFilters.proximityPois[poiOpt.id];
+            if (poiFilter.enabled) {
+                params.set(`${poiOpt.id}_enabled`, "true");
+                if (poiFilter.maxDistance) {
+                    params.set(`${poiOpt.id}_dist`, poiFilter.maxDistance);
+                }
+            }
+        });
+
         if (currentSortCriteria) params.set("sort", currentSortCriteria); // Adauga sortarea la URL
         // Adauga si alte filtre daca e necesar
         setSearchParams(params, { replace: true }); // replace: true pentru a nu umple istoricul browserului
+    };
+
+
+    // Stocare cache pentru rezultatele Overpass per apartament-POI-distanta
+    // Cheia ar fi ceva de genul: `${apartmentId}-${poiType}-${distanceKm}`
+    const poiCheckCache = useMemo(() => new Map<string, boolean>(), []);
+
+    const checkPoiProximity = async (
+        apartmentCoord: { lat: number; lng: number },
+        poiType: ProximityPoiType,
+        maxDistKm: number,
+        apartmentId: string // Pentru caching
+    ): Promise<boolean> => {
+        const cacheKey = `${apartmentId}-${poiType}-${maxDistKm}`;
+        if (poiCheckCache.has(cacheKey)) {
+            // console.log("Cache hit for:", cacheKey);
+            return poiCheckCache.get(cacheKey)!;
+        }
+
+        // console.log(`Checking ${poiType} for apt ${apartmentId} within ${maxDistKm}km`);
+
+        const poiOpt = poiOptions.find(p => p.id === poiType);
+        if (!poiOpt) return false;
+
+        const radiusMeters = maxDistKm * 1000;
+        let overpassQuery = `[out:json][timeout:10];(`;
+        poiOpt.overpassQueryTags.forEach(tag => {
+            const [key, value] = tag.split('=');
+            overpassQuery += `nwr["${key}"="${value}"](around:${radiusMeters},${apartmentCoord.lat},${apartmentCoord.lng});`;
+        });
+        overpassQuery += `);out count;`;
+        // console.log("Overpass for POI:", overpassQuery);
+
+        try {
+            const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
+            if (!response.ok) {
+                console.error(`Overpass API error for ${poiType}: ${response.statusText}`);
+                poiCheckCache.set(cacheKey, false); // Cache a failure as false to avoid retrying too quickly
+                return false;
+            }
+            const data = await response.json();
+            const count = parseInt(data.elements[0]?.tags?.total) || 0;
+            const found = count > 0;
+            poiCheckCache.set(cacheKey, found);
+            return found;
+        } catch (error) {
+            console.error(`Error checking ${poiType} proximity:`, error);
+            poiCheckCache.set(cacheKey, false);
+            return false;
+        }
     };
 
     const [selectedMapData, setSelectedMapData] = useState<{
@@ -263,7 +366,8 @@ const Home: React.FC = () => {
 
     // --- START: Updated Filter Application Logic ---
     // Renamed to applyFilters to be clearer
-    const applyFilters = (apartmentsToFilter: Apartment[], currentFilters: Filters) => {
+    const applyFilters = async (apartmentsToFilter: Apartment[], currentFilters: Filters) => {
+        setIsCheckingPois(true);
         let filtered = [...apartmentsToFilter]; // Lucreaza pe o copie pentru a nu modifica originalul direct aici
 
         // 1. Filtru Locatie
@@ -439,6 +543,40 @@ const Home: React.FC = () => {
             }
         }
 
+        // Filtre de proximitate POI
+        const activePoiFilters = poiOptions.filter(
+            (poiOpt) => currentFilters.proximityPois[poiOpt.id]?.enabled && currentFilters.proximityPois[poiOpt.id]?.maxDistance
+        );
+
+        if (activePoiFilters.length > 0) {
+            const promises = filtered.map(async (apt) => {
+                if (typeof apt.latitude !== 'number' || typeof apt.longitude !== 'number') {
+                    return false; // Exclude apartamente fara coordonate
+                }
+
+                const aptCoords = { lat: apt.latitude, lng: apt.longitude };
+                let matchesAllPoi = true;
+
+                for (const poiOpt of activePoiFilters) {
+                    const poiFilterData = currentFilters.proximityPois[poiOpt.id];
+                    const maxDistKm = parseFloat(poiFilterData.maxDistance);
+
+                    if (isNaN(maxDistKm) || maxDistKm <= 0) continue; // Skip if distance is invalid
+
+                    const found = await checkPoiProximity(aptCoords, poiOpt.id, maxDistKm, apt._id);
+                    if (!found) {
+                        matchesAllPoi = false;
+                        break; // Daca un POI nu e gasit, apartamentul nu trece filtrul
+                    }
+                }
+                return matchesAllPoi;
+            });
+
+            const results = await Promise.all(promises);
+            filtered = filtered.filter((_, index) => results[index]);
+        }
+        setIsCheckingPois(false);
+
         setFilteredApartments(filtered);
     };
 
@@ -463,19 +601,37 @@ const Home: React.FC = () => {
 
     // Function to update a specific filter value, supporting both top-level and facilities keys
     const handleFilterChange = (
-        filterName: keyof Omit<Filters, 'facilities' | 'discounts'> | FacilityKey | DiscountKey,
-        value: string | boolean
+        filterName: keyof Omit<Filters, 'facilities' | 'discounts' | 'proximityPois'> | FacilityKey | DiscountKey | ProximityPoiType,
+        value: string | boolean,
+        subKey?: 'enabled' | 'maxDistance' // Pentru proximityPois
     ) => {
         setFilters(prevFilters => {
+
+            let newFilters = { ...prevFilters };
+
             const isFacilityKey = facilityOptions.some(opt => opt.id === filterName);
             const isDiscountKey = ['discount1', 'discount2', 'discount3'].includes(filterName as string);
+            const isPoiKey = poiOptions.some(opt => opt.id === filterName);
 
-            let newFilters;
+            // let newFilters;
             if (isFacilityKey) {
                 newFilters = { ...prevFilters, facilities: { ...prevFilters.facilities, [filterName as FacilityKey]: value as boolean } };
             } else if (isDiscountKey) {
                 newFilters = { ...prevFilters, discounts: { ...prevFilters.discounts, [filterName as DiscountKey]: value as boolean } };
-            } else {
+            }
+            else if (isPoiKey && subKey) {
+                const poiType = filterName as ProximityPoiType;
+                newFilters.proximityPois = {
+                    ...prevFilters.proximityPois,
+                    [poiType]: {
+                        ...prevFilters.proximityPois[poiType],
+                        [subKey]: value,
+                        // Daca debifezi checkbox-ul, reseteaza si distanta
+                        ...(subKey === 'enabled' && value === false && { maxDistance: "" }),
+                    },
+                };
+            }
+            else {
                 newFilters = { ...prevFilters, [filterName as keyof Omit<Filters, 'facilities' | 'discounts'>]: value };
             }
 
@@ -491,7 +647,6 @@ const Home: React.FC = () => {
                 newFilters.selectedUniversityId = "";
                 newFilters.maxDistanceToUniversity = "";
             }
-
 
             return newFilters;
         });
@@ -509,13 +664,18 @@ const Home: React.FC = () => {
             minSurface: "", maxSurface: "", available: false,
             discounts: { discount1: false, discount2: false, discount3: false },
             facilities: facilityOptions.reduce((acc, opt) => { acc[opt.id] = false; return acc; }, {} as Filters['facilities']),
-            minConstructionYear: "", tenantFaculty: "", selectedUniversityId: "", maxDistanceToUniversity: ""
+            minConstructionYear: "", tenantFaculty: "", selectedUniversityId: "", maxDistanceToUniversity: "",
+            proximityPois: poiOptions.reduce((acc, poiOpt) => {
+                acc[poiOpt.id] = { enabled: false, maxDistance: "" };
+                return acc;
+            }, {} as Record<ProximityPoiType, ProximityPoiFilter>)
         };
         setFilters(defaultInitialFilters);
         setUniversitySearchCity(""); // Reseteaza si orasul de cautare
         setFoundUniversities([]);   // Reseteaza universitatile gasite
         setSortCriteria("date_desc"); // Reseteaza si sortarea
         setSearchParams({}, { replace: true });
+        poiCheckCache.clear();
     };
 
 
@@ -775,6 +935,43 @@ const Home: React.FC = () => {
                         </div>
                     )}
 
+                    <div className="filters-header">
+                        <h2><i className="fas fa-map-signs"></i> Puncte de Interes in Proximitate</h2>
+                    </div>
+                    {poiOptions.map(poiOpt => (
+                        <div className="filter-group poi-filter-group" key={poiOpt.id}>
+                            <label className="poi-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    id={`filter-poi-${poiOpt.id}-enabled`}
+                                    checked={filters.proximityPois[poiOpt.id]?.enabled || false}
+                                    onChange={(e) => handleFilterChange(poiOpt.id, e.target.checked, 'enabled')}
+                                />
+                                {" "}{poiOpt.label}
+                            </label>
+                            {filters.proximityPois[poiOpt.id]?.enabled && (
+                                <div className="sub-filter" style={{ marginTop: '5px', marginLeft: '20px' }}>
+                                    <label htmlFor={`filter-poi-${poiOpt.id}-distance`} style={{ marginRight: '5px' }}>Distanta max.:</label>
+                                    <select
+                                        id={`filter-poi-${poiOpt.id}-distance`}
+                                        value={filters.proximityPois[poiOpt.id]?.maxDistance || ""}
+                                        onChange={(e) => handleFilterChange(poiOpt.id, e.target.value, 'maxDistance')}
+                                    >
+                                        <option value="">Oricat</option>
+                                        <option value="0.5">Sub 0.5 km</option>
+                                        <option value="1">Sub 1 km</option>
+                                        <option value="2">Sub 2 km</option>
+                                        {/* Poti adauga si alte optiuni */}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+
+
+                    <button onClick={handleApplyFiltersAction} className="refresh-button" disabled={isCheckingPois}>
+                        {isCheckingPois ? "Se verifica POI..." : "Aplica Filtrele pentru punctele de interes"}
+                    </button>
 
                     {/* Location Filter */}
                     <div className="filter-group">
@@ -986,6 +1183,7 @@ const Home: React.FC = () => {
 
                 {/* Apartments List Section (existing structure) */}
                 <section className="apartments-list">
+                    {isCheckingPois && <div className="loading-inline"><p>Se verifica proximitatea punctelor de interes...</p></div>}
                     {sortedAndFilteredApartments.length > 0 ? (
                         sortedAndFilteredApartments.map((apartment) => {
                             const imageUrl = apartment.images?.[0] ?? "/Poze_apartamente/placeholder.jpeg";
