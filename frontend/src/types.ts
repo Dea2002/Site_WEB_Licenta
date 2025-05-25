@@ -118,3 +118,10 @@ export const ALL_POSSIBLE_FACILITIES_MAP: FacilityMap[] = [
     { key: "rooftop", label: "Acces acoperis" },
     { key: "intercom", label: "Interfon" },
 ];
+
+export interface University {
+    _id: string;
+    name: string; // Sau fullName
+    latitude: number;
+    longitude: number;
+}

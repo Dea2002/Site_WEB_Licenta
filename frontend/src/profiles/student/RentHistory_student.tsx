@@ -53,7 +53,6 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
         })
             .then(({ data }) => {
                 setCurrentRent(data);
-                console.log(data);
             })
             .catch(err => {
                 if (err.response?.status === 404) {

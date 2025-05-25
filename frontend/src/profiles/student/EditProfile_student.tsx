@@ -55,7 +55,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     useEffect(() => {
         // Cand "user" din context se schimba (dupa login), reconstruim formData
         if (!user) return;
-        console.log("User updated:", user);
         const newState: ProfileFormState = {
             fullName: user.fullName,
             email: user.email,

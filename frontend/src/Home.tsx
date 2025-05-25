@@ -6,7 +6,23 @@ import { Apartment } from "./types"; // Make sure Apartment type includes all re
 import "./style.css"; // Your existing CSS for Home
 import MapModal from "./MapModal"; // Assuming this is used elsewhere or for future use
 import { Faculty } from "./AuthContext";
-// --- START: Updated Filters Interface ---
+import { University } from "./types";
+
+
+interface NominatimResult {
+    place_id: number;
+    licence: string;
+    osm_type: string;
+    osm_id: number;
+    boundingbox: [string, string, string, string];
+    lat: string;
+    lon: string;
+    display_name: string;
+    class: string;
+    type: string;
+    importance: number;
+}
+
 
 interface TenantFacultyInfo {
     apartmentId: string; // ID-ul apartamentului la care se refera chiriasul
@@ -53,6 +69,9 @@ interface Filters {
     };
     minConstructionYear: string;
     tenantFaculty: string;
+    selectedUniversityId: string; // ID-ul universitatii selectate
+    maxDistanceToUniversity: string; // Distanta in km (ex: "1", "3", "5", "" pentru oricare)
+
     // acceptsColleagues: boolean;
 }
 type FacilityKey = keyof Filters['facilities'];
@@ -91,10 +110,16 @@ const Home: React.FC = () => {
     const [allFaculties, setAllFaculties] = useState<Faculty[]>([]); // Stare pentru a stoca toate facultatile
     const [loadingFaculties, setLoadingFaculties] = useState<boolean>(false);
     const [activeTenantFaculties, setActiveTenantFaculties] = useState<TenantFacultyInfo[]>([]);
-    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(true); // Seteaza initial pe true
+    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(false); // Seteaza initial pe true
 
     const [sortCriteria, setSortCriteria] = useState<string>("date_desc"); // Default: cele mai noi
     const [searchParams, setSearchParams] = useSearchParams(); // Adaugam setSearchParams
+
+    const [universitySearchCity, setUniversitySearchCity] = useState<string>("");
+    const [foundUniversities, setFoundUniversities] = useState<University[]>([]); // University ar avea {id, name, lat, lng}
+    const [loadingFoundUniversities, setLoadingFoundUniversities] = useState<boolean>(false);
+    const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
+
     // const locationParam = searchParams.get("location") || "";
 
     // const { isAuthenticated, token } = useContext(AuthContext);
@@ -121,6 +146,8 @@ const Home: React.FC = () => {
         }, {} as Filters['facilities']),
         minConstructionYear: searchParams.get("minConstructionYear") || "",
         tenantFaculty: searchParams.get("tenantFaculty") || "",
+        selectedUniversityId: searchParams.get("universityId") || "",     // NOU
+        maxDistanceToUniversity: searchParams.get("maxDistance") || "", // NOU
     }), [searchParams]); // Recalculeaza doar daca searchParams se schimba
     // --- END: Updated Initial Filters State ---
 
@@ -132,7 +159,7 @@ const Home: React.FC = () => {
     }, [initialFilters]);
 
     // Functie pentru a actualiza URL-ul cu filtrele curente
-    const updateURLWithFilters = (currentFilters: Filters) => {
+    const updateURLWithFilters = (currentFilters: Filters, currentSortCriteria: string) => {
         const params = new URLSearchParams();
         if (currentFilters.location) params.set("location", currentFilters.location);
         if (currentFilters.minPrice) params.set("minPrice", currentFilters.minPrice);
@@ -152,6 +179,7 @@ const Home: React.FC = () => {
                 params.set(opt.id, "true");
             }
         });
+        if (currentSortCriteria) params.set("sort", currentSortCriteria); // Adauga sortarea la URL
         // Adauga si alte filtre daca e necesar
         setSearchParams(params, { replace: true }); // replace: true pentru a nu umple istoricul browserului
     };
@@ -178,10 +206,6 @@ const Home: React.FC = () => {
                 setApartments(fetchedApartments);
                 setAllFaculties(facultiesResponse.data);
                 setActiveTenantFaculties(tenantFacultiesResponse.data);
-
-                console.log("Apartamente:", fetchedApartments);
-                console.log("Facultati dropdown:", facultiesResponse.data);
-                console.log("Facultati chiriasi:", tenantFacultiesResponse.data);
 
                 // Aplicam filtrele initiale (care pot veni din URL via initialFilters)
                 applyFilters(fetchedApartments, filters); // Folosim starea 'filters' care e sincronizata cu URL-ul
@@ -214,66 +238,20 @@ const Home: React.FC = () => {
                 setAllFaculties(facultiesResponse.data);
                 setActiveTenantFaculties(tenantFacultiesResponse.data);
 
+                if (filters.selectedUniversityId && universitySearchCity) {
+                    await handleSearchUniversitiesInCity(true); // true ca sa nu reseteze filtrele de universitate
+                }
             } catch (error) {
                 console.error("Eroare la preluarea datelor initiale:", error);
                 // Gestioneaza erorile corespunzator
             } finally {
                 setLoadingFaculties(false);
                 setLoadingTenantData(false);
+                setLoadingInitialData(false);
             }
         };
         fetchData();
     }, []);
-
-    // Fetch apartments (existing code)
-    // useEffect(() => {
-    //     api
-    //         .get<Apartment[]>("/apartments")
-    //         .then((response) => {
-    //             setApartments(response.data);
-    //             console.log("Apartamente preluate:", response.data);
-    //             // Apply initial filter from URL param if present
-    //             if (locationParam.trim() !== "") {
-    //                 applyFilters(response.data, { ...filters, location: locationParam });
-    //             } else {
-    //                 setFilteredApartments(response.data);
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             console.error("Eroare la preluarea datelor:", error);
-    //         });
-
-    //     setLoadingFaculties(true);
-    //     api.get<Faculty[]>("/faculty/")
-    //         .then(response => {
-    //             setAllFaculties(response.data);
-    //         })
-    //         .catch(error => {
-    //             console.error("Eroare la preluarea listei de facultati:", error);
-    //             setAllFaculties([]);
-    //         })
-    //         .finally(() => {
-    //             setLoadingFaculties(false);
-    //         });
-
-    //     // Fetch pentru datele despre facultatile chiriasilor activi
-    //     setLoadingTenantData(true);
-    //     api.get<TenantFacultyInfo[]>("/apartments/rentals/active-tenant-faculties-summary") // Endpoint ipotetic, vezi mai jos
-    //         .then(response => {
-    //             setActiveTenantFaculties(response.data);
-    //             console.log("Facultati chiriasi activi:", response.data);
-    //             // Dupa ce avem si aceste date, am putea re-aplica filtrele daca e necesar
-    //             // si daca un filtru de facultate era deja activ (ex: din URL)
-    //             // Dar, de obicei, utilizatorul aplica filtrele dupa ce pagina s-a incarcat.
-    //         })
-    //         .catch(error => {
-    //             console.error("Eroare la preluarea facultatilor chiriasilor:", error);
-    //             setActiveTenantFaculties([]);
-    //         })
-    //         .finally(() => {
-    //             setLoadingTenantData(false);
-    //         });
-    // }, [locationParam]); // Run only once on mount
 
     useEffect(() => {
         if (apartments.length > 0) { // Aplica doar daca datele initiale s-au incarcat
@@ -282,23 +260,6 @@ const Home: React.FC = () => {
             setFilteredApartments([]); // Daca nu sunt apartamente, lista filtrata e goala
         }
     }, [apartments, filters, activeTenantFaculties]);
-
-    // useEffect(() => {
-    //     api
-    //         .get<Apartment[]>("/apartments")
-    //         .then((response) => {
-    //             setApartments(response.data);
-    //             // Apply initial location filter IF locationParam exists
-    //             if (locationParam.trim() !== "") {
-    //                 applyFilters(response.data, { ...initialFilters, location: locationParam });
-    //             } else {
-    //                 setFilteredApartments(response.data); // Otherwise, show all initially
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             console.error("Eroare la preluarea datelor:", error);
-    //         });
-    // }, []); // Runs once
 
     // --- START: Updated Filter Application Logic ---
     // Renamed to applyFilters to be clearer
@@ -389,10 +350,7 @@ const Home: React.FC = () => {
         // 7. Filtru Facilitati (dinamic)
         // Iteram peste toate optiunile de facilitati definite
         facilityOptions.forEach(facilityOption => {
-            // Verificam daca aceasta facilitate este selectata in filtrele curente
             if (currentFilters.facilities[facilityOption.id]) {
-                // Filtram apartamentele care au aceasta facilitate setata pe true
-                // Asigura-te ca apt.facilities exista inainte de a accesa proprietatile
                 filtered = filtered.filter(apt => apt.facilities && apt.facilities[facilityOption.id] === true);
             }
         });
@@ -455,12 +413,51 @@ const Home: React.FC = () => {
             });
         }
 
+        // 11. FILTRU DISTANta FAta DE UNIVERSITATE (cu universitati dinamice)
+        if (currentFilters.selectedUniversityId && currentFilters.maxDistanceToUniversity) {
+            const selectedUni = foundUniversities.find(uni => uni._id === currentFilters.selectedUniversityId);
+            const maxDistM = parseFloat(currentFilters.maxDistanceToUniversity) * 1000; // Convertim km in metri
+
+
+
+            if (selectedUni && typeof selectedUni.latitude === 'number' && typeof selectedUni.longitude === 'number' && !isNaN(maxDistM) && maxDistM > 0) {
+                filtered = filtered.filter(apt => {
+
+                    if (typeof apt.latitude === 'number' && typeof apt.longitude === 'number') {
+                        const distance = calculateHaversineDistance(
+                            selectedUni.latitude, selectedUni.longitude,
+                            apt.latitude, apt.longitude
+                        );
+                        return distance <= maxDistM;
+                    }
+                    return false; // Exclude apartamentele fara coordonate
+                });
+            } else if (selectedUni) {
+
+            } else {
+
+            }
+        }
+
         setFilteredApartments(filtered);
     };
 
+    const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+        const R = 6371e3; // Raza Pamantului in metri
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distanta in metri
+    };
     // Handler for explicit button click or Enter key
     const handleApplyFiltersAction = () => {
-        updateURLWithFilters(filters);
+        updateURLWithFilters(filters, sortCriteria); // Actualizeaza URL-ul cu filtrele curente
         // applyFilters(apartments, filters);
     };
 
@@ -469,68 +466,58 @@ const Home: React.FC = () => {
         filterName: keyof Omit<Filters, 'facilities' | 'discounts'> | FacilityKey | DiscountKey,
         value: string | boolean
     ) => {
-        setFilters((prevFilters) => {
+        setFilters(prevFilters => {
             const isFacilityKey = facilityOptions.some(opt => opt.id === filterName);
-            // Verificam daca filterName este o cheie a obiectului discounts
-            const isDiscountKey = filterName === 'discount1' || filterName === 'discount2' || filterName === 'discount3';
+            const isDiscountKey = ['discount1', 'discount2', 'discount3'].includes(filterName as string);
 
+            let newFilters;
             if (isFacilityKey) {
-                return {
-                    ...prevFilters,
-                    facilities: {
-                        ...prevFilters.facilities,
-                        [filterName as FacilityKey]: value as boolean,
-                    },
-                };
-            } else if (isDiscountKey) { // <-- BLOC NOU PENTRU DISCOUNTURI
-                return {
-                    ...prevFilters,
-                    discounts: {
-                        ...prevFilters.discounts,
-                        [filterName as DiscountKey]: value as boolean,
-                    },
-                };
+                newFilters = { ...prevFilters, facilities: { ...prevFilters.facilities, [filterName as FacilityKey]: value as boolean } };
+            } else if (isDiscountKey) {
+                newFilters = { ...prevFilters, discounts: { ...prevFilters.discounts, [filterName as DiscountKey]: value as boolean } };
             } else {
-                // Pentru cheile de la radacina (location, minPrice, etc.)
-                return {
-                    ...prevFilters,
-                    // Asigura-te ca TypeScript stie ca filterName este o cheie valida aici
-                    [filterName as keyof Omit<Filters, 'facilities' | 'discounts'>]: value,
-                };
+                newFilters = { ...prevFilters, [filterName as keyof Omit<Filters, 'facilities' | 'discounts'>]: value };
             }
+
+            // Daca se schimba selectedUniversityId, reseteaza maxDistanceToUniversity
+            if (filterName === 'selectedUniversityId' && value === "") { // Daca se deselecteaza universitatea
+                newFilters.maxDistanceToUniversity = "";
+            }
+            // Daca se schimba orasul de cautare pentru universitati (universitySearchCity),
+            // reseteaza universitatile gasite si filtrele asociate.
+            if (filterName === 'location' && prevFilters.location !== value) { // Presupunand ca 'location' e si orasul de cautare pt uni
+                // setUniversitySearchCity(value as string); // Daca vrei sa legi direct
+                setFoundUniversities([]);
+                newFilters.selectedUniversityId = "";
+                newFilters.maxDistanceToUniversity = "";
+            }
+
+
+            return newFilters;
         });
     };
 
     // Reset Filters Function
+    // const handleResetFilters = () => {
+
+    //     setFilters(initialFilters); // Resetam la valorile default absolute
+    //     setSearchParams({}, { replace: true }); // Curatam URL-ul
+    // };
     const handleResetFilters = () => {
-        // Resetam la starea initiala derivata din searchParams (sau la valori default daca searchParams sunt goale)
-        // const params = new URLSearchParams(location.search);
-        // const resetState: Filters = {
-        //     location: params.get("location") || "",
-        //     minPrice: params.get("minPrice") || "",
-        //     maxPrice: params.get("maxPrice") || "",
-        //     numberOfRooms: params.get("numberOfRooms") || "",
-        //     numberOfBathrooms: params.get("numberOfBathrooms") || "",
-        //     minSurface: params.get("minSurface") || "",
-        //     maxSurface: params.get("maxSurface") || "",
-        //     available: params.get("available") === 'true',
-        //     discounts: {
-        //         discount1: params.get("d1") === 'true',
-        //         discount2: params.get("d2") === 'true',
-        //         discount3: params.get("d3") === 'true',
-        //     },
-        //     facilities: facilityOptions.reduce((acc, opt) => {
-        //         acc[opt.id] = params.get(opt.id) === 'true';
-        //         return acc;
-        //     }, {} as Filters['facilities']),
-        //     minConstructionYear: params.get("minConstructionYear") || "",
-        //     tenantFaculty: params.get("tenantFaculty") || "",
-        // };
-        // Daca vrem resetare completa la valorile default, ignorand URL-ul:
-        // const resetState = { ...initialFilters, location: "" }; // Sau pastram locationParam daca e relevant
-        setFilters(initialFilters); // Resetam la valorile default absolute
-        setSearchParams({}, { replace: true }); // Curatam URL-ul
+        const defaultInitialFilters: Filters = { // Filtrele default absolute
+            location: "", minPrice: "", maxPrice: "", numberOfRooms: "", numberOfBathrooms: "",
+            minSurface: "", maxSurface: "", available: false,
+            discounts: { discount1: false, discount2: false, discount3: false },
+            facilities: facilityOptions.reduce((acc, opt) => { acc[opt.id] = false; return acc; }, {} as Filters['facilities']),
+            minConstructionYear: "", tenantFaculty: "", selectedUniversityId: "", maxDistanceToUniversity: ""
+        };
+        setFilters(defaultInitialFilters);
+        setUniversitySearchCity(""); // Reseteaza si orasul de cautare
+        setFoundUniversities([]);   // Reseteaza universitatile gasite
+        setSortCriteria("date_desc"); // Reseteaza si sortarea
+        setSearchParams({}, { replace: true });
     };
+
 
     const handleMoreDetails = (id: string) => {
         navigate(`/apartment/${id}`);
@@ -617,8 +604,76 @@ const Home: React.FC = () => {
         return sortableArray;
     }, [filteredApartments, sortCriteria, activeTenantFaculties]); // Adaugam activeTenantFaculties pentru sortarea dupa disponibilitate
 
+    const handleSearchUniversitiesInCity = async (calledFromInitialLoad = false) => {
+        const cityToSearch = universitySearchCity || (calledFromInitialLoad ? filters.location : "");
+        if (!cityToSearch.trim() && !calledFromInitialLoad) { // Permite rularea daca e din initial load si filters.location ar fi gol
+            alert("Va rugam introduceti un oras sau o zona pentru cautarea universitatilor.");
+            return;
+        }
+        if (!cityToSearch.trim() && calledFromInitialLoad && !filters.location) {
+            return; // Nu cauta daca niciun oras nu e specificat
+        }
 
 
+        setLoadingFoundUniversities(true);
+        if (!calledFromInitialLoad) { // Nu reseta daca e apelat la incarcarea initiala cu un ID deja in URL
+            setFoundUniversities([]);
+            setFilters(prev => ({ ...prev, selectedUniversityId: "", maxDistanceToUniversity: "" }));
+        }
+
+        try {
+            const nominatimResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityToSearch)}&format=json&addressdetails=1&limit=1&accept-language=ro`);
+            if (!nominatimResponse.ok) throw new Error(`Eroare Nominatim: ${nominatimResponse.statusText}`);
+            const nominatimData: NominatimResult[] = await nominatimResponse.json();
+
+            if (nominatimData.length === 0) {
+                if (!calledFromInitialLoad) alert(`Nu s-a putut gasi locatia: ${cityToSearch}`);
+                else console.warn(`Nu s-a putut geocodifica locatia initiala pentru universitati: ${cityToSearch}`);
+                setLoadingFoundUniversities(false);
+                return;
+            }
+            const locationData = nominatimData[0];
+            let searchAreaQueryPart: string;
+            if (locationData.boundingbox) {
+                const [s, n, w, e] = locationData.boundingbox.map(parseFloat);
+                searchAreaQueryPart = `(${s},${w},${n},${e})`;
+            } else {
+                const cityLat = parseFloat(locationData.lat);
+                const cityLng = parseFloat(locationData.lon);
+                const searchRadiusForCity = 15000; // 15km
+                searchAreaQueryPart = `(around:${searchRadiusForCity},${cityLat},${cityLng})`;
+            }
+            const overpassQuery = `[out:json][timeout:25];(nwr[amenity=university]${searchAreaQueryPart};);out center;`;
+            const overpassResponse = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
+            if (!overpassResponse.ok) throw new Error(`Eroare Overpass API: ${overpassResponse.statusText}`);
+            const overpassData = await overpassResponse.json();
+            const universities = overpassData.elements.map((el: any) => {
+                const name = el.tags?.name || el.tags?.['name:ro'] || el.tags?.official_name || `Universitate (ID OSM: ${el.id})`;
+                let latVal, lngVal;
+                if (el.type === "node") { latVal = el.lat; lngVal = el.lon; }
+                else if (el.center) { latVal = el.center.lat; lngVal = el.center.lon; }
+                else { return null; }
+                if (typeof latVal !== 'number' || typeof lngVal !== 'number') return null;
+                return { _id: String(el.id), name, latitude: latVal, longitude: lngVal };
+            }).filter(Boolean) as University[];
+            const uniqueUniversities = Array.from(new Map(universities.map(uni => [uni.name, uni])).values());
+            setFoundUniversities(uniqueUniversities.sort((a, b) => a.name.localeCompare(b.name)));
+            if (!calledFromInitialLoad && uniqueUniversities.length === 0) {
+                alert(`Nicio universitate gasita pentru "${cityToSearch}".`);
+            }
+        } catch (error) {
+            console.error("Eroare la cautarea universitatilor:", error);
+            if (!calledFromInitialLoad) alert(`A aparut o eroare: ${error instanceof Error ? error.message : "Eroare"}`);
+            setFoundUniversities([]);
+        } finally {
+            setLoadingFoundUniversities(false);
+        }
+    };
+
+
+    if (loadingInitialData && apartments.length === 0) { // Arata loading doar la incarcarea initiala majora
+        return <div className="loading-error-container"><p>Se incarca datele...</p></div>;
+    }
 
     // Render component (existing code structure)
     return (
@@ -631,7 +686,7 @@ const Home: React.FC = () => {
                 <aside className="filters-sidebar">
                     {" "}
                     <div className="filters-header">
-                        <div className="sort-options-sidebar"> {/* Adauga o clasa specifica daca vrei stilizare diferita în sidebar */}
+                        <div className="sort-options-sidebar"> {/* Adauga o clasa specifica daca vrei stilizare diferita in sidebar */}
                             <h2> {/* Poti adauga un titlu si aici daca doresti */}
                                 <i className="fas fa-sort-amount-down"></i> Sorteaza Rezultatele
                             </h2>
@@ -680,6 +735,47 @@ const Home: React.FC = () => {
                             <i className="fas fa-undo"></i> Reset
                         </button>
                     </div>
+
+                    {/* faculty location in promity filter */}
+                    <div className="filter-group">
+                        <label htmlFor="uni-search-city">Cauta Universitati in Oras:</label>
+                        <input type="text" id="uni-search-city" value={universitySearchCity} onChange={(e) => setUniversitySearchCity(e.target.value)} placeholder="ex: Timisoara" />
+                        <button onClick={() => handleSearchUniversitiesInCity()} disabled={loadingFoundUniversities || !universitySearchCity} style={{ marginTop: "5px" }}>
+                            {loadingFoundUniversities ? "Se cauta..." : "Cauta Univ."}
+                        </button>
+                    </div>
+
+                    {/* University Selection & Distance (doar daca s-au gasit universitati) */}
+                    {(foundUniversities.length > 0 || filters.selectedUniversityId) && ( // Afiseaza si daca un ID e deja in filtru (din URL)
+                        <div className="filter-group">
+                            <label htmlFor="filter-university"><i className="fas fa-school"></i> Proximitate Universitate:</label>
+                            <select id="filter-university" value={filters.selectedUniversityId} onChange={(e) => handleFilterChange("selectedUniversityId", e.target.value)} disabled={loadingFoundUniversities && foundUniversities.length === 0} >
+                                <option value="">Selecteaza o universitate</option>
+                                {loadingFoundUniversities && foundUniversities.length === 0 ? (<option disabled>Se incarca...</option>) : (
+                                    foundUniversities.map(uni => (
+                                        <option key={uni._id} value={uni._id}>
+                                            {uni.name}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+
+                            {filters.selectedUniversityId && (
+                                <div className="sub-filter" style={{ marginTop: '10px' }}>
+                                    <label htmlFor="filter-max-distance">Distanta maxima (km):</label>
+                                    <select id="filter-max-distance" value={filters.maxDistanceToUniversity} onChange={(e) => handleFilterChange("maxDistanceToUniversity", e.target.value)} >
+                                        <option value="">Oricat</option>
+                                        <option value="0.5">Sub 0.5 km</option>
+                                        <option value="1">Sub 1 km</option>
+                                        <option value="2">Sub 2 km</option>
+                                        <option value="5">Sub 5 km</option>
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+
                     {/* Location Filter */}
                     <div className="filter-group">
                         <label htmlFor="filter-location">

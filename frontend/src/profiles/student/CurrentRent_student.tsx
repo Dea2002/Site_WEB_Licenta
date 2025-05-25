@@ -190,7 +190,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
             ...(withOwner ? [rentData.apartment.ownerId] : []),
             ...activeRenters.map(r => r._id)
         ];
-        console.log('with owner:', withOwner);
         try {
             const { data: conversation } = await api.post<{
                 _id: string;

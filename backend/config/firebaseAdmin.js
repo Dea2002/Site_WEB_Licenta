@@ -10,7 +10,6 @@ if (process.env.NODE_ENV !== 'production') {
 let serviceAccount;
 try {
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON_STRING) {
-        console.log("Se incarca cheia de serviciu Firebase din variabila de mediu GOOGLE_APPLICATION_CREDENTIALS_JSON_STRING.");
         serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON_STRING);
     } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         // Aceasta ramura este mai putin probabila pentru platforme PaaS,
@@ -49,7 +48,7 @@ if (!admin.apps.length && serviceAccount && firebaseStorageBucketUrl) {
         // process.exit(1);
     }
 } else if (admin.apps.length) {
-    console.log("Firebase Admin SDK era deja initializat.");
+    console.error("Firebase Admin SDK era deja initializat.");
 } else if (!serviceAccount) {
     console.error("Firebase Admin SDK nu a putut fi initializat: cheia de serviciu lipseste.");
 }

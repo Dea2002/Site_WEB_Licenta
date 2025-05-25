@@ -22,21 +22,18 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
     const [userNames, setUserNames] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        console.log('🔄 Loading history for', conversationId);
         socket.emit('join', conversationId);
 
         api.get<Message[]>(`/messages/${conversationId}?limit=100`)
             .then(res => {
-                console.log('📨 History response:', res.data);
                 setMessages(res.data);
                 preloadNames(res.data);
             })
             .catch(err => {
-                console.error('❌ Error loading history:', err);
+                console.error('Error loading history:', err);
             });
 
         const handler = (msg: Message) => {
-            console.log('🆕 New WS message:', msg);
             if (msg.conversationId === conversationId) {
                 setMessages(prev => [...prev, msg]);
                 // Ar fi bine sa preincarci numele si pentru mesajele noi, daca e cazul

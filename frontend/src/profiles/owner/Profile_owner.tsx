@@ -10,8 +10,6 @@ type ProfileSection = 'edit';
 const Profile_owner: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
     const { user } = useContext(AuthContext); // Preluam user-ul din context
-    console.log(user);
-    // Daca nu exista user logat, poate redirectionam sau afisam un mesaj
     if (!user) {
         // Poti adauga o redirectionare sau un placeholder aici
         return (

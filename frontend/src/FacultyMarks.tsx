@@ -65,10 +65,8 @@ const FacultyMarks: React.FC = () => {
     }), [];
 
     const handleApprove = async (requestId: string) => {
-        console.log("incerc approve");
         if (!token) return;
         try {
-            console.log("sunt in approve");
 
             await api.put(
                 `/faculty/mark/${requestId}/approve`,

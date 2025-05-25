@@ -19,7 +19,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
             if (foundFaculty) {
                 return new ObjectId(foundFaculty._id);
             } else {
-                console.log(`Facultatea cu numele "${facultyName}" nu a fost gasita.`);
+                console.error(`Facultatea cu numele "${facultyName}" nu a fost gasita.`);
                 return null;
             }
         } catch (error) {
@@ -214,7 +214,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 try {
                     await associationsRequestsCollection.insertOne(newAssociationRequest);
                 } catch (assocError) {
-                    console.log("Eroare la crearea cererii de asociere: ", assocError);
+                    console.error("Eroare la crearea cererii de asociere: ", assocError);
                 }
 
                 // cererea de actualizare a mediei
@@ -230,7 +230,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 try {
                     await markRequestsCollection.insertOne(newMarkRequest);
                 } catch (markError) {
-                    console.log("Eroare la crearea cererii de actualizare a mediei: ", markError);
+                    console.error("Eroare la crearea cererii de actualizare a mediei: ", markError);
                 }
 
                 // notificarile
@@ -256,10 +256,9 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         body('email').isEmail().withMessage('Email invalid'),
         body('password').notEmpty().withMessage('Parola este necesara'),
     ], async (req, res) => {
-        console.log("Vreau login");
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log(errors);
+            console.error(errors);
             return res.status(400).json({ errors: errors.array() });
         }
 

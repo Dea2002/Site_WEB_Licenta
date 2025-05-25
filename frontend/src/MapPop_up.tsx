@@ -178,7 +178,6 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
             }
         }
         const overpassQuery = `[out:json][timeout:25];(${queryParts.join('')});out center;`;
-        // console.log("Overpass Query:", overpassQuery);
 
         try {
             const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
@@ -186,7 +185,6 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
                 throw new Error(`Eroare Overpass API: ${response.statusText}`);
             }
             const data = await response.json();
-            // console.log("Overpass Data:", data);
 
             const pois: POI[] = data.elements.map((element: any): POI | null => {
                 let poiLat, poiLng;

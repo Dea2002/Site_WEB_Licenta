@@ -620,7 +620,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             // 2. sterge imaginile asociate din Firebase Storage
             if (apartmentToDelete.images && apartmentToDelete.images.length > 0) {
-                console.log(`incep stergerea a ${apartmentToDelete.images.length} imagini din Firebase pentru apartamentul ${apartmentId}...`);
                 const deletePromises = apartmentToDelete.images.map(async (imageUrl) => {
                     try {
                         // Extrage calea fisierului din URL (aceeasi logica ca la stergerea individuala)
@@ -642,7 +641,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
                         if (filePathInFirebase) {
                             await bucket.file(filePathInFirebase).delete();
-                            console.log(`Imaginea ${filePathInFirebase} stearsa cu succes din Firebase.`);
                         }
                     } catch (storageError) {
                         // Logheaza eroarea dar continua procesul de stergere a celorlalte imagini si a documentului din DB
@@ -665,7 +663,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                     }
                 });
             } else {
-                console.log(`Apartamentul ${apartmentId} nu are imagini asociate in Firebase de sters.`);
+                console.error(`Apartamentul ${apartmentId} nu are imagini asociate in Firebase de sters.`);
             }
 
             // 3. sterge documentul apartamentului din MongoDB
@@ -677,7 +675,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 return res.status(500).json({ message: "Apartamentul a fost gasit dar nu a putut fi sters din baza de date." });
             }
 
-            console.log(`Apartamentul ${apartmentId} si imaginile asociate (daca existau) au fost sterse.`);
             res.status(200).json({ message: "Apartamentul si imaginile asociate au fost sterse cu succes." });
 
         } catch (error) {

@@ -21,7 +21,6 @@ const ApartmentsListAdmin: React.FC = () => {
     //         })
     //         .then((response) => {
     //             setApartments(response.data);
-    //             console.log(response.data);
     //             setLoading(false);
     //         })
     //         .catch((error) => {
@@ -120,7 +119,6 @@ const ApartmentsListAdmin: React.FC = () => {
         //                             type="text"
         //                             value={apartment.reason || ""}
         //                             onChange={(e) => {
-        //                                 console.log("Tasta");
         //                                 const reason = e.target.value;
         //                                 handleStatusChange(apartment._id, apartment.status, reason);
         //                             }}

@@ -171,7 +171,6 @@ const Register: React.FC = () => {
                     // upload finalizat cu succes, obtine URL pentru download
                     getDownloadURL(uploadTask.snapshot.ref)
                         .then((downloadURL) => {
-                            console.log("File available at", downloadURL);
                             resolve(downloadURL); // rezolva promise-ul cu URL-ul
                         })
                         .catch(reject);
@@ -318,11 +317,9 @@ const Register: React.FC = () => {
 
         try {
             // 1. Upload Logo
-            console.log("Uploading logo");
             const logoUrl = await uploadFileToStorage(logo, `faculty_files/${abreviere}`);
 
             // 2. Upload Document
-            console.log("Uploading document");
             const documentUrl = await uploadFileToStorage(
                 documentOficial,
                 `faculty_files/${abreviere}`,

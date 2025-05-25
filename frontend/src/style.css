@@ -391,8 +391,8 @@ body::before {
 
 .apartments-list-section {
     display: flex;
-    flex-direction: column; /* Sortează opțiunile deasupra listei */
-    /* width: 100%; */ /* Sau lățimea dorită pentru această secțiune */
+    flex-direction: column; /* Sorteaza optiunile deasupra listei */
+    /* width: 100%; */ /* Sau latimea dorita pentru aceasta sectiune */
 }
 
 .sort-options {

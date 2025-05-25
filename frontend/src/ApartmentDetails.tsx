@@ -16,7 +16,6 @@ import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/Rental
 import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
 
 
-
 const ApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const { refresh } = useNotifications();
@@ -182,7 +181,7 @@ const ApartmentDetails: React.FC = () => {
             );
 
             // Handle successful request submission
-            console.log("Reservation request sent successfully!");
+
             refresh(); // Refresh notifications
             alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
 // Import the CSS file (ensure the path is correct)
@@ -6,6 +6,20 @@ import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you creat
 import { useNavigate } from "react-router-dom";
 import { storage } from "./firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L, { LatLngExpression } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+// Importa imaginile ca module
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: iconRetinaUrl,
+    iconUrl: iconUrl,
+    shadowUrl: shadowUrl,
+});
 
 // 1. Defineste starea initiala a formularului
 const initialFormData = {
@@ -13,6 +27,8 @@ const initialFormData = {
     numberOfBathrooms: "",
     floorNumber: "",
     location: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
     price: 0,
     totalSurface: "",
     constructionYear: "",
@@ -87,6 +103,15 @@ const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'intercom', label: 'Interfon' },
 ];
 
+// Componenta pentru a centra harta cand markerul se schimba
+const ChangeView = ({ center, zoom }: { center: LatLngExpression, zoom: number }) => {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom, map]);
+    return null;
+}
+
 const OwnerListNewApartment: React.FC = () => {
     const { user, token } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -95,10 +120,29 @@ const OwnerListNewApartment: React.FC = () => {
     const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [message, setMessage] = useState("");
 
+    // Stari pentru geocodare si harta
+    const [isGeocoding, setIsGeocoding] = useState(false);
+    const [geocodingError, setGeocodingError] = useState("");
+    const [showMapConfirmation, setShowMapConfirmation] = useState(false);
+    const [mapCenter, setMapCenter] = useState<LatLngExpression | null>(null); // [lat, lng]
+    const [mapMarkerPosition, setMapMarkerPosition] = useState<LatLngExpression | null>(null);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, type, value } = e.target;
         const checked = (e.target as HTMLInputElement).checked; // Specific pentru checkboxes
+
+        // Daca se modifica adresa, resetam coordonatele si ascundem harta
+        if (name === "location") {
+            setShowMapConfirmation(false);
+            setMapMarkerPosition(null);
+            setGeocodingError("");
+            setFormData(prevData => ({
+                ...prevData,
+                latitude: null,
+                longitude: null,
+            }));
+        }
 
         // Verifica daca `name` apartine unui sub-obiect (facilities, discounts, utilities)
         if (name in formData.facilities) {
@@ -153,6 +197,61 @@ const OwnerListNewApartment: React.FC = () => {
                 () => getDownloadURL(task.snapshot.ref).then(resolve).catch(reject)
             );
         });
+
+    const handleGeocodeAddress = async () => {
+        if (!formData.location.trim()) {
+            setGeocodingError("Va rugam introduceti o adresa.");
+            setShowMapConfirmation(false);
+            return;
+        }
+        setIsGeocoding(true);
+        setGeocodingError("");
+        setShowMapConfirmation(false);
+        setMapMarkerPosition(null);
+        setFormData(prev => ({ ...prev, latitude: null, longitude: null }));
+
+
+        try {
+            // Folosim Nominatim pentru geocodare
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(formData.location)}&format=json&limit=1&addressdetails=1&accept-language=ro`
+            );
+            if (!response.ok) {
+                throw new Error(`Eroare la geocodare: ${response.statusText}`);
+            }
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const { lat, lon, display_name } = data[0];
+                const latNum = parseFloat(lat);
+                const lonNum = parseFloat(lon);
+
+                if (!isNaN(latNum) && !isNaN(lonNum)) {
+                    setFormData(prevData => ({
+                        ...prevData,
+                        latitude: latNum,
+                        longitude: lonNum,
+                    }));
+                    setMapCenter([latNum, lonNum]);
+                    setMapMarkerPosition([latNum, lonNum]);
+                    setShowMapConfirmation(true);
+                    setMessage(`Adresa gasita: ${display_name}. Verificati pe harta.`);
+                } else {
+                    throw new Error("Coordonate invalide primite de la serviciul de geocodare.");
+                }
+            } else {
+                setGeocodingError("Adresa nu a putut fi gasita. incercati sa fiti mai specific (ex: adaugati orasul).");
+                setShowMapConfirmation(false);
+            }
+        } catch (error: any) {
+            console.error("Geocoding error:", error);
+            setGeocodingError(error.message || "Eroare la verificarea adresei.");
+            setShowMapConfirmation(false);
+        } finally {
+            setIsGeocoding(false);
+        }
+    };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -214,6 +313,8 @@ const OwnerListNewApartment: React.FC = () => {
                 numberOfBathrooms: parseInt(formData.numberOfBathrooms) || 0,
                 floorNumber: parseInt(formData.floorNumber) || 0,
                 location: formData.location,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
                 price: formData.price,
                 totalSurface: parseFloat(formData.totalSurface) || 0,
                 constructionYear: parseInt(formData.constructionYear) || 0,
@@ -228,9 +329,9 @@ const OwnerListNewApartment: React.FC = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
+            window.scrollTo(0, 0);
             setMessage("Apartament listat cu succes!");
             // scroll to top
-            window.scrollTo(0, 0);
             // Optionally reset form or navigate away
             setFormData(initialFormData); // Reset form data
             setImageFiles([]); // Reset image files
@@ -256,7 +357,12 @@ const OwnerListNewApartment: React.FC = () => {
                     >
                         {message}
                     </div>
-                )}{" "}
+                )}
+
+                {geocodingError && (
+                    <div className="message message-error">{geocodingError}</div>
+                )}
+
                 {/* Form for listing a new apartment */}
                 <form onSubmit={handleSubmit} className="list-apartment-form">
                     <div className="form-group">
@@ -299,7 +405,53 @@ const OwnerListNewApartment: React.FC = () => {
                             onChange={handleChange}
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={handleGeocodeAddress}
+                            // disabled={isGeocoding || !formData.location.trim()}
+                            style={{ marginTop: '10px' }}
+                            className="geocode-button" // Adauga o clasa pentru stilizare
+                        >
+                            {isGeocoding ? "Se verifica..." : "Verifica Adresa pe Harta"}
+                        </button>
                     </div>
+
+                    {/* Afisare Harta de Confirmare */}
+                    {showMapConfirmation && mapCenter && mapMarkerPosition && (
+                        <div className="map-confirmation-container form-group">
+                            <h3 style={{ marginBottom: '10px' }}>Confirmare Locatie pe Harta</h3>
+                            <MapContainer center={mapCenter} zoom={16} style={{ height: '300px', width: '100%' }}>
+                                <ChangeView center={mapCenter} zoom={16} />
+                                <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                />
+                                <Marker position={mapMarkerPosition}>
+                                    <Popup>
+                                        {formData.location} <br /> Este corecta locatia?
+                                    </Popup>
+                                </Marker>
+                            </MapContainer>
+                            <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#555' }}>
+                                Daca markerul nu este exact pe locatie, va rugam ajustati adresa si verificati din nou.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Campuri (optionale) pentru a afisa lat/lng - pot fi read-only */}
+                    {formData.latitude && formData.longitude && (
+                        <div className="coordinates-display form-group" style={{ display: "flex", gap: "20px" }}>
+                            <div>
+                                <label htmlFor="latitude_display">Latitudine:</label>
+                                <input type="text" id="latitude_display" value={formData.latitude.toFixed(6)} readOnly />
+                            </div>
+                            <div>
+                                <label htmlFor="longitude_display">Longitudine:</label>
+                                <input type="text" id="longitude_display" value={formData.longitude.toFixed(6)} readOnly />
+                            </div>
+                        </div>
+                    )}
+
                     {/* Pret */}
                     <div className="form-group">
                         <label htmlFor="price">Pret chirie (RON/camera/noapte):*</label>
@@ -501,7 +653,7 @@ const OwnerListNewApartment: React.FC = () => {
 
 
                     {/* Buton de submit */}
-                    <button type="submit" className="submit-apartment">
+                    <button type="submit" className="submit-apartment" disabled={isGeocoding || !formData.latitude}>
                         Listeaza Apartamentul
                     </button>
                 </form>

@@ -50,12 +50,10 @@ app.use('/auth/register', authLimiter);
 
 // Socket.IO real-time
 io.on('connection', socket => {
-    // console.log('🔌 New socket:', socket.id);
 
     // clientul intra intr-o camera (conversationId)
     socket.on('join', conversationId => {
         socket.join(conversationId);
-        // console.log(`Socket ${socket.id} joined ${conversationId}`);
     });
 
     // cand primeste mesaj de la client
@@ -307,7 +305,7 @@ async function run() {
             const userId = req.user.userId;
 
             if (!apartmentId) {
-                console.log("nu am id apartament");
+                console.error("nu am id apartament");
 
                 return res.status(400).json({ message: 'ID-ul apartamentului este necesar' });
             }
@@ -316,7 +314,7 @@ async function run() {
                 const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
 
                 if (!apartment) {
-                    console.log("nu am gasit apartament");
+                    console.error("nu am gasit apartament");
 
                     return res.status(404).json({ message: 'Apartament nu a fost gasit' });
                 }
@@ -485,7 +483,6 @@ async function run() {
 
                 // adaug campul isActive si mut documentul in colectia de istoric de rezervari
                 reservationRequest.isActive = true;
-                console.log(reservationRequest);
 
                 // Populeaza datele clientului si apartamentului inainte de inserare in istoric
                 const clientData = await usersCollection.findOne({ _id: reservationRequest.client });
@@ -945,7 +942,6 @@ async function run() {
         //!! --- Sfarsit structura veche ---
 
         server.listen(port, () => {
-            console.log(`Serverul ruleaza pe http://localhost:${port}`);
         });
     } catch (error) {
         console.error("!!!!!!!!!!!!!!!!! Eroare FATALa la pornire sau conectare DB:", error);
