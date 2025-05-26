@@ -134,6 +134,31 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         }
     });
 
+    router.delete('/reservation-request/:id', authenticateToken, async (req, res) => {
+        const requestId = req.params.id;
+        const userId = req.user._id;
+
+        try {
+            // Verifica daca cererea apartine utilizatorului
+            const request = await reservationRequestsCollection.findOne({
+                _id: new ObjectId(requestId),
+                client: new ObjectId(userId)
+            });
+
+            if (!request) {
+                return res.status(404).json({ message: 'Cererea nu a fost gasita sau nu apartine utilizatorului.' });
+            }
+
+            // Sterge cererea
+            await reservationRequestsCollection.deleteOne({ _id: new ObjectId(requestId) });
+
+            return res.json({ message: 'Cererea a fost stearsa cu succes.' });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Eroare interna a serverului.' });
+        }
+    });
+
     router.get('/current_request', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         try {

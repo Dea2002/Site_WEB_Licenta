@@ -43,6 +43,9 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
     const [errorCurrent, setErrorCurrent] = useState<string | null>(null);
     const [errorHistory, setErrorHistory] = useState<string | null>(null);
 
+    // Stare noua pentru operatiunea de anulare
+    const [cancelingRequestId, setCancelingRequestId] = useState<string | null>(null);
+    const [cancelError, setCancelError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!token) return;
@@ -78,9 +81,34 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
             .finally(() => setLoadingHistory(false));
     }, [token]);
 
+    const handleCancelRequest = async (requestId: string) => {
+        if (!window.confirm("Esti sigur ca vrei sa anulezi aceasta cerere de chirie?")) {
+            return;
+        }
+        setCancelingRequestId(requestId);
+        setCancelError(null);
+        try {
+            await api.delete(`/users/reservation-request/${requestId}`, { // Schimba la endpoint-ul tau corect
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Actualizeaza lista de cereri curente
+            setCurrentRent(prevRequests => prevRequests.filter(req => req._id !== requestId));
+            alert("Cererea a fost anulata cu succes!");
+            // Optional, poti re-face fetch la istoric daca cererile anulate apar acolo
+            // fetchHistory(); 
+        } catch (err: any) {
+            console.error("Eroare la anularea cererii:", err);
+            setCancelError(err.response?.data?.message || "Nu s-a putut anula cererea.");
+            // Afiseaza eroarea langa buton sau global
+        } finally {
+            setCancelingRequestId(null);
+        }
+    };
+
     return (
         <div className="profile-section-content">
             <h2>Cereri Chirii Curente</h2>
+            {cancelError && <p className="error-message global-error">{cancelError}</p>}
             {loadingCurrent ? (
                 <p>Se incarca…</p>
             ) : errorCurrent ? (
@@ -91,6 +119,7 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
                         const ci = parseISO(crr.checkIn);
                         const co = parseISO(crr.checkOut);
                         const nights = differenceInCalendarDays(co, ci) + 1;
+                        const isBeingCanceled = cancelingRequestId === crr._id;
                         return (
                             <li key={crr._id} className="rent-history-item">
                                 {/* <div className="current-rent-card"> */}
@@ -109,7 +138,17 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
                                     <strong>Pret total:</strong>{' '}
                                     {(crr.apartment.price * nights * crr.rooms).toFixed(2)} RON
                                 </p>
-                                {/* </div> */}
+                                <div className="request-actions">
+                                    {/* Permite anularea doar daca statusul e 'pending_approval' sau similar */}
+                                    {/* Exemplu: if (crr.status === 'pending_approval') */}
+                                    <button
+                                        onClick={() => handleCancelRequest(crr._id)}
+                                        disabled={isBeingCanceled}
+                                        className="cancel-request-button"
+                                    >
+                                        {isBeingCanceled ? "Se anuleaza..." : "Anuleaza Cererea"}
+                                    </button>
+                                </div>
                             </li>
                         );
                     })}

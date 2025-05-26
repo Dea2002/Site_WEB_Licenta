@@ -240,3 +240,50 @@
     width: 100%; /* latimea dupa cum vrei */
     opacity: 1;
 }
+
+.current-request-item {
+    display: flex; /* Permite alinierea detaliilor si a actiunilor */
+    justify-content: space-between; /* Impinge detaliile la stanga si actiunile la dreapta */
+    align-items: flex-start; /* Aliniaza la inceput pe verticala */
+    gap: 15px; /* Spatiu intre detalii si buton */
+}
+
+.request-details {
+    flex-grow: 1; /* Permite detaliilor sa ocupe spatiul ramas */
+}
+
+.request-actions {
+    flex-shrink: 0; /* Impiedica butonul sa se micsoreze */
+    padding-top: 5px; /* Aliniere vizuala mai buna cu primul rand de text */
+}
+
+.cancel-request-button {
+    background-color: #dc3545; /* Rosu pentru actiuni de anulare/stergere */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.cancel-request-button:hover {
+    background-color: #c82333; /* Rosu mai inchis la hover */
+}
+
+.cancel-request-button:disabled {
+    background-color: #6c757d; /* Gri cand e dezactivat */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.global-error {
+    /* Pentru eroarea de anulare afisata global in sectiune */
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
