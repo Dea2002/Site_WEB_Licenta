@@ -135,3 +135,47 @@
         flex-grow: 1; /* Permite select-ului sa se extinda */
     }
 }
+
+.review-meta {
+    display: flex;
+    align-items: center;
+}
+
+.delete-review-button {
+    background: none;
+    border: none;
+    color: #dc3545; /* Rosu pentru stergere */
+    cursor: pointer;
+    padding: 2px 5px; /* Padding mic */
+    font-size: 0.9em; /* Marime icon/text */
+    line-height: 1;
+    transition: color 0.2s ease-in-out, transform 0.1s ease;
+}
+
+.delete-review-button:hover {
+    color: #c82333; /* Rosu mai inchis la hover */
+    transform: scale(1.1);
+}
+
+.delete-review-button:disabled {
+    color: #6c757d; /* Gri cand e dezactivat */
+    cursor: not-allowed;
+    transform: none;
+}
+
+.delete-review-button .fas.fa-trash-alt {
+    /* Daca folosesti FontAwesome */
+    pointer-events: none; /* Asigura ca click-ul merge pe buton */
+}
+
+/* Stil pentru mesajul de eroare la stergere in ReviewItem */
+.review-item .error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 0.85em;
+}

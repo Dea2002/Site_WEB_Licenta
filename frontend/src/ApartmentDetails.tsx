@@ -47,6 +47,20 @@ const ApartmentDetails: React.FC = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [blobUrls, setBlobUrls] = useState<string[]>([]);
 
+    const handleReviewDeleted = (deletedReviewId: string) => {
+        setReviews(prevReviews => prevReviews.filter(review => review._id !== deletedReviewId));
+        // Optional: afiseaza o notificare de succes
+        // refresh(); // Daca vrei sa re-fetch-uiesti notificarile sau alte date
+        // Aici ai putea actualiza si rating-ul mediu al apartamentului DACA
+        // backend-ul nu o face automat si ai aceasta informatie in `apartment` state.
+        // De exemplu, ai putea re-face fetch-ul detaliilor apartamentului pentru a obtine rating-ul actualizat.
+        if (id) {
+            api.get<Apartment>(`/apartments/${id}`)
+                .then((response) => setApartment(response.data))
+                .catch(err => console.error("Eroare la re-preluarea detaliilor apartamentului dupa stergere review:", err));
+        }
+    };
+
     // Handler to receive dates from ReservationPopup
     const handleDatesSelected = (checkIn: Date, checkOut: Date, rooms: number) => {
         setSelectedDates({ checkIn, checkOut });
@@ -564,7 +578,9 @@ const ApartmentDetails: React.FC = () => {
                         {loadingReviews && <p>Se incarca recenziile...</p>}
                         {reviewError && <p className="error">{reviewError}</p>}
                         {!loadingReviews && !reviewError && (
-                            <ReviewList reviews={reviews} />
+                            <ReviewList reviews={reviews}
+                                currentUserId={user?._id || null}
+                                onReviewDeleted={handleReviewDeleted} />
                         )}
                     </section>
                 </div>

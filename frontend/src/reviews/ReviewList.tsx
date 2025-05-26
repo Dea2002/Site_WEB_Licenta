@@ -1,15 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
 // Nu mai avem nevoie de 'api' aici daca facem sortarea client-side
 // import { api } from '../api'; 
 import { Review } from '../types';
+import { api } from '../api';
 import { format } from 'date-fns';
 import { ro } from 'date-fns/locale';
-
+import { AuthContext } from '../AuthContext';
+import "./ReviewList.css"
 interface ReviewItemProps {
     review: Review;
+    currentUserId: string | null; // ID-ul utilizatorului logat
+    onReviewDeleted: (reviewId: string) => void; // Callback pentru a notifica parintele
 }
 
-const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
+const ReviewItem: React.FC<ReviewItemProps> = ({ review, currentUserId, onReviewDeleted }) => {
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+    const { token } = useContext(AuthContext);
+
     const renderStars = (rating: number) => {
         let stars = [];
         for (let i = 1; i <= 5; i++) {
@@ -21,15 +29,48 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
         }
         return stars;
     };
+    const handleDeleteReview = async () => {
+        if (!window.confirm("Esti sigur ca vrei sa stergi aceasta recenzie?")) {
+            return;
+        }
+        setIsDeleting(true);
+        setDeleteError(null);
+        try {
+            await api.delete(`/reviews/${review._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            onReviewDeleted(review._id); // Notifica componenta parinte
+        } catch (err: any) {
+            console.error("Eroare la stergerea review-ului:", err);
+            setDeleteError(err.response?.data?.message || "Nu s-a putut sterge recenzia.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const canDelete = currentUserId === review.userId;
 
     return (
         <div className="review-item" style={{ borderBottom: '1px solid #eee', marginBottom: '15px', paddingBottom: '15px' }}>
             <div className="review-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                 <strong className="review-user-name">{review.userName || `Utilizator ${review.userId.substring(0, 6)}...`}</strong>
-                <span className="review-date" style={{ fontSize: '0.9em', color: '#777' }}>
-                    {review.createdAt ? format(new Date(review.createdAt), 'd MMMM yyyy, HH:mm', { locale: ro }) : 'Data necunoscuta'}
-                </span>
+                <div className="review-meta">
+                    <span className="review-date" style={{ fontSize: '0.9em', color: '#777', marginRight: canDelete ? '10px' : '0' }}>
+                        {review.createdAt ? format(new Date(review.createdAt), 'd MMMM yyyy, HH:mm', { locale: ro }) : 'Data necunoscuta'}
+                    </span>
+                    {canDelete && (
+                        <button
+                            onClick={handleDeleteReview}
+                            disabled={isDeleting}
+                            className="delete-review-button" // Adauga o clasa pentru stilizare
+                            title="Sterge recenzia"
+                        >
+                            {isDeleting ? "Se sterge..." : <i className="fas fa-trash-alt"></i> /* Sau text "Sterge" */}
+                        </button>
+                    )}
+                </div>
             </div>
+            {deleteError && <p className="error-message" style={{ color: 'red', fontSize: '0.9em' }}>{deleteError}</p>}
             <div className="review-rating" style={{ marginBottom: '8px' }}>
                 {renderStars(review.rating)} ({review.rating}/5)
             </div>
@@ -43,9 +84,11 @@ interface ReviewListProps {
     // apartmentId nu mai este strict necesar pentru logica de sortare/filtrare client-side,
     // dar il poti pastra daca il folosesti in alta parte sau pentru debug.
     // apartmentId: string; 
+    currentUserId: string | null; // ID-ul utilizatorului logat
+    onReviewDeleted: (reviewId: string) => void; // Functie callback pentru stergere
 }
 
-const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews }) => {
+const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, currentUserId, onReviewDeleted }) => {
     // Nu mai folosim displayedReviews ca o stare separata care ar fi actualizata de initialReviews,
     // ci direct rezultatul din useMemo.
     // const [displayedReviews, setDisplayedReviews] = useState<Review[]>(initialReviews);
@@ -163,7 +206,11 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews }) => {
             {/* Iteram direct peste sortedAndFilteredReviews */}
             {hasAnyReviewsInitially && sortedAndFilteredReviews.length > 0 && (
                 sortedAndFilteredReviews.map(review => (
-                    <ReviewItem key={review._id} review={review} />
+                    <ReviewItem
+                        key={review._id}
+                        review={review}
+                        currentUserId={currentUserId}
+                        onReviewDeleted={onReviewDeleted} />
                 ))
             )}
         </div>
