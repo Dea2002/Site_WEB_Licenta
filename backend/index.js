@@ -37,17 +37,6 @@ const authLimiter = rateLimit({
 app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
 
-
-// // mongodb connection
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@inchiriere-apartamente.2qkb7.mongodb.net/?retryWrites=true&w=majority&appName=inchiriere-apartamente`;
-// const client = new MongoClient(uri, {
-//     serverApi: {
-//         version: ServerApiVersion.v1,
-//         strict: true,
-//         deprecationErrors: true,
-//     }
-// });
-
 // Socket.IO real-time
 io.on('connection', socket => {
 
@@ -112,9 +101,10 @@ async function run() {
         const associationsRequestsCollection = database.collection("association_requests");
         const conversationsCollection = database.collection("conversations");
         const messagesCollection = database.collection("messages");
+        const reviewsCollection = database.collection("reviews");
 
-        const initNotificationSerivece = require('./utils/notificationService');
-        const notificationService = initNotificationSerivece(notificationsCollection);
+        const initNotificationService = require('./utils/notificationService');
+        const notificationService = initNotificationService(notificationsCollection);
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
@@ -127,6 +117,7 @@ async function run() {
         app.locals.associationsRequestsCollection = associationsRequestsCollection;
         app.locals.conversationsCollection = conversationsCollection;
         app.locals.messagesCollection = messagesCollection;
+        app.locals.reviewsCollection = reviewsCollection;
 
         // --- Importa rutele ---
         const adminRoutes = require('./routes/admin')(usersCollection, apartmentsCollection);
@@ -158,6 +149,10 @@ async function run() {
         const createMessagesRoutes = require('./routes/messages');
         const messagesRoutes = createMessagesRoutes(usersCollection, messagesCollection, conversationsCollection);
         app.use('/messages', messagesRoutes);
+
+        const createReviewsRoutes = require('./routes/reviews');
+        const reviewsRoutes = createReviewsRoutes(reviewsCollection, usersCollection, apartmentsCollection);
+        app.use('/reviews', reviewsRoutes);
 
         //!! --- Structura veche ---
 

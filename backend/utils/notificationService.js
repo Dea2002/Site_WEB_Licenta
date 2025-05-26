@@ -1,5 +1,3 @@
-// services/notificationService.js
-
 const { ObjectId } = require('mongodb');
 
 function initNotificationService(notificationsCollection) {

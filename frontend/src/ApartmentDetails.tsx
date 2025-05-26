@@ -14,7 +14,9 @@ import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import "./ApartmentDetails.css"; // Ensure this CSS is imported
 import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/RentalDetailsTypes"; // Adjust the import path as necessary
 import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
-
+import ReviewList from "./reviews/ReviewList";
+import ReviewForm from "./reviews/ReviewForm";
+import { Review } from "./types";
 
 const ApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
@@ -28,7 +30,10 @@ const ApartmentDetails: React.FC = () => {
 
     // stari pentru facilitati
     const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
-
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
+    const [reviewError, setReviewError] = useState<string>("");
+    const [showReviewForm, setShowReviewForm] = useState<boolean>(false); // Controlezi vizibilitatea formularului
     // State for popups
     const [showOwnerPop_up, setshowOwnerPop_up] = useState(false);
     const [showReservationPopup, setShowReservationPopup] = useState(false);
@@ -47,6 +52,25 @@ const ApartmentDetails: React.FC = () => {
         setRooms({ rooms });
         setError(""); // Clear previous booking errors when new dates are selected
     };
+
+    // Funcție pentru a verifica dacă utilizatorul poate lăsa un review
+    // Aceasta ar trebui să verifice dacă utilizatorul este logat și, ideal,
+    // dacă a avut o rezervare confirmată la acest apartament.
+    // Pentru simplitate, vom verifica doar dacă e logat.
+    const canLeaveReview = useMemo(() => {
+        if (!isAuthenticated || !user) return false;
+        // AICI LOGICA MAI COMPLEXA:
+        // 1. A avut utilizatorul o rezervare la acest apartament?
+        // 2. Rezervarea a fost finalizata (check-out a trecut)?
+        // 3. Nu a lasat deja un review?
+        // Poti face un call la un endpoint `/users/can-review/:apartmentId`
+        // Sau poti avea aceste informatii in `user` object dupa login.
+        // Exemplu simplu:
+        // const hasStayed = user.previousStays?.some(stay => stay.apartmentId === id && stay.status === 'completed');
+        // const hasReviewed = reviews.some(r => r.userId === user._id);
+        // return hasStayed && !hasReviewed;
+        return true; // Placeholder - inlocuieste cu logica reala
+    }, [isAuthenticated, user, id, reviews]);
 
     useEffect(() => {
         if (!apartment?.images?.length) return;
@@ -70,7 +94,6 @@ const ApartmentDetails: React.FC = () => {
 
     // Fetch apartment details
     useEffect(() => {
-
         if (id) {
             api.get<Apartment>(`/apartments/${id}`)
                 .then((response) => {
@@ -115,6 +138,26 @@ const ApartmentDetails: React.FC = () => {
                 .catch((error) => {
                     console.error("Eroare la preluarea detaliilor apartamentului:", error);
                     setError("Apartamentul nu a fost gasit sau a aparut o eroare.");
+                });
+        }
+    }, [id]);
+
+    // Fetch reviews pentru apartamentul curent
+    useEffect(() => {
+        if (id) {
+            setLoadingReviews(true);
+            setReviewError("");
+            // Initial, sorteaza dupa cele mai noi. Include si filtrare daca e cazul.
+            api.get<Review[]>(`/reviews/apartment/${id}?sort=createdAt_desc`)
+                .then(response => {
+                    setReviews(response.data);
+                })
+                .catch(error => {
+                    console.error("Eroare la preluarea review-urilor:", error);
+                    setReviewError("Nu s-au putut încărca review-urile.");
+                })
+                .finally(() => {
+                    setLoadingReviews(false);
                 });
         }
     }, [id]);
