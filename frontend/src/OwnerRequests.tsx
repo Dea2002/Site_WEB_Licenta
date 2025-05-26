@@ -28,68 +28,158 @@ interface ReservationRequest {
     };
 }
 
+interface DeclinePopupProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (reason: string) => void;
+    requestId: string | null; // Pentru a sti la ce cerere se refera
+    isSubmitting: boolean;
+    error?: string | null;
+}
+
+const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSubmit, requestId, isSubmitting, error }) => {
+    const [reason, setReason] = useState("");
+
+    useEffect(() => {
+        // Reseteaza motivul cand popup-ul se redeschide pentru o noua cerere
+        if (isOpen) {
+            setReason("");
+        }
+    }, [isOpen, requestId]);
+
+    if (!isOpen || !requestId) return null;
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!reason.trim()) {
+            // Poti adauga o validare/eroare locala aici daca doresti
+            alert("Va rugam introduceti un motiv pentru respingere.");
+            return;
+        }
+        onSubmit(reason);
+    };
+
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content decline-popup">
+                <h3>Motivul Respingerii Cererii</h3>
+                {error && <p className="error-message popup-error">{error}</p>}
+                <form onSubmit={handleSubmit}>
+                    <textarea
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="Introduceti motivul respingerii aici..."
+                        rows={5}
+                        required
+                        disabled={isSubmitting}
+                    />
+                    <div className="popup-actions">
+                        <button type="submit" disabled={isSubmitting || !reason.trim()} className="popup-button-submit">
+                            {isSubmitting ? "Se trimite..." : "Trimite Motiv"}
+                        </button>
+                        <button type="button" onClick={onClose} disabled={isSubmitting} className="popup-button-cancel">
+                            Anuleaza
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 const OwnerRequests: React.FC = () => {
     const { token, user } = useContext(AuthContext);
     const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
+    const [loading, setLoading] = useState(true); // Adaugam o stare generala de incarcare
+    const [error, setError] = useState<string | null>(null); // Eroare generala
+
+    const [showDeclinePopup, setShowDeclinePopup] = useState<boolean>(false);
+    const [currentRequestIdForDecline, setCurrentRequestIdForDecline] = useState<string | null>(null);
+    const [isSubmittingDecline, setIsSubmittingDecline] = useState<boolean>(false);
+    const [declineSubmitError, setDeclineSubmitError] = useState<string | null>(null);
 
     useEffect(() => {
-        api
-            .get(`/owner/list_reservation_requests/${user!._id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+        if (!user?._id || !token) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        setError(null);
+
+        api.get(`/owner/list_reservation_requests/${user._id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
             .then((response) => {
                 setRequests(response.data);
             })
             .catch((error) => {
                 console.error("Eroare la preluarea cererilor de rezervare:", error);
+                setError(error.response?.data?.message || "Nu s-au putut incarca cererile.");
+            }).finally(() => {
+                setLoading(false);
             });
     }, [user, token]);
 
     const accept = async (id: string) => {
         try {
-            await api
-                .post(
-                    `/reservation_request/${id}/accept`,
-                    {},
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    },
-                )
+            await api.post(`/reservation_request/${id}/accept`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            )
                 .then(() => {
                     setSuccessMessage("Cererea a fost acceptata!");
                     setRequests(requests.filter((request) => request._id !== id));
                     setTimeout(() => setSuccessMessage(""), 3000);
                 });
         } catch (err: any) {
-            console.error(err);
+            console.error("Eroare la acceptarea cererii:", err);
+            setError(err.response?.data?.message || "Nu s-a putut accepta cererea.");
         }
     };
 
-    const decline = async (id: string) => {
+    const handleDeclineClick = (id: string) => {
+        setCurrentRequestIdForDecline(id);
+        setDeclineSubmitError(null); // Reseteaza eroarea anterioara
+        setShowDeclinePopup(true);
+    };
+
+    // NOU: Functie pentru a trimite motivul de respingere si a finaliza actiunea
+    const submitDeclineReason = async (reason: string) => {
+        if (!currentRequestIdForDecline) return;
+
+        setIsSubmittingDecline(true);
+        setDeclineSubmitError(null);
         try {
-            await api
-                .post(
-                    `/reservation_request/${id}/decline`,
-                    {},
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    },
-                )
-                .then(() => {
-                    setSuccessMessage("Cererea a fost stearsa!");
-                    setRequests(requests.filter((request) => request._id !== id));
-                    setTimeout(() => setSuccessMessage(""), 3000);
-                });
+            await api.post(
+                `/reservation_request/${currentRequestIdForDecline}/decline`,
+                { reason: reason },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setSuccessMessage("Cererea a fost respinsa cu succes!");
+            setRequests(prevRequests => prevRequests.filter((request) => request._id !== currentRequestIdForDecline));
+            setShowDeclinePopup(false);
+            setCurrentRequestIdForDecline(null);
+            setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: any) {
-            console.error(err);
+            console.error("Eroare la respingerea cererii:", err);
+            setDeclineSubmitError(err.response?.data?.message || "Nu s-a putut respinge cererea.");
+            // Nu inchidem popup-ul la eroare, pentru ca utilizatorul sa poata reincerca sau corecta
+        } finally {
+            setIsSubmittingDecline(false);
         }
     };
+
+    if (loading) return <div className="owner-requests-container"><p>Se incarca cererile...</p></div>;
+    if (error && requests.length === 0) return <div className="owner-requests-container"><p className="error-message">{error}</p></div>;
 
     return (
         <div className="owner-requests-container">
             <h1>Cereri de rezervare</h1>
             {successMessage && <div className="success-message">{successMessage}</div>}
+            {error && !showDeclinePopup && <div className="error-message">{error}</div>}
+
             {requests.length > 0 ? (
                 <ul className="requests-list">
                     {requests.map((req) => {
@@ -126,15 +216,29 @@ const OwnerRequests: React.FC = () => {
                                 <p>
                                     <strong>Pret: </strong> {totalPrice.toFixed(2)} RON
                                 </p>
-                                <button onClick={() => accept(req._id)}>Accepta</button>
-                                <button onClick={() => decline(req._id)}>Respinge</button>
+                                <div className="request-item-actions">
+                                    <button onClick={() => accept(req._id)} className="button-accept">Accepta</button>
+                                    <button onClick={() => handleDeclineClick(req._id)} className="button-decline">Respinge</button>
+                                </div>
                             </li>
                         );
                     })}
                 </ul>
             ) : (
-                <p>Nu exista cereri de rezervare.</p>
+                !error && <p>Nu exista cereri de rezervare.</p>
             )}
+            <DeclineReasonPopup
+                isOpen={showDeclinePopup}
+                onClose={() => {
+                    setShowDeclinePopup(false);
+                    setCurrentRequestIdForDecline(null);
+                    setDeclineSubmitError(null); // Sterge eroarea la inchiderea manuala
+                }}
+                onSubmit={submitDeclineReason}
+                requestId={currentRequestIdForDecline}
+                isSubmitting={isSubmittingDecline}
+                error={declineSubmitError}
+            />
         </div>
     );
 };

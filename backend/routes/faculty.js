@@ -81,8 +81,10 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
     });
 
-    router.put('/association/:id/reject', async (req, res) => {
+    router.post('/association/:id/reject', async (req, res) => {
         const { id } = req.params;
+        const reason = req.body.reason;
+
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: "ID request invalid" });
         }
@@ -106,7 +108,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             }
 
             // add a notification for the student
-            notificationService.createNotification(message = 'Cererea de asociere a fost respinsa.', receiver = studentId);
+            notificationService.createNotification(message = `Cererea de asociere a fost respinsa cu motivul ${reason}.`, receiver = studentId);
 
             // send positive response
             res.status(200).json({ message: 'Cererea de asociere a fost respinsa.' });
@@ -259,8 +261,10 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
     });
 
-    router.put('/mark/:id/reject', async (req, res) => {
+    router.post('/mark/:id/reject', async (req, res) => {
         const { id } = req.params;
+        const reason = req.body.reason;
+
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: "ID request invalid" });
         }
@@ -284,7 +288,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             }
 
             // add a notification for the student
-            notificationService.createNotification(message = 'Cererea de actualizare medie a fost respinsa.', receiver = studentId);
+            notificationService.createNotification(message = `Cererea de actualizare medie a fost respinsa cu motivul ${reason}.`, receiver = studentId);
 
             // send positive response
             res.status(200).json({ message: 'Cererea de actualizare medie a fost respinsa.' });

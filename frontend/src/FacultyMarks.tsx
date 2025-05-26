@@ -1,7 +1,67 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./FacultyMarks.css";
+
+
+interface DeclinePopupProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (reason: string) => void;
+    requestId: string | null; // Pentru a sti la ce cerere se refera
+    isSubmitting: boolean;
+    error?: string | null;
+}
+
+const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSubmit, requestId, isSubmitting, error }) => {
+    const [reason, setReason] = useState("");
+
+    useEffect(() => {
+        // Reseteaza motivul cand popup-ul se redeschide pentru o noua cerere
+        if (isOpen) {
+            setReason("");
+        }
+    }, [isOpen, requestId]);
+
+    if (!isOpen || !requestId) return null;
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!reason.trim()) {
+            // Poti adauga o validare/eroare locala aici daca doresti
+            alert("Va rugam introduceti un motiv pentru respingere.");
+            return;
+        }
+        onSubmit(reason);
+    };
+
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content decline-popup">
+                <h3>Motivul Respingerii Cererii</h3>
+                {error && <p className="error-message popup-error">{error}</p>}
+                <form onSubmit={handleSubmit}>
+                    <textarea
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="Introduceti motivul respingerii aici..."
+                        rows={5}
+                        required
+                        disabled={isSubmitting}
+                    />
+                    <div className="popup-actions">
+                        <button type="submit" disabled={isSubmitting || !reason.trim()} className="popup-button-submit">
+                            {isSubmitting ? "Se trimite..." : "Trimite Motiv"}
+                        </button>
+                        <button type="button" onClick={onClose} disabled={isSubmitting} className="popup-button-cancel">
+                            Anuleaza
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 
 interface StudentInfo {
@@ -30,6 +90,11 @@ const FacultyMarks: React.FC = () => {
     const [requests, setRequests] = useState<MarkRequest[]>([]);
     const { faculty, token } = useContext(AuthContext);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
+    const [showDeclinePopup, setShowDeclinePopup] = useState<boolean>(false);
+    const [currentRequestIdForDecline, setCurrentRequestIdForDecline] = useState<string | null>(null);
+    const [isSubmittingDecline, setIsSubmittingDecline] = useState<boolean>(false);
+    const [declineSubmitError, setDeclineSubmitError] = useState<string | null>(null);
 
     // Functie pentru a formata data (optional)
     const formatDate = (dateString: string) => {
@@ -80,25 +145,40 @@ const FacultyMarks: React.FC = () => {
         }
     };
 
-    const handleReject = async (requestId: string) => {
-        if (!token) return;
+    const handleDeclineClick = (id: string) => {
+        setCurrentRequestIdForDecline(id);
+        setDeclineSubmitError(null); // Reseteaza eroarea anterioara
+        setShowDeclinePopup(true);
+    };
+
+    const submitDeclineReason = async (reason: string) => {
+        if (!currentRequestIdForDecline) return;
+
+        setIsSubmittingDecline(true);
+        setDeclineSubmitError(null);
         try {
-            await api.put(
-                `/faculty/mark/${requestId}/reject`,
-                { header: { Authorization: `Bearer ${token}` } }
+            await api.post(
+                `/faculty/mark/${currentRequestIdForDecline}/reject`,
+                { reason: reason },
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-
-            setRequests(prevRequests => prevRequests.filter(req => req._id !== requestId));
-
+            setSuccessMessage("Cererea a fost respinsa cu succes!");
+            setRequests(prevRequests => prevRequests.filter((request) => request._id !== currentRequestIdForDecline));
+            setShowDeclinePopup(false);
+            setCurrentRequestIdForDecline(null);
+            setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: any) {
-            console.error("Eroare la respingerea cererii: ", err);
+            console.error("Eroare la respingerea cererii:", err);
+            setDeclineSubmitError(err.response?.data?.message || "Nu s-a putut respinge cererea.");
+        } finally {
+            setIsSubmittingDecline(false);
         }
     };
 
     return (
         <div className="faculty-marks-container">
             <h1>Cereri de Actualizare Medii Studenti</h1>
-
+            {successMessage && <div className="success-message">{successMessage}</div>}
             {error && <p className="error-message">{error}</p>}
 
             {!error && (
@@ -131,19 +211,8 @@ const FacultyMarks: React.FC = () => {
                                         <td>
                                             {/* Afisam butoanele mereu, deoarece presupunem ca toate cererile listate sunt pending */}
                                             <div className="action-buttons">
-                                                <button
-                                                    onClick={() => handleApprove(request._id)} // Trimitem doar ID-ul cererii
-                                                    className="approve-button"
-                                                >
-                                                    Aproba
-                                                </button>
-                                                <button
-                                                    onClick={() => handleReject(request._id)}
-                                                    className="reject-button"
-
-                                                >
-                                                    Respinge
-                                                </button>
+                                                <button onClick={() => handleApprove(request._id)} className="approve-button"> Aproba </button>
+                                                <button onClick={() => handleDeclineClick(request._id)} className="reject-button"> Respinge </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -151,6 +220,19 @@ const FacultyMarks: React.FC = () => {
                             </tbody>
                         </table>
                     )}
+
+                    <DeclineReasonPopup
+                        isOpen={showDeclinePopup}
+                        onClose={() => {
+                            setShowDeclinePopup(false);
+                            setCurrentRequestIdForDecline(null);
+                            setDeclineSubmitError(null); // Sterge eroarea la inchiderea manuala
+                        }}
+                        onSubmit={submitDeclineReason}
+                        requestId={currentRequestIdForDecline}
+                        isSubmitting={isSubmittingDecline}
+                        error={declineSubmitError}
+                    />
                 </div>
             )}
         </div>

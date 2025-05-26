@@ -497,6 +497,8 @@ async function run() {
 
         app.post('/reservation_request/:id/decline', authenticateToken, async (req, res) => {
             const reservationId = req.params.id;
+            const reason = req.body.reason;
+
             if (!ObjectId.isValid(reservationId)) {
                 return res.status(400).json({ message: 'ID-ul rezervarii este invalid' });
             }
@@ -510,7 +512,7 @@ async function run() {
 
                 // sterg documentul din colectia de cereri
                 await reservationRequestsCollection.deleteOne({ _id: new ObjectId(reservationId) });
-                notificationService.createNotification(message = `Cererea de rezervare pentru apartamentul de la locatia: ${apartamentData.location}, a fost respinsa!`, receiver = reservationRequest.client);
+                notificationService.createNotification(message = `Cererea de rezervare pentru apartamentul de la locatia: ${apartamentData.location}, a fost respinsa cu motivul: ${reason}`, receiver = reservationRequest.client);
                 res.status(200).json({ message: 'Cererea de rezervare a fost respinsa' });
             } catch (error) {
                 console.error('Eroare la respingerea cererii de rezervare:', error);

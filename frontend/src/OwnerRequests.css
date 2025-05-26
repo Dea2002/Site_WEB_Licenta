@@ -50,3 +50,147 @@
 .text-red {
     color: red;
 }
+
+.request-item-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.request-item-actions .button-accept,
+.request-item-actions .button-decline {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.request-item-actions .button-accept {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+.request-item-actions .button-accept:hover {
+    background-color: #218838;
+}
+
+.request-item-actions .button-decline {
+    background-color: #dc3545; /* Rosu */
+    color: white;
+}
+.request-item-actions .button-decline:hover {
+    background-color: #c82333;
+}
+
+/* Stiluri pentru Popup */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Fundal semi-transparent */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Asigura ca e deasupra altor elemente */
+}
+
+.popup-content {
+    background-color: white;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px; /* Latime maxima pentru popup */
+    position: relative;
+}
+
+.decline-popup h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.4em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.decline-popup textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+.decline-popup textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.popup-actions .popup-button-submit,
+.popup-actions .popup-button-cancel {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.popup-actions .popup-button-submit {
+    background-color: #007bff; /* Albastru pentru submit */
+    color: white;
+    border: 1px solid #007bff;
+}
+.popup-actions .popup-button-submit:hover {
+    background-color: #0056b3;
+}
+.popup-actions .popup-button-submit:disabled {
+    background-color: #6c757d;
+    opacity: 0.7;
+}
+
+.popup-actions .popup-button-cancel {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.popup-actions .popup-button-cancel:hover {
+    background-color: #e0e0e0;
+}
+
+.popup-error {
+    /* Stil pentru eroarea din popup */
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.text-green {
+    color: green;
+    font-weight: bold;
+}
+.text-red {
+    color: red;
+    font-weight: bold;
+}
+.text-orange {
+    color: orange;
+    font-weight: bold;
+}
