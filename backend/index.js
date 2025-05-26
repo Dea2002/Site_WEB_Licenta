@@ -16,13 +16,41 @@ const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',   // frontend-ul tau
+        origin: [
+            'http://localhost:5173', // Frontend-ul de dezvoltare Vite
+            'http://localhost:3000',
+            'https://studentrent.netlify.app/'
+        ],  // Frontend-ul servit de 'serve'
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
+// --- CONFIGURARE CORS PENTRU EXPRESS ---
+// Este crucial sa fie printre primele!
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://studentrent.netlify.app', // Adresa ta de frontend Netlify
+    'https://studentrent.up.railway.app/'
+    // Adauga si domeniul Railway DACA frontend-ul ar fi servit si de acolo
+    // sau daca ai nevoie de comunicare directa browser -> Railway API (desi frontend-ul e pe Netlify)
+];
 
-app.use(cors());
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Asigura-te ca OPTIONS e aici
+    allowedHeaders: ['Content-Type', 'Authorization', /* alte headere custom pe care le folosesti */],
+    credentials: true,
+    optionsSuccessStatus: 204 // Raspuns standard pentru preflight OK (sau 200)
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 

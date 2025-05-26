@@ -9,18 +9,18 @@ export default defineConfig({
 
         rollupOptions: {
             // 3) manually split react-bootstrap (and react-dom, etc.) out
-            output: {
-                manualChunks(id) {
-                    if (id.includes('node_modules/react-bootstrap')) {
-                        return 'react-bootstrap'
-                    }
-                    if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-                        return 'react-vendor'
-                    }
-                    // you can add more libs here…
-                }
-            },
-
+            /*  output: {
+                 manualChunks(id) {
+                     if (id.includes('node_modules/react-bootstrap')) {
+                         return 'react-bootstrap'
+                     }
+                     if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+                         return 'react-vendor'
+                     }
+                     // you can add more libs here…
+                 }
+             },
+  */
             // 1) filter out the module-level-directives warnings
             onwarn(warning, defaultWarn) {
                 // suppress exactly the "Module level directives cause errors…" messages
