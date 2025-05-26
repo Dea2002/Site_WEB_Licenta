@@ -18,6 +18,27 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         res.send(associationRequests);
     });
 
+    router.get('/all_students', authenticateToken, async (req, res) => {
+        facultyId = req.user._id;
+        if (!ObjectId.isValid(facultyId)) {
+            return res.status(400).json({ message: 'ID facultate invalid.' });
+        }
+
+        const facultyObj = await facultiesCollection.findOne({ _id: new ObjectId(facultyId) });
+        if (!facultyObj) {
+            return res.status(404).json({ message: 'Facultatea nu a fost gasita.' });
+        }
+
+
+        try {
+            const students = await usersCollection.find({ faculty_valid: true, faculty: facultyObj.fullName }).toArray();
+            res.send(students);
+        } catch (error) {
+            console.error("Eroare la listarea studentilor: ", error);
+            res.status(500).json({ message: 'Eroare server la preluarea studentilor.' });
+        }
+    });
+
     router.get('/get_association_requests/:facultyId', async (req, res) => {
         const { facultyId } = req.params;
         if (!ObjectId.isValid(facultyId)) {
@@ -298,6 +319,38 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
     });
 
+    router.patch('/students/:studentId/invalidate', authenticateToken, async (req, res) => {
+        const { studentId } = req.params;
+        if (!ObjectId.isValid(studentId)) {
+            return res.status(400).json({ message: 'ID student invalid.' });
+        }
+
+        try {
+            // Verifica daca studentul exista
+            const student = await usersCollection.findOne({ _id: new ObjectId(studentId) });
+            if (!student) {
+                return res.status(404).json({ message: 'Studentul nu a fost gasit.' });
+            }
+
+            // Actualizeaza campul faculty_valid la false
+            const updateResult = await usersCollection.updateOne(
+                { _id: new ObjectId(studentId) },
+                { $set: { faculty_valid: false } }
+            );
+
+            if (updateResult.modifiedCount === 0) {
+                return res.status(500).json({ message: 'Nu s-a putut invalida studentul.' });
+            }
+
+            // Trimite notificare studentului
+            await notificationService.createNotification('Ai fost invalidat de la facultate.', studentId);
+
+            return res.status(200).json({ message: 'Student invalidat cu succes.' });
+        } catch (error) {
+            console.error("Eroare la invalidarea studentului:", error);
+            return res.status(500).json({ message: 'Eroare server la invalidarea studentului.' });
+        }
+    });
 
     router.patch('/edit_profile', authenticateToken, async (req, res) => {
         try {
