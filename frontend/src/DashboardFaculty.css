@@ -128,8 +128,8 @@ td {
 }
 
 th {
-    background-color: #007bff; /* O culoare de accent pentru header */
-    color: white;
+    background-color: #7e204c; /* O culoare de accent pentru header */
+    color: #f5c45e;
     font-weight: 600;
     white-space: nowrap; /* Impiedica ruperea textului din header */
 }
