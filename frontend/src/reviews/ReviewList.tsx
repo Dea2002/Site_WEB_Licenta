@@ -115,45 +115,57 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews }) => {
         // Nu mai este nevoie de fetchAndSetReviews
     };
 
+    const hasAnyReviewsInitially = initialReviews && initialReviews.length > 0;
+
     // Afiseaza mesajul daca lista (dupa filtrare si sortare) este goala.
     // isLoading a fost eliminat.
-    if (sortedAndFilteredReviews.length === 0) {
-        if (filterRating > 0) { // Daca exista un filtru de rating activ
-            return <p>Nu exista recenzii care sa corespunda notei selectate.</p>;
-        }
-        return <p>Nu exista recenzii pentru acest apartament inca. Fii primul care lasa una!</p>;
-    }
+    // if (sortedAndFilteredReviews.length === 0) {
+    //     if (filterRating > 0) { // Daca exista un filtru de rating activ
+    //         return <p>Nu exista recenzii care sa corespunda notei selectate.</p>;
+    //     }
+    //     return <p>Nu exista recenzii pentru acest apartament inca. Fii primul care lasa una!</p>;
+    // }
 
     return (
         <div className="review-list-container">
-            <div className="review-controls" style={{ marginBottom: '20px', display: 'flex', gap: '15px', alignItems: 'center' }}>
-                <div>
-                    <label htmlFor="sort-reviews" style={{ marginRight: '5px' }}>Sorteaza dupa:</label>
-                    <select id="sort-reviews" value={sortBy} onChange={handleSortChange} /* disabled={isLoading} eliminat */ >
-                        <option value="createdAt_desc">Cele mai noi</option>
-                        <option value="createdAt_asc">Cele mai vechi</option>
-                        <option value="rating_desc">Rating (Mare &gt Mic)</option>
-                        <option value="rating_asc">Rating (Mic &gt Mare)</option>
-                    </select>
-                </div>
-                <div>
-                    <label htmlFor="filter-rating" style={{ marginRight: '5px' }}>Filtreaza dupa nota:</label>
-                    <select id="filter-rating" value={filterRating} onChange={handleRatingFilterChange} /* disabled={isLoading} eliminat */ >
-                        <option value="0">Toate notele</option>
-                        <option value="5">Doar 5 stele</option>
-                        <option value="4">Doar 4 stele</option>
-                        <option value="3">Doar 3 stele</option>
-                        <option value="2">Doar 2 stele</option>
-                        <option value="1">Doar 1 stea</option>
-                    </select>
-                </div>
-                {/* isLoading si mesajul asociat au fost eliminate */}
-            </div>
+            {hasAnyReviewsInitially ? (
+                <div className="review-controls" style={{ marginBottom: '20px', display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <div>
+                        <label htmlFor="sort-reviews" style={{ marginRight: '5px' }}>Sorteaza dupa:</label>
+                        <select id="sort-reviews" value={sortBy} onChange={handleSortChange} /* disabled={isLoading} eliminat */ >
+                            <option value="createdAt_desc">Cele mai noi</option>
+                            <option value="createdAt_asc">Cele mai vechi</option>
+                            <option value="rating_desc">Rating (Mare &gt Mic)</option>
+                            <option value="rating_asc">Rating (Mic &gt Mare)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="filter-rating" style={{ marginRight: '5px' }}>Filtreaza dupa nota:</label>
+                        <select id="filter-rating" value={filterRating} onChange={handleRatingFilterChange} /* disabled={isLoading} eliminat */ >
+                            <option value="0">Toate notele</option>
+                            <option value="5">Doar 5 stele</option>
+                            <option value="4">Doar 4 stele</option>
+                            <option value="3">Doar 3 stele</option>
+                            <option value="2">Doar 2 stele</option>
+                            <option value="1">Doar 1 stea</option>
+                        </select>
+                    </div>
+                    {/* isLoading si mesajul asociat au fost eliminate */}
+                </div>) : (
+                // Daca initialReviews este gol, afisam direct mesajul ca nu sunt recenzii deloc
+                <p>Nu exista recenzii pentru acest apartament inca. Fii primul care lasa una!</p>
+            )}
+            {/* Randam lista de review-uri sau mesajul corespunzator DUPA controale */}
+            {hasAnyReviewsInitially && sortedAndFilteredReviews.length === 0 && filterRating > 0 && (
+                <p>Nu exista recenzii care sa corespunda notei selectate.</p>
+            )}
 
             {/* Iteram direct peste sortedAndFilteredReviews */}
-            {sortedAndFilteredReviews.map(review => (
-                <ReviewItem key={review._id} review={review} />
-            ))}
+            {hasAnyReviewsInitially && sortedAndFilteredReviews.length > 0 && (
+                sortedAndFilteredReviews.map(review => (
+                    <ReviewItem key={review._id} review={review} />
+                ))
+            )}
         </div>
     );
 };
