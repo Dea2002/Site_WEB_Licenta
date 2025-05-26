@@ -4,13 +4,12 @@ import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { ref, deleteObject, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "./firebaseConfig";
-import { Apartment, PaginatedRentals, Rental } from "./types";
-import "./OwnerApartmentDetails.css"; // Asigura-te ca CSS-ul este actualizat
-import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
-
+import { Apartment, PaginatedRentals, Rental, ALL_POSSIBLE_FACILITIES_MAP, Review, PaginatedResponse } from "./types";
+import "./OwnerApartmentDetails.css";
+import ReviewList from "./reviews/ReviewList";
 
 const OwnerApartmentDetails: React.FC = () => {
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
     const { apartmentId } = useParams<{ apartmentId: string }>();
     const navigate = useNavigate();
 
@@ -60,6 +59,9 @@ const OwnerApartmentDetails: React.FC = () => {
     const [loadingRentals, setLoadingRentals] = useState<boolean>(false);
     const [rentalHistoryPage, setRentalHistoryPage] = useState<number>(1);
 
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
+    const [reviewError, setReviewError] = useState<string | null>(null);
 
     const parseNumericField = (value: any): string => {
         if (value === null || value === undefined || value === "") return "";
@@ -199,6 +201,37 @@ const OwnerApartmentDetails: React.FC = () => {
         }
     }, [token]);
 
+    const fetchReviews = useCallback(async () => {
+        if (!apartmentId) return;
+        setLoadingReviews(true);
+        setReviewError(null);
+        try {
+            // Presupunem ca vrem toate review-urile pentru afisare, deci un limit mare
+            // Daca API-ul returneaza un obiect cu paginare, tipul este PaginatedResponse<Review>
+            // Daca API-ul returneaza direct un array, tipul este Review[]
+            const response = await api.get<PaginatedResponse<Review>>(`/reviews/apartment/${apartmentId}?sort=createdAt_desc&limit=1000`, {
+                // Proprietarul nu are nevoie de token pentru a vedea review-urile,
+                // dar daca ruta e protejata, adauga header-ul:
+                // headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data && Array.isArray(response.data.reviews)) {
+                setReviews(response.data.reviews);
+            } else if (Array.isArray(response.data)) { // Fallback daca API-ul returneaza direct array
+                setReviews(response.data as any); // 'as any' e un mic hack aici, ideal ar fi tipare mai stricta
+            }
+            else {
+                console.warn("Format neasteptat pentru review-uri de la API in OwnerApartmentDetails:", response.data);
+                setReviews([]);
+            }
+        } catch (err: any) {
+            console.error("Eroare la preluarea review-urilor in OwnerApartmentDetails:", err);
+            setReviewError(err.response?.data?.message || "Nu s-au putut incarca recenziile.");
+            setReviews([]);
+        } finally {
+            setLoadingReviews(false);
+        }
+    }, [apartmentId, token]);
+
     useEffect(() => {
         fetchApartmentData();
     }, [fetchApartmentData]);
@@ -208,9 +241,16 @@ const OwnerApartmentDetails: React.FC = () => {
             fetchCurrentRentals();
             fetchRentalHistory(1);
             fetchConversationId(apartment._id);
+            fetchReviews();
         }
     }, [apartment?._id, fetchCurrentRentals, fetchRentalHistory, fetchConversationId]);
 
+    const handleReviewDeleted = (deletedReviewId: string) => {
+        setReviews(prevReviews => prevReviews.filter(review => review._id !== deletedReviewId));
+        // Re-fetch apartment data pentru a actualiza averageRating si numberOfReviews
+        // Daca backend-ul actualizeaza automat aceste campuri la stergerea unui review.
+        fetchApartmentData();
+    };
 
     // --- GENERIC SAVE FUNCTION ---
     const handleSaveSection = async (
@@ -880,7 +920,20 @@ const OwnerApartmentDetails: React.FC = () => {
                         </>
                     ) : !loadingRentals && <p>Niciun istoric de chirii.</p>}
                 </section>
-            </div >
+            </div>
+
+            <section className="details-section reviews-owner-dashboard"> {/* Adauga o clasa specifica daca vrei stilizare diferita */}
+                <h2>Recenzii Primite ({reviews.length})</h2>
+                {loadingReviews && <p>Se incarca recenziile...</p>}
+                {reviewError && <p className="error-message">{reviewError}</p>}
+                {!loadingReviews && !reviewError && apartmentId && (
+                    <ReviewList
+                        reviews={reviews}
+                        currentUserId={user?._id || null} // ID-ul proprietarului (pentru eventuala stergere daca e admin)
+                        onReviewDeleted={handleReviewDeleted}
+                    />
+                )}
+            </section>
 
             {/* --- Delete Apartment Section --- */}
             < section className="details-section delete-apartment-section" >
@@ -890,7 +943,7 @@ const OwnerApartmentDetails: React.FC = () => {
                     {isSaving.deleteApartment ? "Se sterge..." : "sterge Apartamentul Definitiv"}
                 </button>
             </section >
-        </div >
+        </div>
     );
 };
 

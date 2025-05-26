@@ -160,15 +160,6 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
 
     const hasAnyReviewsInitially = initialReviews && initialReviews.length > 0;
 
-    // Afiseaza mesajul daca lista (dupa filtrare si sortare) este goala.
-    // isLoading a fost eliminat.
-    // if (sortedAndFilteredReviews.length === 0) {
-    //     if (filterRating > 0) { // Daca exista un filtru de rating activ
-    //         return <p>Nu exista recenzii care sa corespunda notei selectate.</p>;
-    //     }
-    //     return <p>Nu exista recenzii pentru acest apartament inca. Fii primul care lasa una!</p>;
-    // }
-
     return (
         <div className="review-list-container">
             {hasAnyReviewsInitially ? (
@@ -196,7 +187,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                     {/* isLoading si mesajul asociat au fost eliminate */}
                 </div>) : (
                 // Daca initialReviews este gol, afisam direct mesajul ca nu sunt recenzii deloc
-                <p>Nu exista recenzii pentru acest apartament inca. Fii primul care lasa una!</p>
+                <p>Nu exista recenzii pentru acest apartament inca.</p>
             )}
             {/* Randam lista de review-uri sau mesajul corespunzator DUPA controale */}
             {hasAnyReviewsInitially && sortedAndFilteredReviews.length === 0 && filterRating > 0 && (
