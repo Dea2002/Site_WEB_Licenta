@@ -1,0 +1,137 @@
+.review-list-container {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.review-list-container h2 {
+    /* Daca ai un titlu in ApartmentDetails pentru sectiunea de review-uri */
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    color: #333;
+}
+
+.review-controls {
+    display: flex;
+    flex-wrap: wrap; /* Permite trecerea pe randul urmator pe ecrane mici */
+    gap: 20px; /* Spatiu intre grupuri de control */
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.review-controls > div {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Spatiu intre label si select */
+}
+
+.review-controls label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.95em;
+}
+
+.review-controls select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 0.9em;
+    min-width: 150px; /* Latime minima pentru select */
+    cursor: pointer;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.review-controls select:focus {
+    outline: none;
+    border-color: #007bff; /* O culoare de accent la focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.review-controls p {
+    /* Pentru mesajul "Se actualizeaza..." */
+    margin: 0;
+    color: #007bff;
+    font-style: italic;
+}
+
+/* Stiluri pentru ReviewItem (poate fi in acelasi fisier sau separat) */
+.review-item {
+    background-color: #fff; /* Fundal usor diferit daca e necesar */
+    padding: 15px;
+    margin-bottom: 15px; /* Spatiu sub fiecare review item */
+    border: 1px solid #e7e7e7; /* O bordura mai subtila */
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* O umbra foarte usoara */
+}
+
+.review-item:last-child {
+    border-bottom: 1px solid #e7e7e7; /* Elimina border-bottom de la ultimul element daca era din inline style */
+    margin-bottom: 0;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px; /* Spatiu mai mare sub header */
+}
+
+.review-user-name {
+    font-weight: 600;
+    color: #2c3e50; /* O culoare mai inchisa pentru nume */
+    font-size: 1.05em;
+}
+
+.review-date {
+    font-size: 0.85em; /* Data putin mai mica */
+    color: #888;
+}
+
+.review-rating {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.review-rating .star-display span {
+    /* Daca vrei sa stilizezi stelele din ReviewItem separat */
+    font-size: 1.3em; /* Ajusteaza marimea stelelor in lista */
+    margin-right: 1px;
+}
+
+.review-comment {
+    margin: 0;
+    line-height: 1.6;
+    color: #454545;
+    white-space: pre-wrap; /* Pastreaza spatiile si liniile noi */
+    font-size: 0.95em;
+}
+
+/* Mesaj cand nu sunt review-uri */
+.review-list-container > p {
+    padding: 20px;
+    text-align: center;
+    color: #777;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    border: 1px dashed #ddd;
+}
+
+/* Responsive pentru controale */
+@media (max-width: 600px) {
+    .review-controls {
+        flex-direction: column; /* Controalele una sub alta pe ecrane mici */
+        align-items: stretch; /* Label si select pe toata latimea */
+    }
+    .review-controls > div {
+        width: 100%; /* Ocupa toata latimea */
+        justify-content: space-between; /* Aliniaza label la stanga, select la dreapta */
+    }
+    .review-controls select {
+        flex-grow: 1; /* Permite select-ului sa se extinda */
+    }
+}

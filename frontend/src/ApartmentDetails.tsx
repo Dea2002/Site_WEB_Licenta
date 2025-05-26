@@ -8,6 +8,7 @@ import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
 import { format, parseISO } from "date-fns";
 import "leaflet/dist/leaflet.css";
+import "./reviews/Reviews.css"
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
@@ -16,7 +17,7 @@ import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/Rental
 import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
 import ReviewList from "./reviews/ReviewList";
 import ReviewForm from "./reviews/ReviewForm";
-import { Review } from "./types";
+import { Review, PaginatedResponse } from "./types";
 
 const ApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
@@ -53,10 +54,10 @@ const ApartmentDetails: React.FC = () => {
         setError(""); // Clear previous booking errors when new dates are selected
     };
 
-    // Funcție pentru a verifica dacă utilizatorul poate lăsa un review
-    // Aceasta ar trebui să verifice dacă utilizatorul este logat și, ideal,
-    // dacă a avut o rezervare confirmată la acest apartament.
-    // Pentru simplitate, vom verifica doar dacă e logat.
+    // Functie pentru a verifica daca utilizatorul poate lasa un review
+    // Aceasta ar trebui sa verifice daca utilizatorul este logat si, ideal,
+    // daca a avut o rezervare confirmata la acest apartament.
+    // Pentru simplitate, vom verifica doar daca e logat.
     const canLeaveReview = useMemo(() => {
         if (!isAuthenticated || !user) return false;
         // AICI LOGICA MAI COMPLEXA:
@@ -148,19 +149,40 @@ const ApartmentDetails: React.FC = () => {
             setLoadingReviews(true);
             setReviewError("");
             // Initial, sorteaza dupa cele mai noi. Include si filtrare daca e cazul.
-            api.get<Review[]>(`/reviews/apartment/${id}?sort=createdAt_desc`)
+            api.get<PaginatedResponse<Review>>(`/reviews/apartment/${id}?sort=createdAt_desc&limit=1000`)
                 .then(response => {
-                    setReviews(response.data);
+                    // VERIFICA CE RETURNZA API-UL AICI
+                    // Daca response.data este un obiect care contine un array de review-uri, 
+                    // ex: { reviews: [], page: 1, ... }, atunci trebuie sa extragi array-ul corect.
+                    if (Array.isArray(response.data)) { // Daca API-ul returneaza direct un array
+                        setReviews(response.data);
+                    } else if (response.data && Array.isArray(response.data.reviews)) { // Daca API-ul returneaza un obiect cu proprietatea 'reviews'
+                        setReviews(response.data.reviews);
+                    } else {
+                        console.warn("Format neasteptat pentru review-uri de la API:", response.data);
+                        setReviews([]); // Seteaza un array gol ca fallback
+                        setReviewError("Formatul datelor primite pentru review-uri este incorect.");
+                        setReviews([]); // Asigura-te ca setezi un array gol si la eroare
+                    }
                 })
                 .catch(error => {
                     console.error("Eroare la preluarea review-urilor:", error);
-                    setReviewError("Nu s-au putut încărca review-urile.");
+                    setReviewError("Nu s-au putut incarca review-urile.");
                 })
                 .finally(() => {
                     setLoadingReviews(false);
                 });
+        } else {
+            setReviews([]);
         }
     }, [id]);
+
+    const handleReviewSubmitted = (newReview: Review) => {
+        // Adauga noul review la inceputul listei (sau re-fetch)
+        setReviews(prevReviews => [newReview, ...prevReviews]);
+        setShowReviewForm(false); // Ascunde formularul dupa submit
+        // Aici ai putea actualiza si rating-ul mediu al apartamentului daca nu o faci in backend
+    };
 
     // Handle body scroll when popups are open
     useEffect(() => {
@@ -520,6 +542,31 @@ const ApartmentDetails: React.FC = () => {
                             <p>Niciunul momentan</p>
                         )}
                     </div>
+
+                    <section className="reviews-section">
+                        <h2>Recenzii ({reviews.length})</h2>
+
+                        {/* Buton pentru a arata/ascunde formularul de review */}
+                        {isAuthenticated && canLeaveReview && !showReviewForm && (
+                            <button onClick={() => setShowReviewForm(true)} className="button-add-review">
+                                Adauga o Recenzie
+                            </button>
+                        )}
+
+                        {showReviewForm && apartment && user && (
+                            <ReviewForm
+                                apartmentId={apartment._id}
+                                onReviewSubmitted={handleReviewSubmitted}
+                                onCancel={() => setShowReviewForm(false)}
+                            />
+                        )}
+
+                        {loadingReviews && <p>Se incarca recenziile...</p>}
+                        {reviewError && <p className="error">{reviewError}</p>}
+                        {!loadingReviews && !reviewError && (
+                            <ReviewList reviews={reviews} />
+                        )}
+                    </section>
                 </div>
 
                 {/* === New Right Section Structure with Original Button Styles === */}

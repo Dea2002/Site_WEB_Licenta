@@ -58,6 +58,9 @@ export interface Apartment {
     latitude: number;
     longitude: number;
     createdAt: string;
+
+    averageRating?: number;
+    numberOfReviews?: number;
 }
 
 export interface Rental {
@@ -125,4 +128,22 @@ export interface University {
     name: string; // Sau fullName
     latitude: number;
     longitude: number;
+}
+
+export interface Review {
+    _id: string;
+    apartmentId: string;
+    userId: string;
+    userName?: string; // Numele utilizatorului, poate fi optional sau populat
+    rating: number;
+    comment: string;
+    createdAt: string; // Sau Date, daca o convertesti la fetch
+    updatedAt?: string; // Sau Date
+}
+
+export interface PaginatedResponse<T> {
+    reviews: T[]; // Array-ul de date (in cazul tau, Review[])
+    page: number;
+    pages: number; // Numarul total de pagini
+    totalReviews: number; // Numarul total de elemente care corespund filtrului
 }

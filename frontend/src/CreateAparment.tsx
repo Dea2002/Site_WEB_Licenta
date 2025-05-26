@@ -270,7 +270,7 @@ const OwnerListNewApartment: React.FC = () => {
         // Validare obligatorie pentru adresa verificata
         if (!addressVerified || !formData.latitude || !formData.longitude) {
             setMessage(""); // Sterge mesajul de succes anterior, daca exista
-            setGeocodingError("Adresa trebuie verificată pe hartă înainte de a continua. Apăsați 'Verifică Adresa pe Hartă'.");
+            setGeocodingError("Adresa trebuie verificata pe harta inainte de a continua. Apasati 'Verifica Adresa pe Harta'.");
             // Optional: scroll la campul de adresa sau la butonul de verificare
             const locationInput = document.getElementById('location');
             if (locationInput) locationInput.focus();
@@ -421,7 +421,7 @@ const OwnerListNewApartment: React.FC = () => {
                         {formData.location.trim() && !addressVerified && !geocodingError && !isGeocoding && (
                             // Afiseaza acest mesaj doar daca adresa e completata, nu e verificata, nu e eroare si nu se geocodeaza
                             <small id="location-help" className="form-text text-warning" style={{ display: 'block', marginTop: '5px' }}>
-                                Vă rugăm să verificați adresa pe hartă.
+                                Va rugam sa verificati adresa pe harta.
                             </small>
                         )}
                     </div>
