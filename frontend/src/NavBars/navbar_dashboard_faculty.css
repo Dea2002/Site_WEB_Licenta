@@ -1,0 +1,13 @@
+.faculty-logo-brand {
+    padding-top: 0; /* Elimina padding default daca e necesar */
+    padding-bottom: 0;
+    margin-right: 1rem; /* Spatiu dupa logo */
+}
+
+.faculty-logo-image {
+    height: 65px; /* Seteaza inaltimea dorita pentru logo */
+    width: auto; /* Latimea se va ajusta proportional */
+    max-width: 150px; /* O latime maxima pentru a nu fi prea mare */
+    object-fit: contain; /* Asigura ca imaginea se incadreaza corect */
+    border-radius: 4px; /* Optional: colturi rotunjite pentru logo */
+}

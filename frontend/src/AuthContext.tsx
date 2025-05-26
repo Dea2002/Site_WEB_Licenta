@@ -27,6 +27,7 @@ export interface Faculty {
     medie_valid: string;
     numeRector: string;
     phoneNumber: string;
+    logoUrl: string;
     role: "facultate";
 }
 

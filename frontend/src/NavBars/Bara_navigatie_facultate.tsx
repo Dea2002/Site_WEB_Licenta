@@ -20,6 +20,21 @@ function NavBar() {
 
     return (<Navbar expand="lg" className="custom-navbar-faculty">
         <Container>
+            {isAuthenticated && faculty?.logoUrl && (
+                <Navbar.Brand as={Link} to="/faculty_dashboard" className="faculty-logo-brand">
+                    <img
+                        src={faculty.logoUrl}
+                        alt={`${faculty.fullName || 'Faculty'} Logo`}
+                        className="faculty-logo-image" // Clasa pentru stilizare
+                    />
+                </Navbar.Brand>
+            )}
+            {/* Daca nu e logo, poti afisa numele facultatii ca text brand, sau nimic */}
+            {isAuthenticated && !faculty?.logoUrl && faculty?.fullName && (
+                <Navbar.Brand as={Link} to="/faculty_dashboard">
+                    {faculty.fullName}
+                </Navbar.Brand>
+            )}
             <Navbar.Toggle aria-controls="basic-navbar-nav-faculty" />
             <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                 {/* Dropdown-uri din partea stanga */}
