@@ -640,6 +640,9 @@ const OwnerApartmentDetails: React.FC = () => {
         if (!apartment || !window.confirm("ATENtIE! Sigur doriti sa stergeti definitiv acest apartament si toate datele asociate (chirii, etc.)? Aceasta actiune este ireversibila!")) return;
         setIsSaving(prev => ({ ...prev, deleteApartment: true }));
         try {
+            apartment.images.map((img) => {
+                deleteExistingImage(img);
+            });
             await api.delete(`/apartments/${apartment._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
