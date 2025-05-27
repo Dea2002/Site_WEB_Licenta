@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
-// Import the CSS file (ensure the path is correct)
 import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you create a new file
 import { useNavigate } from "react-router-dom";
 import { storage } from "./firebaseConfig";
@@ -118,6 +117,7 @@ const OwnerListNewApartment: React.FC = () => {
 
     const [formData, setFormData] = useState<FormData>(initialFormData);
     const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [documentFile, setDocumentFile] = useState<File | null>(null); // Optional, daca vrei sa adaugi un document
     const [message, setMessage] = useState("");
 
     // Stari pentru geocodare si harta
@@ -186,6 +186,12 @@ const OwnerListNewApartment: React.FC = () => {
         if (!e.target.files) return;
         // multiple
         setImageFiles(Array.from(e.target.files));
+    };
+
+    const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files) return;
+        // multiple
+        setDocumentFile(e.target.files[0] || null);
     };
 
     const uploadFile = (file: File): Promise<string> =>
@@ -308,6 +314,8 @@ const OwnerListNewApartment: React.FC = () => {
             // upload toate imaginile in paralel
             const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
 
+            const documentUrl = await uploadFile(documentFile as File).catch(() => null);
+
             const payload = {
                 ownerId: user?._id,
                 numberOfRooms: parseInt(formData.numberOfRooms) || 0,
@@ -324,6 +332,7 @@ const OwnerListNewApartment: React.FC = () => {
                 utilities: formData.utilities,
                 facilities: formData.facilities,
                 images: imageUrls,
+                document: documentUrl,
             };
 
             await api.post(`/new-apartment`, payload,
@@ -658,6 +667,21 @@ const OwnerListNewApartment: React.FC = () => {
                         />
                         {imageFiles.length > 0 && (
                             <p>{imageFiles.length} fisier(e) selectat(e)</p>
+                        )}
+                    </div>
+
+                    {/* Document */}
+                    <div className="form-group">
+                        <h2 className="form-section-title">Document de proprietate:*</h2>
+                        <input
+                            type="file"
+                            id="document"
+                            accept="application/pdf"
+                            onChange={handleDocumentChange}
+                            required
+                        />
+                        {documentFile && (
+                            <p>Document selectat.</p>
                         )}
                     </div>
 

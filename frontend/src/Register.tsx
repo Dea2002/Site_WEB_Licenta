@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { api } from './api';
 import { useNavigate, Link } from "react-router-dom";
-import "./Register.css"; // Ensure CSS is imported
-import { storage } from "./firebaseConfig"; // Import Firebase storage if needed
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import "./Register.css";
+import { uploadFileToStorage } from "./firebaseConfig"; // Import Firebase storage if needed
+
 
 // Interface for Student form
 interface RegisterFormState {
@@ -151,33 +151,33 @@ const Register: React.FC = () => {
         setError(""); // Clear errors on change
     };
 
-    const uploadFileToStorage = (file: File, path: String): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            if (!file) {
-                reject("Fisier invalid");
-                return;
-            }
+    // const uploadFileToStorage = (file: File, path: String): Promise<string> => {
+    //     return new Promise((resolve, reject) => {
+    //         if (!file) {
+    //             reject("Fisier invalid");
+    //             return;
+    //         }
 
-            const storageRef = ref(storage, `${path}/${Date.now()}-${file.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, file);
+    //         const storageRef = ref(storage, `${path}/${Date.now()}-${file.name}`);
+    //         const uploadTask = uploadBytesResumable(storageRef, file);
 
-            uploadTask.on(
-                "state_changed",
-                () => { },
-                (error) => {
-                    console.error("Upload Error:", error);
-                },
-                () => {
-                    // upload finalizat cu succes, obtine URL pentru download
-                    getDownloadURL(uploadTask.snapshot.ref)
-                        .then((downloadURL) => {
-                            resolve(downloadURL); // rezolva promise-ul cu URL-ul
-                        })
-                        .catch(reject);
-                },
-            );
-        });
-    };
+    //         uploadTask.on(
+    //             "state_changed",
+    //             () => { },
+    //             (error) => {
+    //                 console.error("Upload Error:", error);
+    //             },
+    //             () => {
+    //                 // upload finalizat cu succes, obtine URL pentru download
+    //                 getDownloadURL(uploadTask.snapshot.ref)
+    //                     .then((downloadURL) => {
+    //                         resolve(downloadURL); // rezolva promise-ul cu URL-ul
+    //                     })
+    //                     .catch(reject);
+    //             },
+    //         );
+    //     });
+    // };
 
     // Submit handler for Student form
     const handleStudentSubmit = async (e: React.FormEvent) => {
@@ -320,10 +320,7 @@ const Register: React.FC = () => {
             const logoUrl = await uploadFileToStorage(logo, `faculty_files/${abreviere}`);
 
             // 2. Upload Document
-            const documentUrl = await uploadFileToStorage(
-                documentOficial,
-                `faculty_files/${abreviere}`,
-            );
+            const documentUrl = await uploadFileToStorage(documentOficial, `faculty_files/${abreviere}`);
 
             // 3. Send data to backend
             await api.post("/auth/register_faculty", {
