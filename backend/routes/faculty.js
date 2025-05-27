@@ -319,6 +319,67 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
     });
 
+    router.patch('/students/invalidate-all', authenticateToken, async (req, res) => {
+        try {
+            // Actualizeaza toti studentii pentru a-i invalida
+            const updateResult = await usersCollection.updateMany(
+                {
+                    faculty_valid: true,
+                    faculty: req.user.fullName
+                },
+                { $set: { faculty_valid: false } }
+            );
+
+            // if (updateResult.modifiedCount === 0) {
+            //     return res.status(500).json({ message: 'Nu s-a putut invalida niciun student.' });
+            // }
+
+            // Trimite notificare tuturor studentilor
+            const students = await usersCollection.find({ faculty_valid: false }).toArray();
+            for (const student of students) {
+                await notificationService.createNotification('Ai fost invalidat de la facultate.', student._id);
+            }
+
+            return res.status(200).json({ message: 'Toti studentii au fost invalidati cu succes.' });
+        } catch (error) {
+            console.error("Eroare la invalidarea tuturor studentilor:", error);
+            return res.status(500).json({ message: 'Eroare server la invalidarea studentilor.' });
+        }
+    });
+
+    router.delete('/account/delete', authenticateToken, async (req, res) => {
+        const facultyId = req.user._id;
+
+        if (!ObjectId.isValid(facultyId)) {
+            return res.status(400).json({ message: 'ID facultate invalid.' });
+        }
+
+        try {
+            // Verifica daca facultatea exista
+            const faculty = await facultiesCollection.findOne({ _id: new ObjectId(facultyId) });
+            if (!faculty) {
+                return res.status(404).json({ message: 'Facultatea nu a fost gasita.' });
+            }
+
+            // Sterge facultatea
+            const deleteResult = await facultiesCollection.deleteOne({ _id: new ObjectId(facultyId) });
+            if (deleteResult.deletedCount === 0) {
+                return res.status(500).json({ message: 'Nu s-a putut sterge facultatea.' });
+            }
+
+            // sterge toate cererile de asociere
+            await associationsRequestsCollection.deleteMany({ facultyId: new ObjectId(facultyId) });
+
+            // Sterge notificari asociate
+            await notificationsCollection.deleteMany({ receiver: facultyId });
+
+            return res.status(200).json({ message: 'Contul de facultate a fost sters cu succes.' });
+        } catch (error) {
+            console.error("Eroare la stergerea contului de facultate:", error);
+            return res.status(500).json({ message: 'Eroare server la stergerea contului de facultate.' });
+        }
+    });
+
     router.patch('/students/:studentId/invalidate', authenticateToken, async (req, res) => {
         const { studentId } = req.params;
         if (!ObjectId.isValid(studentId)) {

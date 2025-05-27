@@ -71,3 +71,66 @@
 .return-button:hover {
     background-color: #f09bd5;
 }
+
+.profile-sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-sidebar-nav li {
+    margin-bottom: 8px; /* Spatiu intre itemii de meniu */
+}
+
+.sidebar-button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #343a40;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.sidebar-button:hover {
+    background-color: #e9ecef;
+    color: #007bff;
+}
+
+.sidebar-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: 500;
+}
+
+/* NOU: Stiluri pentru sectiunea de actiuni periculoase */
+.sidebar-actions-dangerous {
+    margin-top: 30px; /* Spatiu deasupra butonului de stergere */
+    padding-top: 20px;
+    border-top: 1px dashed #ced4da; /* Linie de separare */
+}
+
+.delete-account-button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #ffebee; /* Un rosu foarte deschis pentru avertisment */
+    border: 1px solid #dc3545; /* Bordura rosie */
+    color: #dc3545; /* Text rosu */
+    text-align: center; /* Text centrat pentru acest buton */
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.delete-account-button:hover {
+    background-color: #f8d7da; /* Rosu mai intens la hover */
+    color: #721c24; /* Text mai inchis la hover */
+}
