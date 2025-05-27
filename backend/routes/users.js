@@ -5,15 +5,12 @@ const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
 const jwt = require('jsonwebtoken');
 
-function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection, reservationRequestsCollection) {
+function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection, reservationRequestsCollection, reviewsCollection, associationsRequestsCollection, messagesCollection) {
 
     router.get('/current-rent/:userId', authenticateToken, async (req, res) => {
         const { userId } = req.params;
         const now = new Date();
 
-        // if (req.user._id !== userId) {
-        //     return res.status(403).json({ message: 'Acces interzis' });
-        // }
 
         try {
             // 1) Gaseşte rezervarea activa curenta
@@ -131,6 +128,79 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         } catch (error) {
             console.error('Eroare la PATCH /users/edit_profile: ', error);
             return res.status(500).json({ message: 'Eroare interna la server' });
+        }
+    });
+
+    router.patch('/requests/cancel-all-for-student', authenticateToken, async (req, res) => {
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ message: "Autentificare necesara." });
+        }
+        const studentObjectId = new ObjectId(req.user._id); // Presupunem ca e deja ObjectId
+
+        try {
+
+            // Anuleaza (sau sterge) toate cererile pending ale acestui student
+            // Aici, le actualizam statusul. Poti alege sa le stergi cu deleteMany.
+            const result = await reservationRequestsCollection.deleteMany(
+                {
+                    client: studentObjectId, // Sau 'userId', depinde de schema ta
+                }
+            );
+
+            res.status(200).json({
+                message: `${result.modifiedCount} cereri active au fost anulate.`,
+                modifiedCount: result.modifiedCount
+            });
+        } catch (err) {
+            console.error("Eroare la anularea cererilor studentului:", err);
+            res.status(500).json({ message: "Eroare interna la server la anularea cererilor." });
+        }
+    });
+
+    router.delete('/account/delete', authenticateToken, async (req, res) => {
+        console.log("Cerere de stergere a contului primita pentru utilizator:", req.user._id);
+        if (!req.user || !req.user._id) {
+            console.error("Utilizatorul nu este autentificat sau nu are ID valid.");
+            return res.status(401).json({ message: "Autentificare necesara." });
+        }
+        const studentObjectId = new ObjectId(req.user._id);
+
+        try {
+
+            // modificarea campului senderId in mesaje
+            await messagesCollection.updateMany(
+                { senderId: studentObjectId },
+                { $set: { senderId: "utilizator Sters" } })
+
+            // stergerea cererilor de asociere
+            await associationsRequestsCollection.deleteMany({ studentId: studentObjectId });
+
+            // stergerea cererilor de actualizare a mediei
+            await markRequestsCollection.deleteMany({ studentId: studentObjectId });
+            // stergerea notificarilor pentru student
+            await notificationService.deleteNotificationsByReceiver(studentObjectId);
+
+            // setarea pe inactiv a chiriilor active
+            await reservationHistoryCollection.updateMany(
+                { client: studentObjectId, isActive: true },
+                { $set: { isActive: false } },
+                { $unset: { client: "", clientData: null } }
+            );
+
+            // schimbarea numelui studentului in "utilizator Sters" in toate recenziile
+            await reviewsCollection.updateMany(
+                { userId: studentObjectId },
+                { $set: { userId: "utilizator Sters", userName: "Utilizator sters" } } // $unset sterge campul userId
+            );
+
+            // Sterge contul studentului
+            await usersCollection.deleteOne({ _id: studentObjectId });
+
+            // Clientul va gestiona logout-ul si redirect-ul
+            res.status(200).json({ message: "Contul studentului a fost sters cu succes." });
+        } catch (err) {
+            console.error("Eroare la stergerea contului studentului:", err);
+            res.status(500).json({ message: "Eroare interna la server la stergerea contului." });
         }
     });
 

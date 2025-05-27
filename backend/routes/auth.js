@@ -194,9 +194,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
             // Insereaza utilizatorul in baza de date
             const result = await usersCollection.insertOne(newUser);
 
-            //! creez cererea de asociere cu facultatea + validarea mediei introduse
-            //!!!!!! PLUS NOTIFICARE PENTRU AMBELE
-
             if (result.insertedId) {
                 const facultyId = await getFacultyIdByName(faculty);
 

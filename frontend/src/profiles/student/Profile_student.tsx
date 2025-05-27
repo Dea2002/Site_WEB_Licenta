@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../AuthContext";
 import "./profile_student.css";
+import { api } from "../../api";
+import { useNavigate } from "react-router-dom";
 import EditProfile from './EditProfile_student';
 import CurrentRent from './CurrentRent_student';
 import RentHistory from './RentHistory_student';
@@ -11,7 +13,9 @@ type ProfileSection = 'edit' | 'current-rent' | 'history';
 
 const Profile_student: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
-    const { user } = useContext(AuthContext); // Preluam user-ul din context
+    const { user, logout, token } = useContext(AuthContext); // Preluam user-ul din context
+    const navigate = useNavigate();
+
     // Daca nu exista user logat, poate redirectionam sau afisam un mesaj
     if (!user) {
         // Poti adauga o redirectionare sau un placeholder aici
@@ -37,6 +41,72 @@ const Profile_student: React.FC = () => {
         }
     };
 
+    const studentId = user?._id;
+
+    const cancelAllActiveStudentRequests = async (): Promise<boolean> => {
+        if (!token || !studentId) {
+            console.error("Token sau ID student lipseste pentru anularea cererilor.");
+
+            return false;
+        }
+        console.log(`Initiere anulare cereri active pentru studentul ${studentId}`);
+
+        try {
+            // Endpoint-ul tau pentru a anula toate cererile active/pending ale studentului
+            // Backend-ul va prelua ID-ul studentului din token
+            await api.patch('/users/requests/cancel-all-for-student', {}, { // Sau DELETE, depinde de implementare
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            console.log("Toate cererile active/pending ale studentului au fost anulate/sterse.");
+            return true; // Succes
+        } catch (err: any) {
+            console.error("Eroare la anularea cererilor studentului:", err);
+
+            return false; // Ese
+        }
+    };
+
+    // Functia care sterge contul studentului
+    const deleteStudentAccountAPI = async (): Promise<boolean> => {
+        if (!token || !studentId) {
+            console.error("Token sau ID student lipseste pentru stergerea contului.");
+
+            return false;
+        }
+        console.log(`Initiere stergere cont pentru studentul ${studentId}`);
+
+        try {
+            // Endpoint-ul tau pentru a sterge contul studentului
+            // Backend-ul va prelua ID-ul studentului din token
+            await api.delete(`/users/account/delete`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            console.log("Contul studentului a fost sters din baza de date.");
+            return true; // Succes
+        } catch (err: any) {
+            console.error("Eroare la stergerea contului studentului din API:", err);
+
+            return false;
+        }
+    };
+
+    // Functia care orchestreaza procesul de stergere
+    const handleInitiateDeleteAccount = async () => {
+
+        // Pasul 1: Anuleaza toate cererile active/pending
+        const requestsCanceled = await cancelAllActiveStudentRequests();
+
+        if (requestsCanceled) {
+            // Pasul 2: Daca cererile au fost anulate cu succes, sterge contul studentului
+            const accountDeleted = await deleteStudentAccountAPI();
+            if (accountDeleted) {
+                alert("Contul a fost sters cu succes. Veti fi deconectat.");
+                logout();
+                navigate('/');
+            }
+        }
+    };
+
     return (
         <>
             <div className="user-profile-page-container">
@@ -47,6 +117,7 @@ const Profile_student: React.FC = () => {
                         <ProfileSidebar
                             activeSection={activeSection}
                             onSectionChange={setActiveSection} // Trimitem functia de actualizare
+                            onInitiateDeleteAccount={handleInitiateDeleteAccount}
                         />
                     </div>
 

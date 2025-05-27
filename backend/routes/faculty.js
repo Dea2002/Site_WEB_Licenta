@@ -369,6 +369,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
             // sterge toate cererile de asociere
             await associationsRequestsCollection.deleteMany({ facultyId: new ObjectId(facultyId) });
+            await markRequestsCollection.deleteMany({ facultyId: new ObjectId(facultyId) });
 
             // Sterge notificari asociate
             await notificationsCollection.deleteMany({ receiver: facultyId });

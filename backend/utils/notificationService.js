@@ -6,6 +6,29 @@ function initNotificationService(notificationsCollection) {
         throw new Error("Notifications Collection is required for NotificationService initialization.");
     }
 
+    async function deleteNotificationsByReceiver(receiverId) {
+        // Validare inputuri
+        if (!receiverId) {
+            throw new Error("ID-ul destinatarului este obligatoriu pentru stergerea notificărilor.");
+        }
+        let finalReceiverId;
+        try {
+            finalReceiverId = new ObjectId(receiverId); // Converteste si valideaza ID-ul
+        }
+        catch (e) {
+            throw new Error(`ID destinatar invalid: ${receiverId}`);
+        }
+        // Stergere
+        try {
+            const deleteResult = await notificationsCollection.deleteMany({ receiver: finalReceiverId });
+
+            return deleteResult;
+        } catch (error) {
+            console.error(`Eroare (service) la stergerea notificărilor pentru ${receiverId}:`, error);
+            throw new Error(`Nu s-au putut sterge notificările: ${error.message}`);
+        }
+    }
+
     async function createNotification(message, receiver, sender = "system") {
         // Validare inputuri
         if (!message || !receiver) {
@@ -42,7 +65,7 @@ function initNotificationService(notificationsCollection) {
     }
 
     return {
-        createNotification
+        createNotification, deleteNotificationsByReceiver
     };
 }
 

@@ -13,10 +13,6 @@ const Profile_faculty: React.FC = () => {
     const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
     const { faculty, token, logout } = useContext(AuthContext); // Preluam user-ul din context
 
-    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-    const [deleteError, setDeleteError] = useState<string | null>(null);
-    const [deleteSuccessMessage, setDeleteSuccessMessage] = useState<string | null>(null);
-
     const navigate = useNavigate();
 
     if (!faculty) {
@@ -36,7 +32,6 @@ const Profile_faculty: React.FC = () => {
     const invalidateAllStudentsAssociated = async (): Promise<boolean> => {
         if (!token) {
             console.error("Token sau ID facultate lipseste pentru invalidarea studentilor.");
-            setDeleteError("Eroare de autentificare la invalidarea studentilor.");
             return false;
         }
         console.log(`Initiere invalidare studenti pentru facultatea ${faculty._id}`);
@@ -48,7 +43,6 @@ const Profile_faculty: React.FC = () => {
             return true; // Succes
         } catch (err: any) {
             console.error("Eroare la invalidarea tuturor studentilor:", err);
-            setDeleteError(err.response?.data?.message || "Nu s-au putut invalida studentii asociati.");
             return false; // Ese
         }
     };
@@ -57,11 +51,9 @@ const Profile_faculty: React.FC = () => {
     const deleteFacultyAccountAPI = async () => { // Renumit pentru a evita confuzia cu functia de mai jos
         if (!token) {
             console.error("Token sau ID facultate lipseste pentru stergerea contului.");
-            setDeleteError("Eroare de autentificare la stergerea contului. Reincercati.");
             return false; // Indica esec
         }
         console.log(`Initiere stergere cont pentru facultatea ${faculty._id}`);
-        setDeleteError(null);
         try {
             await api.delete(`/faculty/account/delete`, { // Backend-ul preia ID-ul din token
                 headers: { Authorization: `Bearer ${token}` }
@@ -70,16 +62,12 @@ const Profile_faculty: React.FC = () => {
             return true; // Succes
         } catch (err: any) {
             console.error("Eroare la stergerea contului facultatii din API:", err);
-            setDeleteError(err.response?.data?.message || "Nu s-a putut sterge contul facultatii. Verificati consola.");
             return false; // Ese
         }
     };
 
     // Functia care orchestreaza procesul de stergere, pasata la Sidebar
     const handleInitiateDeleteAccount = async () => {
-        setIsDeletingAccount(true);
-        setDeleteError(null);
-        setDeleteSuccessMessage(null);
 
         // Pasul 1: Invalideaza toti studentii
         const studentsInvalidated = await invalidateAllStudentsAssociated();
@@ -88,7 +76,6 @@ const Profile_faculty: React.FC = () => {
             // Pasul 2: Daca studentii au fost invalidati cu succes, sterge contul facultatii
             const accountDeleted = await deleteFacultyAccountAPI();
             if (accountDeleted) {
-                setDeleteSuccessMessage("Contul facultatii si asociatiile studentilor au fost procesate. Veti fi deconectat.");
                 alert("Contul facultatii a fost sters cu succes. Veti fi deconectat.");
                 logout();
                 navigate('/');
@@ -97,7 +84,6 @@ const Profile_faculty: React.FC = () => {
         }
         // Daca invalidateAllStudentsAssociated esueaza, deleteError este deja setat.
 
-        setIsDeletingAccount(false);
     };
 
 
