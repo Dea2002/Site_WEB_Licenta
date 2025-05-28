@@ -49,20 +49,16 @@ const Profile_student: React.FC = () => {
 
             return false;
         }
-        console.log(`Initiere anulare cereri active pentru studentul ${studentId}`);
 
         try {
-            // Endpoint-ul tau pentru a anula toate cererile active/pending ale studentului
-            // Backend-ul va prelua ID-ul studentului din token
-            await api.patch('/users/requests/cancel-all-for-student', {}, { // Sau DELETE, depinde de implementare
+            await api.patch('/users/requests/cancel-all-for-student', {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log("Toate cererile active/pending ale studentului au fost anulate/sterse.");
-            return true; // Succes
+            return true;
         } catch (err: any) {
             console.error("Eroare la anularea cererilor studentului:", err);
 
-            return false; // Ese
+            return false;
         }
     };
 
@@ -73,7 +69,6 @@ const Profile_student: React.FC = () => {
 
             return false;
         }
-        console.log(`Initiere stergere cont pentru studentul ${studentId}`);
 
         try {
             // Endpoint-ul tau pentru a sterge contul studentului
@@ -81,8 +76,7 @@ const Profile_student: React.FC = () => {
             await api.delete(`/users/account/delete`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log("Contul studentului a fost sters din baza de date.");
-            return true; // Succes
+            return true;
         } catch (err: any) {
             console.error("Eroare la stergerea contului studentului din API:", err);
 

@@ -22,9 +22,9 @@ const Profile_faculty: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'edit':
-                return <EditProfile faculty={faculty} />; // Trimitem user-ul catre componenta
+                return <EditProfile faculty={faculty} />;
             default:
-                return <EditProfile faculty={faculty} />; // Sau un mesaj default
+                return <EditProfile faculty={faculty} />;
         }
     };
 
@@ -34,39 +34,33 @@ const Profile_faculty: React.FC = () => {
             console.error("Token sau ID facultate lipseste pentru invalidarea studentilor.");
             return false;
         }
-        console.log(`Initiere invalidare studenti pentru facultatea ${faculty._id}`);
         try {
-            // Endpoint-ul tau pentru a invalida toti studentii unei facultati
-            // Backend-ul va prelua ID-ul facultatii din token-ul utilizatorului logat (care este facultatea)
             await api.patch('/faculty/students/invalidate-all');
-            console.log("Toti studentii asociati au fost invalidati.");
-            return true; // Succes
+            return true;
         } catch (err: any) {
             console.error("Eroare la invalidarea tuturor studentilor:", err);
-            return false; // Ese
+            return false;
         }
     };
 
     // Functia care sterge contul facultatii
-    const deleteFacultyAccountAPI = async () => { // Renumit pentru a evita confuzia cu functia de mai jos
+    const deleteFacultyAccountAPI = async () => {
         if (!token) {
             console.error("Token sau ID facultate lipseste pentru stergerea contului.");
-            return false; // Indica esec
+            return false;
         }
-        console.log(`Initiere stergere cont pentru facultatea ${faculty._id}`);
         try {
-            await api.delete(`/faculty/account/delete`, { // Backend-ul preia ID-ul din token
+            await api.delete(`/faculty/account/delete`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log("Contul facultatii a fost sters din baza de date.");
-            return true; // Succes
+            return true;
         } catch (err: any) {
             console.error("Eroare la stergerea contului facultatii din API:", err);
-            return false; // Ese
+            return false;
         }
     };
 
-    // Functia care orchestreaza procesul de stergere, pasata la Sidebar
+
     const handleInitiateDeleteAccount = async () => {
 
         // Pasul 1: Invalideaza toti studentii
