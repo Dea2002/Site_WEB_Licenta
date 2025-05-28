@@ -18,25 +18,25 @@ function createMessagesRoutes(usersCollection, messagesCollection, conversations
         res.json(history);
     });
 
-    router.delete('/clear', async (req, res) => {
-        const { confirmation } = req.body;
-        if (confirmation !== 'CONFIRM') {
-            return res
-                .status(400)
-                .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-        }
-        try {
-            const result = await messagesCollection.deleteMany({});
-            return res.json({
-                message: `Au fost sterse ${result.deletedCount} documente.`,
-            });
-        } catch (err) {
-            console.error('Eroare la stergerea documentelor:', err);
-            return res
-                .status(500)
-                .json({ message: 'Eroare interna la server.' });
-        }
-    });
+    // router.delete('/clear', async (req, res) => {
+    //     const { confirmation } = req.body;
+    //     if (confirmation !== 'CONFIRM') {
+    //         return res
+    //             .status(400)
+    //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+    //     }
+    //     try {
+    //         const result = await messagesCollection.deleteMany({});
+    //         return res.json({
+    //             message: `Au fost sterse ${result.deletedCount} documente.`,
+    //         });
+    //     } catch (err) {
+    //         console.error('Eroare la stergerea documentelor:', err);
+    //         return res
+    //             .status(500)
+    //             .json({ message: 'Eroare interna la server.' });
+    //     }
+    // });
 
     return router;
 }

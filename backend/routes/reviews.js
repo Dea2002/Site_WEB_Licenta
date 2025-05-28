@@ -63,22 +63,14 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
                     }
                 }
             );
-            // console.log(`Rating actualizat pentru apartamentul ${apartmentIdString}:`, updateData);
 
         } catch (err) {
             console.error(`Eroare la actualizarea rating-ului mediu pentru apartamentul ${apartmentIdString}:`, err);
         }
     }
 
-    // GET / - Preia toate review-urile (ex: pentru admin)
-    // Necesita autentificare si, posibil, verificare de rol admin
+
     router.get('/', authenticateToken, async (req, res) => {
-        // TODO: Implementeaza logica pentru admini, cu paginare etc.
-        // Considera cine ar trebui sa aiba acces la toate review-urile.
-        // Pentru moment, returnam un mesaj placeholder.
-        // if (!req.user.isAdmin) { // Exemplu de verificare rol
-        //     return res.status(403).json({ message: 'Acces neautorizat.' });
-        // }
         try {
             const { page: queryPage, limit: queryLimit, sort } = req.query;
             const page = Number(queryPage) || 1;
@@ -164,42 +156,41 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
         }
     });
 
-    // Ruta ta existenta pentru /clear ramane
-    router.delete('/clear', async (req, res) => {
-        const { confirmation } = req.body;
-        if (confirmation !== 'CONFIRM') {
-            return res
-                .status(400)
-                .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-        }
-        try {
-            // Inainte de a sterge toate, ar trebui sa iteram si sa actualizam rating-urile pentru fiecare apartament afectat.
-            // Sau, mai simplu, daca aceasta e o operatiune rara de admin, poti avea un script separat
-            // pentru recalcularea tuturor rating-urilor dupa o astfel de operatiune.
-            // Pentru moment, doar stergem.
-            const allReviews = await reviewsCollection.find({}).project({ apartmentId: 1 }).toArray();
+    // router.delete('/clear', async (req, res) => {
+    //     const { confirmation } = req.body;
+    //     if (confirmation !== 'CONFIRM') {
+    //         return res
+    //             .status(400)
+    //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+    //     }
+    //     try {
+    //         // Inainte de a sterge toate, ar trebui sa iteram si sa actualizam rating-urile pentru fiecare apartament afectat.
+    //         // Sau, mai simplu, daca aceasta e o operatiune rara de admin, poti avea un script separat
+    //         // pentru recalcularea tuturor rating-urilor dupa o astfel de operatiune.
+    //         // Pentru moment, doar stergem.
+    //         const allReviews = await reviewsCollection.find({}).project({ apartmentId: 1 }).toArray();
 
-            const result = await reviewsCollection.deleteMany({});
+    //         const result = await reviewsCollection.deleteMany({});
 
-            // Dupa ce ai sters, ar trebui sa actualizezi rating-urile apartamentelor.
-            // Acest lucru poate fi costisitor daca sunt multe apartamente.
-            if (result.deletedCount > 0) {
-                const uniqueApartmentIds = [...new Set(allReviews.map(r => r.apartmentId.toString()))];
-                for (const aptId of uniqueApartmentIds) {
-                    await calculateAndUpdateAverageRating(aptId);
-                }
-            }
+    //         // Dupa ce ai sters, ar trebui sa actualizezi rating-urile apartamentelor.
+    //         // Acest lucru poate fi costisitor daca sunt multe apartamente.
+    //         if (result.deletedCount > 0) {
+    //             const uniqueApartmentIds = [...new Set(allReviews.map(r => r.apartmentId.toString()))];
+    //             for (const aptId of uniqueApartmentIds) {
+    //                 await calculateAndUpdateAverageRating(aptId);
+    //             }
+    //         }
 
-            return res.json({
-                message: `Au fost sterse ${result.deletedCount} documente. Rating-urile au fost actualizate.`,
-            });
-        } catch (err) {
-            console.error('Eroare la stergerea documentelor:', err);
-            return res
-                .status(500)
-                .json({ message: 'Eroare interna la server.' });
-        }
-    });
+    //         return res.json({
+    //             message: `Au fost sterse ${result.deletedCount} documente. Rating-urile au fost actualizate.`,
+    //         });
+    //     } catch (err) {
+    //         console.error('Eroare la stergerea documentelor:', err);
+    //         return res
+    //             .status(500)
+    //             .json({ message: 'Eroare interna la server.' });
+    //     }
+    // });
 
     // DELETE /:reviewId - Sterge un review specific
     // Necesita autentificare. Ideal, doar autorul review-ului sau un admin ar trebui sa poata sterge.

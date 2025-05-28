@@ -410,45 +410,65 @@ async function run() {
             res.status(200).json({ message: 'Am facut cerere de rezervare' });
         });
 
-        app.delete('/requests/clear', async (req, res) => {
-            const { confirmation } = req.body;
-            if (confirmation !== 'CONFIRM') {
-                return res
-                    .status(400)
-                    .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-            }
-            try {
-                const result = await reservationRequestsCollection.deleteMany({});
-                return res.json({
-                    message: `Au fost sterse ${result.deletedCount} documente.`,
-                });
-            } catch (err) {
-                console.error('Eroare la stergerea documentelor:', err);
-                return res
-                    .status(500)
-                    .json({ message: 'Eroare interna la server.' });
-            }
-        });
+        // app.delete('/requests/clear', async (req, res) => {
+        //     const { confirmation } = req.body;
+        //     if (confirmation !== 'CONFIRM') {
+        //         return res
+        //             .status(400)
+        //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+        //     }
+        //     try {
+        //         const result = await reservationRequestsCollection.deleteMany({});
+        //         return res.json({
+        //             message: `Au fost sterse ${result.deletedCount} documente.`,
+        //         });
+        //     } catch (err) {
+        //         console.error('Eroare la stergerea documentelor:', err);
+        //         return res
+        //             .status(500)
+        //             .json({ message: 'Eroare interna la server.' });
+        //     }
+        // });
 
-        app.delete('/history/clear', async (req, res) => {
-            const { confirmation } = req.body;
-            if (confirmation !== 'CONFIRM') {
-                return res
-                    .status(400)
-                    .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-            }
-            try {
-                const result = await reservationHistoryCollection.deleteMany({});
-                return res.json({
-                    message: `Au fost sterse ${result.deletedCount} documente.`,
-                });
-            } catch (err) {
-                console.error('Eroare la stergerea documentelor:', err);
-                return res
-                    .status(500)
-                    .json({ message: 'Eroare interna la server.' });
-            }
-        });
+        // app.delete('/users/clear', async (req, res) => {
+        //     const { confirmation } = req.body;
+        //     if (confirmation !== 'CONFIRM') {
+        //         return res
+        //             .status(400)
+        //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+        //     }
+        //     try {
+        //         const result = await usersCollection.deleteMany({});
+        //         return res.json({
+        //             message: `Au fost sterse ${result.deletedCount} documente.`,
+        //         });
+        //     } catch (err) {
+        //         console.error('Eroare la stergerea documentelor:', err);
+        //         return res
+        //             .status(500)
+        //             .json({ message: 'Eroare interna la server.' });
+        //     }
+        // });
+
+        // app.delete('/history/clear', async (req, res) => {
+        //     const { confirmation } = req.body;
+        //     if (confirmation !== 'CONFIRM') {
+        //         return res
+        //             .status(400)
+        //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
+        //     }
+        //     try {
+        //         const result = await reservationHistoryCollection.deleteMany({});
+        //         return res.json({
+        //             message: `Au fost sterse ${result.deletedCount} documente.`,
+        //         });
+        //     } catch (err) {
+        //         console.error('Eroare la stergerea documentelor:', err);
+        //         return res
+        //             .status(500)
+        //             .json({ message: 'Eroare interna la server.' });
+        //     }
+        // });
 
         /* returneaza toate cererile de rezervare pentru un proprietar */
         app.get('/owner/list_reservation_requests/:ownerId', authenticateToken, async (req, res) => {

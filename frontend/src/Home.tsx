@@ -250,11 +250,9 @@ const Home: React.FC = () => {
     ): Promise<boolean> => {
         const cacheKey = `${apartmentId}-${poiType}-${maxDistKm}`;
         if (poiCheckCache.has(cacheKey)) {
-            // console.log("Cache hit for:", cacheKey);
             return poiCheckCache.get(cacheKey)!;
         }
 
-        // console.log(`Checking ${poiType} for apt ${apartmentId} within ${maxDistKm}km`);
 
         const poiOpt = poiOptions.find(p => p.id === poiType);
         if (!poiOpt) return false;
@@ -266,7 +264,6 @@ const Home: React.FC = () => {
             overpassQuery += `nwr["${key}"="${value}"](around:${radiusMeters},${apartmentCoord.lat},${apartmentCoord.lng});`;
         });
         overpassQuery += `);out count;`;
-        // console.log("Overpass for POI:", overpassQuery);
 
         try {
             const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);

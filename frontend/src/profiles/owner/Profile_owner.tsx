@@ -27,19 +27,14 @@ const Profile_owner: React.FC = () => {
             setDeleteError("Eroare de autentificare. Reincercati.");
             return false;
         }
-        console.log(`Initiere actiuni pregatitoare pentru stergerea contului proprietarului ${ownerId}`);
         setDeleteError(null);
         try {
-            // Endpoint-ul tau pentru a anula chirii, sterge/arhiva apartamente, sterge imagini Firebase etc.
-            // Backend-ul va prelua ID-ul proprietarului din token.
-            // Acest endpoint ar putea returna un status sau un mesaj despre operatiunile efectuate.
-            const response = await api.patch('/users/owner_account/prepare-for-deletion');
-            console.log("Actiunile pregatitoare pentru stergerea contului proprietarului au fost finalizate:", response.data?.message || "OK");
-            return true; // Succes
+            await api.patch('/users/owner_account/prepare-for-deletion');
+            return true;
         } catch (err: any) {
             console.error("Eroare la actiunile pregatitoare pentru stergerea contului proprietarului:", err);
             setDeleteError(err.response?.data?.message || "Nu s-au putut finaliza actiunile pregatitoare (ex: stergerea apartamentelor).");
-            return false; // Esec
+            return false;
         }
     };
 
@@ -50,14 +45,12 @@ const Profile_owner: React.FC = () => {
             setDeleteError("Eroare de autentificare la stergerea contului. Reincercati.");
             return false;
         }
-        console.log(`Initiere stergere cont pentru proprietarul ${ownerId}`);
         setDeleteError(null);
         try {
             // Endpoint-ul tau pentru a sterge contul proprietarului
             // Backend-ul va prelua ID-ul proprietarului din token
             await api.delete(`/users/owner_account/delete`);
-            console.log("Contul proprietarului a fost sters din baza de date.");
-            return true; // Succes
+            return true;
         } catch (err: any) {
             console.error("Eroare la stergerea contului proprietarului din API:", err);
             setDeleteError(err.response?.data?.message || "Nu s-a putut sterge contul proprietarului.");
@@ -73,7 +66,6 @@ const Profile_owner: React.FC = () => {
 
         // Pasul 1: Actiuni pregatitoare (anulare chirii, stergere apartamente etc.)
         const preparatoryActionsCompleted = await handlePreparatoryActionsForOwnerDeletion();
-        console.log("Actiuni pregatitoare finalizate:", preparatoryActionsCompleted);
         if (preparatoryActionsCompleted) {
             // Pasul 2: Daca actiunile pregatitoare au reusit, sterge contul proprietarului
             const accountDeleted = await deleteOwnerAccountAPI();
@@ -83,15 +75,11 @@ const Profile_owner: React.FC = () => {
                 logout();
                 navigate('/');
             }
-            // Daca deleteOwnerAccountAPI esueaza, deleteError va fi setat in acea functie
         }
-        // Daca handlePreparatoryActionsForOwnerDeletion esueaza, deleteError este deja setat.
-
         setIsDeletingAccount(false);
     };
 
     if (!user) {
-        // Poti adauga o redirectionare sau un placeholder aici
         return (
             <div className="user-profile-page-container">
                 <p>Trebuie sa fii autentificat ca proprietar pentru a vedea aceasta pagina. Te rugam <Link to="/login">autentifica-te</Link>.</p>

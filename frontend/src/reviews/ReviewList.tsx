@@ -1,6 +1,4 @@
 import React, { useState, useMemo, useContext } from 'react';
-// Nu mai avem nevoie de 'api' aici daca facem sortarea client-side
-// import { api } from '../api'; 
 import { Review } from '../types';
 import { api } from '../api';
 import { format } from 'date-fns';
@@ -9,7 +7,7 @@ import { AuthContext } from '../AuthContext';
 import "./ReviewList.css"
 interface ReviewItemProps {
     review: Review;
-    currentUserId: string | null; // ID-ul utilizatorului logat
+    currentUserId: string | null;
     onReviewDeleted: (reviewId: string) => void; // Callback pentru a notifica parintele
 }
 
@@ -80,34 +78,19 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review, currentUserId, onReview
 };
 
 interface ReviewListProps {
-    reviews: Review[]; // Lista initiala si completa de review-uri pentru acest apartament
-    // apartmentId nu mai este strict necesar pentru logica de sortare/filtrare client-side,
-    // dar il poti pastra daca il folosesti in alta parte sau pentru debug.
-    // apartmentId: string; 
-    currentUserId: string | null; // ID-ul utilizatorului logat
-    onReviewDeleted: (reviewId: string) => void; // Functie callback pentru stergere
+    reviews: Review[];
+    currentUserId: string | null;
+    onReviewDeleted: (reviewId: string) => void;
 }
 
 const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, currentUserId, onReviewDeleted }) => {
-    // Nu mai folosim displayedReviews ca o stare separata care ar fi actualizata de initialReviews,
-    // ci direct rezultatul din useMemo.
-    // const [displayedReviews, setDisplayedReviews] = useState<Review[]>(initialReviews);
-
     const [sortBy, setSortBy] = useState<string>('createdAt_desc');
     const [filterRating, setFilterRating] = useState<number>(0);
 
-    // isLoading nu mai este necesar pentru operatiuni client-side.
-    // const [isLoading, setIsLoading] = useState(false);
-
-    // IMPORTANT: Presupunem ca `initialReviews` contine TOATE review-urile pentru apartament
-    // si nu se schimba decat daca se adauga un review nou (caz in care componenta parinte ar trebui sa paseze noua lista completa).
-
     // --- Sortare/Filtrare Client-Side ---
     const sortedAndFilteredReviews = useMemo(() => {
-        // console.log("Recalculating sortedAndFilteredReviews", { initialReviewsCount: initialReviews.length, sortBy, filterRating });
-        let tempReviews = [...initialReviews]; // Lucreaza pe o copie pentru a nu modifica array-ul original din props
+        let tempReviews = [...initialReviews];
 
-        // Filtrare
         if (filterRating > 0) {
             tempReviews = tempReviews.filter(r => r.rating === filterRating);
         }
@@ -143,19 +126,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
         return tempReviews;
     }, [initialReviews, sortBy, filterRating]);
 
-    // Nu mai este nevoie de acest useEffect daca `displayedReviews` este direct `sortedAndFilteredReviews` in map.
-    // useEffect(() => { 
-    //     setDisplayedReviews(sortedAndFilteredReviews); 
-    // }, [sortedAndFilteredReviews]);
-
     const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSortBy(e.target.value);
-        // Nu mai este nevoie de fetchAndSetReviews
     };
 
     const handleRatingFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setFilterRating(parseInt(e.target.value, 10));
-        // Nu mai este nevoie de fetchAndSetReviews
     };
 
     const hasAnyReviewsInitially = initialReviews && initialReviews.length > 0;
@@ -166,7 +142,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                 <div className="review-controls" style={{ marginBottom: '20px', display: 'flex', gap: '15px', alignItems: 'center' }}>
                     <div>
                         <label htmlFor="sort-reviews" style={{ marginRight: '5px' }}>Sorteaza dupa:</label>
-                        <select id="sort-reviews" value={sortBy} onChange={handleSortChange} /* disabled={isLoading} eliminat */ >
+                        <select id="sort-reviews" value={sortBy} onChange={handleSortChange}>
                             <option value="createdAt_desc">Cele mai noi</option>
                             <option value="createdAt_asc">Cele mai vechi</option>
                             <option value="rating_desc">Rating (Mare &gt Mic)</option>
@@ -175,7 +151,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                     </div>
                     <div>
                         <label htmlFor="filter-rating" style={{ marginRight: '5px' }}>Filtreaza dupa nota:</label>
-                        <select id="filter-rating" value={filterRating} onChange={handleRatingFilterChange} /* disabled={isLoading} eliminat */ >
+                        <select id="filter-rating" value={filterRating} onChange={handleRatingFilterChange}>
                             <option value="0">Toate notele</option>
                             <option value="5">Doar 5 stele</option>
                             <option value="4">Doar 4 stele</option>
@@ -184,12 +160,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                             <option value="1">Doar 1 stea</option>
                         </select>
                     </div>
-                    {/* isLoading si mesajul asociat au fost eliminate */}
                 </div>) : (
-                // Daca initialReviews este gol, afisam direct mesajul ca nu sunt recenzii deloc
                 <p>Nu exista recenzii pentru acest apartament inca.</p>
             )}
-            {/* Randam lista de review-uri sau mesajul corespunzator DUPA controale */}
             {hasAnyReviewsInitially && sortedAndFilteredReviews.length === 0 && filterRating > 0 && (
                 <p>Nu exista recenzii care sa corespunda notei selectate.</p>
             )}
