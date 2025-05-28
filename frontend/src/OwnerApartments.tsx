@@ -47,7 +47,7 @@ const OwnerApartments: React.FC = () => {
                         // Verifica daca apartment.images exista si este un array cu cel putin un element
                         const imageUrl = apartment.images && apartment.images.length > 0
                             ? apartment.images[0] // Ia primul URL din array
-                            : "/Poze_apartamente/placeholder.jpeg"; // Un placeholder daca nu exista imagini
+                            : "/Poze_apartamente/placeholder.png"; // Un placeholder daca nu exista imagini
 
                         return (
                             <div

@@ -1186,7 +1186,7 @@ const Home: React.FC = () => {
                     {isCheckingPois && <div className="loading-inline"><p>Se verifica proximitatea punctelor de interes...</p></div>}
                     {sortedAndFilteredApartments.length > 0 ? (
                         sortedAndFilteredApartments.map((apartment) => {
-                            const imageUrl = apartment.images?.[0] ?? "/Poze_apartamente/placeholder.jpeg";
+                            const imageUrl = apartment.images?.[0] ?? "/Poze_apartamente/placeholder.png";
                             return (
                                 <div key={apartment._id} className="apartment">
                                     <img
