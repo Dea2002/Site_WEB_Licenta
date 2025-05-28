@@ -557,32 +557,31 @@ const ApartmentDetails: React.FC = () => {
                         )}
                     </div>
 
-                    <section className="reviews-section">
-                        <h2>Recenzii ({reviews.length})</h2>
-
-                        {/* Buton pentru a arata/ascunde formularul de review */}
-                        {isAuthenticated && canLeaveReview && !showReviewForm && (
-                            <button onClick={() => setShowReviewForm(true)} className="button-add-review">
-                                Adauga o Recenzie
-                            </button>
-                        )}
-
-                        {showReviewForm && apartment && user && (
-                            <ReviewForm
-                                apartmentId={apartment._id}
-                                onReviewSubmitted={handleReviewSubmitted}
-                                onCancel={() => setShowReviewForm(false)}
-                            />
-                        )}
-
-                        {loadingReviews && <p>Se incarca recenziile...</p>}
-                        {reviewError && <p className="error">{reviewError}</p>}
-                        {!loadingReviews && !reviewError && (
-                            <ReviewList reviews={reviews}
-                                currentUserId={user?._id || null}
-                                onReviewDeleted={handleReviewDeleted} />
-                        )}
-                    </section>
+                    <div className="reviews-wrapper-card">
+                        <section className="reviews-section">
+                            <h2>Recenzii ({reviews.length})</h2>
+                            {/* Buton pentru a arata/ascunde formularul de review */}
+                            {isAuthenticated && canLeaveReview && !showReviewForm && (
+                                <button onClick={() => setShowReviewForm(true)} className="button-add-review">
+                                    Adauga o Recenzie
+                                </button>
+                            )}
+                            {showReviewForm && apartment && user && (
+                                <ReviewForm
+                                    apartmentId={apartment._id}
+                                    onReviewSubmitted={handleReviewSubmitted}
+                                    onCancel={() => setShowReviewForm(false)}
+                                />
+                            )}
+                            {loadingReviews && <p>Se incarca recenziile...</p>}
+                            {reviewError && <p className="error">{reviewError}</p>}
+                            {!loadingReviews && !reviewError && (
+                                <ReviewList reviews={reviews}
+                                    currentUserId={user?._id || null}
+                                    onReviewDeleted={handleReviewDeleted} />
+                            )}
+                        </section>
+                    </div>
                 </div>
 
                 {/* === New Right Section Structure with Original Button Styles === */}
@@ -668,7 +667,6 @@ const ApartmentDetails: React.FC = () => {
                 <OwnerPop_up
                     ownername={apartment.ownerInformation?.fullName}
                     owneremail={apartment.ownerInformation?.email}
-                    phoneNumber={apartment.ownerInformation?.phoneNumber}
                     onClose={() => setshowOwnerPop_up(false)}
                 />
             )}

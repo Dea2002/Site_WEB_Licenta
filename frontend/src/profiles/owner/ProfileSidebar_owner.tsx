@@ -7,12 +7,22 @@ type ProfileSection = 'edit';
 interface ProfileSidebarProps {
     activeSection: ProfileSection;
     onSectionChange: (section: ProfileSection) => void; // Functie callback
+    onInitiateDeleteAccount: () => void;
 }
 
-const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectionChange }) => {
+const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectionChange, onInitiateDeleteAccount }) => {
     const menuItems = [
         { id: 'edit', label: 'Editare Profil' },
     ];
+
+    const handleDeleteClick = () => {
+        // Adaugam o confirmare dubla pentru o actiune atat de distructiva
+        if (window.confirm("ATENTIE! Esti pe cale sa iti stergi contul de proprietar. Aceasta actiune va duce la stergerea tuturor apartamentelor listate si anularea chiriilor asociate. Actiunea este ireversibila. Continui?")) {
+            if (window.confirm("Confirmare finala: Sigur doresti sa stergi contul de proprietar si toate datele asociate?")) {
+                onInitiateDeleteAccount();
+            }
+        }
+    };
 
     return (
         <nav className="profile-sidebar-nav">
@@ -30,6 +40,16 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                     </li>
                 ))}
             </ul>
+            {/* NOU: Sectiune pentru stergerea contului */}
+            <div className="sidebar-actions-dangerous">
+                <button
+                    className="sidebar-button delete-account-button"
+                    onClick={handleDeleteClick}
+                >
+                    Sterge Contul Proprietar
+                </button>
+            </div>
+
         </nav>
     );
 };

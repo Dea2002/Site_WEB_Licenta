@@ -1,17 +1,29 @@
 /* === Stiluri Generale pentru Sectiunea de Recenzii === */
-.reviews-section {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #e9ecef; /* O linie de separare mai subtila */
+.reviews-wrapper-card {
+    background-color: #fff; /* Fundal alb pentru chenar */
+    padding: 25px 30px; /* Spatiere interioara generoasa, similar cu .review-form */
+    margin-top: 40px; /* Pastreaza spatiul de sus initial al .reviews-section */
+    margin-bottom: 30px; /* Adauga spatiu sub chenarul de recenzii */
+    border-radius: 8px; /* Colturi rotunjite pentru un aspect modern */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* O umbra pentru efect de "card" */
+    border: 1px solid #e9ecef; /* O bordura subtila, similar cu .review-item */
 }
 
-.reviews-section h2 {
-    font-size: 1.75rem; /* Marime consistenta pentru titlurile de sectiune */
-    color: white; /* O culoare mai inchisa pentru text */
+/* Ajustari pentru .reviews-section si h2-ul sau cand sunt in interiorul wrapper-ului */
+.reviews-wrapper-card .reviews-section {
+    margin-top: 0; /* Margin-top este acum pe wrapper */
+    padding-top: 0; /* Padding-ul superior este gestionat de wrapper */
+    border-top: none; /* Bordura de sus nu mai este necesară aici, chenarul o defineste */
+}
+
+.reviews-wrapper-card .reviews-section h2 {
+    font-size: 1.75rem;
+    color: #343a40; /* !!! IMPORTANT: Schimbat din 'white' in culoare închisă pentru lizibilitate pe fundal alb !!! */
     margin-bottom: 25px;
     padding-bottom: 10px;
-    border-bottom: 2px solid #007bff; /* Accent albastru sub titlu */
-    display: inline-block; /* Pentru ca border-bottom sa nu ocupe toata latimea */
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
+    margin-top: 0; /* Asigură-te că nu există un margin-top suplimentar pe h2 în acest context */
 }
 
 .button-add-review {
