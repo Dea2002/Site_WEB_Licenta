@@ -18,6 +18,23 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         res.send(associationRequests);
     });
 
+    router.get('/by_name', async (req, res) => {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ message: 'Numele facultatii este necesar.' });
+        }
+        try {
+            const faculty = await facultiesCollection.findOne({ fullName: name });
+            if (!faculty) {
+                return res.status(404).json({ message: 'Facultatea nu a fost gasita.' });
+            }
+            res.send(faculty);
+        } catch (error) {
+            console.error("Eroare la cautarea facultatii: ", error);
+            res.status(500).json({ message: 'Eroare server la cautarea facultatii.' });
+        }
+    });
+
     router.get('/all_students', authenticateToken, async (req, res) => {
         facultyId = req.user._id;
         if (!ObjectId.isValid(facultyId)) {

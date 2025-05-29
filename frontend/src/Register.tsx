@@ -22,6 +22,7 @@ interface RegisterFormState {
 interface FacultyFormState {
     fullName: string;
     abreviere: string;
+    aniStudiu: number | "";
     logo: File | null; // Store the File object
     documentOficial: File | null; // Store the File object
     numeRector: string;
@@ -84,6 +85,7 @@ const Register: React.FC = () => {
     const [facultyFormState, setFacultyFormState] = useState<FacultyFormState>({
         fullName: "",
         abreviere: "",
+        aniStudiu: "",
         logo: null,
         documentOficial: null,
         numeRector: "",
@@ -104,9 +106,7 @@ const Register: React.FC = () => {
     useEffect(() => {
         const fetchFaculties = async () => {
             try {
-                // Asigura-te ca URL-ul este corect (poate ai un base URL in axios config)
                 const response = await api.get<FacultyInfo[]>("/faculty");
-                // Presupunand ca backend-ul returneaza direct array-ul [{fullName: '...', abreviere: '...'}, ...]
                 setFacultiesList(response.data);
             } catch (err) {
                 console.error("Eroare la fetch facultati:", err);
@@ -114,9 +114,8 @@ const Register: React.FC = () => {
         };
 
         fetchFaculties();
-    }, []); // [] asigura rularea o singura data la montare
+    }, []);
 
-    // Change handler for Student form
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormState((prevState) => ({
@@ -134,8 +133,10 @@ const Register: React.FC = () => {
         setError("");
     };
 
-    const handleFacultyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, files } = e.target;
+    const handleFacultyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        const input = e.target as HTMLInputElement;
+        const files = input.files;
 
         if (type === "file") {
             setFacultyFormState((prevState) => ({
@@ -151,35 +152,6 @@ const Register: React.FC = () => {
         setError(""); // Clear errors on change
     };
 
-    // const uploadFileToStorage = (file: File, path: String): Promise<string> => {
-    //     return new Promise((resolve, reject) => {
-    //         if (!file) {
-    //             reject("Fisier invalid");
-    //             return;
-    //         }
-
-    //         const storageRef = ref(storage, `${path}/${Date.now()}-${file.name}`);
-    //         const uploadTask = uploadBytesResumable(storageRef, file);
-
-    //         uploadTask.on(
-    //             "state_changed",
-    //             () => { },
-    //             (error) => {
-    //                 console.error("Upload Error:", error);
-    //             },
-    //             () => {
-    //                 // upload finalizat cu succes, obtine URL pentru download
-    //                 getDownloadURL(uploadTask.snapshot.ref)
-    //                     .then((downloadURL) => {
-    //                         resolve(downloadURL); // rezolva promise-ul cu URL-ul
-    //                     })
-    //                     .catch(reject);
-    //             },
-    //         );
-    //     });
-    // };
-
-    // Submit handler for Student form
     const handleStudentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -218,8 +190,8 @@ const Register: React.FC = () => {
             return;
         }
 
-        const medieValue = parseFloat(medie); // Convert input string to number
-        let medieRange = ""; // Initialize range string
+        const medieValue = parseFloat(medie);
+        let medieRange = "";
 
         if (isNaN(medieValue) || medieValue < 5 || medieValue > 10) {
             setError("Media introdusa nu este valida (trebuie sa fie intre 5.00 si 10.00).");
@@ -282,6 +254,7 @@ const Register: React.FC = () => {
         const {
             fullName,
             abreviere,
+            aniStudiu,
             logo,
             documentOficial,
             numeRector,
@@ -300,6 +273,7 @@ const Register: React.FC = () => {
         if (
             !fullName ||
             !abreviere ||
+            aniStudiu === "" ||
             !logo ||
             !documentOficial ||
             !numeRector ||
@@ -326,6 +300,7 @@ const Register: React.FC = () => {
             await api.post("/auth/register_faculty", {
                 fullName,
                 abreviere,
+                aniStudiu: Number(aniStudiu),
                 logoUrl,
                 documentUrl,
                 numeRector,
@@ -335,11 +310,13 @@ const Register: React.FC = () => {
                 password,
                 role: "facultate",
             });
+            window.scrollTo(0, 0);
             setSuccess("inregistrare facultate reusita! Contul va fi verificat.");
             // Reset form state
             setFacultyFormState({
                 fullName: "",
                 abreviere: "",
+                aniStudiu: "",
                 logo: null,
                 documentOficial: null,
                 numeRector: "",
@@ -616,9 +593,9 @@ const Register: React.FC = () => {
             return (
                 <div className="register-container owner-form">
                     {" "}
-                    {/* Specific class */}
+
                     <h1>inregistrare Proprietar</h1>
-                    {/* Use owner state and handlers */}
+
                     <form onSubmit={handleOwnerSubmit} className="register-form">
                         <div>
                             <label htmlFor="ownerEmail">Email:*</label>
@@ -682,7 +659,6 @@ const Register: React.FC = () => {
             );
         }
 
-        // --- START: JSX for Faculty Form ---
         if (selectedRole === "facultate") {
             return (
                 <div className="register-container faculty-form">
@@ -710,6 +686,30 @@ const Register: React.FC = () => {
                                 required
                             />
                         </div>
+
+                        <div>
+                            <label htmlFor="aniStudiu">Ani de studiu:*</label>
+                            <select
+                                id="aniStudiu"
+                                name="aniStudiu"
+                                value={facultyFormState.aniStudiu}
+                                onChange={handleFacultyChange}
+                                required
+                            >
+                                <option value="" disabled>
+                                    -- Selecteaza anii de studiu --
+                                </option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                            </select>
+                        </div>
+
                         <div>
                             <label htmlFor="logo">Logo Facultate:*</label>
                             <input
