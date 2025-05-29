@@ -9,7 +9,7 @@ function initNotificationService(notificationsCollection) {
     async function deleteNotificationsByReceiver(receiverId) {
         // Validare inputuri
         if (!receiverId) {
-            throw new Error("ID-ul destinatarului este obligatoriu pentru stergerea notificărilor.");
+            throw new Error("ID-ul destinatarului este obligatoriu pentru stergerea notificarilor.");
         }
         let finalReceiverId;
         try {
@@ -24,8 +24,8 @@ function initNotificationService(notificationsCollection) {
 
             return deleteResult;
         } catch (error) {
-            console.error(`Eroare (service) la stergerea notificărilor pentru ${receiverId}:`, error);
-            throw new Error(`Nu s-au putut sterge notificările: ${error.message}`);
+            console.error(`Eroare (service) la stergerea notificarilor pentru ${receiverId}:`, error);
+            throw new Error(`Nu s-au putut sterge notificarile: ${error.message}`);
         }
     }
 

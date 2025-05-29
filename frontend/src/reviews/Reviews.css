@@ -13,17 +13,17 @@
 .reviews-wrapper-card .reviews-section {
     margin-top: 0; /* Margin-top este acum pe wrapper */
     padding-top: 0; /* Padding-ul superior este gestionat de wrapper */
-    border-top: none; /* Bordura de sus nu mai este necesară aici, chenarul o defineste */
+    border-top: none; /* Bordura de sus nu mai este necesara aici, chenarul o defineste */
 }
 
 .reviews-wrapper-card .reviews-section h2 {
     font-size: 1.75rem;
-    color: #343a40; /* !!! IMPORTANT: Schimbat din 'white' in culoare închisă pentru lizibilitate pe fundal alb !!! */
+    color: #343a40; /* !!! IMPORTANT: Schimbat din 'white' in culoare inchisa pentru lizibilitate pe fundal alb !!! */
     margin-bottom: 25px;
     padding-bottom: 10px;
     border-bottom: 2px solid #007bff;
     display: inline-block;
-    margin-top: 0; /* Asigură-te că nu există un margin-top suplimentar pe h2 în acest context */
+    margin-top: 0; /* Asigura-te ca nu exista un margin-top suplimentar pe h2 in acest context */
 }
 
 .button-add-review {

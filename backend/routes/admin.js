@@ -23,6 +23,84 @@ module.exports = (usersCollection, apartmentsCollection) => {
         }
     });
 
+    // Ruta pentru actualizarea statusului unui apartament
+    router.put('/apartments/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
+        const apartmentId = req.params.id;
+        const { status, reason } = req.body;
+
+        if (!['disponibil', 'indisponibil'].includes(status)) {
+            return res.status(400).json({ message: 'Status invalid' });
+        }
+
+        if (!ObjectId.isValid(apartmentId)) {
+            return res.status(400).json({ message: 'ID apartament invalid' });
+        }
+
+        try {
+
+            const updateFields = { status };
+
+            if (status === 'indisponibil') {
+                updateFields.reason = reason || '';
+            } else {
+                updateFields.reason = '';
+            }
+
+
+            const result = await apartmentsCollection.updateOne({ _id: new ObjectId(apartmentId) }, { $set: updateFields });
+
+            if (result.modifiedCount === 0) {
+                return res.status(400).json({ message: 'Nu s-a putut actualiza statusul' });
+            }
+
+            const updatedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
+            res.json(updatedApartment);
+
+        } catch (error) {
+            console.error('Eroare la actualizarea statusului apartamentului:', error);
+            res.status(500).json({ message: 'Eroare la actualizarea statusului apartamentului' });
+        }
+    });
+
+    // Pentru adaugarea de useri
+    router.post('/users', authenticateToken, verifyAdmin, async (req, res) => {
+        const { email, fullName, phoneNumber, role, password, gender, faculty } = req.body;
+
+        // Validari simple
+        if (!email || !fullName || !phoneNumber || !role || !password || !gender || !faculty) {
+            return res.status(400).json({ message: 'Toate campurile sunt obligatorii' });
+        }
+
+        try {
+            // Verifica daca utilizatorul exista deja
+            const existingUser = await usersCollection.findOne({ email });
+            if (existingUser) {
+                return res.status(400).json({ message: 'Utilizatorul exista deja' });
+            }
+
+            // Cripteaza parola
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Creeaza noul utilizator
+            const newUser = {
+                email,
+                fullName,
+                phoneNumber,
+                role,
+                password: hashedPassword,
+                gender,
+                faculty,
+                createdAt: new Date()
+            };
+
+            await usersCollection.insertOne(newUser);
+            res.status(201).json({ message: 'Utilizatorul a fost adaugat cu succes' });
+        } catch (error) {
+            console.error('Eroare la adaugarea utilizatorului:', error);
+            res.status(500).json({ message: 'Eroare interna a serverului' });
+        }
+    });
+
     // Obtine toti utilizatorii
     router.get('/users', authenticateToken, verifyAdmin, async (req, res) => {
         try {
@@ -62,6 +140,28 @@ module.exports = (usersCollection, apartmentsCollection) => {
             res.status(200).json(owners);
         } catch (error) {
             console.error('Eroare la obtinerea proprietarilor:', error);
+            res.status(500).json({ message: 'Eroare interna a serverului' });
+        }
+    });
+
+    // Pentru stergerea utilizatorilor
+    router.delete('/users/:id', authenticateToken, verifyAdmin, async (req, res) => {
+        const userId = req.params.id;
+
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'ID utilizator invalid' });
+        }
+
+        try {
+            const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: 'Utilizatorul nu a fost gasit' });
+            }
+
+            res.status(200).json({ message: 'Utilizatorul a fost sters cu succes' });
+        } catch (error) {
+            console.error('Eroare la stergerea utilizatorului:', error);
             res.status(500).json({ message: 'Eroare interna a serverului' });
         }
     });

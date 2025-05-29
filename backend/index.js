@@ -10,6 +10,7 @@ const { Server } = require('socket.io');
 const authenticateToken = require('./middleware/authenticateToken');
 const verifyAdmin = require('./middleware/verifyAdmin');
 const { connectDB } = require('./db');
+const cron = require('node-cron');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -100,6 +101,74 @@ io.on('connection', socket => {
     });
 });
 
+async function updateReservationStatusesScheduledTask(databaseInstance) {
+    if (!databaseInstance) {
+        console.error('CRON: Instanta DB nu este disponibila.');
+        return;
+    }
+    console.log('CRON: Pornire actualizare statusuri rezervari...');
+
+    // Obtine colectiile direct din databaseInstance
+    const reservationHistoryCollection = databaseInstance.collection("reservation_history");
+    const reservationRequestsCollection = databaseInstance.collection("reservation_requests");
+    const currentDate = new Date();
+
+    try {
+        const resultHistoryOld = await reservationHistoryCollection.updateMany(
+            {
+                checkOut: { $lt: currentDate },
+                isActive: true
+            },
+            {
+                $set: { isActive: false }
+            }
+        );
+        console.log(`CRON: ${resultHistoryOld.modifiedCount} documente din istoric actualizate la "isActive:false".`);
+
+        const resultHistoryNew = await reservationHistoryCollection.updateMany(
+            {
+                checkIn: { $lt: currentDate },
+                isActive: false
+            },
+            {
+                $set: { isActive: true }
+            }
+        );
+        console.log(`CRON: ${resultHistoryNew.modifiedCount} documente din istoric actualizate la "isActive:true".`);
+
+        const resultRequests = await reservationRequestsCollection.find({
+            checkIn: { $lt: currentDate }
+        }).toArray();
+
+        if (resultRequests.length > 0) {
+            // trimit notificare studentului cu faptul ca cererea de rezervare a expirat, iar apoi o sterg
+            for (const request of resultRequests) {
+                const clientId = request.client;
+                const apartmentId = request.apartament;
+                const apartmentObject = await databaseInstance.collection("apartments").findOne({ _id: apartmentId });
+
+                // Creeaza notificarea pentru client
+                if (clientId) {
+                    await databaseInstance.collection("notifications").insertOne({
+                        receiver: clientId,
+                        message: `Cererea de rezervare pentru apartamentul de la locatia: ${apartmentObject.location}, a expirat si a fost stearsa.`,
+                        createdAt: new Date()
+                    });
+                }
+
+                // Sterge cererea de rezervare
+                await reservationRequestsCollection.deleteOne({ _id: request._id });
+            }
+        } else {
+            console.log('CRON: Nu exista cereri de rezervare vechi de sters.');
+        }
+
+    } catch (error) {
+        console.error('CRON: Eroare in timpul actualizarii statusurilor:', error);
+    }
+    console.log('CRON: Actualizare statusuri rezervari finalizata.');
+}
+
 // Utility to generate dates between two dates (inclusive)
 function getDatesBetween(start, end) {
     const dates = [];
@@ -130,6 +199,17 @@ async function run() {
         const conversationsCollection = database.collection("conversations");
         const messagesCollection = database.collection("messages");
         const reviewsCollection = database.collection("reviews");
+
+        // cron.schedule('5 0 * * *', () => { // Zilnic la 00:05
+        cron.schedule('*/2 * * * *', () => { // la fiecare 2 minute
+            console.log('-------------------------------------');
+            console.log('CRON: Ruleaza sarcina programata de actualizare a statusurilor...');
+            updateReservationStatusesScheduledTask(database); // Paseaza instanta DB
+        }, {
+            scheduled: true,
+            timezone: "Europe/Bucharest"
+        });
+        console.log("CRON: Job pentru actualizarea statusurilor rezervarilor a fost programat.");
 
         const initNotificationService = require('./utils/notificationService');
         const notificationService = initNotificationService(notificationsCollection);
@@ -184,210 +264,22 @@ async function run() {
 
         //!! --- Structura veche ---
 
-        // Ruta pentru actualizarea profilului utilizatorului
-        app.put('/update-user/:id', authenticateToken, async (req, res) => {
-            const id = req.params.id;
-            const updatedUser = req.body;
-            const filter = { _id: new ObjectId(id) };
-            const options = { upsert: false };
-            const updateDoc = {
-                $set: {
-                    fullName: updatedUser.fullName,
-                    email: updatedUser.email,
-                    phoneNumber: updatedUser.phoneNumber,
-                    // Actualizeaza parola doar daca este furnizata
-                    ...(updatedUser.password && {
-                        password: await bcrypt.hash(updatedUser.password, 10),
-                    }),
-                },
-            };
-
-            try {
-                const result = await usersCollection.updateOne(filter, updateDoc, options);
-                if (result.modifiedCount > 0) {
-                    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
-                    res.status(200).json(user); // Returneaza utilizatorul actualizat
-                } else {
-                    res.status(400).json({ message: 'Actualizare nereusita' });
-                }
-            } catch (error) {
-                console.error('Eroare la actualizarea utilizatorului:', error);
-                res.status(500).json({ message: 'Eroare interna a serverului' });
-            }
-        });
-
-
-
-        // Ruta pentru actualizarea statusului unui apartament
-        app.put('/admin/apartments/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
-            const apartmentId = req.params.id;
-            const { status, reason } = req.body;
-
-            if (!['disponibil', 'indisponibil'].includes(status)) {
-                return res.status(400).json({ message: 'Status invalid' });
-            }
-
-            if (!ObjectId.isValid(apartmentId)) {
-                return res.status(400).json({ message: 'ID apartament invalid' });
-            }
-
-            try {
-
-                const updateFields = { status };
-
-                if (status === 'indisponibil') {
-                    updateFields.reason = reason || '';
-                } else {
-                    updateFields.reason = '';
-                }
-
-
-                const result = await app.locals.apartmentsCollection.updateOne({ _id: new ObjectId(apartmentId) }, { $set: updateFields });
-
-                if (result.modifiedCount === 0) {
-                    return res.status(400).json({ message: 'Nu s-a putut actualiza statusul' });
-                }
-
-                const updatedApartment = await app.locals.apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
-                res.json(updatedApartment);
-
-            } catch (error) {
-                console.error('Eroare la actualizarea statusului apartamentului:', error);
-                res.status(500).json({ message: 'Eroare la actualizarea statusului apartamentului' });
-            }
-        });
-
-
-        // Pentru stergerea utilizatorilor
-        app.delete('/admin/users/:id', authenticateToken, verifyAdmin, async (req, res) => {
-            const userId = req.params.id;
-
-            if (!ObjectId.isValid(userId)) {
-                return res.status(400).json({ message: 'ID utilizator invalid' });
-            }
-
-            try {
-                const result = await app.locals.usersCollection.deleteOne({ _id: new ObjectId(userId) });
-
-                if (result.deletedCount === 0) {
-                    return res.status(404).json({ message: 'Utilizatorul nu a fost gasit' });
-                }
-
-                res.status(200).json({ message: 'Utilizatorul a fost sters cu succes' });
-            } catch (error) {
-                console.error('Eroare la stergerea utilizatorului:', error);
-                res.status(500).json({ message: 'Eroare interna a serverului' });
-            }
-        });
-
-
-
-        // Pentru adaugarea de useri
-        app.post('/admin/users', authenticateToken, verifyAdmin, async (req, res) => {
-            const { email, fullName, phoneNumber, role, password, gender, faculty } = req.body;
-
-            // Validari simple
-            if (!email || !fullName || !phoneNumber || !role || !password || !gender || !faculty) {
-                return res.status(400).json({ message: 'Toate campurile sunt obligatorii' });
-            }
-
-            try {
-                // Verifica daca utilizatorul exista deja
-                const existingUser = await app.locals.usersCollection.findOne({ email });
-                if (existingUser) {
-                    return res.status(400).json({ message: 'Utilizatorul exista deja' });
-                }
-
-                // Cripteaza parola
-                const hashedPassword = await bcrypt.hash(password, 10);
-
-                // Creeaza noul utilizator
-                const newUser = {
-                    email,
-                    fullName,
-                    phoneNumber,
-                    role,
-                    password: hashedPassword,
-                    gender,
-                    faculty,
-                    createdAt: new Date()
-                };
-
-                await app.locals.usersCollection.insertOne(newUser);
-                res.status(201).json({ message: 'Utilizatorul a fost adaugat cu succes' });
-            } catch (error) {
-                console.error('Eroare la adaugarea utilizatorului:', error);
-                res.status(500).json({ message: 'Eroare interna a serverului' });
-            }
-        });
-
-
-        // Exemplu de ruta protejata
-        app.post('/reserve', authenticateToken, async (req, res) => {
-            const { apartmentId } = req.body;
-            const userId = req.user.userId;
-
-            if (!apartmentId) {
-                console.error("nu am id apartament");
-
-                return res.status(400).json({ message: 'ID-ul apartamentului este necesar' });
-            }
-
-            try {
-                const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
-
-                if (!apartment) {
-                    console.error("nu am gasit apartament");
-
-                    return res.status(404).json({ message: 'Apartament nu a fost gasit' });
-                }
-
-                // Logica de rezervare
-                const newReservation = {
-                    userId: new ObjectId(userId),
-                    apartmentId: new ObjectId(apartmentId),
-                    date: new Date(),
-                };
-
-                await enrolledCollection.insertOne(newReservation);
-
-                // Actualizeaza numarul total de rezervari al apartamentului
-                await apartmentsCollection.updateOne({ _id: new ObjectId(apartmentId) }, { $inc: { totalbooked: 1 } });
-
-                res.status(200).json({ message: 'Rezervare efectuata cu succes!' });
-            } catch (error) {
-                console.error('Eroare la rezervare:', error);
-                res.status(500).json({ message: 'Eroare interna a serverului' });
-            }
-        });
-
-        app.post('/create_reservation_request', authenticateToken, async (req, res) => { // asta creeaza o cerere de rezervare a unui apartament
+        app.post('/create_reservation_request', authenticateToken, async (req, res) => { // 
 
             if (req.user.role !== 'student' && req.user.role !== 'client') {
                 return res.status(403).json({ message: 'Doar clientii pot face cereri de rezervare' });
             }
 
-            const { clientId, apartmentId, numberOfRooms, checkIn, checkOut, priceRent, priceUtilities, discount, numberOfNights } = req.body; // extrag datele din request
-            const clientObjectId = new ObjectId(clientId); // creez un obiect de tip ObjectId pentru client
+            const { clientId, apartmentId, numberOfRooms, checkIn, checkOut, priceRent, priceUtilities, discount, numberOfNights } = req.body;
+            const clientObjectId = new ObjectId(clientId);
             const apartmentObjectId = new ObjectId(apartmentId);
             const apartmentObject = await apartmentsCollection.findOne({ _id: apartmentObjectId }); // caut apartamentul in baza de date
 
-            // creez obiecte de tip Date pentru check-in si check-out
             const newCheckIn = new Date(checkIn);
             const newCheckOut = new Date(checkOut);
 
-            const reservations = await reservationRequestsCollection.find({ client: clientObjectId }).toArray(); // caut cererile clientului
+            const reservations = await reservationRequestsCollection.find({ client: clientObjectId }).toArray();
 
-            for (const reservation of reservations) {
-                // creez obiecte de tip Date pentru check-in si check-out pentru fiecare cerere existenta
-                const existingCheckIn = new Date(reservation.checkIn);
-                const existingCheckOut = new Date(reservation.checkOut);
-
-                // conditia de suprapunere a datelor
-                // if (newCheckIn <= existingCheckOut && newCheckOut >= existingCheckIn) {
-                //     return res.status(400).json({ message: 'Datele pentru check-in si check-out se suprapun cu o cerere existenta' });
-                // }
-            }
             const finalPrice = (priceRent * ((100 - discount) / 100) * numberOfRooms + priceUtilities) * numberOfNights;
             const newReservationRequest = {
                 client: clientObjectId,
@@ -410,97 +302,34 @@ async function run() {
             res.status(200).json({ message: 'Am facut cerere de rezervare' });
         });
 
-        // app.delete('/requests/clear', async (req, res) => {
-        //     const { confirmation } = req.body;
-        //     if (confirmation !== 'CONFIRM') {
-        //         return res
-        //             .status(400)
-        //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-        //     }
-        //     try {
-        //         const result = await reservationRequestsCollection.deleteMany({});
-        //         return res.json({
-        //             message: `Au fost sterse ${result.deletedCount} documente.`,
-        //         });
-        //     } catch (err) {
-        //         console.error('Eroare la stergerea documentelor:', err);
-        //         return res
-        //             .status(500)
-        //             .json({ message: 'Eroare interna la server.' });
-        //     }
-        // });
-
-        // app.delete('/users/clear', async (req, res) => {
-        //     const { confirmation } = req.body;
-        //     if (confirmation !== 'CONFIRM') {
-        //         return res
-        //             .status(400)
-        //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-        //     }
-        //     try {
-        //         const result = await usersCollection.deleteMany({});
-        //         return res.json({
-        //             message: `Au fost sterse ${result.deletedCount} documente.`,
-        //         });
-        //     } catch (err) {
-        //         console.error('Eroare la stergerea documentelor:', err);
-        //         return res
-        //             .status(500)
-        //             .json({ message: 'Eroare interna la server.' });
-        //     }
-        // });
-
-        // app.delete('/history/clear', async (req, res) => {
-        //     const { confirmation } = req.body;
-        //     if (confirmation !== 'CONFIRM') {
-        //         return res
-        //             .status(400)
-        //             .json({ message: 'Trebuie sa trimiti in body { confirmation: "CONFIRM" }' });
-        //     }
-        //     try {
-        //         const result = await reservationHistoryCollection.deleteMany({});
-        //         return res.json({
-        //             message: `Au fost sterse ${result.deletedCount} documente.`,
-        //         });
-        //     } catch (err) {
-        //         console.error('Eroare la stergerea documentelor:', err);
-        //         return res
-        //             .status(500)
-        //             .json({ message: 'Eroare interna la server.' });
-        //     }
-        // });
-
         /* returneaza toate cererile de rezervare pentru un proprietar */
         app.get('/owner/list_reservation_requests/:ownerId', authenticateToken, async (req, res) => {
             try {
                 const ownerId = req.params.ownerId;
 
                 const rezervari = await reservationRequestsCollection.aggregate([
-                    // Lookup pentru apartamente
                     {
                         $lookup: {
-                            from: 'apartments',          // Numele colectiei de apartamente
-                            localField: 'apartament',     // Campul din cereri care contine id-ul apartamentului
-                            foreignField: '_id',         // Campul din colectia de apartamente
+                            from: 'apartments',
+                            localField: 'apartament',
+                            foreignField: '_id',
                             as: 'apartamentData'
                         }
                     },
-                    { $unwind: '$apartamentData' }, // Transforma array-ul din lookup intr-un document
+                    { $unwind: '$apartamentData' },
                     {
                         $match: {
-                            'apartamentData.ownerId': new ObjectId(ownerId)  // Filtreaza dupa ownerId
+                            'apartamentData.ownerId': new ObjectId(ownerId)
                         }
                     },
-                    // Lookup pentru client (utilizator)
                     {
                         $lookup: {
-                            from: 'users',             // Numele colectiei de utilizatori
-                            localField: 'client',      // Campul din cereri care contine id-ul clientului
-                            foreignField: '_id',       // Campul din colectia de users
+                            from: 'users',
+                            localField: 'client',
+                            foreignField: '_id',
                             as: 'clientData'
                         }
                     },
-                    // Optional: daca te astepti ca fiecare cerere sa aiba un singur client, poti face unwind:
                     { $unwind: { path: '$clientData', preserveNullAndEmptyArrays: true } }
                 ]).toArray();
 
@@ -512,6 +341,8 @@ async function run() {
 
         app.post('/reservation_request/:id/accept', authenticateToken, async (req, res) => {
             const reservationId = req.params.id;
+            const currentDate = new Date();
+
             if (!ObjectId.isValid(reservationId)) {
                 return res.status(400).json({ message: 'ID-ul rezervarii este invalid' });
             }
@@ -524,8 +355,13 @@ async function run() {
                 // sterg documentul din colectia de cereri
                 await reservationRequestsCollection.deleteOne({ _id: new ObjectId(reservationId) });
 
-                // adaug campul isActive si mut documentul in colectia de istoric de rezervari
-                reservationRequest.isActive = true;
+                // adaug campul isActive si mut documentul in colectia de istoric de rezervari 
+                // daca checkIn este astazi atunci isActive este true, daca este in viitor isActive este false
+                if (reservationRequest.checkIn.toDateString() === currentDate.toDateString()) {
+                    reservationRequest.isActive = true;
+                } else if (reservationRequest.checkIn > currentDate) {
+                    reservationRequest.isActive = false;
+                }
 
                 // Populeaza datele clientului si apartamentului inainte de inserare in istoric
                 const clientData = await usersCollection.findOne({ _id: reservationRequest.client });
@@ -590,7 +426,7 @@ async function run() {
                             localField: 'apartament',
                             foreignField: '_id',
                             as: 'apartamentData'
-                        }/*  */
+                        }
                     },
 
                     { $unwind: "$apartamentData" },
@@ -608,8 +444,6 @@ async function run() {
                 res.status(500).json({ message: 'Eroare interna a serverului' });
             }
         });
-
-
 
         // create an apartment
         app.post('/new-apartment', async (req, res) => {
@@ -672,193 +506,11 @@ async function run() {
             res.send(result);
         })
 
-        // Get user by email
-        app.get('/user/by-email/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { email: email };
-            const result = await usersCollection.findOne(query);
-            res.send(result);
-        })
-
-
-        // Delete user
-        // ! Poate doar adminul
-        app.delete('/delete-user/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await usersCollection.deleteOne(query);
-            res.send(result);
-        })
-
-
-        // Update user
-        // ! Modificari:
-        /*
-            - trebuie verificat cine acceseaza /update-user (utilizatorul poate updata doar pe el insusi)
-            - modificat ce se poate actualiza la user (scoti photo, vezi daca lasi rolul etc.)
-        */
-        // app.put('/update-user/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const updatedUser = req.body;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const options = { upsert: true };
-        //     const updateDoc = {
-        //         $set: {
-        //             name: updatedUser.name,
-        //             email: updatedUser.email,
-        //             role: updatedUser.role,
-        //             address: updatedUser.address,
-        //             phoneNumber: updatedUser.phoneNumber,
-        //             photoUrl: updatedUser.photoUrl
-        //         }
-        //     }
-        //     const result = await usersCollection.updateOne(filter, updateDoc, options);
-        //     res.send(result);
-        // })
-
-
-
-        // ! ENROLLED ROUTES
-        // afiseaza lista cu apartamentele cele mai populare in ordine descrescatoare, care au fost inchiriate de mai multe ori
-        app.get('/popular_apartments', async (req, res) => {
-            const result = await apartmentsCollection.find().sort({ totalbooked: -1 }).limit(6).toArray();
-            res.send(result);
-        })
-
-
-        app.get('/popular-owner', async (req, res) => {
-            const pipeline = [{
-                $group: {
-                    _id: "$owneremail",
-                    totalbooked: { $sum: "$totalbooked" },
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "_id",
-                    foreignField: "email",
-                    as: "owner"
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    owner: {
-                        $arrayElemAt: ["$owner", 0]
-                    },
-                    totalbooked: 1
-                }
-            },
-            {
-                $sort: {
-                    totalbooked: -1
-                }
-            },
-            {
-                $limit: 6
-            }
-            ]
-            const result = await apartmentsCollection.aggregate(pipeline).toArray();
-            res.send(result);
-        })
-
-
-        // ADMINS stats
-        app.get('/admin-stats', async (req, res) => {
-            // Get approved classes and pending classes and instructors
-            const approvedApartments = (await apartmentsCollection.find({ status: 'disponibil' }).toArray()).length;
-            const unavailableApartments = (await apartmentsCollection.find({ status: 'indisponibil' }).toArray()).length;
-            const owners = (await usersCollection.find({ role: 'proprietar' }).toArray()).length;
-            const totalApartments = (await apartmentsCollection.find().toArray()).length;
-            const totalEnrolled = (await enrolledCollection.find().toArray()).length;
-            const result = {
-                approvedApartments,
-                unavailableApartments,
-                owners,
-                totalApartments,
-                totalEnrolled,
-
-            }
-            res.send(result);
-
-        })
-
-
-
         // Get all owners
         app.get('/owners', async (req, res) => {
             const result = await usersCollection.find({ role: 'proprietar' }).toArray();
             res.send(result);
         })
-
-        // Add ENROLLMENT
-        app.post('/new-enrollment', async (req, res) => {
-            const newEnroll = req.body;
-            const result = await enrolledCollection.insertOne(newEnroll);
-            res.send(result);
-        })
-
-        app.get('/enrolled', async (req, res) => {
-            const result = await enrolledCollection.find({}).toArray();
-            res.send(result);
-        })
-
-        // NU MERGE
-        app.get('/enrolled-apartments/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { userEmail: email };
-            const pipeline = [{
-                $match: query
-            },
-            {
-                $lookup: {
-                    from: "apartments",
-                    localField: "apartmentId",
-                    foreignField: "_id",
-                    as: "apartments"
-                }
-            },
-            {
-                $unwind: "$apartments"
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "apartments.owneremail",
-                    foreignField: "email",
-                    as: "proprietar"
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    proprietar: {
-                        $arrayElemAt: ["$proprietar", 0]
-                    },
-                    apartments: 1,
-                }
-            }
-
-            ];
-
-            const result = await enrolledCollection.aggregate(pipeline).toArray();
-            res.send(result);
-        })
-
-
-        // Applied route
-        app.post('/as-proprietar', async (req, res) => {
-            const data = req.body;
-            const result = await appliedCollection.insertOne(data);
-            res.send(result);
-        });
-
-        app.get('/applied-owners/:email', async (req, res) => {
-            const email = req.params.email;
-            const result = await appliedCollection.findOne({ email });
-            res.send(result);
-        });
 
         app.post('/unavailable_dates/:apartment_id', authenticateToken, async (req, res) => {
 
@@ -939,19 +591,10 @@ async function run() {
 
                     daysInRequest.forEach(day => {
                         if (requestApartmentIdStr === apartmentId) {
-                            // Cererea este pentru apartamentul curent (B)
-                            // Adauga numarul de camere solicitate la totalul pentru ziua respectiva
                             usedRoomsMap[day] = (usedRoomsMap[day] || 0) + roomsInRequest;
                         } else if (requestUserIdStr && requestUserIdStr === currentUserId) {
-                            // Cererea este pentru un ALT apartament (A, C, D...)
-                            // DAR este facuta de UTILIZATORUL CURENT
-                            // Deci, pentru utilizatorul curent, aceasta zi este ocupata, indiferent de apartamentul B
-                            // Marcam ziua ca avand capacitatea maxima atinsa (pentru utilizatorul curent)
                             usedRoomsMap[day] = capacity;
                         }
-                        // Daca cererea e pentru alt apartament sI alt utilizator, nu afecteaza direct disponibilitatea
-                        // apartamentului B pentru utilizatorul curent, decat prin faptul ca ar putea umple apartamentul B
-                        // (cazul `requestApartmentIdStr === apartmentId` acoperit mai sus).
                     });
                 });
 
@@ -959,8 +602,6 @@ async function run() {
                 userRentalsOnOtherApartments.forEach(rental => {
                     const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
                     days.forEach(day => {
-                        // Utilizatorul curent este ocupat cu o alta rezervare confirmata,
-                        // deci ziua este indisponibila pentru el pentru apartamentul B.
                         usedRoomsMap[day] = capacity;
                     });
                 });
