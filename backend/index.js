@@ -111,12 +111,14 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
     // Obtine colectiile direct din databaseInstance
     const reservationHistoryCollection = databaseInstance.collection("reservation_history");
     const reservationRequestsCollection = databaseInstance.collection("reservation_requests");
+
     const currentDate = new Date();
+    const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Doar data, fara ora
 
     try {
         const resultHistoryOld = await reservationHistoryCollection.updateMany(
             {
-                checkOut: { $lt: currentDate },
+                checkOut: { $lt: currentDateOnly },
                 isActive: true
             },
             {
@@ -127,7 +129,7 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
 
         const resultHistoryNew = await reservationHistoryCollection.updateMany(
             {
-                checkIn: { $lt: currentDate },
+                checkIn: { $lt: currentDateOnly },
                 isActive: false
             },
             {
@@ -136,13 +138,13 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
         );
         console.log(`CRON: ${resultHistoryNew.modifiedCount} documente din istoric actualizate la "isActive:true".`);
 
-        const resultRequests = await reservationRequestsCollection.find({
-            checkIn: { $lt: currentDate }
+        const expiredRequests = await reservationRequestsCollection.find({
+            checkIn: { $lt: currentDateOnly }
         }).toArray();
 
-        if (resultRequests.length > 0) {
+        if (expiredRequests.length > 0) {
             // trimit notificare studentului cu faptul ca cererea de rezervare a expirat, iar apoi o sterg
-            for (const request of resultRequests) {
+            for (const request of expiredRequests) {
                 const clientId = request.client;
                 const apartmentId = request.apartament;
                 const apartmentObject = await databaseInstance.collection("apartments").findOne({ _id: apartmentId });
@@ -161,6 +163,71 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
             }
         } else {
             console.log('CRON: Nu exista cereri de rezervare vechi de sters.');
+        }
+
+
+        const notificationWindowDays = 10;
+        const tenDaysFromNow = new Date(currentDateOnly);
+        tenDaysFromNow.setDate(currentDateOnly.getDate() + notificationWindowDays);
+
+        // Gaseste chiriile active care expira in urmatoarele `notificationWindowDays` zile
+        // si pentru care nu s-a trimis deja notificarea de expirare.
+        const upcomingExpirations = await reservationHistoryCollection.find({
+            isActive: true,
+            checkOut: {
+                $gte: currentDateOnly, // Expira azi sau in viitor
+                $lt: tenDaysFromNow    // Dar inainte de 10 zile de acum
+            }
+        }).toArray();
+
+        if (upcomingExpirations.length > 0) {
+
+            for (const rental of upcomingExpirations) {
+                const clientId = rental.client; // Presupunem ca 'client' este ID-ul clientului
+                const apartmentId = rental.apartament;
+                const checkOutDate = new Date(rental.checkOut);
+
+                // Calculeaza diferenta in zile
+                // Pentru a fi corect, calculam diferenta intre checkout si data curenta (fara ore)
+                const diffTime = Math.abs(checkOutDate.getTime() - currentDateOnly.getTime());
+                const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // Daca checkOutDate este chiar currentDateOnly, daysRemaining va fi 0, dar noi vrem sa afisam "azi" sau "1 zi"
+                // Mai corect:
+                let daysLeftString;
+                if (checkOutDate.getFullYear() === currentDateOnly.getFullYear() &&
+                    checkOutDate.getMonth() === currentDateOnly.getMonth() &&
+                    checkOutDate.getDate() === currentDateOnly.getDate()) {
+                    daysLeftString = "azi";
+                } else {
+                    const actualDaysLeft = Math.max(0, daysRemaining);
+                    daysLeftString = `${actualDaysLeft} ${actualDaysLeft === 1 ? 'zi' : 'zile'}`;
+                }
+
+
+                let apartmentLocation = "locatie necunoscuta";
+                if (apartmentId) {
+                    const apartmentObject = await apartmentsCollection.findOne({ _id: apartmentId });
+                    if (apartmentObject) {
+                        apartmentLocation = apartmentObject.location;
+                    }
+                }
+
+                if (clientId) {
+                    try {
+                        await notificationsCollection.insertOne({
+                            receiver: clientId, // ObjectId
+                            message: `Chiria ta pentru apartamentul de la ${apartmentLocation} expira ${daysLeftString} (pe ${checkOutDate.toLocaleDateString()}).`,
+                            isRead: false,
+                            createdAt: new Date()
+                        });
+                    } catch (notifError) {
+                        console.error(`CRON: Eroare la crearea notificarii de expirare iminenta pentru client ${clientId}, chirie ${rental._id}:`, notifError);
+                    }
+                }
+            }
+
+        } else {
+            console.log('CRON: Nicio chirie activa care sa expire in urmatoarele 10 zile si care necesita notificare.');
         }
 
     } catch (error) {
