@@ -44,21 +44,18 @@ interface FacultyInfo {
     _id?: string; // Optional, but good practice if backend sends it
     fullName: string;
     abreviere: string;
+    aniStudiu: number; // Total years of study
 }
 
 // Define possible roles
 type Role = "student" | "proprietar" | "facultate" | null;
 
-const getYearOptionsForFaculty = (facultyName: string): string[] => {
-    // Normalize the faculty name slightly for easier comparison (lowercase)
-    const lowerCaseFaculty = facultyName.toLowerCase();
-    if (lowerCaseFaculty.includes("universitatea politehnica timisoara")) {
-        return ["1", "2", "3", "4"];
-    } else if (lowerCaseFaculty.includes("medicina victor babes timisoara")) {
-        return ["1", "2", "3", "4", "5", "6"];
-    } else if (lowerCaseFaculty.includes("universitatea de vest")) {
-        return ["1", "2", "3"];
-    } else return [""];
+const getYearOptions = (totalYears: number | undefined | null): string[] => {
+    if (!totalYears || totalYears <= 0) {
+        return ["1"]; // Fallback la minim 1 an daca datele sunt invalide sau lipsesc
+    }
+    // Creeaza un array de la 1 la totalYears
+    return Array.from({ length: totalYears }, (_, i) => (i + 1).toString());
 };
 
 const Register: React.FC = () => {
@@ -422,7 +419,11 @@ const Register: React.FC = () => {
         }
 
         if (selectedRole === "student") {
-            const currentYearOptions = getYearOptionsForFaculty(formState.faculty);
+            const selectedFacultyObject = facultiesList.find(f => f.fullName === formState.faculty);
+            const studyYearsForSelectedFaculty = selectedFacultyObject?.aniStudiu;
+
+            // Genereaza optiunile de an pe baza `aniStudiu` ale facultatii selectate
+            const currentYearOptions = getYearOptions(studyYearsForSelectedFaculty);
 
             return (
                 <div className="register-container student-form">
@@ -519,11 +520,9 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 // Disable if no faculty is selected OR if options are empty
-                                disabled={!formState.faculty || currentYearOptions.length === 0}
+                                disabled={!formState.faculty || currentYearOptions.length === 0 || (currentYearOptions.length === 1 && currentYearOptions[0] === "")}
                             >
-                                <option value="" disabled>
-                                    -- Selecteaza anul --
-                                </option>
+                                <option value="" disabled> -- Selecteaza anul -- </option>
                                 {currentYearOptions.map((year) => (
                                     <option key={year} value={year}>
                                         {`Anul ${year}`}
