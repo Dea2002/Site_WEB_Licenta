@@ -41,7 +41,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { fullName, abreviere, numeRector, emailSecretariat, phoneNumber, logoUrl, documentUrl, password, role } = req.body;
+        const { fullName, abreviere, numeRector, emailSecretariat, phoneNumber, logoUrl, documentUrl, password, role, aniStudiu } = req.body;
 
         try {
 
@@ -63,6 +63,7 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 fullName,
                 abreviere,
                 numeRector,
+                aniStudiu,
                 emailSecretariat,
                 phoneNumber,
                 logoUrl,
