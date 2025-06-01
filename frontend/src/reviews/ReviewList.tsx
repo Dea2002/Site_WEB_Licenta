@@ -145,8 +145,8 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                         <select id="sort-reviews" value={sortBy} onChange={handleSortChange}>
                             <option value="createdAt_desc">Cele mai noi</option>
                             <option value="createdAt_asc">Cele mai vechi</option>
-                            <option value="rating_desc">Rating (Mare &gt Mic)</option>
-                            <option value="rating_asc">Rating (Mic &gt Mare)</option>
+                            <option value="rating_desc">Rating (Mare {'>'} Mic)</option>
+                            <option value="rating_asc">Rating (Mic {'>'} Mare)</option>
                         </select>
                     </div>
                     <div>
