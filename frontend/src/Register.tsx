@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { api } from './api';
+import { api } from "./api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
 import { uploadFileToStorage } from "./firebaseConfig"; // Import Firebase storage if needed
-
 
 // Interface for Student form
 interface RegisterFormState {
@@ -291,7 +290,10 @@ const Register: React.FC = () => {
             const logoUrl = await uploadFileToStorage(logo, `faculty_files/${abreviere}`);
 
             // 2. Upload Document
-            const documentUrl = await uploadFileToStorage(documentOficial, `faculty_files/${abreviere}`);
+            const documentUrl = await uploadFileToStorage(
+                documentOficial,
+                `faculty_files/${abreviere}`,
+            );
 
             // 3. Send data to backend
             await api.post("/auth/register_faculty", {
@@ -419,7 +421,9 @@ const Register: React.FC = () => {
         }
 
         if (selectedRole === "student") {
-            const selectedFacultyObject = facultiesList.find(f => f.fullName === formState.faculty);
+            const selectedFacultyObject = facultiesList.find(
+                (f) => f.fullName === formState.faculty,
+            );
             const studyYearsForSelectedFaculty = selectedFacultyObject?.aniStudiu;
 
             // Genereaza optiunile de an pe baza `aniStudiu` ale facultatii selectate
@@ -520,9 +524,17 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 // Disable if no faculty is selected OR if options are empty
-                                disabled={!formState.faculty || currentYearOptions.length === 0 || (currentYearOptions.length === 1 && currentYearOptions[0] === "")}
+                                disabled={
+                                    !formState.faculty ||
+                                    currentYearOptions.length === 0 ||
+                                    (currentYearOptions.length === 1 &&
+                                        currentYearOptions[0] === "")
+                                }
                             >
-                                <option value="" disabled> -- Selecteaza anul -- </option>
+                                <option value="" disabled>
+                                    {" "}
+                                    -- Selecteaza anul --{" "}
+                                </option>
                                 {currentYearOptions.map((year) => (
                                     <option key={year} value={year}>
                                         {`Anul ${year}`}
@@ -575,13 +587,13 @@ const Register: React.FC = () => {
                         </div>
                         {error && <p className="error">{error}</p>}
                         {success && <p className="success">{success}</p>}
-                        <button type="submit">inregistreaza-te ca Student</button>
+                        <button type="submit">Inregistreaza-te ca Student</button>
                         <button
                             type="button"
                             onClick={() => setSelectedRole(null)}
                             className="back-button"
                         >
-                            inapoi
+                            Inapoi
                         </button>
                     </form>
                 </div>
@@ -592,9 +604,7 @@ const Register: React.FC = () => {
             return (
                 <div className="register-container owner-form">
                     {" "}
-
                     <h1>inregistrare Proprietar</h1>
-
                     <form onSubmit={handleOwnerSubmit} className="register-form">
                         <div>
                             <label htmlFor="ownerEmail">Email:*</label>

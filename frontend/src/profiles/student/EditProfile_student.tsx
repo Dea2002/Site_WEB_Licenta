@@ -1,8 +1,8 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
-import { AuthContext, User } from '../../AuthContext'; // Importam User
-import { api } from '../../api';
-import './profile_student.css'; // Stiluri
-import jwt_decode from 'jwt-decode';
+import React, { useState, useContext, useRef, useEffect } from "react";
+import { AuthContext, User } from "../../AuthContext"; // Importam User
+import { api } from "../../api";
+import "./profile_student.css"; // Stiluri
+import jwt_decode from "jwt-decode";
 import { parseISO, isAfter, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
@@ -23,7 +23,7 @@ interface ProfileFormState {
     currentPassword: string;
     newPassword: string;
     confirmNewPassword: string;
-};
+}
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     // Stari pentru campurile formularului, initializate cu datele userului
@@ -47,8 +47,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
     // Adauga alte campuri pe care vrei sa le permiti editarii (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
     const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request si login pt update context
     const navigate = useNavigate();
 
@@ -76,13 +76,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     // Functie pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setMessage('');
-        setError('');
-        let medieEdited = false;
+        setMessage("");
+        setError("");
+        let markEdited = false;
         let medieRange = "";
         // validarea mediei introduse
         if (profileFormState.medie !== initialMedie) {
-            const medieNum = parseFloat(profileFormState.medie!.replace(',', '.'));
+            const medieNum = parseFloat(profileFormState.medie!.replace(",", "."));
             if (isNaN(medieNum) || medieNum < 5.0 || medieNum > 10.0) {
                 setError("Medie invalida. Trebuie sa fie intre 5.0 si 10.0.");
                 return;
@@ -93,7 +93,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 return;
             }
 
-            medieEdited = true;
+            markEdited = true;
             if (medieNum >= 9.5) {
                 medieRange = "Categoria 1: (9.50 - 10.00)";
             } else if (medieNum >= 9.0) {
@@ -125,7 +125,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         }
 
         setIsLoading(true);
-        let updatedData = {}
+        let updatedData = {};
         // 1. Construiesti payload-ul exact din form state
         // const updatedData: ProfileFormState = { ...profileFormState };
         if (profileFormState.medie !== initialMedie) {
@@ -133,13 +133,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 ...rest,
                 password: newPassword,
                 medie: medieRange,
-                medieEdited: medieEdited
+                markEdited: markEdited,
             };
-
         } else {
             updatedData = {
-                ...rest, password: newPassword
-            }
+                ...rest,
+                password: newPassword,
+            };
         }
 
         try {
@@ -147,7 +147,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             const response = await api.patch(
                 `/users/edit_profile`,
                 { userId: user._id, ...updatedData },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization: `Bearer ${token}` } },
             );
 
             const newToken = response.data.token;
@@ -174,18 +174,18 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         }));
 
         setError("");
-    }
+    };
 
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
             // @ts-ignore – ca sa poţi indexa generic
-            value !== initialFormStateRef.current[key]
+            value !== initialFormStateRef.current[key],
     );
     const validUntil = parseISO(profileFormState.medie_valid!);
     const canEditMedie = isAfter(new Date(), validUntil);
     const formattedMedieValid = profileFormState.medie_valid
-        ? format(parseISO(profileFormState.medie_valid), 'dd-MM-yyyy')
-        : '';
+        ? format(parseISO(profileFormState.medie_valid), "dd-MM-yyyy")
+        : "";
     return (
         <div className="profile-section-content">
             <h2>Editare Profil Student</h2>
@@ -329,11 +329,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 {message && <p className="success-message">{message}</p>}
                 {error && <p className="error-message">{error}</p>}
 
-                <button
-                    type="submit"
-                    disabled={isLoading || !isDirty}
-                >
-                    {isLoading ? 'Se salveaza...' : 'Salveaza Modificarile'}
+                <button type="submit" disabled={isLoading || !isDirty}>
+                    {isLoading ? "Se salveaza..." : "Salveaza Modificarile"}
                 </button>
             </form>
         </div>

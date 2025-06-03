@@ -70,7 +70,7 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
     router.patch('/edit_profile', authenticateToken, async (req, res) => {
         try {
             const userId = req.user._id; // id-ul utilizatorului din token
-            const medieEdited = req.body.medieEdited;
+            const markEdited = req.body.markEdited;
             const updates = { ...req.body };
             const allowed = ['phoneNumber', 'numar_matricol', 'anUniversitar', 'medie'];
             const setFields = {};
@@ -103,7 +103,7 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
             const newToken = jwt.sign(updated, process.env.ACCESS_SECRET, { expiresIn: '1h' });
 
             // send notification to faculty about the new grade
-            if (medieEdited == true) {
+            if (markEdited == true) {
                 notificationService.createNotification(message = `Studentul ${req.user.fullName} doreste sa isi actualizeze media la ${updates['medie']}.`, receiver = faculty._id);
 
                 // cererea de actualizare a mediei
