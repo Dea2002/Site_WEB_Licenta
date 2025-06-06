@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { api } from './api';
-import { useNavigate } from 'react-router-dom';
+import { api } from "./api";
+import { useNavigate } from "react-router-dom";
 import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
 import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
 import { format, parseISO } from "date-fns";
 import "leaflet/dist/leaflet.css";
-import "./reviews/Reviews.css"
+import "./reviews/Reviews.css";
 import MapPop_up from "./MapPop_up"; // Your Map Popup component
 import { useNotifications } from "./NotificationContext";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
@@ -48,7 +48,7 @@ const ApartmentDetails: React.FC = () => {
     const [blobUrls, setBlobUrls] = useState<string[]>([]);
 
     const handleReviewDeleted = (deletedReviewId: string) => {
-        setReviews(prevReviews => prevReviews.filter(review => review._id !== deletedReviewId));
+        setReviews((prevReviews) => prevReviews.filter((review) => review._id !== deletedReviewId));
         // Optional: afiseaza o notificare de succes
         // refresh(); // Daca vrei sa re-fetch-uiesti notificarile sau alte date
         // Aici ai putea actualiza si rating-ul mediu al apartamentului DACA
@@ -57,7 +57,12 @@ const ApartmentDetails: React.FC = () => {
         if (id) {
             api.get<Apartment>(`/apartments/${id}`)
                 .then((response) => setApartment(response.data))
-                .catch(err => console.error("Eroare la re-preluarea detaliilor apartamentului dupa stergere review:", err));
+                .catch((err) =>
+                    console.error(
+                        "Eroare la re-preluarea detaliilor apartamentului dupa stergere review:",
+                        err,
+                    ),
+                );
         }
     };
 
@@ -90,20 +95,19 @@ const ApartmentDetails: React.FC = () => {
     useEffect(() => {
         if (!apartment?.images?.length) return;
         Promise.all(
-            apartment.images.map(src =>
+            apartment.images.map((src) =>
                 fetch(src)
-                    .then(res => res.blob())
-                    .then(blob => URL.createObjectURL(blob))
-            )
+                    .then((res) => res.blob())
+                    .then((blob) => URL.createObjectURL(blob)),
+            ),
         )
-            .then(urls => setBlobUrls(urls))
-            .catch(err => console.error("Nu am putut incarca imaginea:", err));
+            .then((urls) => setBlobUrls(urls))
+            .catch((err) => console.error("Nu am putut incarca imaginea:", err));
     }, [apartment?.images]);
-
 
     useEffect(() => {
         return () => {
-            blobUrls.forEach(u => URL.revokeObjectURL(u));
+            blobUrls.forEach((u) => URL.revokeObjectURL(u));
         };
     }, [blobUrls]);
 
@@ -118,8 +122,9 @@ const ApartmentDetails: React.FC = () => {
 
                     // Initializare facilitati bazate pe obiectul aptData.facilities
                     const initialFacilitiesLabels: string[] = [];
-                    if (fetchedApartment.facilities) { // Verifica daca obiectul facilities exista
-                        ALL_POSSIBLE_FACILITIES_MAP.forEach(facilityMapItem => {
+                    if (fetchedApartment.facilities) {
+                        // Verifica daca obiectul facilities exista
+                        ALL_POSSIBLE_FACILITIES_MAP.forEach((facilityMapItem) => {
                             if (fetchedApartment.facilities[facilityMapItem.key] === true) {
                                 initialFacilitiesLabels.push(facilityMapItem.label);
                             }
@@ -129,9 +134,9 @@ const ApartmentDetails: React.FC = () => {
 
                     // NOU: Preincarcarea imaginilor
                     if (fetchedApartment.images && fetchedApartment.images.length > 0) {
-                        fetchedApartment.images.forEach(imageUrl => {
+                        fetchedApartment.images.forEach((imageUrl) => {
                             const img = new Image(); // Creeaza un nou element de imagine in memorie
-                            img.src = imageUrl;      // Setarea sursei incepe descarcarea
+                            img.src = imageUrl; // Setarea sursei incepe descarcarea
                             // Nu e nevoie sa adaugi 'img' la DOM.
                             // Browserul il va pastra in cache odata descarcat.
                         });
@@ -139,10 +144,7 @@ const ApartmentDetails: React.FC = () => {
 
                     // apelul pentru colegi
                     const n = fetchedApartment.numberOfRooms;
-                    api.get<Colleague[]>(
-                        `/apartments/nearest_checkout/${id}`,
-                        { params: { n } }
-                    )
+                    api.get<Colleague[]>(`/apartments/nearest_checkout/${id}`, { params: { n } })
                         .then((res) => {
                             setColleaguesList(res.data);
                         })
@@ -163,23 +165,30 @@ const ApartmentDetails: React.FC = () => {
             setLoadingReviews(true);
             setReviewError("");
             // Initial, sorteaza dupa cele mai noi. Include si filtrare daca e cazul.
-            api.get<PaginatedResponse<Review>>(`/reviews/apartment/${id}?sort=createdAt_desc&limit=1000`)
-                .then(response => {
+            api.get<PaginatedResponse<Review>>(
+                `/reviews/apartment/${id}?sort=createdAt_desc&limit=1000`,
+            )
+                .then((response) => {
                     // VERIFICA CE RETURNZA API-UL AICI
-                    // Daca response.data este un obiect care contine un array de review-uri, 
+                    // Daca response.data este un obiect care contine un array de review-uri,
                     // ex: { reviews: [], page: 1, ... }, atunci trebuie sa extragi array-ul corect.
-                    if (Array.isArray(response.data)) { // Daca API-ul returneaza direct un array
+                    if (Array.isArray(response.data)) {
+                        // Daca API-ul returneaza direct un array
                         setReviews(response.data);
-                    } else if (response.data && Array.isArray(response.data.reviews)) { // Daca API-ul returneaza un obiect cu proprietatea 'reviews'
+                    } else if (response.data && Array.isArray(response.data.reviews)) {
+                        // Daca API-ul returneaza un obiect cu proprietatea 'reviews'
                         setReviews(response.data.reviews);
                     } else {
-                        console.warn("Format neasteptat pentru review-uri de la API:", response.data);
+                        console.warn(
+                            "Format neasteptat pentru review-uri de la API:",
+                            response.data,
+                        );
                         setReviews([]); // Seteaza un array gol ca fallback
                         setReviewError("Formatul datelor primite pentru review-uri este incorect.");
                         setReviews([]); // Asigura-te ca setezi un array gol si la eroare
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error("Eroare la preluarea review-urilor:", error);
                     setReviewError("Nu s-au putut incarca review-urile.");
                 })
@@ -193,7 +202,7 @@ const ApartmentDetails: React.FC = () => {
 
     const handleReviewSubmitted = (newReview: Review) => {
         // Adauga noul review la inceputul listei (sau re-fetch)
-        setReviews(prevReviews => [newReview, ...prevReviews]);
+        setReviews((prevReviews) => [newReview, ...prevReviews]);
         setShowReviewForm(false); // Ascunde formularul dupa submit
         // Aici ai putea actualiza si rating-ul mediu al apartamentului daca nu o faci in backend
     };
@@ -252,7 +261,7 @@ const ApartmentDetails: React.FC = () => {
                     priceRent: apartment.price, // Pretul de baza per noapte per camera
                     priceUtilities: bookingCosts.totalDailyUtilityCost, // Costul zilnic al utilitatilor
                     discount: bookingCosts.discountPercentage, // Procentajul de discount aplicat
-                    numberOfNights: bookingCosts.nights
+                    numberOfNights: bookingCosts.nights,
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -264,7 +273,6 @@ const ApartmentDetails: React.FC = () => {
             refresh(); // Refresh notifications
             alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page
-
         } catch (err: any) {
             setError(
                 err.response?.data?.message || "Eroare la trimiterea cererii. incercati din nou.",
@@ -290,7 +298,8 @@ const ApartmentDetails: React.FC = () => {
                 const parsedLat = parseFloat(lat);
                 const parsedLng = parseFloat(lon);
 
-                if (!isNaN(parsedLat) && !isNaN(parsedLng)) { // Verificare importanta
+                if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+                    // Verificare importanta
                     setSelectedMapData({
                         lat: parsedLat,
                         lng: parsedLng,
@@ -333,14 +342,15 @@ const ApartmentDetails: React.FC = () => {
             isGroup: boolean;
             createdAt: string;
             lastMessageAt: string;
-        }>('/conversations', {
+        }>("/conversations", {
             participants: [user!._id, otherUserId],
         });
         navigate(`/chat/${conversation._id}`);
     }
     // Helper function to render selected dates and costs (part of the new right section logic)
     const renderSelectedDatesInfo = () => {
-        if (!selectedDates || !bookingCosts) { // Verificam si bookingCosts
+        if (!selectedDates || !bookingCosts) {
+            // Verificam si bookingCosts
             // Afiseaza un mesaj default sau nimic daca nu sunt selectate datele
             return (
                 <div className="selected-dates-info">
@@ -368,32 +378,58 @@ const ApartmentDetails: React.FC = () => {
 
         return (
             <div className="selected-dates-info">
-                <p><span>Check-in:</span> {format(selectedDates.checkIn, "dd/MM/yyyy")}</p>
-                <p><span>Check-out:</span> {format(selectedDates.checkOut, "dd/MM/yyyy")}</p>
+                <p>
+                    <span>Check-in:</span> {format(selectedDates.checkIn, "dd/MM/yyyy")}
+                </p>
+                <p>
+                    <span>Check-out:</span> {format(selectedDates.checkOut, "dd/MM/yyyy")}
+                </p>
                 <hr className="line-divider short" />
-                <p><span>Pret Cazare / camera ({nightsText}):</span> {bookingCosts.baseApartmentCostForPeriod.toFixed(2)} RON</p>
-                <p><span>Costuri Extra Estim. ({nightsText}):</span> {(bookingCosts.totalUtilityCostForPeriod / bookingCosts.numberOfRooms).toFixed(2)} RON</p>
-                <p><span>Numar camere:</span> {bookingCosts.numberOfRooms}</p>
+                <p>
+                    <span>Pret Cazare / camera ({nightsText}):</span>{" "}
+                    {bookingCosts.baseApartmentCostForPeriod.toFixed(2)} RON
+                </p>
+                <p>
+                    <span>Costuri Extra Estim. ({nightsText}):</span>{" "}
+                    {(bookingCosts.totalUtilityCostForPeriod / bookingCosts.numberOfRooms).toFixed(
+                        2,
+                    )}{" "}
+                    RON
+                </p>
+                <p>
+                    <span>Numar camere:</span> {bookingCosts.numberOfRooms}
+                </p>
                 <hr className="line-divider short" />
-                <p><span>Total Cazare ({bookingCosts.numberOfRooms} camere):</span> {bookingCosts.totalApartmentCostForPeriodAllRooms.toFixed(2)} RON</p>
-                <p><span>Total Utilitati ({bookingCosts.numberOfRooms} camere):</span> {bookingCosts.totalUtilityCostForPeriod.toFixed(2)} RON</p>
+                <p>
+                    <span>Total Cazare ({bookingCosts.numberOfRooms} camere):</span>{" "}
+                    {bookingCosts.totalApartmentCostForPeriodAllRooms.toFixed(2)} RON
+                </p>
+                <p>
+                    <span>Total Utilitati ({bookingCosts.numberOfRooms} camere):</span>{" "}
+                    {bookingCosts.totalUtilityCostForPeriod.toFixed(2)} RON
+                </p>
 
                 <hr className="line-divider short" />
                 {bookingCosts.userHasValidDiscount && bookingCosts.discountPercentage > 0 && (
                     <p>
-                        <span>Discount categorie medie ({bookingCosts.discountPercentage}%):</span> -{bookingCosts.discountAmount.toFixed(2)} RON
+                        <span>Discount categorie medie ({bookingCosts.discountPercentage}%):</span>{" "}
+                        -{bookingCosts.discountAmount.toFixed(2)} RON
                     </p>
                 )}
                 <hr className="line-divider short bold" />
                 <p className="total-price">
-                    <span>Pret Total:</span> {bookingCosts.userHasValidDiscount ? bookingCosts.finalCostWithDiscount.toFixed(2) : bookingCosts.finalCostWithoutDiscount.toFixed(2)} RON
+                    <span>Pret Total:</span>{" "}
+                    {bookingCosts.userHasValidDiscount
+                        ? bookingCosts.finalCostWithDiscount.toFixed(2)
+                        : bookingCosts.finalCostWithoutDiscount.toFixed(2)}{" "}
+                    RON
                 </p>
                 {!bookingCosts.userHasValidDiscount && bookingCosts.discountPercentage > 0 && (
                     <p className="info-text" style={{ fontSize: "0.8em", marginTop: "5px" }}>
-                        (Pretul nu include reducerea de student deoarece media nu este valida sau nu se aplica.)
+                        (Pretul nu include reducerea de student deoarece media nu este valida sau nu
+                        se aplica.)
                     </p>
                 )}
-
 
                 <button
                     className="owner-section-button"
@@ -414,7 +450,7 @@ const ApartmentDetails: React.FC = () => {
     const nextImage = () => {
         if (apartment && apartment.images) {
             setCurrentImageIndex((prevIndex) =>
-                prevIndex === apartment.images.length - 1 ? 0 : prevIndex + 1
+                prevIndex === apartment.images.length - 1 ? 0 : prevIndex + 1,
             );
         }
     };
@@ -422,7 +458,7 @@ const ApartmentDetails: React.FC = () => {
     const prevImage = () => {
         if (apartment && apartment.images) {
             setCurrentImageIndex((prevIndex) =>
-                prevIndex === 0 ? apartment.images.length - 1 : prevIndex - 1
+                prevIndex === 0 ? apartment.images.length - 1 : prevIndex - 1,
             );
         }
     };
@@ -442,7 +478,10 @@ const ApartmentDetails: React.FC = () => {
                                     </button>
                                 )}
                                 <img
-                                    src={blobUrls[currentImageIndex] ?? apartment.images[currentImageIndex]}
+                                    src={
+                                        blobUrls[currentImageIndex] ??
+                                        apartment.images[currentImageIndex]
+                                    }
                                     alt={`Poza ${currentImageIndex + 1}`}
                                     className="carousel-image"
                                 />
@@ -462,10 +501,24 @@ const ApartmentDetails: React.FC = () => {
                     {/* Titlu - Locatie si Pret */}
                     <div className="title-location-price">
                         <h2>Apartament in {apartment.location}</h2>
-                        <p className="price-display">{apartment.price} RON / camera / noapte (fara reducere)</p>
-                        <p>{apartment.price * ((100 - apartment.discounts.discount1) / 100)} RON / camera / noapte pentru studentii de categoria 1 ({apartment.discounts.discount1}% discount)</p>
-                        <p>{apartment.price * ((100 - apartment.discounts.discount2) / 100)} RON / camera / noapte pentru studentii de categoria 2 ({apartment.discounts.discount2}% discount)</p>
-                        <p>{apartment.price * ((100 - apartment.discounts.discount3) / 100)} RON / camera / noapte pentru studentii de categoria 3 ({apartment.discounts.discount3}% discount)</p>
+                        <p className="price-display">
+                            {apartment.price} RON / camera / noapte (fara reducere)
+                        </p>
+                        <p>
+                            {apartment.price * ((100 - apartment.discounts.discount1) / 100)} RON /
+                            camera / noapte pentru studentii de categoria 1 (
+                            {apartment.discounts.discount1}% discount)
+                        </p>
+                        <p>
+                            {apartment.price * ((100 - apartment.discounts.discount2) / 100)} RON /
+                            camera / noapte pentru studentii de categoria 2 (
+                            {apartment.discounts.discount2}% discount)
+                        </p>
+                        <p>
+                            {apartment.price * ((100 - apartment.discounts.discount3) / 100)} RON /
+                            camera / noapte pentru studentii de categoria 3 (
+                            {apartment.discounts.discount3}% discount)
+                        </p>
                         <button
                             className="button-map"
                             onClick={() => handleLocationClick(apartment)}
@@ -510,7 +563,11 @@ const ApartmentDetails: React.FC = () => {
                             <i className="fas fa-check-circle icon-prefix"></i>Facilitati
                         </h3>
 
-                        <ul className="facilities-list-display">{selectedFacilities.map(label => <li key={label}>{label}</li>)}</ul>
+                        <ul className="facilities-list-display">
+                            {selectedFacilities.map((label) => (
+                                <li key={label}>{label}</li>
+                            ))}
+                        </ul>
                     </div>
 
                     {/* Grup Costuri Extra Estimate (Lunare / Zilnice - clarificam) */}
@@ -527,7 +584,8 @@ const ApartmentDetails: React.FC = () => {
                             <span>TV:</span> {apartment.utilities.TVPrice ?? "N/A"} RON
                         </p>
                         <p>
-                            <span>Apa (estimat):</span> {apartment.utilities.waterPrice ?? "N/A"} RON
+                            <span>Apa (estimat):</span> {apartment.utilities.waterPrice ?? "N/A"}{" "}
+                            RON
                         </p>
                         <p>
                             <span>Gaz (estimat):</span> {apartment.utilities.gasPrice ?? "N/A"} RON
@@ -544,12 +602,12 @@ const ApartmentDetails: React.FC = () => {
                             <i className="fas fa-users icon-prefix"></i>Colegi de Apartament
                         </h3>
                         {colleaguesList.length > 0 && token != null ? (
-                            colleaguesList.map(col => (
+                            colleaguesList.map((col) => (
                                 <p key={col._id}>
-                                    <strong>{col.faculty}:</strong>{" "}
-                                    checkIn: {format(parseISO(col.checkIn), "dd-MM-yyyy")};{" "}
-                                    checkOut: {format(parseISO(col.checkOut), "dd-MM-yyyy")};{" "}
-                                    Numar camere: {col.numberOfRooms}
+                                    <strong>{col.faculty}:</strong> checkIn:{" "}
+                                    {format(parseISO(col.checkIn), "dd-MM-yyyy")}; checkOut:{" "}
+                                    {format(parseISO(col.checkOut), "dd-MM-yyyy")}; Numar camere:{" "}
+                                    {col.numberOfRooms}
                                 </p>
                             ))
                         ) : (
@@ -562,7 +620,10 @@ const ApartmentDetails: React.FC = () => {
                             <h2>Recenzii ({reviews.length})</h2>
                             {/* Buton pentru a arata/ascunde formularul de review */}
                             {isAuthenticated && canLeaveReview && !showReviewForm && (
-                                <button onClick={() => setShowReviewForm(true)} className="button-add-review">
+                                <button
+                                    onClick={() => setShowReviewForm(true)}
+                                    className="button-add-review"
+                                >
                                     Adauga o Recenzie
                                 </button>
                             )}
@@ -576,9 +637,11 @@ const ApartmentDetails: React.FC = () => {
                             {loadingReviews && <p>Se incarca recenziile...</p>}
                             {reviewError && <p className="error">{reviewError}</p>}
                             {!loadingReviews && !reviewError && (
-                                <ReviewList reviews={reviews}
+                                <ReviewList
+                                    reviews={reviews}
                                     currentUserId={user?._id || null}
-                                    onReviewDeleted={handleReviewDeleted} />
+                                    onReviewDeleted={handleReviewDeleted}
+                                />
                             )}
                         </section>
                     </div>
@@ -600,8 +663,12 @@ const ApartmentDetails: React.FC = () => {
                                     >
                                         Detalii
                                     </button>
-                                    <button className="owner-section-button chat-btn"
-                                        onClick={() => openChatWith(apartment!.ownerInformation!._id)}>
+                                    <button
+                                        className="owner-section-button chat-btn"
+                                        onClick={() =>
+                                            openChatWith(apartment!.ownerInformation!._id)
+                                        }
+                                    >
                                         Chat
                                     </button>{" "}
                                     {/* Original Class */}
@@ -611,7 +678,6 @@ const ApartmentDetails: React.FC = () => {
                             <div className="booking-section">
                                 <h4>Verifica Disponibilitatea</h4>
                                 {renderSelectedDatesInfo()}{" "}
-
                             </div>
                             <hr className="line-divider thick" /> {/* Using new divider class */}
                             {/* Error display */}
@@ -629,10 +695,10 @@ const ApartmentDetails: React.FC = () => {
                                     !isAuthenticated
                                         ? "Trebuie sa fiti autentificat pentru a rezerva"
                                         : !user!.faculty_valid
-                                            ? "Trebuie sa aveti facultatea validata pentru a rezerva"
-                                            : selectedDates
-                                                ? "Trimite Cerere Rezervare"
-                                                : "Selectati perioada"
+                                        ? "Trebuie sa aveti facultatea validata pentru a rezerva"
+                                        : selectedDates
+                                        ? "Trimite Cerere Rezervare"
+                                        : "Selectati perioada"
                                 }
                             >
                                 <span className="reserve-btn-text">
@@ -670,14 +736,16 @@ const ApartmentDetails: React.FC = () => {
                     onClose={() => setshowOwnerPop_up(false)}
                 />
             )}
-            {selectedMapData && typeof selectedMapData.lat === 'number' && typeof selectedMapData.lng === 'number' && (
-                <MapPop_up
-                    lat={selectedMapData.lat}
-                    lng={selectedMapData.lng}
-                    address={selectedMapData.address}
-                    onClose={() => setSelectedMapData(null)}
-                />
-            )}
+            {selectedMapData &&
+                typeof selectedMapData.lat === "number" &&
+                typeof selectedMapData.lng === "number" && (
+                    <MapPop_up
+                        lat={selectedMapData.lat}
+                        lng={selectedMapData.lng}
+                        address={selectedMapData.address}
+                        onClose={() => setSelectedMapData(null)}
+                    />
+                )}
         </div>
     );
 };
