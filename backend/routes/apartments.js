@@ -480,7 +480,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             const uniqueIds = [...new Set(clientIds)].map(id => new ObjectId(id));
             const usersArray = await usersCollection
                 .find({ _id: { $in: uniqueIds } })
-                .project({ fullName: 1 })   // luam doar ce ne trebuie
+                .project({ fullName: 1, faculty: 1 })   // luam doar ce ne trebuie
                 .toArray();
 
             // 4) Construieste un map de lookup { userId => userDoc }
@@ -496,7 +496,8 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                     fullName: user.fullName || 'Unknown',
                     numberOfRooms: r.numberOfRooms,
                     checkIn: r.checkIn,
-                    checkOut: r.checkOut
+                    checkOut: r.checkOut,
+                    faculty: user.faculty
                 };
             });
 
