@@ -492,7 +492,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             const result = rents.map(r => {
                 const user = userMap.get(r.client.toString()) || {};
                 return {
-                    _id: r.client.toString(),
+                    _id: r._id.toString(),
                     fullName: user.fullName || 'Unknown',
                     numberOfRooms: r.numberOfRooms,
                     checkIn: r.checkIn,
