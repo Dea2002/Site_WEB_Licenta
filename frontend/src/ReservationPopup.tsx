@@ -109,22 +109,14 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
 
     useEffect(() => {
 
-        // make a get request to local host /testez and console log the response
         api.post(`/unavailable_dates/${apartmentId}`,
-            { numberOfRooms: selectedRooms },
+            { requestedRooms: selectedRooms },
             { headers: { Authorization: `Bearer ${token}` } },
         )
             .then((response) => {
                 const data: string[] = response.data;
                 const intervals = groupIntoIntervals(data);
 
-                // // iteram prin array-ul primit de la requestul facut
-                // for (let i = 0; i < data.length; i += 2) {
-                //     intervals.push({
-                //         start: new Date(data[i]),
-                //         end: new Date(data[i + 1]),
-                //     });
-                // }
                 setUnavailableIntervals(intervals);
             })
             .catch((error) => {

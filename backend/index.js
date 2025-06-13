@@ -111,6 +111,7 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
     // Obtine colectiile direct din databaseInstance
     const reservationHistoryCollection = databaseInstance.collection("reservation_history");
     const reservationRequestsCollection = databaseInstance.collection("reservation_requests");
+    const apartmentsCollection = databaseInstance.collection("apartments");
 
     const currentDate = new Date();
     const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Doar data, fara ora
@@ -586,7 +587,7 @@ async function run() {
                 return res.status(401).json({ message: 'User not authenticated' });
             }
 
-            const requestedRooms = parseInt(req.body.numberOfRooms, 10) || 1;
+            const requestedRooms = parseInt(req.body.requestedRooms, 10) || 1;
 
             if (requestedRooms < 1) {
                 return res.status(400).json({ message: 'Numar de camere invalid' });
@@ -596,7 +597,6 @@ async function run() {
 
             try {
 
-                // 1) Fetch apartment capacity
                 const apartment = await apartmentsCollection.findOne(
                     { _id: new ObjectId(apartmentId) },
                     { projection: { numberOfRooms: 1 } }
@@ -606,24 +606,21 @@ async function run() {
                 }
                 const capacity = apartment.numberOfRooms;
 
-                // 2) Fetch active rental history
                 const rentals = await reservationHistoryCollection
                     .find({ apartament: new ObjectId(apartmentId), isActive: true })
                     .project({ checkIn: 1, checkOut: 1, numberOfRooms: 1 })
                     .toArray();
 
-                // 3) Fetch all active reservation requests
                 const requests = await reservationRequestsCollection
                     .find()
                     .project({ checkIn: 1, checkOut: 1, numberOfRooms: 1, apartament: 1, client: 1 })
                     .toArray();
 
-                // 4) Fetch active rental history PENTRU UTILIZATORUL CURENT, PENTRU ALTE APARTAMENTE
-                // Acestea sunt rezervarile confirmate ale utilizatorului curent pentru apartamente diferite de cel verificat (A, C, D...)
+
                 const userRentalsOnOtherApartments = await reservationHistoryCollection
                     .find({
-                        user: new ObjectId(currentUserId), // Foloseste ObjectId daca 'user' e stocat asa
-                        apartament: { $ne: new ObjectId(apartmentId) }, // Apartament diferit de cel curent (B)
+                        user: new ObjectId(currentUserId),
+                        apartament: { $ne: new ObjectId(apartmentId) },
                         isActive: true
                     })
                     .project({ checkIn: 1, checkOut: 1 })
@@ -635,24 +632,22 @@ async function run() {
                     return uid === currentUserId && aid !== apartmentId;
                 });
 
-                // 5) Build a map of date -> usedRooms count
                 const usedRoomsMap = {};
 
-                // A) Proceseaza rezervarile confirmate PENTRU APARTAMENTUL CURENT (B)
                 rentals.forEach(rental => {
-                    const rooms = rental.numberOfRooms || 1; // Sau o valoare default daca nu e specificat
+                    const rooms = rental.numberOfRooms || 1;
                     const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
                     days.forEach(day => {
                         usedRoomsMap[day] = (usedRoomsMap[day] || 0) + rooms;
                     });
                 });
 
-                // B) Proceseaza TOATE cererile active
+
                 requests.forEach(reqDoc => {
                     const roomsInRequest = reqDoc.numberOfRooms || 1;
                     const daysInRequest = getDatesBetween(new Date(reqDoc.checkIn), new Date(reqDoc.checkOut));
                     const requestApartmentIdStr = reqDoc.apartament.toString();
-                    // Asigura-te ca `reqDoc.user` exista si este un ObjectId inainte de a apela toString()
+
                     const requestUserIdStr = reqDoc.user ? (typeof reqDoc.user === 'string' ? reqDoc.user : reqDoc.user.toString()) : null;
 
 
@@ -665,7 +660,6 @@ async function run() {
                     });
                 });
 
-                // C) Proceseaza rezervarile confirmate ale UTILIZATORULUI CURENT pe ALTE APARTAMENTE
                 userRentalsOnOtherApartments.forEach(rental => {
                     const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
                     days.forEach(day => {
@@ -679,7 +673,6 @@ async function run() {
                         });
                 });
 
-                // 6) Dates with usedRooms >= capacity are unavailable
                 const unavailableDates = Object.entries(usedRoomsMap)
                     .filter(([, used]) => used + requestedRooms > capacity)
                     .map(([day]) => day);

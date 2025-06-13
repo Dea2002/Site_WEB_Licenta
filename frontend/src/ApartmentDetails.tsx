@@ -271,6 +271,7 @@ const ApartmentDetails: React.FC = () => {
             // Handle successful request submission
 
             refresh(); // Refresh notifications
+            setSelectedDates(null); // Clear selected dates after successful submission
             alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
             // Optionally navigate to a confirmation or 'my requests' page
         } catch (err: any) {
@@ -695,10 +696,10 @@ const ApartmentDetails: React.FC = () => {
                                     !isAuthenticated
                                         ? "Trebuie sa fiti autentificat pentru a rezerva"
                                         : !user!.faculty_valid
-                                        ? "Trebuie sa aveti facultatea validata pentru a rezerva"
-                                        : selectedDates
-                                        ? "Trimite Cerere Rezervare"
-                                        : "Selectati perioada"
+                                            ? "Trebuie sa aveti facultatea validata pentru a rezerva"
+                                            : selectedDates
+                                                ? "Trimite Cerere Rezervare"
+                                                : "Selectati perioada"
                                 }
                             >
                                 <span className="reserve-btn-text">
