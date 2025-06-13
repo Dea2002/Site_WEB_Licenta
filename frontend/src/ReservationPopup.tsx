@@ -143,7 +143,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             })
             .then(response => {
                 const facultyDetails = response.data;
-                if (!facultyDetails || typeof facultyDetails.aniStudiu !== 'number') {
+                if (!facultyDetails || typeof facultyDetails.aniStudiu !== 'string') {
                     console.warn("Nu s-au putut prelua anii de studiu pentru facultate.");
                     setStudentMaxSelectableDate(null); // Permite selectia
                     return;
@@ -161,17 +161,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                     // Luna septembrie este luna 8 in date-fns (0-indexat)
                     if (currentMonth >= 8 && currentMonth <= 11) { // Sept, Oct, Nov, Dec
                         // Poate rezerva pana la 1 Septembrie anul urmator
-                        maxDateForStudent = startOfMonth(setMonth(addYears(today, 1), 8)); // 1 Septembrie anul viitor
+                        maxDateForStudent = startOfMonth(setMonth(addYears(today, 1), 9)); // 1 Septembrie anul viitor
                     } else { // Ian - Aug
                         // Poate rezerva pana la 1 Septembrie anul curent
-                        maxDateForStudent = startOfMonth(setMonth(today, 8)); // 1 Septembrie anul curent
+                        maxDateForStudent = startOfMonth(setMonth(today, 9)); // 1 Septembrie anul curent
                     }
                 } else {
                     let endCurrentAcademicYear;
                     if (currentMonth < 9) { // Inainte de Octombrie
-                        endCurrentAcademicYear = endOfMonth(setMonth(new Date(currentYear, 0, 1), 8)); // Sfarsit Septembrie anul curent
+                        endCurrentAcademicYear = endOfMonth(setMonth(new Date(currentYear, 0, 1), 9)); // Sfarsit Septembrie anul curent
                     } else {
-                        endCurrentAcademicYear = endOfMonth(setMonth(new Date(currentYear + 1, 0, 1), 8)); // Sfarsit Septembrie anul viitor
+                        endCurrentAcademicYear = endOfMonth(setMonth(new Date(currentYear + 1, 0, 1), 9)); // Sfarsit Septembrie anul viitor
                     }
                     // Permitem rezervari pana la sfarsitul anilor ramasi de studiu
                     maxDateForStudent = addYears(endCurrentAcademicYear, (aniStudiuTotal - anUniversitarCurent));

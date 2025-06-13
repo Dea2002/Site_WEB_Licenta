@@ -19,7 +19,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     });
 
     router.get('/by_name', async (req, res) => {
-        const { name } = req.body;
+        const name = req.query.name;
         if (!name) {
             return res.status(400).json({ message: 'Numele facultatii este necesar.' });
         }

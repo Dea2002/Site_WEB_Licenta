@@ -424,12 +424,7 @@ async function run() {
                 await reservationRequestsCollection.deleteOne({ _id: new ObjectId(reservationId) });
 
                 // adaug campul isActive si mut documentul in colectia de istoric de rezervari 
-                // daca checkIn este astazi atunci isActive este true, daca este in viitor isActive este false
-                if (reservationRequest.checkIn.toDateString() === currentDate.toDateString()) {
-                    reservationRequest.isActive = true;
-                } else if (reservationRequest.checkIn > currentDate) {
-                    reservationRequest.isActive = false;
-                }
+                reservationRequest.isActive = true;
 
                 // Populeaza datele clientului si apartamentului inainte de inserare in istoric
                 const clientData = await usersCollection.findOne({ _id: reservationRequest.client });
@@ -606,78 +601,53 @@ async function run() {
                 }
                 const capacity = apartment.numberOfRooms;
 
-                const rentals = await reservationHistoryCollection
-                    .find({ apartament: new ObjectId(apartmentId), isActive: true })
-                    .project({ checkIn: 1, checkOut: 1, numberOfRooms: 1 })
-                    .toArray();
-
-                const requests = await reservationRequestsCollection
-                    .find()
-                    .project({ checkIn: 1, checkOut: 1, numberOfRooms: 1, apartament: 1, client: 1 })
-                    .toArray();
-
-
-                const userRentalsOnOtherApartments = await reservationHistoryCollection
-                    .find({
-                        user: new ObjectId(currentUserId),
-                        apartament: { $ne: new ObjectId(apartmentId) },
-                        isActive: true
-                    })
-                    .project({ checkIn: 1, checkOut: 1 })
-                    .toArray();
-
-                const userRequestsOnOther = requests.filter(reqDoc => {
-                    const uid = reqDoc.client.toString();
-                    const aid = reqDoc.apartament.toString();
-                    return uid === currentUserId && aid !== apartmentId;
-                });
-
                 const usedRoomsMap = {};
 
-                rentals.forEach(rental => {
-                    const rooms = rental.numberOfRooms || 1;
-                    const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
-                    days.forEach(day => {
+                // === PASUL 1: Ocuparea apartamentului curent ===
+                const rentalsForThisApartment = await reservationHistoryCollection.find({ apartament: new ObjectId(apartmentId), isActive: true }).toArray();
+                const requestsForThisApartment = await reservationRequestsCollection.find({ apartament: new ObjectId(apartmentId) }).toArray();
+
+                rentalsForThisApartment.forEach(r => {
+                    const rooms = r.numberOfRooms || 1;
+                    getDatesBetween(new Date(r.checkIn), new Date(r.checkOut)).forEach(day => {
+                        usedRoomsMap[day] = (usedRoomsMap[day] || 0) + rooms;
+                    });
+                });
+                requestsForThisApartment.forEach(r => {
+                    const rooms = r.numberOfRooms || 1;
+                    getDatesBetween(new Date(r.checkIn), new Date(r.checkOut)).forEach(day => {
                         usedRoomsMap[day] = (usedRoomsMap[day] || 0) + rooms;
                     });
                 });
 
+                // === PASUL 2: Ocuparea utilizatorului in alte parti ===
+                const userRentalsOnOther = await reservationHistoryCollection.find({ user: new ObjectId(currentUserId), apartament: { $ne: new ObjectId(apartmentId) }, isActive: true }).toArray();
+                const userRequestsOnOther = await reservationRequestsCollection.find({ client: new ObjectId(currentUserId), apartament: { $ne: new ObjectId(apartmentId) } }).toArray();
 
-                requests.forEach(reqDoc => {
-                    const roomsInRequest = reqDoc.numberOfRooms || 1;
-                    const daysInRequest = getDatesBetween(new Date(reqDoc.checkIn), new Date(reqDoc.checkOut));
-                    const requestApartmentIdStr = reqDoc.apartament.toString();
-
-                    const requestUserIdStr = reqDoc.user ? (typeof reqDoc.user === 'string' ? reqDoc.user : reqDoc.user.toString()) : null;
-
-
-                    daysInRequest.forEach(day => {
-                        if (requestApartmentIdStr === apartmentId) {
-                            usedRoomsMap[day] = (usedRoomsMap[day] || 0) + roomsInRequest;
-                        } else if (requestUserIdStr && requestUserIdStr === currentUserId) {
-                            usedRoomsMap[day] = capacity;
-                        }
-                    });
+                // Folosim un Set pentru a stoca datele ocupate de utilizator. E mai curat.
+                const userBusyDates = new Set();
+                userRentalsOnOther.forEach(r => {
+                    getDatesBetween(new Date(r.checkIn), new Date(r.checkOut)).forEach(day => userBusyDates.add(day));
+                });
+                userRequestsOnOther.forEach(r => {
+                    getDatesBetween(new Date(r.checkIn), new Date(r.checkOut)).forEach(day => userBusyDates.add(day));
                 });
 
-                userRentalsOnOtherApartments.forEach(rental => {
-                    const days = getDatesBetween(new Date(rental.checkIn), new Date(rental.checkOut));
-                    days.forEach(day => {
-                        usedRoomsMap[day] = capacity;
-                    });
-                });
-                userRequestsOnOther.forEach(rq => {
-                    getDatesBetween(new Date(rq.checkIn), new Date(rq.checkOut))
-                        .forEach(day => {
-                            usedRoomsMap[day] = capacity;
-                        });
-                });
+                // === PASUL 3: Combinarea si calculul final ===
+                const unavailableDates = [];
+                // Defineste un interval de date pe care vrei sa-l verifici, ex: Object.keys(usedRoomsMap) + datele din userBusyDates
+                const allRelevantDates = new Set([...Object.keys(usedRoomsMap), ...userBusyDates]);
 
-                const unavailableDates = Object.entries(usedRoomsMap)
-                    .filter(([, used]) => used + requestedRooms > capacity)
-                    .map(([day]) => day);
-                res.json(unavailableDates);
+                allRelevantDates.forEach(day => {
+                    const isUserBusy = userBusyDates.has(day);
+                    const roomsAlreadyUsed = usedRoomsMap[day] || 0;
+                    const isApartmentFull = (roomsAlreadyUsed + requestedRooms) > capacity;
 
+                    if (isUserBusy || isApartmentFull) {
+                        unavailableDates.push(day);
+                    }
+                });
+                res.json(unavailableDates.sort()); // Sortarea e o idee buna pentru consistenta
 
             } catch (error) {
                 console.error("Eroare la preluarea rezervarilor:", error);
