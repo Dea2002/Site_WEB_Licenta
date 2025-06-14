@@ -91,13 +91,6 @@ const MapEffect: React.FC<{
         map.invalidateSize();
 
         if (selectedPoiForRoute) {
-            // Daca un POI este selectat pentru ruta, doar ne asiguram ca si POI-ul este vizibil,
-            // dar nu facem un fitBounds agresiv care sa includa *toate* POI-urile.
-            // Putem centra pe apartament sau pe o medie intre apartament si POI.
-            // Sau, pur si simplu, nu schimbam vizualizarea daca utilizatorul a navigat manual.
-            // Pentru moment, lasam utilizatorul sa controleze zoom-ul/centrul dupa ce a selectat un POI
-            // sau putem centra pe POI-ul selectat daca dorim.
-            // map.setView([selectedPoiForRoute.lat, selectedPoiForRoute.lng], map.getZoom()); // Exemplu: centreaza pe POI
         } else if (pois.length > 0) {
             // Cand se incarca o lista NOUa de POI-uri (dar niciunul nu e selectat pentru ruta inca),
             // facem fitBounds pentru a le include pe toate.
@@ -105,7 +98,6 @@ const MapEffect: React.FC<{
             pois.forEach(poi => bounds.extend([poi.lat, poi.lng]));
             map.fitBounds(bounds, { padding: [50, 50] });
         } else {
-            // Daca nu sunt POI-uri afisate (ex: la prima incarcare sau dupa reset), centreaza pe apartament.
             map.setView(initialCenter, initialZoom);
         }
     }, [map, apartmentPos, pois, selectedPoiForRoute, initialCenter, initialZoom]); // Adaugam selectedPoiForRoute si initial props
@@ -114,7 +106,36 @@ const MapEffect: React.FC<{
 };
 
 
-const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
+const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, onClose }) => {
+
+    const [apartmentAddress, setApartmentAddress] = useState<string>("Se incarca adresa...");
+    const [cityName, setCityName] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchAddressFromCoords = async () => {
+            if (!lat || !lng) return;
+            try {
+
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ro`);
+                if (!response.ok) throw new Error("Eroare la reverse geocoding");
+                const data = await response.json();
+
+                if (data && data.address) {
+                    const city = data.address.city || data.address.town || data.address.village || data.address.county;
+                    setCityName(city);
+                    setApartmentAddress(data.display_name || "Adresa indisponibila");
+                } else {
+                    throw new Error("Adresa nu a putut fi gasita pentru coordonate.");
+                }
+
+            } catch (error) {
+                console.error("Eroare la obtinerea adresei:", error);
+                setApartmentAddress("Eroare la incarcarea adresei.");
+            }
+        };
+
+        fetchAddressFromCoords();
+    }, [lat, lng]); // se executa doar cand se schimba coordonatele
 
     if (typeof lat !== 'number' || typeof lng !== 'number') {
         console.error("MapPop_up a primit lat/lng invalid:", lat, lng);
@@ -136,107 +157,124 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
 
 
     // Functie pentru a calcula distanta (Haversine) - in metri
-    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-        const R = 6371e3; // Raza Pamantului in metri
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const calculateDistance = (latA: number, lonA: number, latB: number, lonB: number): number => {
+        const razaPamant = 6371000; // in metri
+        const radLatA = (latA * Math.PI) / 180;
+        const radLatB = (latB * Math.PI) / 180;
+        const deltaLat = ((latB - latA) * Math.PI) / 180;
+        const deltaLon = ((lonB - lonA) * Math.PI) / 180;
 
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distanta in metri
+        const formulaHaversine =
+            Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+            Math.cos(radLatA) * Math.cos(radLatB) *
+            Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+        const unghiCentral = 2 * Math.atan2(Math.sqrt(formulaHaversine), Math.sqrt(1 - formulaHaversine));
+        const distanta = razaPamant * unghiCentral;
+        return distanta;
     };
 
     const fetchPOIs = useCallback(async (category: PoiFilterButton) => {
-        if (!lat || !lng) return;
         setLoadingPois(true);
-        setPointsOfInterest([]); // Reseteaza POI-urile anterioare
-        setSelectedPoi(null);       // <-- IMPORTANT: Reseteaza POI-ul selectat
+        setPointsOfInterest([]);
+        setSelectedPoi(null);
         setRoutePolyline(null);
         setActivePoiType(category.id);
 
-        // Determina raza de cautare (ex: 2km = 2000m)
-        const radius = 2000; // in metri
-
-        // Construieste query-ul Overpass
-        // (node[tag](around:radius,lat,lng);); -> cauta noduri
-        // (way[tag](around:radius,lat,lng);); -> cauta cai (ex: cladiri, parcuri)
-        // (relation[tag](around:radius,lat,lng);); -> cauta relatii
-        // Folosim (nwr ...) pentru a cauta in toate tipurile
-        let queryParts: string[] = [];
-        for (const tagKey in category.osmQueryTags) {
-            const tagValue = category.osmQueryTags[tagKey];
-            if (Array.isArray(tagValue)) {
-                tagValue.forEach(val => {
-                    queryParts.push(`(nwr[${tagKey}=${val}](around:${radius},${lat},${lng}););`);
-                });
-            } else {
-                queryParts.push(`(nwr[${tagKey}=${tagValue}](around:${radius},${lat},${lng}););`);
-            }
-        }
-        const overpassQuery = `[out:json][timeout:25];(${queryParts.join('')});out center;`;
-
         try {
-            const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
-            if (!response.ok) {
-                throw new Error(`Eroare Overpass API: ${response.statusText}`);
-            }
-            const data = await response.json();
+            let pois: POI[] = [];
+            // CAZ SPECIAL: Cautare pentru Universitati (in tot orasul)
+            if (category.id === 'universities') {
+                if (!cityName) {
+                    alert("Orasul nu a putut fi determinat. incercati din nou.");
+                    return;
+                }
+                const nominatimResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&addressdetails=1&limit=1&accept-language=ro`);
+                if (!nominatimResponse.ok) throw new Error(`Eroare Nominatim: ${nominatimResponse.statusText}`);
+                const nominatimData = await nominatimResponse.json();
 
-            const pois: POI[] = data.elements.map((element: any): POI | null => {
-                let poiLat, poiLng;
-                if (element.type === "node") {
-                    poiLat = element.lat;
-                    poiLng = element.lon;
-                } else if (element.center) { // Pentru way/relation, Overpass poate returna .center
-                    poiLat = element.center.lat;
-                    poiLng = element.center.lon;
+                if (nominatimData.length === 0) throw new Error(`Nu s-a putut geocodifica orasul: ${cityName}`);
+
+                const locationData = nominatimData[0];
+                let searchArea;
+                if (locationData.boundingbox) {
+                    // MODIFICAREA CHEIE ESTE AICI
+                    const [s, n, w, e] = locationData.boundingbox.map(parseFloat);
+                    // Reconstruim stringul in ordinea corecta pentru Overpass: (Sud, Vest, Nord, Est)
+                    searchArea = `(${s},${w},${n},${e})`;
                 } else {
-                    return null; // Nu avem coordonate valide
+                    // Cazul de fallback ramane neschimbat
+                    searchArea = `(around:15000,${parseFloat(locationData.lat)},${parseFloat(locationData.lon)})`;
                 }
 
-                if (poiLat === undefined || poiLng === undefined) return null;
+                const overpassQuery = `[out:json][timeout:25];(nwr[amenity=university]${searchArea};);out center;`;
+                console.log("Overpass Query pentru universitati:", overpassQuery); // Debugging: afisam query-ul
+                console.log("linkul Overpass:", `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
 
-                const distance = calculateDistance(lat, lng, poiLat, poiLng);
-                return {
-                    id: element.id,
-                    lat: poiLat,
-                    lng: poiLng,
-                    name: element.tags?.name || element.tags?.['name:ro'] || `${category.label} (ID: ${element.id})`, // Numele POI-ului
-                    type: category.poiType, // Tipul setat de buton
-                    distance: Math.round(distance),
-                    osm_type: element.type,
-                    osm_id: element.id,
-                };
-            }).filter((poi: POI) => poi !== null).sort((a: POI, b: POI) => (a.distance || Infinity) - (b.distance || Infinity));
+                const overpassResponse = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
+                if (!overpassResponse.ok) throw new Error(`Eroare Overpass API: ${overpassResponse.statusText}`);
+                const data = await overpassResponse.json();
 
+                // Procesam elementele primite de la Overpass
+                const allUniversities = data.elements.map((el: any): POI | null => {
+                    const center = el.type === 'node' ? el : el.center;
+                    if (!center || typeof center.lat !== 'number' || typeof center.lon !== 'number') return null;
+                    return {
+                        id: el.id, lat: center.lat, lng: center.lon,
+                        name: el.tags?.name || el.tags?.['name:ro'] || `Universitate (ID: ${el.id})`,
+                        type: category.poiType, distance: Math.round(calculateDistance(lat, lng, center.lat, center.lon)),
+                        osm_type: el.type, osm_id: el.id,
+                    };
+                }).filter((poi: POI | null): poi is POI => poi !== null);
+
+                // Eliminam duplicatele dupa nume si sortam dupa distanta
+                pois = Array.from(new Map<string, POI>(allUniversities.map((p: POI) => [p.name, p])).values())
+                    .sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+            }
+            // CAZ GENERAL: Cautare pentru celelalte categorii (intr-o raza de 2km)
+            else {
+                const radius = 2000;
+                const queryTag = Object.keys(category.osmQueryTags)[0];
+                const queryValue = category.osmQueryTags[queryTag];
+                const overpassQuery = `[out:json][timeout:25];(nwr[${queryTag}=${queryValue}](around:${radius},${lat},${lng}););out center;`;
+                console.log("Overpass Query:", overpassQuery); // Debugging: afisam query-ul
+                const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
+                if (!response.ok) throw new Error(`Eroare Overpass API: ${response.statusText}`);
+                const data = await response.json();
+
+                pois = data.elements.map((el: any): POI | null => {
+                    const center = el.type === 'node' ? el : el.center;
+                    if (!center || typeof center.lat !== 'number' || typeof center.lon !== 'number') return null;
+                    return {
+                        id: el.id, lat: center.lat, lng: center.lon,
+                        name: el.tags?.name || el.tags?.['name:ro'] || `${category.label} (ID: ${el.id})`,
+                        type: category.poiType, distance: Math.round(calculateDistance(lat, lng, center.lat, center.lon)),
+                        osm_type: el.type, osm_id: el.id,
+                    };
+                }).filter((poi: POI | null): poi is POI => poi !== null)
+                    .sort((a: POI, b: POI) => (a.distance || Infinity) - (b.distance || Infinity));
+            }
             setPointsOfInterest(pois);
         } catch (error) {
             console.error(`Eroare la preluarea POI-urilor (${category.label}):`, error);
-            // Poti seta o stare de eroare aici pentru a o afisa in UI
         } finally {
             setLoadingPois(false);
         }
-    }, [lat, lng]); // `calculateDistance` nu se schimba, deci nu e nevoie in dependente
-
+    }, [lat, lng, cityName]);
 
     // Pentru a desena ruta cand un POI este selectat
 
     const handlePoiClick = async (poi: POI) => {
         setSelectedPoi(poi);
         setRoutePolyline(null); // Reseteaza ruta anterioara
-        // Cauta o ruta folosind un serviciu de rutare (ex: OSRM, GraphHopper, sau chiar Google Directions via backend)
-        // Aici un exemplu simplu cu OSRM (Open Source Routing Machine) - necesita un server OSRM sau folosirea demo.project-osrm.org
+
         try {
             const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${lng},${lat};${poi.lng},${poi.lat}?overview=full&geometries=geojson`);
-            // Atentie: coordonatele pentru OSRM sunt lon,lat
+
             if (!response.ok) throw new Error("Eroare la serviciul de rutare");
             const routeData = await response.json();
             if (routeData.routes && routeData.routes.length > 0) {
-                const coordinates = routeData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as LatLngExpression); // OSRM returneaza [lon, lat]
+                const coordinates = routeData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as LatLngExpression);
                 setRoutePolyline(coordinates);
             }
         } catch (error) {
@@ -289,13 +327,12 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
                     {/* Partea Dreapta: Harta */}
                     <div className="map-container-wrapper">
                         <p className="map-address-display">
-                            <strong style={{ color: "#FF4500" }}>Locatia Apartamentului:</strong> {address}
+                            <strong style={{ color: "#FF4500" }}>Locatia Apartamentului:</strong> {apartmentAddress}
                         </p>
                         <MapContainer
                             center={apartmentPosition}
                             zoom={mapZoom}
-                            style={{ height: "100%", width: "100%" }} // Ajustat pentru a umple wrapper-ul
-                        // ref={mapRef} // `whenCreated` este depreciat, folosim `useMap` in componenta `MapEffect`
+                            style={{ height: "100%", width: "100%" }}
                         >
                             <MapEffect initialCenter={apartmentPosition} initialZoom={initialMapZoom} pois={pointsOfInterest} apartmentPos={apartmentPosition} selectedPoiForRoute={selectedPoi} />
                             <TileLayer
@@ -304,7 +341,7 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, address, onClose }) => {
                             />
                             {/* Marker pentru Apartament */}
                             <Marker position={apartmentPosition} icon={apartmentIcon}>
-                                <Popup>Apartament: {address}</Popup>
+                                <Popup>Apartament: {apartmentAddress}</Popup>
                             </Marker>
 
                             {/* Markere pentru POI-uri */}

@@ -199,7 +199,6 @@ const FacultyMarks: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Mapam peste cererile primite (presupuse a fi pending) */}
                                 {requests.map((request) => (
                                     <tr key={request._id}>
                                         <td>{request.studentInfo.fullName}</td>
@@ -209,7 +208,6 @@ const FacultyMarks: React.FC = () => {
                                         <td>{request.studentInfo.medie}</td>
                                         <td>{formatDate(request.requestDate)}</td>
                                         <td>
-                                            {/* Afisam butoanele mereu, deoarece presupunem ca toate cererile listate sunt pending */}
                                             <div className="action-buttons">
                                                 <button onClick={() => handleApprove(request._id)} className="approve-button"> Aproba </button>
                                                 <button onClick={() => handleDeclineClick(request._id)} className="reject-button"> Respinge </button>

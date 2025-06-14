@@ -558,7 +558,7 @@ const Home: React.FC = () => {
             const selectedUni = foundUniversities.find(
                 (uni) => uni._id === currentFilters.selectedUniversityId,
             );
-            const maxDistM = parseFloat(currentFilters.maxDistanceToUniversity) * 1000; // Convertim km in metri
+            const maxDistM = parseFloat(currentFilters.maxDistanceToUniversity) * 1000; // distanta in metri
 
             if (
                 selectedUni &&
@@ -577,10 +577,8 @@ const Home: React.FC = () => {
                         );
                         return distance <= maxDistM;
                     }
-                    return false; // Exclude apartamentele fara coordonate
+                    return false;
                 });
-            } else if (selectedUni) {
-            } else {
             }
         }
 
@@ -879,12 +877,11 @@ const Home: React.FC = () => {
         const cityToSearch =
             universitySearchCity || (calledFromInitialLoad ? filters.location : "");
         if (!cityToSearch.trim() && !calledFromInitialLoad) {
-            // Permite rularea daca e din initial load si filters.location ar fi gol
             alert("Va rugam introduceti un oras sau o zona pentru cautarea universitatilor.");
             return;
         }
         if (!cityToSearch.trim() && calledFromInitialLoad && !filters.location) {
-            return; // Nu cauta daca niciun oras nu e specificat
+            return;
         }
 
         setLoadingFoundUniversities(true);
@@ -900,9 +897,7 @@ const Home: React.FC = () => {
 
         try {
             const nominatimResponse = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-                    cityToSearch,
-                )}&format=json&addressdetails=1&limit=1&accept-language=ro`,
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityToSearch)}&format=json&addressdetails=1&limit=1&accept-language=ro`,
             );
             if (!nominatimResponse.ok)
                 throw new Error(`Eroare Nominatim: ${nominatimResponse.statusText}`);
@@ -911,51 +906,42 @@ const Home: React.FC = () => {
             if (nominatimData.length === 0) {
                 if (!calledFromInitialLoad) alert(`Nu s-a putut gasi locatia: ${cityToSearch}`);
                 else
-                    console.warn(
-                        `Nu s-a putut geocodifica locatia initiala pentru universitati: ${cityToSearch}`,
-                    );
+                    console.warn(`Nu s-a putut geocodifica locatia initiala pentru universitati: ${cityToSearch}`);
                 setLoadingFoundUniversities(false);
                 return;
             }
             const locationData = nominatimData[0];
             let searchAreaQueryPart: string;
-            if (locationData.boundingbox) {
+            if (locationData.boundingbox) { // in cazul in care datele despre oras contin limitele acestuia
                 const [s, n, w, e] = locationData.boundingbox.map(parseFloat);
                 searchAreaQueryPart = `(${s},${w},${n},${e})`;
             } else {
+                // in caz contrar, cautam pe o raza de 15km fata de centrul orasului
                 const cityLat = parseFloat(locationData.lat);
                 const cityLng = parseFloat(locationData.lon);
                 const searchRadiusForCity = 15000; // 15km
                 searchAreaQueryPart = `(around:${searchRadiusForCity},${cityLat},${cityLng})`;
             }
             const overpassQuery = `[out:json][timeout:25];(nwr[amenity=university]${searchAreaQueryPart};);out center;`;
-            const overpassResponse = await fetch(
-                `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`,
-            );
+            const overpassResponse = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
             if (!overpassResponse.ok)
                 throw new Error(`Eroare Overpass API: ${overpassResponse.statusText}`);
             const overpassData = await overpassResponse.json();
-            const universities = overpassData.elements
-                .map((el: any) => {
-                    const name =
-                        el.tags?.name ||
-                        el.tags?.["name:ro"] ||
-                        el.tags?.official_name ||
-                        `Universitate (ID OSM: ${el.id})`;
-                    let latVal, lngVal;
-                    if (el.type === "node") {
-                        latVal = el.lat;
-                        lngVal = el.lon;
-                    } else if (el.center) {
-                        latVal = el.center.lat;
-                        lngVal = el.center.lon;
-                    } else {
-                        return null;
-                    }
-                    if (typeof latVal !== "number" || typeof lngVal !== "number") return null;
-                    return { _id: String(el.id), name, latitude: latVal, longitude: lngVal };
-                })
-                .filter(Boolean) as University[];
+            const universities = overpassData.elements.map((el: any) => {
+                const name = el.tags?.name || el.tags?.["name:ro"] || el.tags?.official_name || `Universitate (ID OSM: ${el.id})`;
+                let latVal, lngVal;
+                if (el.type === "node") {
+                    latVal = el.lat;
+                    lngVal = el.lon;
+                } else if (el.center) {
+                    latVal = el.center.lat;
+                    lngVal = el.center.lon;
+                } else {
+                    return null;
+                }
+                if (typeof latVal !== "number" || typeof lngVal !== "number") return null;
+                return { _id: String(el.id), name, latitude: latVal, longitude: lngVal };
+            }).filter(Boolean) as University[];
             const uniqueUniversities = Array.from(
                 new Map(universities.map((uni) => [uni.name, uni])).values(),
             );
@@ -1038,10 +1024,8 @@ const Home: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    {/* Keep your class */}
                     <div className="filters-header">
                         {" "}
-                        {/* New header section */}
                         <h2>
                             <i className="fas fa-filter"></i> Filtreaza Oferte
                         </h2>
@@ -1053,7 +1037,6 @@ const Home: React.FC = () => {
                             <i className="fas fa-undo"></i> Reset
                         </button>
                     </div>
-                    {/* faculty location in promity filter */}
                     <div className="filter-group">
                         <label htmlFor="uni-search-city">Cauta Universitati in Oras:</label>
                         <input
@@ -1071,8 +1054,8 @@ const Home: React.FC = () => {
                             {loadingFoundUniversities ? "Se cauta..." : "Cauta Univ."}
                         </button>
                     </div>
-                    {/* University Selection & Distance (doar daca s-au gasit universitati) */}
-                    {(foundUniversities.length > 0 || filters.selectedUniversityId) && ( // Afiseaza si daca un ID e deja in filtru (din URL)
+
+                    {(foundUniversities.length > 0 || filters.selectedUniversityId) && (
                         <div className="filter-group">
                             <label htmlFor="filter-university">
                                 <i className="fas fa-school"></i> Proximitate Universitate:
@@ -1083,9 +1066,7 @@ const Home: React.FC = () => {
                                 onChange={(e) =>
                                     handleFilterChange("selectedUniversityId", e.target.value)
                                 }
-                                disabled={
-                                    loadingFoundUniversities && foundUniversities.length === 0
-                                }
+                                disabled={loadingFoundUniversities && foundUniversities.length === 0}
                             >
                                 <option value="">Selecteaza o universitate</option>
                                 {loadingFoundUniversities && foundUniversities.length === 0 ? (

@@ -29,7 +29,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             setUnreadCount(data.unread);
         } catch (error) {
             console.error("Failed to fetch unread count:", error);
-            // Poti alege sa resetezi la 0 sau sa pastrezi valoarea veche in caz de eroare
             // setUnreadCount(0);
         }
     }, [isAuthenticated, token]);
@@ -44,23 +43,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         setUnreadCount(0); // Resetam la 0 daca nu e autentificat
     }, [isAuthenticated, token, fetchUnread]);
-
-    // useEffect(() => {
-    //     fetchUnread(); // Fetch la mount si la schimbarea auth/token
-
-    //     // Polling - porneste doar daca e autentificat
-    //     let intervalId: NodeJS.Timeout | null = null;
-    //     if (isAuthenticated) {
-    //         intervalId = setInterval(fetchUnread, 60000);
-    //     }
-
-    //     // Cleanup: opreste intervalul la unmount sau cand se schimba starea de autentificare
-    //     return () => {
-    //         if (intervalId) {
-    //             clearInterval(intervalId);
-    //         }
-    //     };
-    // }, [fetchUnread, isAuthenticated]);
 
     // Functia refresh poate fi simplificata pentru a refolosi fetchUnread
     const refresh = useCallback(() => {

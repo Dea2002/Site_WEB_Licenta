@@ -9,7 +9,7 @@ interface DeclinePopupProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (reason: string) => void;
-    requestId: string | null; // Pentru a sti la ce cerere se refera
+    requestId: string | null;
     isSubmitting: boolean;
     error?: string | null;
 }
@@ -18,7 +18,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     const [reason, setReason] = useState("");
 
     useEffect(() => {
-        // Reseteaza motivul cand popup-ul se redeschide pentru o noua cerere
         if (isOpen) {
             setReason("");
         }
@@ -29,7 +28,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!reason.trim()) {
-            // Poti adauga o validare/eroare locala aici daca doresti
             alert("Va rugam introduceti un motiv pentru respingere.");
             return;
         }
@@ -149,7 +147,7 @@ const FacultyAssociations: React.FC = () => {
         try {
             await api.post(
                 `/faculty/association/${currentRequestIdForDecline}/reject`,
-                { reason: reason }, // Trimitem motivul in body
+                { reason: reason },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setSuccessMessage("Cererea a fost respinsa cu succes!");
@@ -160,7 +158,6 @@ const FacultyAssociations: React.FC = () => {
         } catch (err: any) {
             console.error("Eroare la respingerea cererii:", err);
             setDeclineSubmitError(err.response?.data?.message || "Nu s-a putut respinge cererea.");
-            // Nu inchidem popup-ul la eroare, pentru ca utilizatorul sa poata reincerca sau corecta
         } finally {
             setIsSubmittingDecline(false);
         }
@@ -185,21 +182,17 @@ const FacultyAssociations: React.FC = () => {
                                     <th>Email Student</th>
                                     <th>Data Cererii</th>
                                     <th>Numar Matricol</th>
-                                    {/* Statusul a fost eliminat din lipsa datelor */}
                                     <th>Actiuni</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Mapam peste cererile primite (presupuse a fi pending) */}
                                 {requests.map((request) => (
                                     <tr key={request._id}>
-                                        {/* Afisam datele conform interfetei */}
                                         <td>{request.numeStudent}</td>
                                         <td>{request.emailStudent}</td>
                                         <td>{formatDate(request.requestDate)}</td>
                                         <td>{request.numar_matricol}</td>
                                         <td>
-                                            {/* Afisam butoanele mereu, deoarece presupunem ca toate cererile listate sunt pending */}
                                             <div className="request-item-actions">
                                                 <button onClick={() => handleApprove(request._id)} className="button-accept"> Aproba </button>
                                                 <button onClick={() => handleDeclineClick(request._id)} className="button-decline"> Respinge </button>

@@ -194,7 +194,6 @@ const Register: React.FC = () => {
             return;
         }
 
-        // Define your ranges (adjust these as needed)
         if (medieValue >= 9.5) {
             medieRange = "Categoria 1: (9.50 - 10.00)";
         } else if (medieValue >= 9.0) {

@@ -133,7 +133,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             const associationRequest = await associationsRequestsCollection.findOne({ _id: associationRequestId });
 
             if (!associationRequest) {
-                // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
                 return res.status(404).json({ message: 'Cererea de asociere nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
             }
 
@@ -148,7 +147,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             // add a notification for the student
             notificationService.createNotification(message = `Cererea de asociere a fost respinsa cu motivul ${reason}.`, receiver = studentId);
 
-            // send positive response
             res.status(200).json({ message: 'Cererea de asociere a fost respinsa.' });
         } catch (error) {
             console.error("Eroare la respingerea cererii de asociere: ", error);
@@ -234,63 +232,32 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         const markRequestId = new ObjectId(id);
 
         try {
-            // 1. Gaseste cererea
             const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
-            if (!markRequest) {
-                return res.status(404).json({
-                    message:
-                        'Cererea de actualizare medii nu a fost gasita sau nu mai este pending.'
-                });
-            }
+            if (!markRequest) return res.status(404).json({ message: 'Cererea de actualizare medii nu a fost gasita sau nu mai este pending.' });
 
-            // 2. Gaseste studentul
-            const student = await usersCollection.findOne({
-                _id: new ObjectId(markRequest.studentId)
-            });
-            if (!student) {
-                return res.status(404).json({ message: 'Studentul nu a fost gasit.' });
-            }
 
-            // 3. Gaseste facultatea din cerere (markRequest.facultyId)
-            const facultyDoc = await facultiesCollection.findOne({
-                _id: new ObjectId(markRequest.facultyId)
-            });
-            if (!facultyDoc) {
-                return res
-                    .status(404)
-                    .json({ message: 'Facultatea asociata nu a fost gasita.' });
-            }
+            const student = await usersCollection.findOne({ _id: new ObjectId(markRequest.studentId) });
+            if (!student) return res.status(404).json({ message: 'Studentul nu a fost gasit.' });
 
-            // 4. Actualizeaza campul medie_valid al studentului cu valoarea din facultate
+
+            const facultyDoc = await facultiesCollection.findOne({ _id: new ObjectId(markRequest.facultyId) });
+
+            if (!facultyDoc) return res.status(404).json({ message: 'Facultatea asociata nu a fost gasita.' });
+
             const userUpdate = await usersCollection.updateOne(
                 { _id: student._id },
                 { $set: { medie_valid: facultyDoc.medie_valid } }
             );
-            if (userUpdate.matchedCount === 0) {
-                return res
-                    .status(404)
-                    .json({ message: 'Nu s-a putut actualiza medie_valid pentru student.' });
-            }
+            if (userUpdate.matchedCount === 0) return res.status(404).json({ message: 'Nu s-a putut actualiza medie_valid pentru student.' });
 
-            // 5. sterge cererea de actualizare
-            const deleteResult = await markRequestsCollection.deleteOne({
-                _id: markRequestId
-            });
-            if (deleteResult.deletedCount === 0) {
-                return res
-                    .status(500)
-                    .json({ message: 'Nu s-a putut sterge cererea de actualizare.' });
-            }
 
-            // 6. Trimite notificare studentului
-            await notificationService.createNotification(
-                `Termenul de valabilitate a mediei a fost actualizat la ${facultyDoc.medie_valid}.`,
-                student._id
-            );
+            const deleteResult = await markRequestsCollection.deleteOne({ _id: markRequestId });
+            if (deleteResult.deletedCount === 0) return res.status(500).json({ message: 'Nu s-a putut sterge cererea de actualizare.' });
 
-            return res
-                .status(200)
-                .json({ message: 'Cererea a fost aprobata si media actualizata.' });
+
+            await notificationService.createNotification(`Termenul de valabilitate a mediei a fost actualizat la ${facultyDoc.medie_valid}.`, student._id);
+
+            return res.status(200).json({ message: 'Cererea a fost aprobata si media actualizata.' });
         } catch (error) {
             console.error("Eroare la acceptarea cererii de actualizare medii:", error);
             return res
@@ -313,13 +280,11 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
 
             if (!markRequest) {
-                // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
                 return res.status(404).json({ message: 'Cererea de actualizare de medie nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
             }
 
             const { studentId } = markRequest;
 
-            // delete the current association request
             const deleteRequest = await markRequestsCollection.deleteOne({ _id: markRequestId });
             if (deleteRequest.deletedCount === 0) {
                 return res.status(500).json({ message: 'Cererea de actualizare medie nu a putut fi stearsa.' });
@@ -328,7 +293,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             // add a notification for the student
             notificationService.createNotification(message = `Cererea de actualizare medie a fost respinsa cu motivul ${reason}.`, receiver = studentId);
 
-            // send positive response
             res.status(200).json({ message: 'Cererea de actualizare medie a fost respinsa.' });
         } catch (error) {
             console.error("Eroare la respingerea cererii de asociere: ", error);
