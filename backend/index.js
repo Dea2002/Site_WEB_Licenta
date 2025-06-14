@@ -101,7 +101,7 @@ io.on('connection', socket => {
     });
 });
 
-async function updateReservationStatusesScheduledTask(databaseInstance) {
+async function updateReservationStatusesScheduledTask(databaseInstance, notificationService) {
     if (!databaseInstance) {
         console.error('CRON: Instanta DB nu este disponibila.');
         return;
@@ -112,6 +112,7 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
     const reservationHistoryCollection = databaseInstance.collection("reservation_history");
     const reservationRequestsCollection = databaseInstance.collection("reservation_requests");
     const apartmentsCollection = databaseInstance.collection("apartments");
+    const notificationsCollection = databaseInstance.collection("notifications");
 
     const currentDate = new Date();
     const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Doar data, fara ora
@@ -178,6 +179,9 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
             checkOut: {
                 $gte: currentDateOnly, // Expira azi sau in viitor
                 $lt: tenDaysFromNow    // Dar inainte de 10 zile de acum
+            },
+            checkIn: {
+                $lte: currentDateOnly // Inceputul chiriei a fost inainte de azi
             }
         }).toArray();
 
@@ -215,12 +219,11 @@ async function updateReservationStatusesScheduledTask(databaseInstance) {
 
                 if (clientId) {
                     try {
-                        await notificationsCollection.insertOne({
-                            receiver: clientId, // ObjectId
-                            message: `Chiria ta pentru apartamentul de la ${apartmentLocation} expira ${daysLeftString} (pe ${checkOutDate.toLocaleDateString()}).`,
-                            isRead: false,
-                            createdAt: new Date()
-                        });
+                        notificationService.createNotification(
+                            message = `Chiria ta pentru apartamentul de la ${apartmentLocation} expira ${daysLeftString} (pe ${checkOutDate.toLocaleDateString()}).`,
+                            receiver = clientId
+                        );
+
                     } catch (notifError) {
                         console.error(`CRON: Eroare la crearea notificarii de expirare iminenta pentru client ${clientId}, chirie ${rental._id}:`, notifError);
                     }
@@ -269,18 +272,19 @@ async function run() {
         const reviewsCollection = database.collection("reviews");
 
         // cron.schedule('5 0 * * *', () => { // Zilnic la 00:05
+
+        const initNotificationService = require('./utils/notificationService');
+        const notificationService = initNotificationService(notificationsCollection);
+
         cron.schedule('*/2 * * * *', () => { // la fiecare 2 minute
             console.log('-------------------------------------');
             console.log('CRON: Ruleaza sarcina programata de actualizare a statusurilor...');
-            updateReservationStatusesScheduledTask(database); // Paseaza instanta DB
+            updateReservationStatusesScheduledTask(database, notificationService); // Paseaza instanta DB
         }, {
             scheduled: true,
             timezone: "Europe/Bucharest"
         });
         console.log("CRON: Job pentru actualizarea statusurilor rezervarilor a fost programat.");
-
-        const initNotificationService = require('./utils/notificationService');
-        const notificationService = initNotificationService(notificationsCollection);
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
