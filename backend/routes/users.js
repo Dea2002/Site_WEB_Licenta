@@ -14,9 +14,8 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         const { userId } = req.params;
         const now = new Date();
 
-
         try {
-            // 1) Gaseşte rezervarea activa curenta
+            // gaseste rezervarea activa curenta
             const currentRent = await reservationHistoryCollection.findOne({
                 client: new ObjectId(userId),
                 isActive: true,
@@ -24,11 +23,21 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 checkOut: { $gte: now }
             });
 
+            console.log(currentRent);
+
+
             if (!currentRent) {
-                return res.json(null);
+                return res.status(404).json({ message: 'Nu exista chirie activa pentru acest utilizator.' });
             }
 
-            // 2) (Opţional) Ia şi detalii despre apartament
+            const user = await usersCollection.findOne(
+                { _id: new ObjectId(userId) });
+
+            if (!user) {
+                return res.status(404).json({ message: 'Utilizatorul nu a fost gasit.' });
+            }
+
+            // detalii despre apartament
             const apartment = await apartmentsCollection.findOne({
                 _id: currentRent.apartament
             }, {
@@ -37,18 +46,19 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                     price: 1,
                     image: 1,
                     numberOfRooms: 1,
-                    ownerId: 1
+                    ownerId: 1,
+                    utilities: 1,
                 }
             });
 
-            // 3) Trimite raspunsul
+            // trimite raspunsul
             return res.json({
                 _id: currentRent._id,
                 apartment: apartment || null,
                 checkIn: currentRent.checkIn,
                 checkOut: currentRent.checkOut,
-                rooms: currentRent.numberOfRooms,
-                createdAt: currentRent.createdAt
+                finalPrice: currentRent.finalPrice,
+                numberOfRooms: currentRent.numberOfRooms,
             });
         } catch (err) {
             console.error('Error fetching current rent:', err);

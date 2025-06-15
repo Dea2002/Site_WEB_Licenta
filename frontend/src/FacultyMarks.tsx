@@ -184,7 +184,7 @@ const FacultyMarks: React.FC = () => {
             {!error && (
                 <div className="requests-list">
                     {requests.length === 0 ? (
-                        <p>Nu exista cereri de asociere in asteptare.</p>
+                        <p>Nu exista cereri de validare a mediei in asteptare.</p>
                     ) : (
                         <table>
                             <thead>

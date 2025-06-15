@@ -12,21 +12,30 @@ interface CurrentRentProps {
 interface RentDetails {
     _id: string;
     apartment: {
+        numberOfNights: number;
         _id: string;
         location: string;
         price: number;
         image?: string;
         numberOfRooms: number;
         ownerId: string;
+        utilities: {
+            TVPrice: number;
+            electricityPrice: number;
+            gasPrice: number;
+            waterPrice: number;
+            internetPrice: number;
+        }
     };
     checkIn: string;   // ISO date
     checkOut: string;  // ISO date
     rooms: number;
     createdAt: string;
-    numberOfNights: number;
-    priceRent: number;
+    finalPrice: number;
     discount: number;
     priceUtilities: number;
+    numberOfRooms: number;
+
 }
 interface UserBrief {
     _id: string;
@@ -156,7 +165,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         );
     }
     const pricePerRoom = rentData.apartment.price;
-    const numberOfRooms = rentData.rooms;
+    const numberOfRooms = rentData.numberOfRooms; // ! gresit
     const checkInDate = parseISO(rentData.checkIn);
     const checkOutDate = parseISO(rentData.checkOut);
     const nights = differenceInCalendarDays(checkOutDate, checkInDate);
@@ -210,7 +219,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         }
     }
 
-    // === Afisam datele chiriei curente ===
+    console.log('rentData:', rentData);
 
     return (
         <div className="profile-section-content">
@@ -244,7 +253,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                 </p>
 
                 <p>
-                    <strong>Pret: </strong>{rentData.priceRent * rentData.numberOfNights * ((100 - rentData.discount) / 100) + rentData.priceUtilities * rentData.numberOfNights} RON
+                    <strong>Pret: </strong>{rentData.finalPrice} RON
                 </p>
 
                 {/* --- Butoane actiuni --- */}
