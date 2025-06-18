@@ -276,15 +276,15 @@ async function run() {
         const initNotificationService = require('./utils/notificationService');
         const notificationService = initNotificationService(notificationsCollection);
 
-        cron.schedule('*/2 * * * *', () => { // la fiecare 2 minute
-            console.log('-------------------------------------');
-            console.log('CRON: Ruleaza sarcina programata de actualizare a statusurilor...');
-            updateReservationStatusesScheduledTask(database, notificationService); // Paseaza instanta DB
-        }, {
-            scheduled: true,
-            timezone: "Europe/Bucharest"
-        });
-        console.log("CRON: Job pentru actualizarea statusurilor rezervarilor a fost programat.");
+        // cron.schedule('*/2 * * * *', () => { // la fiecare 2 minute
+        //     console.log('-------------------------------------');
+        //     console.log('CRON: Ruleaza sarcina programata de actualizare a statusurilor...');
+        //     updateReservationStatusesScheduledTask(database, notificationService); // Paseaza instanta DB
+        // }, {
+        //     scheduled: true,
+        //     timezone: "Europe/Bucharest"
+        // });
+        // console.log("CRON: Job pentru actualizarea statusurilor rezervarilor a fost programat.");
 
         // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;

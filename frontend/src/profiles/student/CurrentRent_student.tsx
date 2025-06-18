@@ -1,6 +1,6 @@
 import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import React, { useState, useEffect, useContext } from 'react';
-
+import { useInitiatePrivateChat } from "../../hooks/useInitiateChat";
 import { AuthContext } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './profile_student.css';
@@ -50,6 +50,8 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const [activeRenters, setActiveRenters] = useState<UserBrief[]>([]);
     const [isRentersLoading, setIsRentersLoading] = useState(false);
     const [rentersError, setRentersError] = useState<string | null>(null);
+    const { isLoadingPrivate, initiatePrivateChat } = useInitiatePrivateChat();
+
     const navigate = useNavigate();
     useEffect(() => {
         const fetchCurrentRent = async () => {
@@ -175,20 +177,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const showMonthlyEstimate = totalNights > 30;
     const monthlyEstimate = pricePerRoom * 30 * numberOfRooms;
 
-
-    async function openChatWith(otherUserId: string) {
-        const { data: conversation } = await api.post<{
-            _id: string;
-            participants: string[];
-            isGroup: boolean;
-            createdAt: string;
-            lastMessageAt: string;
-        }>('/conversations', {
-            participants: [user!._id, otherUserId],
-        });
-        navigate(`/chat/${conversation._id}`);
-    }
-
     // handler-ul pentru grup chat
     async function openApartmentChat(withOwner: boolean) {
         if (!rentData) return;
@@ -271,7 +259,8 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     {/* Chat cu proprietarul */}
                     <button
                         className="btn-chat-owner"
-                        onClick={() => navigate(`/chat/${rentData!.apartment.ownerId}`)}
+                        onClick={() => initiatePrivateChat(rentData!.apartment.ownerId)}
+                        disabled={isLoadingPrivate}
                     >
                         Proprietar
                     </button>
@@ -291,9 +280,8 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                                 <button
                                     key={u._id}
                                     className="btn-chat-colleague"
-                                    onClick={() => {
-                                        openChatWith(u._id);
-                                    }}
+                                    onClick={() => { initiatePrivateChat(u._id); }}
+                                    disabled={isLoadingPrivate}
                                 >
                                     {u.fullName}
                                 </button>

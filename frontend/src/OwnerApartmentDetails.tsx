@@ -7,11 +7,15 @@ import { storage } from "./firebaseConfig";
 import { Apartment, PaginatedRentals, Rental, ALL_POSSIBLE_FACILITIES_MAP, Review, PaginatedResponse } from "./types";
 import "./OwnerApartmentDetails.css";
 import ReviewList from "./reviews/ReviewList";
+import { useInitiateGroupChat, useInitiatePrivateChat } from "./hooks/useInitiateChat";
 
 const OwnerApartmentDetails: React.FC = () => {
     const { token, user } = useContext(AuthContext);
     const { apartmentId } = useParams<{ apartmentId: string }>();
     const navigate = useNavigate();
+
+    const { isLoadingPrivate, initiatePrivateChat } = useInitiatePrivateChat();
+    const { isLoadingGroup, initiateGroupChat } = useInitiateGroupChat();
 
     const [apartment, setApartment] = useState<Apartment | null>(null);
     const [conversationId, setConversationId] = useState<string | null>(null);
@@ -881,9 +885,13 @@ const OwnerApartmentDetails: React.FC = () => {
                             {currentRentals.map(rental => (
                                 <li key={rental._id}>
                                     Chirias:{" "}
-                                    <Link to={`/chat/${rental.clientData._id}`} /* className="chat-link" */>
+                                    <button
+                                        onClick={() => initiatePrivateChat(rental.clientData._id)}
+                                        disabled={isLoadingPrivate}
+                                    >
                                         {rental.clientData?.fullName || "N/A"}
-                                    </Link>
+                                    </button>
+
                                     <br />
                                     Perioada: {new Date(rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut).toLocaleDateString()} <br />
                                     Status: {rental.derivedStatus}

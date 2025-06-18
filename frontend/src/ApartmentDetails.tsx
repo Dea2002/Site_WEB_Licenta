@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "./api";
-import { useNavigate } from "react-router-dom";
 import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
 import { AuthContext } from "./AuthContext";
 import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
@@ -18,9 +17,10 @@ import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
 import ReviewList from "./reviews/ReviewList";
 import ReviewForm from "./reviews/ReviewForm";
 import { Review, PaginatedResponse } from "./types";
+import { useInitiatePrivateChat } from "./hooks/useInitiateChat";
 
 const ApartmentDetails: React.FC = () => {
-    const navigate = useNavigate();
+
     const { refresh } = useNotifications();
     const { id } = useParams<{ id: string }>();
     const [apartment, setApartment] = useState<Apartment | null>(null);
@@ -28,6 +28,7 @@ const ApartmentDetails: React.FC = () => {
     const [error, setError] = useState("");
     const { isAuthenticated, user, token } = useContext(AuthContext);
     const [colleaguesList, setColleaguesList] = useState<Colleague[]>([]);
+    const { isLoadingPrivate, initiatePrivateChat } = useInitiatePrivateChat();
 
     // stari pentru facilitati
     const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
@@ -336,18 +337,7 @@ const ApartmentDetails: React.FC = () => {
             </div>
         );
     }
-    async function openChatWith(otherUserId: string) {
-        const { data: conversation } = await api.post<{
-            _id: string;
-            participants: string[];
-            isGroup: boolean;
-            createdAt: string;
-            lastMessageAt: string;
-        }>("/conversations", {
-            participants: [user!._id, otherUserId],
-        });
-        navigate(`/chat/${conversation._id}`);
-    }
+
     // Helper function to render selected dates and costs (part of the new right section logic)
     const renderSelectedDatesInfo = () => {
         if (!selectedDates || !bookingCosts) {
@@ -666,9 +656,8 @@ const ApartmentDetails: React.FC = () => {
                                     </button>
                                     <button
                                         className="owner-section-button chat-btn"
-                                        onClick={() =>
-                                            openChatWith(apartment!.ownerInformation!._id)
-                                        }
+                                        onClick={() => initiatePrivateChat(apartment!.ownerInformation!._id)}
+                                        disabled={isLoadingPrivate}
                                     >
                                         Chat
                                     </button>{" "}

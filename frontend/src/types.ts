@@ -147,3 +147,31 @@ export interface PaginatedResponse<T> {
     pages: number; // Numarul total de pagini
     totalReviews: number; // Numarul total de elemente care corespund filtrului
 }
+
+export interface Conversation {
+    _id: string;
+    participants: User[];
+    type: "private" | "group";
+    groupName?: string;
+    groupAdmin?: User;
+    lastMessage?: Message;
+    updatedAt: string;
+}
+
+export interface Message {
+    _id: string;
+    conversationId: string;
+    sender: User;
+    content: string;
+    createdAt: string;
+}
+
+// Tipuri specifice pentru raspunsurile API
+export interface InitiateChatResponse {
+    conversationId: string;
+}
+
+export interface ChatDataResponse {
+    details: Conversation;
+    messages: Message[];
+}

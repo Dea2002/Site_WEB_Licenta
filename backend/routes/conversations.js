@@ -6,6 +6,60 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 function createConversationsRoutes(usersCollection, conversationsCollection) {
 
+    router.post('/initiatePrivate', authenticateToken, async (req, res) => {
+        const userId = req.user._id;
+        const recipientId = req.body.recipientId;
+
+        if (!recipientId || !ObjectId.isValid(recipientId)) {
+            return res.status(400).json({ message: 'ID destinatar invalid.' });
+        }
+
+        if (userId.toString() === recipientId) {
+            return res.status(400).json({ message: 'Nu poti incepe o conversatie cu tine insuti.' });
+        }
+
+        const participantsOids = [new ObjectId(userId), new ObjectId(recipientId)];
+
+        try {
+            // Cautam o conversatie privata existenta intre cei doi utilizatori
+            const existingConversation = await conversationsCollection.findOne({
+                isGroup: false,
+                participants: { $all: participantsOids, $size: 2 }
+            });
+
+            if (existingConversation) {
+                console.log("existing: ", existingConversation);
+
+                return res.json(existingConversation);
+            }
+
+            // Daca nu exista, cream una noua
+            const now = new Date();
+            const newConversation = {
+                participants: participantsOids,
+                isGroup: false,
+                createdAt: now,
+                lastMessageAt: now,
+                lastMessageText: '',
+            };
+
+            const result = await conversationsCollection.insertOne(newConversation);
+            newConversation._id = result.insertedId;
+            console.log(newConversation);
+
+            // res.status(201).json(newConversation);
+
+        } catch (error) {
+            console.error('Eroare la initierea conversatiei private:', error);
+            res.status(500).json({ message: 'Eroare server' });
+        }
+    });
+
+
+    router.post('/initiateGroup', authenticateToken, async (req, res) => {
+
+    });
+
     router.post('/apartment/:apartmentId', authenticateToken, async (req, res) => {
         const { apartmentId } = req.params;
         const includeOwner = req.query.includeOwner === 'true';
