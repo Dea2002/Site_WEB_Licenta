@@ -43,12 +43,12 @@ export const useInitiateGroupChat = () => {
 
     const initiateGroupChat = useCallback(async (apartmentId: string, withOwner: boolean) => {
         setIsLoadingGroup(true);
+        console.log("apartmentId: ", apartmentId);
+        console.log("withOwner: ", withOwner);
         try {
             const response = await api.post('/conversations/initiateGroup', {
-                body: {
-                    apartmentId,
-                    withOwner
-                }
+                apartmentId,
+                withOwner
             });
 
             if (!response.data) {

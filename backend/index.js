@@ -522,8 +522,29 @@ async function run() {
                     createdAt: new Date()
                 };
 
-                //requirementBody.numberofrooms = parseInt(requirementBody.numberofrooms);
                 const result = await apartmentsCollection.insertOne(newApartment);
+
+                // create conversations with and without the owner
+                const conversationWithOwner = {
+                    withOwner: true,
+                    apartment: newApartment._id,
+                    type: 'group',
+                    updatedAt: new Date(),
+                    participants: [new ObjectId(ownerId)]
+                };
+
+                await conversationsCollection.insertOne(conversationWithOwner);
+
+                const conversationWithoutOwner = {
+                    withOwner: false,
+                    apartment: newApartment._id,
+                    type: 'group',
+                    updatedAt: new Date(),
+                    participants: [new ObjectId(ownerId)]
+                };
+
+                await conversationsCollection.insertOne(conversationWithoutOwner);
+
                 res.send(result);
 
             } catch (error) {

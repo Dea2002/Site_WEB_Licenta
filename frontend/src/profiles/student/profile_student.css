@@ -72,32 +72,28 @@
     background-color: #f09bd5;
 }
 
-/* Stil pentru containerul principal al paginii */
 .user-profile-page-container {
-    max-width: 1200px; /* Sau latimea dorita */
-    margin: 2rem auto; /* Centrare si spatiu sus/jos */
+    max-width: 1200px;
+    margin: 2rem auto;
     padding: 1rem;
 }
 
-/* "Dreptunghiul mare" - containerul cu cele doua coloane */
 .profile-content-box {
     display: flex;
-    border: 1px solid #e0e0e0; /* Chenar fin */
-    border-radius: 8px; /* Colturi rotunjite */
-    background-color: #fff; /* Fundal alb */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Umbra subtila */
-    min-height: 60vh; /* inaltime minima */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-height: 60vh;
 }
 
-/* Coloana din stanga - Sidebar */
 .profile-sidebar-column {
-    flex: 0 0 250px; /* Latime fixa pentru sidebar, nu creste, nu scade */
+    flex: 0 0 250px;
     padding: 1.5rem;
-    border-right: 1px solid #e0e0e0; /* Linie de separare */
-    background-color: #f8f9fa; /* Fundal usor diferit pentru sidebar */
+    border-right: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
 }
 
-/* Navigarea din sidebar */
 .profile-sidebar-nav ul {
     list-style: none;
     padding: 0;
@@ -105,16 +101,15 @@
 }
 
 .profile-sidebar-nav li {
-    margin-bottom: 0.5rem; /* Spatiu intre butoane */
+    margin-bottom: 0.5rem;
 }
 
-/* Butoanele din sidebar */
 .sidebar-button {
     display: block;
     width: 100%;
     padding: 0.8rem 1rem;
-    border: 1px solid transparent; /* Fara border default */
-    background-color: transparent; /* Fundal transparent */
+    border: 1px solid transparent;
+    background-color: transparent;
     color: #333;
     text-align: left;
     cursor: pointer;
@@ -124,24 +119,21 @@
 }
 
 .sidebar-button:hover {
-    background-color: #e9ecef; /* Fundal la hover */
+    background-color: #e9ecef;
     color: #000;
 }
 
-/* Stil pentru butonul activ */
 .sidebar-button.active {
-    background-color: #007bff; /* Culoarea principala a site-ului */
-    color: #fff; /* Text alb */
+    background-color: #007bff;
+    color: #fff;
     font-weight: bold;
 }
 
-/* Coloana din dreapta - Continutul principal */
 .profile-main-content-column {
-    flex-grow: 1; /* Ocupa spatiul ramas */
-    padding: 1.5rem 2rem; /* Mai mult padding orizontal */
+    flex-grow: 1;
+    padding: 1.5rem 2rem;
 }
 
-/* Stiluri generale pentru sectiunea de continut */
 .profile-section-content h2 {
     margin-top: 0;
     margin-bottom: 1.5rem;
@@ -150,7 +142,6 @@
     color: #333;
 }
 
-/* Stiluri pentru formular (pot fi extinse) */
 .edit-profile-form .form-group {
     margin-bottom: 1rem;
 }
@@ -169,7 +160,7 @@
     padding: 0.6rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* Include padding/border in width */
+    box-sizing: border-box;
 }
 .edit-profile-form input:disabled {
     background-color: #e9ecef;
@@ -183,7 +174,7 @@
 
 .edit-profile-form button[type="submit"] {
     padding: 0.7rem 1.5rem;
-    background-color: #28a745; /* Verde pentru salvare */
+    background-color: #28a745;
     color: white;
     border: none;
     border-radius: 4px;
@@ -200,7 +191,6 @@
     cursor: not-allowed;
 }
 
-/* Mesaje */
 .success-message {
     color: green;
     margin: 1rem 0;
@@ -210,7 +200,6 @@
     margin: 1rem 0;
 }
 
-/* Stil pentru lista de istoric */
 .rent-history-list {
     list-style: none;
     padding: 0;
@@ -233,32 +222,32 @@
 }
 
 .reservation-history-separator-line {
-    border: none; /* scoate bordura implicita */
-    height: 2px; /* grosimea liniei */
-    background-color: rgb(172, 172, 172); /* culoarea */
-    margin: 1rem 0; /* spatiu sus–jos */
-    width: 100%; /* latimea dupa cum vrei */
+    border: none;
+    height: 2px;
+    background-color: rgb(172, 172, 172);
+    margin: 1rem 0;
+    width: 100%;
     opacity: 1;
 }
 
 .current-request-item {
-    display: flex; /* Permite alinierea detaliilor si a actiunilor */
-    justify-content: space-between; /* Impinge detaliile la stanga si actiunile la dreapta */
-    align-items: flex-start; /* Aliniaza la inceput pe verticala */
-    gap: 15px; /* Spatiu intre detalii si buton */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
 }
 
 .request-details {
-    flex-grow: 1; /* Permite detaliilor sa ocupe spatiul ramas */
+    flex-grow: 1;
 }
 
 .request-actions {
-    flex-shrink: 0; /* Impiedica butonul sa se micsoreze */
-    padding-top: 5px; /* Aliniere vizuala mai buna cu primul rand de text */
+    flex-shrink: 0;
+    padding-top: 5px;
 }
 
 .cancel-request-button {
-    background-color: #dc3545; /* Rosu pentru actiuni de anulare/stergere */
+    background-color: #dc3545;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -269,21 +258,135 @@
 }
 
 .cancel-request-button:hover {
-    background-color: #c82333; /* Rosu mai inchis la hover */
+    background-color: #c82333;
 }
 
 .cancel-request-button:disabled {
-    background-color: #6c757d; /* Gri cand e dezactivat */
+    background-color: #6c757d;
     cursor: not-allowed;
     opacity: 0.7;
 }
 
 .global-error {
-    /* Pentru eroarea de anulare afisata global in sectiune */
     margin-bottom: 15px;
     padding: 10px;
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
     border-radius: 4px;
+}
+
+.current-rent-card {
+    background-color: #fdfdfd;
+    border: 1px solid #e7e7e7;
+    border-radius: 6px;
+    padding: 1.5rem;
+}
+
+.current-rent-card p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.rent-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+.chat-section h3,
+.chat-section h4 {
+    margin-bottom: 0.8rem;
+    margin-top: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.colleagues-chat-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.btn-cancel,
+.btn-cleaning,
+.btn-chat-owner,
+.btn-chat-colleague,
+.btn-chat-group {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-align: center;
+}
+
+.btn-cancel:hover,
+.btn-cleaning:hover,
+.btn-chat-owner:hover,
+.btn-chat-colleague:hover,
+.btn-chat-group:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-cancel:disabled,
+.btn-cleaning:disabled,
+.btn-chat-owner:disabled,
+.btn-chat-colleague:disabled,
+.btn-chat-group:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-cancel {
+    background-color: #e74c3c;
+    color: white;
+}
+.btn-cancel:hover:not(:disabled) {
+    background-color: #c0392b;
+}
+
+.btn-cleaning {
+    background-color: #3498db;
+    color: white;
+}
+.btn-cleaning:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.btn-chat-owner {
+    background-color: #8e44ad;
+    color: white;
+    margin-right: 10px;
+}
+.btn-chat-owner:hover:not(:disabled) {
+    background-color: #732d91;
+}
+
+.btn-chat-colleague {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #dcdcdc;
+}
+.btn-chat-colleague:hover:not(:disabled) {
+    background-color: #e1e1e1;
+    border-color: #c0c0c0;
+}
+
+.btn-chat-group {
+    background-color: #27ae60;
+    color: white;
+    margin-right: 10px;
+}
+.btn-chat-group:hover:not(:disabled) {
+    background-color: #229954;
 }

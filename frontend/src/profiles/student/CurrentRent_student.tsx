@@ -1,8 +1,7 @@
 import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import React, { useState, useEffect, useContext } from 'react';
-import { useInitiatePrivateChat } from "../../hooks/useInitiateChat";
+import { useInitiatePrivateChat, useInitiateGroupChat } from "../../hooks/useInitiateChat";
 import { AuthContext } from '../../AuthContext';
-import { useNavigate } from 'react-router-dom';
 import './profile_student.css';
 import { api } from '../../api';
 interface CurrentRentProps {
@@ -46,13 +45,13 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const [rentData, setRentData] = useState<RentDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { token, user } = useContext(AuthContext);
+    const { token } = useContext(AuthContext);
     const [activeRenters, setActiveRenters] = useState<UserBrief[]>([]);
     const [isRentersLoading, setIsRentersLoading] = useState(false);
     const [rentersError, setRentersError] = useState<string | null>(null);
     const { isLoadingPrivate, initiatePrivateChat } = useInitiatePrivateChat();
+    const { isLoadingGroup, initiateGroupChat } = useInitiateGroupChat();
 
-    const navigate = useNavigate();
     useEffect(() => {
         const fetchCurrentRent = async () => {
             setIsLoading(true);
@@ -167,7 +166,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         );
     }
     const pricePerRoom = rentData.apartment.price;
-    const numberOfRooms = rentData.numberOfRooms; // ! gresit
+    const numberOfRooms = rentData.numberOfRooms;
     const checkInDate = parseISO(rentData.checkIn);
     const checkOutDate = parseISO(rentData.checkOut);
     const nights = differenceInCalendarDays(checkOutDate, checkInDate);
@@ -176,38 +175,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     // Daca e mai mult de 30 nopti, pregateste si o estimare pentru 30 nopti (o luna)
     const showMonthlyEstimate = totalNights > 30;
     const monthlyEstimate = pricePerRoom * 30 * numberOfRooms;
-
-    // handler-ul pentru grup chat
-    async function openApartmentChat(withOwner: boolean) {
-        if (!rentData) return;
-        const apartmentId = rentData.apartment._id;
-        // strangem ID-urile curente: proprietar + chiriasi
-        const participantIds = [
-            user!._id,
-            ...(withOwner ? [rentData.apartment.ownerId] : []),
-            ...activeRenters.map(r => r._id)
-        ];
-        try {
-            const { data: conversation } = await api.post<{
-                _id: string;
-                apartmentId: string;
-                participants: string[];
-                isGroup: boolean;
-            }>(`/conversations/apartment/${apartmentId}?includeOwner=${withOwner}`,
-                {
-                    participants: participantIds,
-                    ownerId: rentData.apartment.ownerId
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            navigate(`/chat/${conversation._id}`);
-        } catch (err) {
-            console.error(err);
-            alert('Nu am putut accesa chat-ul de grup.');
-        }
-    }
-
-    console.log('rentData:', rentData);
 
     return (
         <div className="profile-section-content">
@@ -292,13 +259,15 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     {/* butonul de grup chat */}
                     <button
                         className="btn-chat-group"
-                        onClick={() => openApartmentChat(true)}
+                        onClick={() => initiateGroupChat(rentData!.apartment._id, true)}
+                        disabled={isLoadingGroup}
                     >
                         Chat grup cu proprietar
                     </button>
                     <button
                         className="btn-chat-group"
-                        onClick={() => openApartmentChat(false)}
+                        onClick={() => initiateGroupChat(rentData!.apartment._id, false)}
+                        disabled={isLoadingGroup}
                     >
                         Chat grup fara proprietar
                     </button>

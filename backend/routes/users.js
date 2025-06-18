@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 
 const { getBucket } = require('../config/firebaseAdmin');
 
-
 function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection, reservationRequestsCollection, reviewsCollection, associationsRequestsCollection, messagesCollection, conversationsCollection) {
 
     router.get('/current-rent/:userId', authenticateToken, async (req, res) => {
@@ -22,9 +21,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 checkIn: { $lte: now },
                 checkOut: { $gte: now }
             });
-
-            console.log(currentRent);
-
 
             if (!currentRent) {
                 return res.status(404).json({ message: 'Nu exista chirie activa pentru acest utilizator.' });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback, ChangeEvent } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import { ref, deleteObject, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -7,7 +7,7 @@ import { storage } from "./firebaseConfig";
 import { Apartment, PaginatedRentals, Rental, ALL_POSSIBLE_FACILITIES_MAP, Review, PaginatedResponse } from "./types";
 import "./OwnerApartmentDetails.css";
 import ReviewList from "./reviews/ReviewList";
-import { useInitiateGroupChat, useInitiatePrivateChat } from "./hooks/useInitiateChat";
+import { useInitiatePrivateChat } from "./hooks/useInitiateChat";
 
 const OwnerApartmentDetails: React.FC = () => {
     const { token, user } = useContext(AuthContext);
@@ -15,7 +15,6 @@ const OwnerApartmentDetails: React.FC = () => {
     const navigate = useNavigate();
 
     const { isLoadingPrivate, initiatePrivateChat } = useInitiatePrivateChat();
-    const { isLoadingGroup, initiateGroupChat } = useInitiateGroupChat();
 
     const [apartment, setApartment] = useState<Apartment | null>(null);
     const [conversationId, setConversationId] = useState<string | null>(null);

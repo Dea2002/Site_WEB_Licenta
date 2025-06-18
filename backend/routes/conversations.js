@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router(); // Creeaza o instanta de Router
+const router = express.Router();
 const { ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const authenticateToken = require('../middleware/authenticateToken');
@@ -28,8 +28,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
             });
 
             if (existingConversation) {
-                console.log("existing: ", existingConversation);
-
                 return res.json(existingConversation);
             }
 
@@ -40,14 +38,14 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
                 isGroup: false,
                 createdAt: now,
                 lastMessageAt: now,
+                type: 'private',
                 lastMessageText: '',
             };
 
             const result = await conversationsCollection.insertOne(newConversation);
             newConversation._id = result.insertedId;
-            console.log(newConversation);
 
-            // res.status(201).json(newConversation);
+            res.status(201).json(newConversation);
 
         } catch (error) {
             console.error('Eroare la initierea conversatiei private:', error);
@@ -55,8 +53,34 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         }
     });
 
-
     router.post('/initiateGroup', authenticateToken, async (req, res) => {
+        const withOwner = req.body.withOwner;
+        const apartmentId = req.body.apartmentId;
+
+        if (!apartmentId || !ObjectId.isValid(apartmentId)) {
+            return res.status(400).json({ message: 'ID apartament invalid.' });
+        }
+
+        const existingGroup = await conversationsCollection.findOne({
+            apartmentId: new ObjectId(apartmentId),
+            type: 'group',
+            includeOwner: withOwner
+        });
+
+        if (existingGroup) {
+            return res.status(200).json(existingGroup);
+        }
+
+        // trebuie sa caut chiriasii actuali si sa ii adaug
+
+
+
+        // Daca nu exista, cream o conversatie de tip grup
+        if (withOwner == true) {
+            // trebuie adaugat ownerId in lista de participanti
+
+        }
+
 
     });
 
