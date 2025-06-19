@@ -23,7 +23,7 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         try {
             // Cautam o conversatie privata existenta intre cei doi utilizatori
             const existingConversation = await conversationsCollection.findOne({
-                isGroup: false,
+                type: 'private',
                 participants: { $all: participantsOids, $size: 2 }
             });
 
@@ -35,7 +35,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
             const now = new Date();
             const newConversation = {
                 participants: participantsOids,
-                isGroup: false,
                 createdAt: now,
                 lastMessageAt: now,
                 type: 'private',
@@ -60,28 +59,19 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         if (!apartmentId || !ObjectId.isValid(apartmentId)) {
             return res.status(400).json({ message: 'ID apartament invalid.' });
         }
+        console.log(`withOwner: ${withOwner}, apartmentId: ${apartmentId}`);
 
         const existingGroup = await conversationsCollection.findOne({
-            apartmentId: new ObjectId(apartmentId),
+            apartment: apartmentId,
             type: 'group',
             includeOwner: withOwner
         });
 
         if (existingGroup) {
             return res.status(200).json(existingGroup);
+        } else {
+            return res.status(404).json({ message: 'Conversatie de grup nu a fost gasita.' });
         }
-
-        // trebuie sa caut chiriasii actuali si sa ii adaug
-
-
-
-        // Daca nu exista, cream o conversatie de tip grup
-        if (withOwner == true) {
-            // trebuie adaugat ownerId in lista de participanti
-
-        }
-
-
     });
 
     router.post('/apartment/:apartmentId', authenticateToken, async (req, res) => {
@@ -93,52 +83,18 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
 
         // build the filter so that we match exactly one of the two group-chats
         const filter = {
-            apartmentId: new ObjectId(apartmentId),
-            isGroup: true,
+            apartment: apartmentId,
+            type: 'group',
             includeOwner: includeOwner
         };
 
-
-        // 1) try to find existing convo of this type
         let convo = await conversationsCollection.findOne(filter);
         if (convo) {
             return res.json(convo);
-        }
-        // 2) else create new
-        const { participants: tenantIds = [], ownerId } = req.body;
-        if (!Array.isArray(tenantIds) || tenantIds.length < 1) {
-            return res
-                .status(400)
-                .json({ message: 'Trebuie sa trimiti cel putin un chirias in participants.' });
+        } else {
+            return res.status(404).json({ message: 'Conversatie de grup nu a fost gasita.' });
         }
 
-        // ObjectId-ize
-        const tenantsOids = tenantIds.map(id => new ObjectId(id));
-        const participants = [...tenantsOids];
-
-        if (includeOwner) {
-            if (!ownerId || !ObjectId.isValid(ownerId)) {
-                return res
-                    .status(400)
-                    .json({ message: 'Pentru includeOwner=true trebuie sa trimiti ownerId valid.' });
-            }
-            participants.push(new ObjectId(ownerId));
-        }
-
-        const now = new Date();
-        const doc = {
-            apartmentId: new ObjectId(apartmentId),
-            participants,
-            isGroup: true,
-            includeOwner,
-            createdAt: now,
-            lastMessageAt: now,
-            lastMessageText: '',
-        };
-
-        const result = await conversationsCollection.insertOne(doc);
-        doc._id = result.insertedId;
-        res.status(201).json(doc);
     });
 
     // GET /conversations/:userId → listeaza conversatiile in care e user-ul

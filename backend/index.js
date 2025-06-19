@@ -527,7 +527,7 @@ async function run() {
                 // create conversations with and without the owner
                 const conversationWithOwner = {
                     withOwner: true,
-                    apartment: newApartment._id,
+                    apartment: result.insertedId.toString(),
                     type: 'group',
                     updatedAt: new Date(),
                     participants: [new ObjectId(ownerId)]
@@ -537,7 +537,7 @@ async function run() {
 
                 const conversationWithoutOwner = {
                     withOwner: false,
-                    apartment: newApartment._id,
+                    apartment: result.insertedId.toString(),
                     type: 'group',
                     updatedAt: new Date(),
                     participants: [new ObjectId(ownerId)]

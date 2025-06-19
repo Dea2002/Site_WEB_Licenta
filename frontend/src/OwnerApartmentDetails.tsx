@@ -183,9 +183,6 @@ const OwnerApartmentDetails: React.FC = () => {
         if (!currentApartmentId || !token) return;
 
         try {
-            // Presupunem ca API-ul returneaza direct un string sau un obiect cu o proprietate ce contine string-ul
-            // Exemplu: { conversationId: "stringul_tau_aici" }
-            // Sau direct: "stringul_tau_aici"
             const response = await api.post( // Ajusteaza tipul raspunsului
                 `/conversations/apartment/${currentApartmentId}?includeOwner=true`,
                 { headers: { Authorization: `Bearer ${token}` } }

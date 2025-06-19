@@ -55,7 +55,7 @@ export const useInitiateGroupChat = () => {
                 throw new Error('failed to initiate group chat');
             }
 
-            navigate(`/chat/${response.data.conversationId}`);
+            navigate(`/chat/${response.data._id.toString()}`);
 
         } catch (error) {
             console.error(`Error initiating group chat:`, error);
