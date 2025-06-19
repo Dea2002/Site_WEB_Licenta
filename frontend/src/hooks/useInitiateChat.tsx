@@ -10,7 +10,6 @@ export const useInitiatePrivateChat = () => {
     // Folosim useCallback pentru a ne asigura ca functia nu se recreeaza la fiecare render
     // daca nu este necesar. Este o buna practica de performanta.
     const initiatePrivateChat = useCallback(async (recipientId: string) => {
-        console.log("recipientId: ", recipientId);
 
         setIsLoadingPrivate(true);
         try {
@@ -43,8 +42,6 @@ export const useInitiateGroupChat = () => {
 
     const initiateGroupChat = useCallback(async (apartmentId: string, withOwner: boolean) => {
         setIsLoadingGroup(true);
-        console.log("apartmentId: ", apartmentId);
-        console.log("withOwner: ", withOwner);
         try {
             const response = await api.post('/conversations/initiateGroup', {
                 apartmentId,

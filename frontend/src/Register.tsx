@@ -308,7 +308,7 @@ const Register: React.FC = () => {
                 password,
                 role: "facultate",
             });
-            window.scrollTo(0, 0);
+
             setSuccess("inregistrare facultate reusita! Contul va fi verificat.");
             // Reset form state
             setFacultyFormState({
@@ -336,6 +336,11 @@ const Register: React.FC = () => {
         } finally {
         }
     };
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, [success]);
+
     // --- END: Submit handler for Faculty form ---
 
     const handleOwnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {

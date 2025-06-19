@@ -85,6 +85,8 @@ io.on('connection', socket => {
         const result = await messages.insertOne(msg);
         msg._id = result.insertedId;
 
+        console.log(`Mesaj nou in conversatia ${conversationId} de la ${senderId}: ${text}`);
+
         // 1) emit back to everyone in the room
         io.to(conversationId).emit('message:new', msg);
 
@@ -112,33 +114,93 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
     const reservationHistoryCollection = databaseInstance.collection("reservation_history");
     const reservationRequestsCollection = databaseInstance.collection("reservation_requests");
     const apartmentsCollection = databaseInstance.collection("apartments");
-    const notificationsCollection = databaseInstance.collection("notifications");
+    const conversationsCollection = databaseInstance.collection("conversations");
 
     const currentDate = new Date();
     const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Doar data, fara ora
 
     try {
-        const resultHistoryOld = await reservationHistoryCollection.updateMany(
-            {
-                checkOut: { $lt: currentDateOnly },
-                isActive: true
-            },
-            {
-                $set: { isActive: false }
-            }
-        );
-        console.log(`CRON: ${resultHistoryOld.modifiedCount} documente din istoric actualizate la "isActive:false".`);
+        // Gaseste rezervarile care au expirat si trebuie dezactivate
+        const rentalsToExpire = await reservationHistoryCollection.find({
+            checkOut: { $lt: currentDateOnly },
+            isActive: true
+        }).toArray();
 
-        const resultHistoryNew = await reservationHistoryCollection.updateMany(
-            {
-                checkIn: { $lt: currentDateOnly },
-                isActive: false
-            },
-            {
-                $set: { isActive: true }
+        if (rentalsToExpire.length > 0) {
+            const rentalIdsToExpire = rentalsToExpire.map(r => r._id);
+
+            // Actualizeaza toate rezervarile gasite la "isActive: false"
+            const updateResult = await reservationHistoryCollection.updateMany(
+                { _id: { $in: rentalIdsToExpire } },
+                { $set: { isActive: false } }
+            );
+            console.log(`CRON: ${updateResult.modifiedCount} documente din istoric actualizate la "isActive:false".`);
+
+            // Pentru fiecare rezervare care tocmai a expirat, scoatem clientul din conversatiile asociate
+            console.log(`CRON: Se proceseaza ${rentalsToExpire.length} rezervari expirate pentru eliminarea din conversatii.`);
+            for (const rental of rentalsToExpire) {
+                const apartmentIdStr = rental.apartament.toString();
+                const clientId = rental.client; // ObjectId
+
+                if (clientId) {
+                    const updateConv = await conversationsCollection.updateMany(
+                        {
+                            apartment: apartmentIdStr,
+                            type: 'group'
+                        },
+                        { $pull: { participants: clientId.toString() } }
+                    );
+                    if (updateConv.modifiedCount > 0) {
+                        console.log(`CRON: Clientul ${clientId} a fost eliminat din ${updateConv.modifiedCount} conversatii pentru apartamentul ${apartmentIdStr}.`);
+                    }
+                } else {
+                    console.warn(`CRON: Rezervarea cu ID ${rental._id} nu are un client asociat.`);
+                }
             }
-        );
-        console.log(`CRON: ${resultHistoryNew.modifiedCount} documente din istoric actualizate la "isActive:true".`);
+        } else {
+            console.log('CRON: Nu exista rezervari active care au expirat.');
+        }
+
+        const rentalsToActivate = await reservationHistoryCollection.find({
+            checkIn: { $lt: currentDateOnly },
+            isActive: false
+        }).toArray();
+
+        if (rentalsToActivate.length > 0) {
+            const rentalIdsToActivate = rentalsToActivate.map(r => r._id);
+
+            //Actualizeaza toate rezervarile gasite la "isActive: true"
+            const updateResult = await reservationHistoryCollection.updateMany(
+                { _id: { $in: rentalIdsToActivate } },
+                { $set: { isActive: true } }
+            );
+            console.log(`CRON: ${updateResult.modifiedCount} documente din istoric actualizate la "isActive:true".`);
+
+            // pentru fiecare rezervare care tocmai a inceput, adaugam clientul in conversatiile asociate
+            console.log(`CRON: Se proceseaza ${rentalsToActivate.length} rezervari activate pentru adaugarea in conversatii.`);
+            for (const rental of rentalsToActivate) {
+                const apartmentIdStr = rental.apartament.toString();
+                const clientId = rental.client; // ObjectId
+
+                if (clientId) {
+                    const updateConv = await conversationsCollection.updateMany(
+                        {
+                            apartment: apartmentIdStr,
+                            type: 'group'
+                        },
+                        { $addToSet: { participants: clientId.toString() } }
+                    );
+                    if (updateConv.modifiedCount > 0) {
+                        console.log(`CRON: Clientul ${clientId} a fost adaugat in ${updateConv.modifiedCount} conversatii pentru apartamentul ${apartmentIdStr}.`);
+                    }
+                } else {
+                    console.warn(`CRON: Rezervarea cu ID ${rental._id} nu are un client asociat.`);
+                }
+            }
+        } else {
+            console.log('CRON: Nu exista rezervari inactive care trebuie activate.');
+        }
+
 
         const expiredRequests = await reservationRequestsCollection.find({
             checkIn: { $lt: currentDateOnly }
@@ -526,21 +588,23 @@ async function run() {
 
                 // create conversations with and without the owner
                 const conversationWithOwner = {
-                    withOwner: true,
+                    includeOwner: true,
                     apartment: result.insertedId.toString(),
                     type: 'group',
                     updatedAt: new Date(),
-                    participants: [new ObjectId(ownerId)]
+                    participants: [new ObjectId(ownerId)],
+                    title: `${result.locatie} cu proprietarul`,
                 };
 
                 await conversationsCollection.insertOne(conversationWithOwner);
 
                 const conversationWithoutOwner = {
-                    withOwner: false,
+                    includeOwner: false,
                     apartment: result.insertedId.toString(),
                     type: 'group',
                     updatedAt: new Date(),
-                    participants: [new ObjectId(ownerId)]
+                    participants: [],
+                    title: `${result.locatie} fara proprietar`,
                 };
 
                 await conversationsCollection.insertOne(conversationWithoutOwner);
@@ -646,8 +710,20 @@ async function run() {
                 });
 
                 // === PASUL 2: Ocuparea utilizatorului in alte parti ===
-                const userRentalsOnOther = await reservationHistoryCollection.find({ user: new ObjectId(currentUserId), apartament: { $ne: new ObjectId(apartmentId) }, isActive: true }).toArray();
-                const userRequestsOnOther = await reservationRequestsCollection.find({ client: new ObjectId(currentUserId), apartament: { $ne: new ObjectId(apartmentId) } }).toArray();
+                const userRentalsOnOther = await reservationHistoryCollection.find({
+                    client: new ObjectId(currentUserId),
+                    apartament: {
+                        $ne: new ObjectId(apartmentId)
+                    },
+                    isActive: true
+                }).toArray();
+
+                const userRequestsOnOther = await reservationRequestsCollection.find({
+                    client: new ObjectId(currentUserId),
+                    apartament: {
+                        $ne: new ObjectId(apartmentId)
+                    }
+                }).toArray();
 
                 // Folosim un Set pentru a stoca datele ocupate de utilizator. E mai curat.
                 const userBusyDates = new Set();

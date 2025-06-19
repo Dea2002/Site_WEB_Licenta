@@ -339,7 +339,6 @@ const OwnerListNewApartment: React.FC = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            window.scrollTo(0, 0);
             setMessage("Apartament listat cu succes!");
 
             setFormData(initialFormData); // Reset form data
@@ -357,6 +356,10 @@ const OwnerListNewApartment: React.FC = () => {
             );
         }
     };
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, [message]);
 
     return (
         <div className="page-container">

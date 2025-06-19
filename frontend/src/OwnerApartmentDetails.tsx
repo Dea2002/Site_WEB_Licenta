@@ -185,7 +185,6 @@ const OwnerApartmentDetails: React.FC = () => {
         try {
             const response = await api.post( // Ajusteaza tipul raspunsului
                 `/conversations/apartment/${currentApartmentId}?includeOwner=true`,
-                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setConversationId(response.data._id);

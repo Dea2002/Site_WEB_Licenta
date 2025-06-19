@@ -81,6 +81,7 @@ const ChatHistory: React.FC = () => {
             ) : (
                 <ul className="chats-list">
                     {conversations.map(conv => {
+                        console.log('Conversation:', conv);
                         // daca nu exista titlu custom, compunem din ceilalti participanti
                         const title =
                             conv.title ||

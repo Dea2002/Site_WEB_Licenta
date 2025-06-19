@@ -27,8 +27,6 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
         api.get<Message[]>(`/messages/${conversationId}?limit=100`)
             .then(res => {
                 setMessages(res.data);
-                console.log("preload din handler de new message");
-
                 preloadNames(res.data);
             })
             .catch(err => {
@@ -38,8 +36,6 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
         const handler = (msg: Message) => {
             if (msg.conversationId === conversationId) {
                 setMessages(prev => [...prev, msg]);
-                console.log("preload din handler de new message");
-
                 preloadNames(messages);
             }
         };
@@ -56,14 +52,11 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
     }, [messages]);
 
     function preloadNames(newMsgs: Message[]) {
-        console.log("fac preload");
-        console.log("mesajele din argument: ", newMsgs);
         const unknownIds = Array.from(new Set(
             newMsgs
                 .map(m => m.senderId)
                 .filter(id => id && !userNames[id]) // Adaugat check pentru id
         ));
-        console.log("unknown: ", unknownIds);
         if (unknownIds.length === 0) return;
 
         api.get<{ _id: string; fullName: string }[]>('/users/batch', {
@@ -74,7 +67,6 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
                 map[u._id] = u.fullName;
             });
             setUserNames(map);
-            console.log("usernames: ", userNames);
         }).catch(err => console.error('nu am putut incarca nume useri:', err));
     }
 

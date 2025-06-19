@@ -100,11 +100,24 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
     // GET /conversations/:userId → listeaza conversatiile in care e user-ul
     router.get('/:userId', async (req, res) => {
         const userOid = new ObjectId(req.params.userId);
-        const list = await conversationsCollection
-            .find({ participants: userOid })
+
+        const privateConversations = conversationsCollection
+            .find({
+                type: 'private',
+                participants: userOid,
+            })
             .sort({ lastMessageAt: -1 })
             .toArray();
-        res.json(list);
+
+        const groupConversations = conversationsCollection
+            .find({
+                type: 'group',
+                participants: userOid,
+            })
+            .sort({ lastMessageAt: -1 })
+            .toArray();
+
+        res.json([privateConversations, groupConversations]);
     });
 
     // POST /conversations → creeaza sau returneaza conversatia unu-la-unu
