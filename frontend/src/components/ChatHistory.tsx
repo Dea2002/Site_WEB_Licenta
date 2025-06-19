@@ -81,7 +81,6 @@ const ChatHistory: React.FC = () => {
             ) : (
                 <ul className="chats-list">
                     {conversations.map(conv => {
-                        console.log('Conversation:', conv);
                         // daca nu exista titlu custom, compunem din ceilalti participanti
                         const title =
                             conv.title ||
@@ -104,7 +103,7 @@ const ChatHistory: React.FC = () => {
                                         )}
                                     </div>
                                     <div className="chat-time">
-                                        {formatDistanceToNow(new Date(conv.lastMessageAt), {
+                                        {conv.lastMessageAt && formatDistanceToNow(new Date(conv.lastMessageAt), {
                                             addSuffix: true
                                         })}
                                     </div>

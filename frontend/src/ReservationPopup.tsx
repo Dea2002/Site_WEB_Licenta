@@ -118,7 +118,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 const intervals = groupIntoIntervals(data);
 
                 setUnavailableIntervals(intervals);
-                console.log("Intervale indisponibile:", intervals);
             })
             .catch((error) => {
                 console.error("Eroare la preluarea datelor:", error);

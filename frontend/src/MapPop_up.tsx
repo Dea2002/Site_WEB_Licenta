@@ -208,8 +208,6 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, onClose }) => {
                 }
 
                 const overpassQuery = `[out:json][timeout:25];(nwr[amenity=university]${searchArea};);out center;`;
-                console.log("Overpass Query pentru universitati:", overpassQuery); // Debugging: afisam query-ul
-                console.log("linkul Overpass:", `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
 
                 const overpassResponse = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
                 if (!overpassResponse.ok) throw new Error(`Eroare Overpass API: ${overpassResponse.statusText}`);
@@ -237,7 +235,6 @@ const MapPop_up: React.FC<MapPopUpProps> = ({ lat, lng, onClose }) => {
                 const queryTag = Object.keys(category.osmQueryTags)[0];
                 const queryValue = category.osmQueryTags[queryTag];
                 const overpassQuery = `[out:json][timeout:25];(nwr[${queryTag}=${queryValue}](around:${radius},${lat},${lng}););out center;`;
-                console.log("Overpass Query:", overpassQuery); // Debugging: afisam query-ul
                 const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
                 if (!response.ok) throw new Error(`Eroare Overpass API: ${response.statusText}`);
                 const data = await response.json();

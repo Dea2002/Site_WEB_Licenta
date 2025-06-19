@@ -59,7 +59,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         if (!apartmentId || !ObjectId.isValid(apartmentId)) {
             return res.status(400).json({ message: 'ID apartament invalid.' });
         }
-        console.log(`withOwner: ${withOwner}, apartmentId: ${apartmentId}`);
 
         const existingGroup = await conversationsCollection.findOne({
             apartment: apartmentId,
@@ -101,7 +100,7 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
     router.get('/:userId', async (req, res) => {
         const userOid = new ObjectId(req.params.userId);
 
-        const privateConversations = conversationsCollection
+        const privateConversations = await conversationsCollection
             .find({
                 type: 'private',
                 participants: userOid,
@@ -109,15 +108,17 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
             .sort({ lastMessageAt: -1 })
             .toArray();
 
-        const groupConversations = conversationsCollection
+        const groupConversations = await conversationsCollection
             .find({
                 type: 'group',
-                participants: userOid,
+                participants: { $in: [userOid.toString()] },
             })
             .sort({ lastMessageAt: -1 })
             .toArray();
 
-        res.json([privateConversations, groupConversations]);
+        const result = await Promise.all([privateConversations, groupConversations]);
+
+        res.json(result.flat());
     });
 
     // POST /conversations → creeaza sau returneaza conversatia unu-la-unu
