@@ -48,6 +48,8 @@ const ApartmentDetails: React.FC = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [blobUrls, setBlobUrls] = useState<string[]>([]);
 
+    const [canLeaveReview, setCanLeaveReview] = useState<boolean>(false);
+
     const handleReviewDeleted = (deletedReviewId: string) => {
         setReviews((prevReviews) => prevReviews.filter((review) => review._id !== deletedReviewId));
         // Optional: afiseaza o notificare de succes
@@ -73,25 +75,6 @@ const ApartmentDetails: React.FC = () => {
         setRooms({ rooms });
         setError(""); // Clear previous booking errors when new dates are selected
     };
-
-    // Functie pentru a verifica daca utilizatorul poate lasa un review
-    // Aceasta ar trebui sa verifice daca utilizatorul este logat si, ideal,
-    // daca a avut o rezervare confirmata la acest apartament.
-    // Pentru simplitate, vom verifica doar daca e logat.
-    const canLeaveReview = useMemo(() => {
-        if (!isAuthenticated || !user) return false;
-        // AICI LOGICA MAI COMPLEXA:
-        // 1. A avut utilizatorul o rezervare la acest apartament?
-        // 2. Rezervarea a fost finalizata (check-out a trecut)?
-        // 3. Nu a lasat deja un review?
-        // Poti face un call la un endpoint `/users/can-review/:apartmentId`
-        // Sau poti avea aceste informatii in `user` object dupa login.
-        // Exemplu simplu:
-        // const hasStayed = user.previousStays?.some(stay => stay.apartmentId === id && stay.status === 'completed');
-        // const hasReviewed = reviews.some(r => r.userId === user._id);
-        // return hasStayed && !hasReviewed;
-        return true; // Placeholder - inlocuieste cu logica reala
-    }, [isAuthenticated, user, id, reviews]);
 
     useEffect(() => {
         if (!apartment?.images?.length) return;
@@ -196,6 +179,15 @@ const ApartmentDetails: React.FC = () => {
                 .finally(() => {
                     setLoadingReviews(false);
                 });
+
+            api.get<boolean>(`/users/can-review/${id}`)
+                .then((response) => {
+                    setCanLeaveReview(response.data);
+                })
+                .catch((error) => {
+                    console.error("Eroare la verificarea permisiunilor de review:", error);
+                });
+
         } else {
             setReviews([]);
         }

@@ -9,6 +9,25 @@ const { getBucket } = require('../config/firebaseAdmin');
 
 function createUserRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection, reservationRequestsCollection, reviewsCollection, associationsRequestsCollection, messagesCollection, conversationsCollection) {
 
+    router.get('/can-review/:apartmentId', authenticateToken, async (req, res) => {
+        const userId = req.user._id;
+        const apartmentId = req.params.apartmentId;
+
+        try {
+            const query = {
+                client: new ObjectId(userId),
+                apartament: new ObjectId(apartmentId),
+            };
+
+            const hasRent = await reservationHistoryCollection.findOne(query);
+
+            return res.json(hasRent !== null);
+        } catch (err) {
+            console.error('Eroare la verificarea posibilitatii de revizuire:', err);
+            return res.status(500).json({ message: 'Eroare interna a serverului.' });
+        }
+    });
+
     router.get('/current-rent/:userId', authenticateToken, async (req, res) => {
         const { userId } = req.params;
         const now = new Date();
