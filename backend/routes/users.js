@@ -33,7 +33,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         const now = new Date();
 
         try {
-            // gaseste rezervarea activa curenta
             const currentRent = await reservationHistoryCollection.findOne({
                 client: new ObjectId(userId),
                 isActive: true,
@@ -259,7 +258,7 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
     router.get('/current_request', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         try {
-            // 1) Gasim toate cererile active (presupunem un flag isActive)
+            // 1) Gasim toate cererile active
             const activeRequests = await reservationRequestsCollection
                 .find({
                     client: new ObjectId(userId),
@@ -300,26 +299,53 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
     router.get('/reservations_history/', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         try {
-            const past = await reservationHistoryCollection.find({
-                client: new ObjectId(userId),
-                // isActive: false
-            })
+            const past = await reservationHistoryCollection
+                .find({
+                    client: new ObjectId(userId),
+                })
                 .sort({ checkIn: -1 })
                 .toArray();
 
-            // Mapam pentru frontend doar campurile necesare
+
             const history = await Promise.all(past.map(async r => {
-                const apt = await apartmentsCollection.findOne(
-                    { _id: r.apartament },
-                    { projection: { location: 1 } }
-                );
+                let apartmentLocation = 'Apartament șters';
+                // Verifica daca `r.apartament` este un ObjectId valid inainte de a cauta
+                if (r.apartament && ObjectId.isValid(r.apartament)) {
+                    const apt = await apartmentsCollection.findOne(
+                        { _id: new ObjectId(r.apartament) },
+                        { projection: { location: 1 } }
+                    );
+                    if (apt) {
+                        apartmentLocation = apt.location;
+                    }
+                } else if (typeof r.apartament === 'string') {
+                    // Cazul in care e deja setat "apartament sters"
+                    apartmentLocation = r.apartament;
+                }
+
+                let rentStatus;
+                const now = new Date();
+                const checkInDate = new Date(r.checkIn);
+                const checkOutDate = new Date(r.checkOut);
+
+                if (r.isActive === false) {
+                    rentStatus = 'Anulat';
+                } else if (checkInDate > now) {
+                    rentStatus = 'Viitor';
+                } else if (checkOutDate < now) {
+                    rentStatus = 'Finalizat';
+                } else {
+                    rentStatus = 'Activ';
+                }
+
                 return {
                     _id: r._id,
-                    apartment: apt?.location || '—',
+                    apartment: apartmentLocation,
                     checkIn: r.checkIn,
                     checkOut: r.checkOut,
                     rooms: r.numberOfRooms,
-                    createdAt: r.createdAt
+                    createdAt: r.createdAt,
+                    status: rentStatus,
                 };
             }));
 
@@ -378,7 +404,7 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
 
                 // 1. Anuleaza/Sterge cererile de rezervare pentru acest apartament si notificare studenti
                 const reservations = await reservationRequestsCollection.find({
-                    apartmentId: apartmentObjectId
+                    apartment: apartmentObjectId
                 }).toArray();
                 for (const reservation of reservations) {
                     // Notificare student
@@ -490,14 +516,14 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 await reviewsCollection.deleteMany({ apartmentId: apartmentObjectId });
 
                 // 5. stergerea conversatiilor asociate apartamentului si a tuturor mesajelor
-                const conversations = await conversationsCollection.find({ apartmentId: apartmentObjectId }).toArray();
+                const conversations = await conversationsCollection.find({ apartment: apartmentObjectId }).toArray();
                 if (conversations.length > 0) {
                     for (const conversation of conversations) {
                         // Sterge toate mesajele din conversatie
                         await messagesCollection.deleteMany({ conversationId: conversation._id });
                     }
                     // Sterge conversatiile
-                    await conversationsCollection.deleteMany({ apartmentId: apartmentObjectId });
+                    await conversationsCollection.deleteMany({ apartment: apartmentObjectId });
                 }
 
                 // 6. Sterge apartamentul

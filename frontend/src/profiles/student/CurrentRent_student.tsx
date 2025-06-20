@@ -4,6 +4,7 @@ import { useInitiatePrivateChat, useInitiateGroupChat } from "../../hooks/useIni
 import { AuthContext } from '../../AuthContext';
 import './profile_student.css';
 import { api } from '../../api';
+
 interface CurrentRentProps {
     userId: string;
 }
@@ -26,16 +27,16 @@ interface RentDetails {
             internetPrice: number;
         }
     };
-    checkIn: string;   // ISO date
-    checkOut: string;  // ISO date
+    checkIn: string;
+    checkOut: string;
     rooms: number;
     createdAt: string;
     finalPrice: number;
     discount: number;
     priceUtilities: number;
     numberOfRooms: number;
-
 }
+
 interface UserBrief {
     _id: string;
     fullName: string;
@@ -72,7 +73,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                 setRentData(data);
             } catch (err: any) {
                 console.error('Error fetching current rent:', err);
-                // Daca serverul raspunde cu 404, putem trata mesajul specific
                 if (err.response?.status === 404) {
                     setRentData(null);
                 } else {
@@ -139,32 +139,20 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     };
 
     // === Render logic la inceput, ca sa fie clar ===
-    if (isLoading) {
+    if (isLoading || error || !rentData) {
         return (
             <div className="profile-section-content">
                 <h2>Chiria Actuala</h2>
-                <p>Se incarca...</p>
+                {isLoading && <p>Se incarca...</p>}
+
+                {error && <p className="error-message">{error}</p>}
+
+                {!rentData && <p>Nu exista o chirie activa inregistrata.</p>}
+
             </div>
         );
     }
 
-    if (error) {
-        return (
-            <div className="profile-section-content">
-                <h2>Chiria Actuala</h2>
-                <p className="error-message">{error}</p>
-            </div>
-        );
-    }
-
-    if (!rentData) {
-        return (
-            <div className="profile-section-content">
-                <h2>Chiria Actuala</h2>
-                <p>Nu exista o chirie activa inregistrata.</p>
-            </div>
-        );
-    }
     const pricePerRoom = rentData.apartment.price;
     const numberOfRooms = rentData.numberOfRooms;
     const checkInDate = parseISO(rentData.checkIn);
@@ -214,7 +202,7 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                 {/* --- Butoane actiuni --- */}
 
                 <div className="rent-actions">
-                    <button onClick={handleCancel} className="btn-cancel">Anuleaza chirie</button>
+                    <button onClick={handleCancel} className="btn-cancel">Anuleaza chiria</button>
                     <button onClick={handleCleaningRequest} className="btn-cleaning">Cerere firma curatatorie</button>
                 </div>
 

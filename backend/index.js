@@ -120,23 +120,12 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
     const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Doar data, fara ora
 
     try {
-        // Gaseste rezervarile care au expirat si trebuie dezactivate
         const rentalsToExpire = await reservationHistoryCollection.find({
             checkOut: { $lt: currentDateOnly },
             isActive: true
         }).toArray();
 
         if (rentalsToExpire.length > 0) {
-            const rentalIdsToExpire = rentalsToExpire.map(r => r._id);
-
-            // Actualizeaza toate rezervarile gasite la "isActive: false"
-            const updateResult = await reservationHistoryCollection.updateMany(
-                { _id: { $in: rentalIdsToExpire } },
-                { $set: { isActive: false } }
-            );
-            console.log(`CRON: ${updateResult.modifiedCount} documente din istoric actualizate la "isActive:false".`);
-
-            // Pentru fiecare rezervare care tocmai a expirat, scoatem clientul din conversatiile asociate
             console.log(`CRON: Se proceseaza ${rentalsToExpire.length} rezervari expirate pentru eliminarea din conversatii.`);
             for (const rental of rentalsToExpire) {
                 const apartmentIdStr = rental.apartament.toString();
@@ -163,26 +152,25 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
 
         const rentalsToActivate = await reservationHistoryCollection.find({
             checkIn: { $lt: currentDateOnly },
-            isActive: false
+            checkOut: { $gte: currentDateOnly },
+            isActive: true
         }).toArray();
 
         if (rentalsToActivate.length > 0) {
-            const rentalIdsToActivate = rentalsToActivate.map(r => r._id);
-
-            //Actualizeaza toate rezervarile gasite la "isActive: true"
-            const updateResult = await reservationHistoryCollection.updateMany(
-                { _id: { $in: rentalIdsToActivate } },
-                { $set: { isActive: true } }
-            );
-            console.log(`CRON: ${updateResult.modifiedCount} documente din istoric actualizate la "isActive:true".`);
-
-            // pentru fiecare rezervare care tocmai a inceput, adaugam clientul in conversatiile asociate
-            console.log(`CRON: Se proceseaza ${rentalsToActivate.length} rezervari activate pentru adaugarea in conversatii.`);
+            console.log(`CRON: Se verifica ${rentalsToActivate.length} rezervari active pentru adaugarea in conversatii.`);
             for (const rental of rentalsToActivate) {
+                // Proceseaza doar daca chiriasul nu a fost deja adaugat in grupurile de chat.
+                // Acest flag previne rularea operatiunilor la fiecare executie a cron-ului.
+                if (rental.chatParticipantAdded) {
+                    continue; // Sari peste, deja procesat.
+                }
+
                 const apartmentIdStr = rental.apartament.toString();
                 const clientId = rental.client; // ObjectId
 
                 if (clientId) {
+                    // Adauga clientul in grupurile de conversatii pentru apartament.
+                    // $addToSet asigura ca ID-ul nu este duplicat in array.
                     const updateConv = await conversationsCollection.updateMany(
                         {
                             apartment: apartmentIdStr,
@@ -190,15 +178,23 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
                         },
                         { $addToSet: { participants: clientId.toString() } }
                     );
+
                     if (updateConv.modifiedCount > 0) {
                         console.log(`CRON: Clientul ${clientId} a fost adaugat in ${updateConv.modifiedCount} conversatii pentru apartamentul ${apartmentIdStr}.`);
                     }
+
+                    // Marcheaza chiria in baza de date ca fiind procesata, pentru a nu o mai prelucra in viitor.
+                    await reservationHistoryCollection.updateOne(
+                        { _id: rental._id },
+                        { $set: { chatParticipantAdded: true } }
+                    );
+
                 } else {
                     console.warn(`CRON: Rezervarea cu ID ${rental._id} nu are un client asociat.`);
                 }
             }
         } else {
-            console.log('CRON: Nu exista rezervari inactive care trebuie activate.');
+            console.log('CRON: Nu exista rezervari active de procesat.');
         }
 
 
@@ -491,6 +487,16 @@ async function run() {
 
                 // adaug campul isActive si mut documentul in colectia de istoric de rezervari 
                 reservationRequest.isActive = true;
+
+                if (reservationRequest.checkIn <= currentDate && reservationRequest.checkOut >= currentDate) {
+                    await conversationsCollection.updateMany(
+                        { apartment: reservationRequest.apartament.toString(), type: 'group' },
+                        { $addToSet: { participants: reservationRequest.client.toString() } }
+                    );
+                    reservationRequest.chatParticipantAdded = true;
+                } else {
+                    reservationRequest.chatParticipantAdded = false; // Nu adaugam in conversatii daca nu este activ
+                }
 
                 // Populeaza datele clientului si apartamentului inainte de inserare in istoric
                 const clientData = await usersCollection.findOne({ _id: reservationRequest.client });

@@ -890,7 +890,7 @@ const OwnerApartmentDetails: React.FC = () => {
                                     <br />
                                     Perioada: {new Date(rental.checkIn).toLocaleDateString()} - {new Date(rental.checkOut).toLocaleDateString()} <br />
                                     Status: {rental.derivedStatus}
-                                    {(rental.derivedStatus === 'active' || rental.derivedStatus === 'upcoming' || rental.derivedStatus === 'pending_approval') && (
+                                    {(rental.derivedStatus === 'Activ' || rental.derivedStatus === 'Viitor') && (
                                         <button onClick={() => handleCancelRental(rental._id)} disabled={isSaving.cancelRental} className="cancel-rental-button general-button">
                                             {isSaving.cancelRental ? "Anul..." : "Anuleaza Chiria"}
                                         </button>

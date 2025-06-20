@@ -8,8 +8,6 @@ interface RentHistoryProps {
     userId: string;
 }
 
-// Interfata similara cu cea din CurrentRent, poate fi partajata
-
 interface AptInfo {
     location: string;
     price: number;
@@ -32,11 +30,12 @@ interface HistoryEntry {
     checkOut: string;
     rooms: number;
     createdAt: string;
+    status: string;
 }
 
 const RentHistory: React.FC<RentHistoryProps> = () => {
     const { token } = useContext(AuthContext);
-    const [currentRentRequests, setCurrentRent] = useState<CurrentRentRequest[]>([]);
+    const [currentRentRequests, setCurrentRentRequests] = useState<CurrentRentRequest[]>([]);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [loadingCurrent, setLoadingCurrent] = useState(true);
     const [loadingHistory, setLoadingHistory] = useState(true);
@@ -50,16 +49,15 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
     useEffect(() => {
         if (!token) return;
 
-        // Fetch current rent
         api.get<CurrentRentRequest[]>(`/users/current_request`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(({ data }) => {
-                setCurrentRent(data);
+                setCurrentRentRequests(data);
             })
             .catch(err => {
                 if (err.response?.status === 404) {
-                    setCurrentRent([]);
+                    setCurrentRentRequests([]);
                 } else {
                     setErrorCurrent(
                         err.response?.data?.message || 'Eroare la incarcarea cererii curente.'
@@ -68,7 +66,6 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
             })
             .finally(() => setLoadingCurrent(false));
 
-        // Fetch history
         api.get<HistoryEntry[]>(`/users/reservations_history`, {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -88,18 +85,16 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
         setCancelingRequestId(requestId);
         setCancelError(null);
         try {
-            await api.delete(`/users/reservation-request/${requestId}`, { // Schimba la endpoint-ul tau corect
+            await api.delete(`/users/reservation-request/${requestId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Actualizeaza lista de cereri curente
-            setCurrentRent(prevRequests => prevRequests.filter(req => req._id !== requestId));
+
+            setCurrentRentRequests(prevRequests => prevRequests.filter(req => req._id !== requestId));
             alert("Cererea a fost anulata cu succes!");
-            // Optional, poti re-face fetch la istoric daca cererile anulate apar acolo
-            // fetchHistory(); 
+
         } catch (err: any) {
             console.error("Eroare la anularea cererii:", err);
             setCancelError(err.response?.data?.message || "Nu s-a putut anula cererea.");
-            // Afiseaza eroarea langa buton sau global
         } finally {
             setCancelingRequestId(null);
         }
@@ -122,7 +117,6 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
                         const isBeingCanceled = cancelingRequestId === crr._id;
                         return (
                             <li key={crr._id} className="rent-history-item">
-                                {/* <div className="current-rent-card"> */}
                                 <p>
                                     <strong>Locatie:</strong> {crr.apartment.location}
                                 </p>
@@ -139,8 +133,6 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
                                     {(crr.apartment.price * nights * crr.rooms).toFixed(2)} RON
                                 </p>
                                 <div className="request-actions">
-                                    {/* Permite anularea doar daca statusul e 'pending_approval' sau similar */}
-                                    {/* Exemplu: if (crr.status === 'pending_approval') */}
                                     <button
                                         onClick={() => handleCancelRequest(crr._id)}
                                         disabled={isBeingCanceled}
@@ -182,6 +174,9 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
                                 </p>
                                 <p>
                                     <strong>Camere:</strong> {h.rooms}
+                                </p>
+                                <p>
+                                    <strong>Status: </strong> {h.status}
                                 </p>
                             </li>
                         );

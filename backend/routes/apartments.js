@@ -29,12 +29,11 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             const currentDate = new Date();
 
-            // Construim interogarea pentru istoric
             const query = {
-                apartament: new ObjectId(apartmentId), // Filtram dupa ID-ul apartamentului
+                apartament: new ObjectId(apartmentId),
                 $or: [
-                    { isActive: false },             // Toate chiriile anulate (isActive este false)
-                    { checkOut: { $lt: currentDate } } // Sau chiriile care s-au incheiat (checkOut este in trecut)
+                    { isActive: false },
+                    { checkOut: { $lt: currentDate } }
                 ]
             };
 
@@ -50,32 +49,26 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             }
 
             const rentals = await reservationHistoryCollection.find(query)
-                .sort({ checkOut: -1 }) // Sorteaza dupa data de sfarsit, cele mai recente incheiate/anulate primele
+                .sort({ checkOut: -1 })
                 .skip(skip)
                 .limit(limit)
                 .toArray();
 
             const totalPages = Math.ceil(totalRentals / limit);
 
-            // Poti adauga un camp `derivedStatus` la fiecare rental in frontend sau aici pe backend
-            // pentru o afisare mai clara in UI (ex: "Completed", "Cancelled", "Active")
             const processedRentals = rentals.map(rental => {
-                let derivedStatus = "Unknown";
+                let derivedStatus = "Necunoscut";
+
                 if (!rental.isActive) {
-                    derivedStatus = "Cancelled"; // Presupunem ca isActive: false inseamna anulat
-                } else if (new Date(rental.checkOut) < currentDate) {
-                    derivedStatus = "Completed";
-                } else if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate) {
-                    derivedStatus = "Active";
-                } else if (new Date(rental.checkIn) > currentDate) {
-                    derivedStatus = "Upcoming";
+                    derivedStatus = "Anulat";
+                } else {
+                    derivedStatus = "Finalizat";
                 }
                 return { ...rental, derivedStatus };
             });
 
-
             res.json({
-                rentals: processedRentals, // Trimitem chiriile procesate
+                rentals: processedRentals,
                 currentPage: page,
                 totalPages,
                 totalRentals
@@ -148,33 +141,72 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             const currentDate = new Date();
 
-            // Construim interogarea pentru chiriile active si viitoare
             const query = {
-                apartament: new ObjectId(apartmentId), // ID-ul apartamentului
-                isActive: true,                       // Doar cele care sunt active (nu anulate)
-                checkOut: { $gte: currentDate }       // si a caror data de checkOut este azi sau in viitor
+                apartament: new ObjectId(apartmentId),
+                isActive: true,
+                checkOut: { $gte: currentDate }
             };
 
             const rentals = await reservationHistoryCollection.find(query)
                 .sort({ checkIn: 1 }) // Sorteaza dupa data de inceput, cele mai apropiate primele
                 .toArray();
 
-            // si aici poti adauga `derivedStatus` daca e util
             const processedRentals = rentals.map(rental => {
-                let derivedStatus = "Unknown";
-                if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate && rental.isActive) { // isActive e deja filtrat true
-                    derivedStatus = "Active";
-                } else if (new Date(rental.checkIn) > currentDate && rental.isActive) {
-                    derivedStatus = "Upcoming";
+                let derivedStatus = "Necunoscut";
+                if (new Date(rental.checkIn) <= currentDate && new Date(rental.checkOut) >= currentDate) {
+                    derivedStatus = "Activ";
+                } else if (new Date(rental.checkIn) > currentDate) {
+                    derivedStatus = "Viitor";
                 }
                 return { ...rental, derivedStatus };
             });
 
 
-            res.json(processedRentals); // Returneaza array-ul de inchirieri
+            res.json(processedRentals);
 
         } catch (error) {
             console.error('Eroare la preluarea chiriilor curente si viitoare:', error);
+            res.status(500).json({ message: 'Eroare interna a serverului.' });
+        }
+    });
+
+    router.patch('/rentals/:rentalId/cancel-by-owner', authenticateToken, async (req, res) => {
+        const { rentalId } = req.params;
+        const userId = req.user._id;
+
+        try {
+            const rental = await reservationHistoryCollection.findOne({ _id: new ObjectId(rentalId) });
+            if (!rental) {
+                return res.status(404).json({ message: "Chiria nu a fost gasita." });
+            }
+            if (rental.apartament.ownerId.toString() !== userId.toString()) {
+                return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
+            }
+
+            // Actualizeaza chiria ca fiind anulat
+            const result = await reservationHistoryCollection.updateOne(
+                { _id: new ObjectId(rentalId) },
+                { $set: { isActive: false } }
+            );
+
+            if (result.modifiedCount === 0) {
+                return res.status(400).json({ message: "Chiria nu a putut fi anulata." });
+            }
+
+            // scoate chiriasul din grupurile de chat pentru acest apartament
+            await conversationsCollection.updateMany(
+                {
+                    apartment: new ObjectId(rental.apartament._id),
+                    type: 'group',
+                    participants: rental.client.toString(),
+                },
+                { $pull: { participants: rental.client.toString() } }
+            );
+
+            res.json({ message: "Chiria a fost anulata cu succes." });
+
+        } catch (error) {
+            console.error('Eroare la anularea chiriei:', error);
             res.status(500).json({ message: 'Eroare interna a serverului.' });
         }
     });
@@ -560,10 +592,26 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 { _id: new ObjectId(rentId), client: new ObjectId(userId) },
                 { $set: { isActive: false } }
             );
+
             if (result.modifiedCount === 0) {
                 return res.status(404).json({ message: 'Rezervare negasita sau nu aveti permisiunea.' });
             }
+
+            const rent = await reservationHistoryCollection.findOne({ _id: new ObjectId(rentId) });
+
+            if (rent) {
+                await conversationsCollection.updateMany(
+                    {
+                        apartment: rent.apartament.toString(),
+                        type: 'group',
+                        participants: rent.client.toString(),
+                    },
+                    { $pull: { participants: rent.client.toString() } }
+                );
+            }
+
             return res.json({ message: 'Chiria a fost anulata cu succes.' });
+
         } catch (err) {
             console.error(err);
             return res.status(500).json({ message: 'Eroare la anulare.' });
