@@ -42,7 +42,6 @@ const RentHistory: React.FC<RentHistoryProps> = () => {
     const [errorCurrent, setErrorCurrent] = useState<string | null>(null);
     const [errorHistory, setErrorHistory] = useState<string | null>(null);
 
-    // Stare noua pentru operatiunea de anulare
     const [cancelingRequestId, setCancelingRequestId] = useState<string | null>(null);
     const [cancelError, setCancelError] = useState<string | null>(null);
 

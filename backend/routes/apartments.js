@@ -85,21 +85,19 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         try {
             const currentDate = new Date();
             const query = {
-                isActive: true,                       // Doar cele active (nu anulate)
-                checkIn: { $lte: currentDate },           // A caror data de checkIn este azi sau in trecut
-                checkOut: { $gte: currentDate },      // A caror data de checkOut este azi sau in viitor
-                "clientData.faculty": { $exists: true, $ne: null, $ne: "" } // Doar cele unde facultatea e specificata
+                isActive: true,
+                checkIn: { $lte: currentDate },
+                checkOut: { $gte: currentDate },
+                "clientData.faculty": { $exists: true, $ne: null, $ne: "" }
             };
             const activeRentals = await reservationHistoryCollection.find(query)
                 .project({
-                    apartament: 1, // ID-ul apartamentului din chirie
-                    "clientData.faculty": 1, // Numele facultatii din clientData
-                    _id: 0 // Nu avem nevoie de ID-ul chiriei aici
+                    apartament: 1,
+                    "clientData.faculty": 1,
+                    _id: 0
                 })
                 .toArray();
-            // Transforma datele in formatul asteptat de frontend (TenantFacultyInfo)
-            // si elimina duplicatele (un apartament poate avea mai multi chiriasi de la aceeasi facultate)
-            const facultySummaryMap = new Map(); // apartmentId -> Set de facultati
+            const facultySummaryMap = new Map();
 
             activeRentals.forEach(rental => {
                 const apartmentIdStr = rental.apartament.toString();
@@ -148,7 +146,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             };
 
             const rentals = await reservationHistoryCollection.find(query)
-                .sort({ checkIn: 1 }) // Sorteaza dupa data de inceput, cele mai apropiate primele
+                .sort({ checkIn: 1 })
                 .toArray();
 
             const processedRentals = rentals.map(rental => {
@@ -183,7 +181,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
             }
 
-            // Actualizeaza chiria ca fiind anulat
             const result = await reservationHistoryCollection.updateOne(
                 { _id: new ObjectId(rentalId) },
                 { $set: { isActive: false } }
@@ -193,7 +190,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 return res.status(400).json({ message: "Chiria nu a putut fi anulata." });
             }
 
-            // scoate chiriasul din grupurile de chat pentru acest apartament
             await conversationsCollection.updateMany(
                 {
                     apartment: new ObjectId(rental.apartament._id),
@@ -221,10 +217,9 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
     router.put('/:apartmentId/add-images', authenticateToken, async (req, res) => {
         const { apartmentId } = req.params;
-        const { newImageUrlsToAdd } = req.body; // Ar trebui sa fie un array de string-uri (URL-uri)
-        const userId = req.user._id; // ID-ul utilizatorului autentificat, setat de authenticateToken
+        const { newImageUrlsToAdd } = req.body;
+        const userId = req.user._id;
 
-        // 1. Validare input
         if (!ObjectId.isValid(apartmentId)) {
             return res.status(400).json({ message: "ID apartament invalid." });
         }
@@ -232,16 +227,12 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             return res.status(400).json({ message: "Lista de URL-uri noi este invalida sau lipseste. Trebuie sa fie un array de string-uri." });
         }
         if (newImageUrlsToAdd.length === 0) {
-            // Tehnic, nu e o eroare, dar frontend-ul nu ar trebui sa trimita un array gol.
-            // Poti alege sa returnezi apartamentul existent sau un mesaj specific.
             const existingApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
             if (!existingApartment) return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
             return res.status(200).json(existingApartment); // Returneaza apartamentul neschimbat
         }
 
         try {
-            // Obtine colectia (daca nu e definita global in fisier)
-
 
             // 2. Verifica existenta apartamentului si proprietarul
             const apartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
@@ -250,35 +241,23 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
             }
 
-            // Asigura-te ca utilizatorul autentificat este proprietarul apartamentului
             if (apartment.ownerId.toString() !== userId.toString()) {
                 return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
             }
 
             // 3. Actualizeaza documentul in MongoDB
-            // Adauga noile URL-uri la array-ul existent `images`.
-            // Folosim `$addToSet` cu `$each` pentru a adauga fiecare element din array-ul `newImageUrlsToAdd`
-            // la array-ul `images`, doar daca elementul nu exista deja in `images`.
-            // Acest lucru previne adaugarea de URL-uri duplicate.
             const updateResult = await apartmentsCollection.updateOne(
                 { _id: new ObjectId(apartmentId) },
                 { $addToSet: { images: { $each: newImageUrlsToAdd } } }
-                // Alternativ, daca vrei sa permiti duplicate sau ordinea e importanta si vrei sa adaugi la sfarsit:
-                // { $push: { images: { $each: newImageUrlsToAdd } } }
             );
 
             if (updateResult.matchedCount === 0) {
-                // Acest caz nu ar trebui sa se intample datorita verificarii `apartment` de mai sus.
                 return res.status(404).json({ message: "Apartamentul nu a fost gasit pentru actualizare (match count)." });
             }
-
-            // Chiar daca modifiedCount este 0 (ex: toate URL-urile existau deja si s-a folosit $addToSet),
-            // operatiunea este considerata un succes.
 
             // 4. Preluam si returnam documentul actualizat pentru a fi consistent cu frontend-ul
             const updatedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
             if (!updatedApartment) {
-                // Caz improbabil daca updateResult.matchedCount era 1
                 return res.status(404).json({ message: "Apartamentul actualizat nu a putut fi regasit." });
             }
 
@@ -291,7 +270,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     });
 
     router.put('/:apartmentId/remove-image-reference', authenticateToken, async (req, res) => {
-        // Sau router.delete('/:apartmentId/image-reference' ... ) daca preferi metoda DELETE
         const { apartmentId } = req.params;
         const { imageUrlToDelete } = req.body;
         const userId = req.user._id;
@@ -312,14 +290,12 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 return res.status(403).json({ message: "Neautorizat." });
             }
 
-            // Doar actualizeaza MongoDB
             const result = await apartmentsCollection.updateOne(
                 { _id: new ObjectId(apartmentId) },
                 { $pull: { images: imageUrlToDelete } }
             );
 
             if (result.matchedCount === 0) {
-                // Ar trebui sa fie prins de verificarea apartment de mai sus
                 return res.status(404).json({ message: "Apartamentul nu a fost gasit pentru actualizare (MongoDB)." });
             }
 
@@ -334,49 +310,39 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
     router.put('/:apartmentId', authenticateToken, async (req, res) => {
         const { apartmentId } = req.params;
-        const updates = req.body; // Campurile de actualizat trimise de frontend
-        const userId = req.user._id; // ID-ul utilizatorului autentificat
+        const updates = req.body;
+        const userId = req.user._id;
 
         if (!ObjectId.isValid(apartmentId)) {
             return res.status(400).json({ message: "ID apartament invalid." });
         }
 
         try {
-            // Gaseste apartamentul pentru a verifica proprietarul
             const apartmentToUpdate = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
 
             if (!apartmentToUpdate) {
                 return res.status(404).json({ message: "Apartamentul nu a fost gasit." });
             }
 
-            // Verifica daca utilizatorul autentificat este proprietarul apartamentului
             if (apartmentToUpdate.ownerId.toString() !== userId.toString()) {
                 return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
             }
 
-            // Construieste obiectul de actualizare pentru MongoDB ($set)
-            // Validam si curatam `updates` pentru a preveni injectarea de campuri nedorite
-            // si pentru a asigura tipurile corecte
             const updatePayload = {};
             const allowedRootFields = [
                 'price', 'renovationYear', 'images',
-                // Nu permitem actualizarea directa a campurilor ca numberOfRooms aici,
-                // daca nu sunt explicit gestionate.
-                // Adauga aici si alte campuri de la radacina pe care le permiti a fi actualizate direct.
             ];
             const allowedNestedObjects = ['discounts', 'utilities', 'facilities'];
 
             for (const key in updates) {
                 if (allowedRootFields.includes(key)) {
-                    // Pentru campurile numerice de la radacina, asigura-te ca sunt numere daca nu sunt null
                     if (['price', 'renovationYear'].includes(key)) {
                         updatePayload[key] = (updates[key] === null || updates[key] === undefined) ? null : Number(updates[key]);
                     } else {
-                        updatePayload[key] = updates[key]; // ex: images
+                        updatePayload[key] = updates[key];
                     }
                 } else if (allowedNestedObjects.includes(key) && typeof updates[key] === 'object' && updates[key] !== null) {
-                    // Pentru obiecte nested, le preluam asa cum sunt, dar ideal ar fi sa validam si structura lor interna
-                    updatePayload[key] = {}; // Initializam pentru a evita probleme cu prototype pollution
+                    updatePayload[key] = {};
 
                     if (key === 'discounts') {
                         const d = updates.discounts;
@@ -395,12 +361,9 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                             electricityPrice: (u.electricityPrice === null || u.electricityPrice === undefined) ? null : Number(u.electricityPrice),
                         };
                     } else if (key === 'facilities') {
-                        // Aici preluam direct obiectul `facilities` trimis de frontend,
-                        // presupunand ca frontend-ul trimite structura corecta cu valori booleene.
-                        // Poti adauga validare suplimentara pentru cheile permise in `facilities`
                         const f = updates.facilities;
                         const validFacilitiesPayload = {};
-                        const allowedFacilityKeys = [ // Cheile definite in interfata ta
+                        const allowedFacilityKeys = [
                             'wifi', 'parking', 'airConditioning', 'tvCable', 'laundryMachine',
                             'fullKitchen', 'balcony', 'petFriendly', 'pool', 'gym', 'elevator',
                             'terrace', 'bikeStorage', 'storageRoom', 'rooftop', 'fireAlarm',
@@ -415,15 +378,11 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                         updatePayload.facilities = validFacilitiesPayload;
                     }
                 }
-                // Ignoram alte campuri pentru securitate
             }
 
             if (Object.keys(updatePayload).length === 0) {
                 return res.status(400).json({ message: "Niciun camp valid de actualizat furnizat." });
             }
-
-            // Adauga `updatedAt` daca doresti
-            // updatePayload.updatedAt = new Date();
 
             const result = await apartmentsCollection.updateOne(
                 { _id: new ObjectId(apartmentId) },
@@ -431,17 +390,14 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             );
 
             if (result.matchedCount === 0) {
-                // Acest caz nu ar trebui sa se intample din cauza verificarii `apartmentToUpdate` de mai sus
                 return res.status(404).json({ message: "Apartamentul nu a fost gasit pentru actualizare (match)." });
             }
 
             if (result.modifiedCount === 0 && result.matchedCount === 1) {
-                // Nicio modificare efectiva, dar requestul a fost ok. Returnam apartamentul existent.
                 const notModifiedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
                 return res.status(200).json(notModifiedApartment);
             }
 
-            // Preluam si returnam documentul actualizat
             const updatedApartment = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
             res.status(200).json(updatedApartment);
 
@@ -452,20 +408,19 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     });
 
     router.get('/:id', async (req, res) => {
-        // folosim o agregare de tio lookup pentru a extrage informatii despre proprietarul unui apartament
         const id = req.params.id; // id-ul ownerului
         try {
             const apartmentOwner = await apartmentsCollection.aggregate([
                 { $match: { _id: new ObjectId(id) } },
                 {
                     $lookup: {
-                        from: "users", // asigura-te ca numele colectiei de utilizatori este corect
-                        localField: "ownerId", // presupunem ca ai stocat id-ul proprietarului aici
+                        from: "users",
+                        localField: "ownerId",
                         foreignField: "_id",
                         as: "ownerInformation"
                     }
                 },
-                { $unwind: "$ownerInformation" } // presupunand ca fiecare apartament are un singur proprietar
+                { $unwind: "$ownerInformation" }
             ]).toArray();
 
             if (!apartmentOwner || apartmentOwner.length === 0) {
@@ -494,7 +449,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         const n = Math.max(1, parseInt(req.query.n, 10) || 10);
 
         try {
-            // 1) Ia primele n rezervari active pentru apartament, sortate dupa checkOut
             const rents = await reservationHistoryCollection
                 .find({
                     apartament: new ObjectId(apartmentId),
@@ -505,14 +459,14 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 .limit(n)
                 .toArray();
 
-            // 2) Extrage TOtI client IDs (cu duplicate), in ordine
+            // 2) Extrage toti client IDs (cu duplicate), in ordine
             const clientIds = rents.map(r => r.client.toString());
 
             // 3) Gaseste user-ii unici ca sa nu faci prea multe query-uri
             const uniqueIds = [...new Set(clientIds)].map(id => new ObjectId(id));
             const usersArray = await usersCollection
                 .find({ _id: { $in: uniqueIds } })
-                .project({ fullName: 1, faculty: 1 })   // luam doar ce ne trebuie
+                .project({ fullName: 1, faculty: 1 })
                 .toArray();
 
             // 4) Construieste un map de lookup { userId => userDoc }
@@ -540,13 +494,11 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         }
     });
 
-    // Lista chiriasilor activi in apartament
     router.get('/active-renters/:apartmentId', authenticateToken, async (req, res) => {
         const { apartmentId } = req.params;
         const now = new Date();
 
         try {
-            // gasim toate rezervarile active care includ ziua de azi
             const rents = await reservationHistoryCollection
                 .find({
                     apartament: new ObjectId(apartmentId),
@@ -556,11 +508,9 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                 })
                 .toArray();
 
-            // ids unici
             const uniqueIds = [...new Set(rents.map(r => r.client.toString()))]
                 .map(id => new ObjectId(id));
 
-            // aducem numele
             const users = await usersCollection
                 .find({ _id: { $in: uniqueIds } })
                 .project({ fullName: 1 })
@@ -568,7 +518,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
 
             const mapUser = new Map(users.map(u => [u._id.toString(), u.fullName]));
 
-            // reconstruim raspunsul in ordinea in care apar users (dupa id unic)
             const result = Array.from(mapUser.entries()).map(([id, fullName]) => ({
                 _id: id,
                 fullName
@@ -582,7 +531,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     }
     );
 
-    // Anuleaza o rezervare (firma user-ului)
     router.post('/cancel-rent/:rentId', authenticateToken, async (req, res) => {
         const { rentId } = req.params;
         const userId = req.user._id;
@@ -619,7 +567,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
     }
     );
 
-    // Cerere firma curatenie
     router.post('/cleaning-request', authenticateToken, async (req, res) => {
         const userId = req.user._id;
         const { apartmentId } = req.body;
@@ -654,7 +601,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
         }
 
         try {
-            const bucket = getBucket(); // Obtine instanta bucket-ului Firebase
+            const bucket = getBucket();
 
             // 1. Gaseste apartamentul pentru a verifica proprietarul sI pentru a obtine lista de imagini
             const apartmentToDelete = await apartmentsCollection.findOne({ _id: new ObjectId(apartmentId) });
@@ -692,8 +639,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                             await bucket.file(filePathInFirebase).delete();
                         }
                     } catch (storageError) {
-                        // Logheaza eroarea dar continua procesul de stergere a celorlalte imagini si a documentului din DB
-                        // Poti alege o strategie mai stricta daca stergerea din Firebase este critica.
                         if (storageError.code === 404) {
                             console.warn(`Imaginea la URL ${imageUrl} (cale: ${filePathInFirebase || 'necunoscuta'}) nu a fost gasita in Firebase Storage pentru apartamentul ${apartmentId}.`);
                         } else {
@@ -702,9 +647,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
                     }
                 });
 
-                // Asteapta finalizarea tuturor promisiunilor de stergere din Firebase
-                // Folosim Promise.allSettled pentru a continua chiar daca unele stergeri esueaza,
-                // pentru a ne asigura ca incercam sa stergem documentul din DB.
                 const results = await Promise.allSettled(deletePromises);
                 results.forEach(result => {
                     if (result.status === 'rejected') {
@@ -719,7 +661,6 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             const deleteResult = await apartmentsCollection.deleteOne({ _id: new ObjectId(apartmentId) });
 
             if (deleteResult.deletedCount === 0) {
-                // Ar fi ciudat sa ajungem aici daca findOne a functionat, dar e o verificare de siguranta
                 console.warn(`Apartamentul ${apartmentId} a fost gasit dar nu a putut fi sters din MongoDB.`);
                 return res.status(500).json({ message: "Apartamentul a fost gasit dar nu a putut fi sters din baza de date." });
             }

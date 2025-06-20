@@ -59,7 +59,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     router.get('/get_association_requests/:facultyId', async (req, res) => {
         const { facultyId } = req.params;
         if (!ObjectId.isValid(facultyId)) {
-            // Returneaza o eroare 400 Bad Request daca ID-ul nu e valid
             return res.status(400).json({ message: 'ID facultate invalid.' });
         }
         try {
@@ -85,12 +84,10 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             const associationRequest = await associationsRequestsCollection.findOne({ _id: associationRequestId });
 
             if (!associationRequest) {
-                // Nu s-a gasit cererea, fie nu exista, fie nu apartine acestei facultati, fie nu mai e pending
                 return res.status(404).json({ message: 'Cererea de asociere nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
             }
             const { studentId } = associationRequest;
 
-            // get the user document from the userId
             const userUpdate = await usersCollection.updateOne(
                 { _id: new ObjectId(studentId) },
                 { $set: { faculty_valid: true } }
@@ -100,16 +97,13 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 return { success: false, message: "Utilizatorul nu a fost gasit" };
             }
 
-            // delete the current association request
             const deleteRequest = await associationsRequestsCollection.deleteOne({ _id: associationRequestId });
             if (deleteRequest.deletedCount === 0) {
                 return res.status(500).json({ message: 'Cererea de asociere nu a putut fi stearsa.' });
             }
 
-            // add a notification for the student
             notificationService.createNotification(message = 'Cererea de asociere a fost acceptata.', receiver = studentId);
 
-            // send positive response
             res.status(200).json({ message: 'Cererea de asociere a fost acceptata cu succes.' });
 
         } catch (error) {
@@ -138,13 +132,11 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
             const { studentId } = associationRequest;
 
-            // delete the current association request
             const deleteRequest = await associationsRequestsCollection.deleteOne({ _id: associationRequestId });
             if (deleteRequest.deletedCount === 0) {
                 return res.status(500).json({ message: 'Cererea de asociere nu a putut fi stearsa.' });
             }
 
-            // add a notification for the student
             notificationService.createNotification(message = `Cererea de asociere a fost respinsa cu motivul ${reason}.`, receiver = studentId);
 
             res.status(200).json({ message: 'Cererea de asociere a fost respinsa.' });
@@ -199,7 +191,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                         _id: 1,
                         requestDate: 1,
                         faculty: 1,
-                        // Aici adaugi campurile din studentInfo
                         'studentInfo._id': 1,
                         'studentInfo.fullName': 1,
                         'studentInfo.email': 1,
@@ -290,7 +281,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 return res.status(500).json({ message: 'Cererea de actualizare medie nu a putut fi stearsa.' });
             }
 
-            // add a notification for the student
             notificationService.createNotification(message = `Cererea de actualizare medie a fost respinsa cu motivul ${reason}.`, receiver = studentId);
 
             res.status(200).json({ message: 'Cererea de actualizare medie a fost respinsa.' });
@@ -302,7 +292,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
     router.patch('/students/invalidate-all', authenticateToken, async (req, res) => {
         try {
-            // Actualizeaza toti studentii pentru a-i invalida
             const updateResult = await usersCollection.updateMany(
                 {
                     faculty_valid: true,
@@ -310,10 +299,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 },
                 { $set: { faculty_valid: false } }
             );
-
-            // if (updateResult.modifiedCount === 0) {
-            //     return res.status(500).json({ message: 'Nu s-a putut invalida niciun student.' });
-            // }
 
             // Trimite notificare tuturor studentilor
             const students = await usersCollection.find({ faculty_valid: false }).toArray();
@@ -336,23 +321,19 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
 
         try {
-            // Verifica daca facultatea exista
             const faculty = await facultiesCollection.findOne({ _id: new ObjectId(facultyId) });
             if (!faculty) {
                 return res.status(404).json({ message: 'Facultatea nu a fost gasita.' });
             }
 
-            // Sterge facultatea
             const deleteResult = await facultiesCollection.deleteOne({ _id: new ObjectId(facultyId) });
             if (deleteResult.deletedCount === 0) {
                 return res.status(500).json({ message: 'Nu s-a putut sterge facultatea.' });
             }
 
-            // sterge toate cererile de asociere
             await associationsRequestsCollection.deleteMany({ facultyId: new ObjectId(facultyId) });
             await markRequestsCollection.deleteMany({ facultyId: new ObjectId(facultyId) });
 
-            // Sterge notificari asociate
             await notificationsCollection.deleteMany({ receiver: facultyId });
 
             return res.status(200).json({ message: 'Contul de facultate a fost sters cu succes.' });
@@ -369,13 +350,11 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
         }
 
         try {
-            // Verifica daca studentul exista
             const student = await usersCollection.findOne({ _id: new ObjectId(studentId) });
             if (!student) {
                 return res.status(404).json({ message: 'Studentul nu a fost gasit.' });
             }
 
-            // Actualizeaza campul faculty_valid la false
             const updateResult = await usersCollection.updateOne(
                 { _id: new ObjectId(studentId) },
                 { $set: { faculty_valid: false } }
@@ -385,7 +364,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 return res.status(500).json({ message: 'Nu s-a putut invalida studentul.' });
             }
 
-            // Trimite notificare studentului
             await notificationService.createNotification('Ai fost invalidat de la facultate.', studentId);
 
             return res.status(200).json({ message: 'Student invalidat cu succes.' });
@@ -436,14 +414,6 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             return res.status(500).json({ message: 'Eroare interna la server' });
         }
     });
-
-
-
-
-
-
-
-
 
     return router;
 }

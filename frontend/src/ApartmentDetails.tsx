@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "./api";
-import { Apartment } from "./types"; // Assuming types.ts defines the Apartment interface
+import { Apartment } from "./types";
 import { AuthContext } from "./AuthContext";
-import OwnerPop_up from "./OwnerPop_up"; // Your Owner Popup component
-import ReservationPopup from "./ReservationPopup"; // Your Reservation Popup component
+import OwnerPop_up from "./OwnerPop_up";
+import ReservationPopup from "./ReservationPopup";
 import { format, parseISO } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import "./reviews/Reviews.css";
-import MapPop_up from "./MapPop_up"; // Your Map Popup component
+import MapPop_up from "./MapPop_up";
 import { useNotifications } from "./NotificationContext";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
-import "./ApartmentDetails.css"; // Ensure this CSS is imported
-import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/RentalDetailsTypes"; // Adjust the import path as necessary
+import "./ApartmentDetails.css";
+import { SelectedDates, Colleague, calculateBookingCosts } from "../utils/RentalDetailsTypes";
 import { ALL_POSSIBLE_FACILITIES_MAP } from "./types";
 import ReviewList from "./reviews/ReviewList";
 import ReviewForm from "./reviews/ReviewForm";
@@ -35,7 +35,7 @@ const ApartmentDetails: React.FC = () => {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
     const [reviewError, setReviewError] = useState<string>("");
-    const [showReviewForm, setShowReviewForm] = useState<boolean>(false); // Controlezi vizibilitatea formularului
+    const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
     // State for popups
     const [showOwnerPop_up, setshowOwnerPop_up] = useState(false);
     const [showReservationPopup, setShowReservationPopup] = useState(false);
@@ -52,11 +52,7 @@ const ApartmentDetails: React.FC = () => {
 
     const handleReviewDeleted = (deletedReviewId: string) => {
         setReviews((prevReviews) => prevReviews.filter((review) => review._id !== deletedReviewId));
-        // Optional: afiseaza o notificare de succes
-        // refresh(); // Daca vrei sa re-fetch-uiesti notificarile sau alte date
-        // Aici ai putea actualiza si rating-ul mediu al apartamentului DACA
-        // backend-ul nu o face automat si ai aceasta informatie in `apartment` state.
-        // De exemplu, ai putea re-face fetch-ul detaliilor apartamentului pentru a obtine rating-ul actualizat.
+
         if (id) {
             api.get<Apartment>(`/apartments/${id}`)
                 .then((response) => setApartment(response.data))
@@ -69,11 +65,10 @@ const ApartmentDetails: React.FC = () => {
         }
     };
 
-    // Handler to receive dates from ReservationPopup
     const handleDatesSelected = (checkIn: Date, checkOut: Date, rooms: number) => {
         setSelectedDates({ checkIn, checkOut });
         setRooms({ rooms });
-        setError(""); // Clear previous booking errors when new dates are selected
+        setError("");
     };
 
     useEffect(() => {
@@ -95,7 +90,6 @@ const ApartmentDetails: React.FC = () => {
         };
     }, [blobUrls]);
 
-    // Fetch apartment details
     useEffect(() => {
         if (id) {
             api.get<Apartment>(`/apartments/${id}`)
@@ -103,11 +97,8 @@ const ApartmentDetails: React.FC = () => {
                     const fetchedApartment = response.data;
                     setApartment(fetchedApartment);
                     setCurrentImageIndex(0);
-
-                    // Initializare facilitati bazate pe obiectul aptData.facilities
                     const initialFacilitiesLabels: string[] = [];
                     if (fetchedApartment.facilities) {
-                        // Verifica daca obiectul facilities exista
                         ALL_POSSIBLE_FACILITIES_MAP.forEach((facilityMapItem) => {
                             if (fetchedApartment.facilities[facilityMapItem.key] === true) {
                                 initialFacilitiesLabels.push(facilityMapItem.label);
@@ -115,18 +106,12 @@ const ApartmentDetails: React.FC = () => {
                         });
                     }
                     setSelectedFacilities(initialFacilitiesLabels);
-
-                    // NOU: Preincarcarea imaginilor
                     if (fetchedApartment.images && fetchedApartment.images.length > 0) {
                         fetchedApartment.images.forEach((imageUrl) => {
-                            const img = new Image(); // Creeaza un nou element de imagine in memorie
-                            img.src = imageUrl; // Setarea sursei incepe descarcarea
-                            // Nu e nevoie sa adaugi 'img' la DOM.
-                            // Browserul il va pastra in cache odata descarcat.
+                            const img = new Image();
+                            img.src = imageUrl;
                         });
                     }
-
-                    // apelul pentru colegi
                     const n = fetchedApartment.numberOfRooms;
                     api.get<Colleague[]>(`/apartments/nearest_checkout/${id}`, { params: { n } })
                         .then((res) => {
@@ -143,33 +128,30 @@ const ApartmentDetails: React.FC = () => {
         }
     }, [id]);
 
-    // Fetch reviews pentru apartamentul curent
+
     useEffect(() => {
         if (id) {
             setLoadingReviews(true);
             setReviewError("");
-            // Initial, sorteaza dupa cele mai noi. Include si filtrare daca e cazul.
+
             api.get<PaginatedResponse<Review>>(
                 `/reviews/apartment/${id}?sort=createdAt_desc&limit=1000`,
             )
                 .then((response) => {
-                    // VERIFICA CE RETURNZA API-UL AICI
-                    // Daca response.data este un obiect care contine un array de review-uri,
-                    // ex: { reviews: [], page: 1, ... }, atunci trebuie sa extragi array-ul corect.
                     if (Array.isArray(response.data)) {
-                        // Daca API-ul returneaza direct un array
+
                         setReviews(response.data);
                     } else if (response.data && Array.isArray(response.data.reviews)) {
-                        // Daca API-ul returneaza un obiect cu proprietatea 'reviews'
+
                         setReviews(response.data.reviews);
                     } else {
                         console.warn(
                             "Format neasteptat pentru review-uri de la API:",
                             response.data,
                         );
-                        setReviews([]); // Seteaza un array gol ca fallback
+                        setReviews([]);
                         setReviewError("Formatul datelor primite pentru review-uri este incorect.");
-                        setReviews([]); // Asigura-te ca setezi un array gol si la eroare
+                        setReviews([]);
                     }
                 })
                 .catch((error) => {
@@ -194,13 +176,11 @@ const ApartmentDetails: React.FC = () => {
     }, [id]);
 
     const handleReviewSubmitted = (newReview: Review) => {
-        // Adauga noul review la inceputul listei (sau re-fetch)
+
         setReviews((prevReviews) => [newReview, ...prevReviews]);
-        setShowReviewForm(false); // Ascunde formularul dupa submit
-        // Aici ai putea actualiza si rating-ul mediu al apartamentului daca nu o faci in backend
+        setShowReviewForm(false);
     };
 
-    // Handle body scroll when popups are open
     useEffect(() => {
         if (showOwnerPop_up || showReservationPopup || selectedMapData) {
             document.body.style.overflow = "hidden";
@@ -208,22 +188,18 @@ const ApartmentDetails: React.FC = () => {
             document.body.style.overflow = "auto";
         }
         return () => {
-            // Cleanup function
             document.body.style.overflow = "auto";
         };
     }, [showOwnerPop_up, showReservationPopup, selectedMapData]);
 
-    // Function to open the date selection popup
     const selectInterval = async () => {
         setShowReservationPopup(true);
     };
 
-    // Use useMemo to calculate costs only when relevant state changes
     const bookingCosts = useMemo(() => {
         return calculateBookingCosts(apartment, selectedDates, rooms.rooms);
     }, [apartment, user, selectedDates, rooms.rooms]);
 
-    // Function to send reservation request
     const makeReservation = async () => {
         if (!apartment) {
             setError("Apartamentul nu a fost gasit.");
@@ -238,10 +214,9 @@ const ApartmentDetails: React.FC = () => {
 
         if (!isAuthenticated || !user || !token) {
             setError("Trebuie sa fiti autentificat pentru a trimite o cerere de rezervare.");
-            // Consider navigating to login: navigate('/login');
             return;
         }
-        setError(""); // Clear previous errors
+        setError("");
         try {
             await api.post(
                 "/create_reservation_request",
@@ -251,9 +226,9 @@ const ApartmentDetails: React.FC = () => {
                     numberOfRooms: bookingCosts.numberOfRooms,
                     checkIn: format(selectedDates.checkIn, "yyyy-MM-dd"),
                     checkOut: format(selectedDates.checkOut, "yyyy-MM-dd"),
-                    priceRent: apartment.price, // Pretul de baza per noapte per camera
-                    priceUtilities: bookingCosts.totalDailyUtilityCost, // Costul zilnic al utilitatilor
-                    discount: bookingCosts.discountPercentage, // Procentajul de discount aplicat
+                    priceRent: apartment.price,
+                    priceUtilities: bookingCosts.totalDailyUtilityCost,
+                    discount: bookingCosts.discountPercentage,
                     numberOfNights: bookingCosts.nights,
                 },
                 {
@@ -261,12 +236,10 @@ const ApartmentDetails: React.FC = () => {
                 },
             );
 
-            // Handle successful request submission
+            refresh();
+            setSelectedDates(null);
+            alert("Cererea de rezervare a fost trimisa cu succes!");
 
-            refresh(); // Refresh notifications
-            setSelectedDates(null); // Clear selected dates after successful submission
-            alert("Cererea de rezervare a fost trimisa cu succes!"); // Simple confirmation
-            // Optionally navigate to a confirmation or 'my requests' page
         } catch (err: any) {
             setError(
                 err.response?.data?.message || "Eroare la trimiterea cererii. incercati din nou.",
@@ -275,9 +248,8 @@ const ApartmentDetails: React.FC = () => {
         }
     };
 
-    // Function to handle map button click
     const handleLocationClick = async (apt: Apartment) => {
-        setError(""); // Clear previous errors
+        setError("");
         try {
             const response = await api.get("https://nominatim.openstreetmap.org/search", {
                 params: {
@@ -293,7 +265,7 @@ const ApartmentDetails: React.FC = () => {
                 const parsedLng = parseFloat(lon);
 
                 if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-                    // Verificare importanta
+
                     setSelectedMapData({
                         lat: parsedLat,
                         lng: parsedLng,
@@ -310,7 +282,6 @@ const ApartmentDetails: React.FC = () => {
         }
     };
 
-    // Loading and initial error states
     if (!apartment && error) {
         return (
             <div>
@@ -330,11 +301,10 @@ const ApartmentDetails: React.FC = () => {
         );
     }
 
-    // Helper function to render selected dates and costs (part of the new right section logic)
     const renderSelectedDatesInfo = () => {
         if (!selectedDates || !bookingCosts) {
-            // Verificam si bookingCosts
-            // Afiseaza un mesaj default sau nimic daca nu sunt selectate datele
+
+
             return (
                 <div className="selected-dates-info">
                     <p>Selectati perioada si numarul de camere pentru a vedea costul.</p>
@@ -445,19 +415,17 @@ const ApartmentDetails: React.FC = () => {
             );
         }
     };
-    // Main component render
+
     return (
         <div className="apartment-details-page">
             <div className="details-container">
-                {/* === Partea stanga (Imagine + Detalii Grupate) === */}
                 <div className="left-section">
-                    {/* Imaginea principala */}
                     <div className="image-carousel-container">
                         {apartment.images && apartment.images.length > 0 ? (
                             <>
                                 {apartment.images.length > 1 && (
                                     <button onClick={prevImage} className="carousel-button prev">
-                                        <FaLongArrowAltLeft /> {/* Sageata stanga */}
+                                        <FaLongArrowAltLeft />
                                     </button>
                                 )}
                                 <img
@@ -470,7 +438,7 @@ const ApartmentDetails: React.FC = () => {
                                 />
                                 {apartment.images.length > 1 && (
                                     <button onClick={nextImage} className="carousel-button next">
-                                        <FaLongArrowAltRight /> {/* Sageata dreapta */}
+                                        <FaLongArrowAltRight />
                                     </button>
                                 )}
                             </>
@@ -601,7 +569,7 @@ const ApartmentDetails: React.FC = () => {
                     <div className="reviews-wrapper-card">
                         <section className="reviews-section">
                             <h2>Recenzii ({reviews.length})</h2>
-                            {/* Buton pentru a arata/ascunde formularul de review */}
+
                             {isAuthenticated && canLeaveReview && !showReviewForm && (
                                 <button
                                     onClick={() => setShowReviewForm(true)}
@@ -633,15 +601,14 @@ const ApartmentDetails: React.FC = () => {
                 {/* === New Right Section Structure with Original Button Styles === */}
                 <div className="right-section">
                     {apartment.ownerInformation && (
-                        // Using new card structure
                         <div className="owner-booking-card">
                             <div className="owner-info-header">
                                 <h3>Proprietar</h3>
                                 <p>{apartment.ownerInformation.fullName}</p>
-                                {/* Using new buttons container but original button classes */}
+
                                 <div className="owner-buttons">
                                     <button
-                                        className="owner-section-button details-btn" // Original Class
+                                        className="owner-section-button details-btn"
                                         onClick={() => setshowOwnerPop_up(true)}
                                     >
                                         Detalii
@@ -653,26 +620,23 @@ const ApartmentDetails: React.FC = () => {
                                     >
                                         Chat
                                     </button>{" "}
-                                    {/* Original Class */}
+
                                 </div>
                             </div>
-                            <hr className="line-divider thick" /> {/* Using new divider class */}
+                            <hr className="line-divider thick" />
                             <div className="booking-section">
                                 <h4>Verifica Disponibilitatea</h4>
                                 {renderSelectedDatesInfo()}{" "}
                             </div>
-                            <hr className="line-divider thick" /> {/* Using new divider class */}
-                            {/* Error display */}
+                            <hr className="line-divider thick" />
                             {error && <p className="error booking-error">{error}</p>}
-                            {/* Using original reserve button class */}
                             <button
                                 className="reserve-btn"
                                 onClick={selectedDates ? makeReservation : selectInterval}
                                 disabled={
-                                    !isAuthenticated || // verific autentificarea
-                                    !user!.faculty_valid // verific validarea facultatii
+                                    !isAuthenticated ||
+                                    !user!.faculty_valid
                                 }
-                                // disabled
                                 title={
                                     !isAuthenticated
                                         ? "Trebuie sa fiti autentificat pentru a rezerva"
@@ -702,8 +666,7 @@ const ApartmentDetails: React.FC = () => {
                     )}
                 </div>
             </div>{" "}
-            {/* End details-container */}
-            {/* Pop-ups remain the same */}
+
             {showReservationPopup && (
                 <ReservationPopup
                     onClose={() => setShowReservationPopup(false)}

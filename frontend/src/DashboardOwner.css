@@ -1,4 +1,3 @@
-/* General styling for the page container */
 .dashboard-owner-page {
     display: flex;
     justify-content: center;
@@ -9,7 +8,6 @@
     font-family: Arial, sans-serif;
 }
 
-/* Container for the dashboard header and card */
 .dashboard-owner-apartments {
     width: 100%;
     max-width: 450px;
@@ -24,10 +22,9 @@
     box-sizing: border-box;
 }
 
-/* Header styling */
 .dashboard-header {
-    background-color: #211c84; /* Dark blue background */
-    color: #ffffff; /* White text */
+    background-color: #211c84;
+    color: #ffffff;
     padding: 20px 25px;
     text-align: center;
 
@@ -38,11 +35,10 @@
 
 .dashboard-header h2 {
     margin: 0;
-    font-size: 1.8em; /* Larger font size for the title */
+    font-size: 1.8em;
     font-weight: 600;
 }
 
-/* Card content styling */
 .dashboard-card {
     padding: 20px 20px;
     text-align: center;
@@ -66,9 +62,8 @@
     border-radius: 20px;
 }
 
-/* Icon container and styling */
 .card-icon-container {
-    margin-bottom: 20px; /* Space below the icon */
+    margin-bottom: 20px;
 }
 
 .card-icon {
@@ -84,13 +79,12 @@
     font-weight: 600;
 }
 
-/* Count number styling */
 .card-count {
     font-size: 4em;
     color: #333;
     font-weight: bold;
     margin-top: 0;
-    /* margin-bottom: 30px; */
+
     line-height: 1;
 }
 

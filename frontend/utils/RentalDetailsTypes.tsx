@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { parseISO, differenceInCalendarDays, isAfter } from "date-fns";
-import { Apartment } from "../src/types"; // Assuming types.ts defines the Apartment interface
+import { Apartment } from "../src/types";
 import { AuthContext } from "../src/AuthContext";
 
 export interface SelectedDates {
@@ -28,12 +28,12 @@ export interface BookingCostDetails {
     dailyElectricityCost: number;
     totalDailyUtilityCost: number;
     totalUtilityCostForPeriod: number;
-    baseApartmentCostForPeriod: number; // Cost apartament pentru perioada, per camera
-    totalApartmentCostForPeriodAllRooms: number; // Cost apartament pentru perioada, toate camerele
+    baseApartmentCostForPeriod: number;
+    totalApartmentCostForPeriodAllRooms: number;
     discountPercentage: number;
     discountAmount: number;
-    finalCostWithDiscount: number; // Cost total cu discount si utilitati
-    finalCostWithoutDiscount: number; // Cost total fara discount dar cu utilitati
+    finalCostWithDiscount: number;
+    finalCostWithoutDiscount: number;
     userHasValidDiscount: boolean;
 }
 
@@ -65,7 +65,7 @@ export const calculateBookingCosts = (
     const totalDailyUtilityCost = dailyInternetCost + dailyTVCost + dailyWaterCost + dailyGasCost + dailyElectricityCost;
     const totalUtilityCostForPeriod = totalDailyUtilityCost * nights;
 
-    const baseApartmentCostForPeriod = pricePerNight * nights; // Per camera
+    const baseApartmentCostForPeriod = pricePerNight * nights;
     const totalApartmentCostForPeriodAllRooms = baseApartmentCostForPeriod * numRooms;
 
     let discountPercentage = 0;

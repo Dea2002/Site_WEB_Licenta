@@ -2,18 +2,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { api } from "./api";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginModal from "./LoginModal";
-import { Apartment } from "./types"; // Make sure Apartment type includes all relevant fields
-import "./style.css"; // Your existing CSS for Home
-import MapModal from "./MapModal"; // Assuming this is used elsewhere or for future use
+import { Apartment } from "./types";
+import "./style.css";
+import MapModal from "./MapModal";
 import { Faculty } from "./AuthContext";
 import { University } from "./types";
 
 interface ProximityPoiFilter {
     enabled: boolean;
-    maxDistance: string; // "0.5", "1", "2", ""
-    // Optional: Stare pentru a stoca daca verificarea e in curs sau rezultatul
+    maxDistance: string;
     isChecking?: boolean;
-    found?: boolean | null; // null = not checked, true = found, false = not found
+    found?: boolean | null;
 }
 
 type ProximityPoiType =
@@ -39,16 +38,15 @@ interface NominatimResult {
 }
 
 interface TenantFacultyInfo {
-    apartmentId: string; // ID-ul apartamentului la care se refera chiriasul
-    faculty: string; // Numele facultatii chiriasului
-    // Poti adauga si clientId daca e relevant pentru alte scopuri, dar nu e strict necesar doar pentru acest filtru
+    apartmentId: string;
+    faculty: string;
 }
 interface Filters {
     location: string;
     minPrice: string;
     maxPrice: string;
-    numberOfRooms: string; // "" (any), "1", "2", "3", "4+"
-    numberOfBathrooms: string; // "" (any), "1", "2+"
+    numberOfRooms: string;
+    numberOfBathrooms: string;
     minSurface: string;
     maxSurface: string;
     available: boolean;
@@ -83,18 +81,15 @@ interface Filters {
     };
     minConstructionYear: string;
     tenantFaculty: string;
-    selectedUniversityId: string; // ID-ul universitatii selectate
-    maxDistanceToUniversity: string; // Distanta in km (ex: "1", "3", "5", "" pentru oricare)
+    selectedUniversityId: string;
+    maxDistanceToUniversity: string;
     proximityPois: Record<ProximityPoiType, ProximityPoiFilter>;
-
-    // acceptsColleagues: boolean;
 }
 
 interface PoiOption {
     id: ProximityPoiType;
     label: string;
-    overpassQueryTags: string[]; // Poate fi un array de tag-uri, ex: ["amenity=pharmacy", "dispensing=yes"]
-    // Sau un singur tag: ["shop=supermarket"]
+    overpassQueryTags: string[];
 }
 
 const poiOptions: PoiOption[] = [
@@ -106,7 +101,7 @@ const poiOptions: PoiOption[] = [
         id: "subwayStation",
         label: "Statie Metrou",
         overpassQueryTags: ["railway=station", "station=subway"],
-    }, // Uneori necesita combinatii
+    },
     { id: "park", label: "Parc", overpassQueryTags: ["leisure=park"] },
 ];
 
@@ -136,33 +131,29 @@ const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: "rooftop", label: "Acces acoperis" },
     { id: "intercom", label: "Interfon" },
 ];
-// --- END: Updated Filters Interface ---
 
 const Home: React.FC = () => {
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [filteredApartments, setFilteredApartments] = useState<Apartment[]>([]);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-    const [allFaculties, setAllFaculties] = useState<Faculty[]>([]); // Stare pentru a stoca toate facultatile
+    const [allFaculties, setAllFaculties] = useState<Faculty[]>([]);
     const [loadingFaculties, setLoadingFaculties] = useState<boolean>(false);
     const [activeTenantFaculties, setActiveTenantFaculties] = useState<TenantFacultyInfo[]>([]);
-    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(false); // Seteaza initial pe true
+    const [loadingTenantData, setLoadingTenantData] = useState<boolean>(false);
 
-    const [sortCriteria, setSortCriteria] = useState<string>("date_desc"); // Default: cele mai noi
-    const [searchParams, setSearchParams] = useSearchParams(); // Adaugam setSearchParams
+    const [sortCriteria, setSortCriteria] = useState<string>("date_desc");
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [universitySearchCity, setUniversitySearchCity] = useState<string>("");
-    const [foundUniversities, setFoundUniversities] = useState<University[]>([]); // University ar avea {id, name, lat, lng}
+    const [foundUniversities, setFoundUniversities] = useState<University[]>([]);
     const [loadingFoundUniversities, setLoadingFoundUniversities] = useState<boolean>(false);
     const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
 
     const [isCheckingPois, setIsCheckingPois] = useState(false);
-    // const locationParam = searchParams.get("location") || "";
 
-    // const { isAuthenticated, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // --- START: Updated Initial Filters State ---
     const initialFilters: Filters = useMemo(() => {
         const baseFilters = {
             location: searchParams.get("location") || "",
@@ -184,11 +175,10 @@ const Home: React.FC = () => {
             }, {} as Filters["facilities"]),
             minConstructionYear: searchParams.get("minConstructionYear") || "",
             tenantFaculty: searchParams.get("tenantFaculty") || "",
-            selectedUniversityId: searchParams.get("universityId") || "", // NOU
-            maxDistanceToUniversity: searchParams.get("maxDistance") || "", // NOU
+            selectedUniversityId: searchParams.get("universityId") || "",
+            maxDistanceToUniversity: searchParams.get("maxDistance") || "",
             proximityPois: {} as Record<ProximityPoiType, ProximityPoiFilter>,
         };
-        // Initializam proximityPois
         poiOptions.forEach((poiOpt) => {
             baseFilters.proximityPois[poiOpt.id] = {
                 enabled: searchParams.get(`${poiOpt.id}_enabled`) === "true",
@@ -196,17 +186,14 @@ const Home: React.FC = () => {
             };
         });
         return baseFilters;
-    }, [searchParams]); // Recalculeaza doar daca searchParams se schimba
-    // --- END: Updated Initial Filters State ---
+    }, [searchParams]);
 
     const [filters, setFilters] = useState<Filters>(initialFilters);
 
-    // Sincronizeaza starea filters cu searchParams la schimbarea initialFilters (ex: navigare directa cu URL)
     useEffect(() => {
         setFilters(initialFilters);
     }, [initialFilters]);
 
-    // Functie pentru a actualiza URL-ul cu filtrele curente
     const updateURLWithFilters = (currentFilters: Filters, currentSortCriteria: string) => {
         const params = new URLSearchParams();
         if (currentFilters.location) params.set("location", currentFilters.location);
@@ -230,7 +217,6 @@ const Home: React.FC = () => {
             }
         });
 
-        // Adaugam filtrele POI la URL
         poiOptions.forEach((poiOpt) => {
             const poiFilter = currentFilters.proximityPois[poiOpt.id];
             if (poiFilter.enabled) {
@@ -241,20 +227,17 @@ const Home: React.FC = () => {
             }
         });
 
-        if (currentSortCriteria) params.set("sort", currentSortCriteria); // Adauga sortarea la URL
-        // Adauga si alte filtre daca e necesar
-        setSearchParams(params, { replace: true }); // replace: true pentru a nu umple istoricul browserului
+        if (currentSortCriteria) params.set("sort", currentSortCriteria);
+        setSearchParams(params, { replace: true });
     };
 
-    // Stocare cache pentru rezultatele Overpass per apartament-POI-distanta
-    // Cheia ar fi ceva de genul: `${apartmentId}-${poiType}-${distanceKm}`
     const poiCheckCache = useMemo(() => new Map<string, boolean>(), []);
 
     const checkPoiProximity = async (
         apartmentCoord: { lat: number; lng: number },
         poiType: ProximityPoiType,
         maxDistKm: number,
-        apartmentId: string, // Pentru caching
+        apartmentId: string,
     ): Promise<boolean> => {
         const cacheKey = `${apartmentId}-${poiType}-${maxDistKm}`;
         if (poiCheckCache.has(cacheKey)) {
@@ -278,7 +261,7 @@ const Home: React.FC = () => {
             );
             if (!response.ok) {
                 console.error(`Overpass API error for ${poiType}: ${response.statusText}`);
-                poiCheckCache.set(cacheKey, false); // Cache a failure as false to avoid retrying too quickly
+                poiCheckCache.set(cacheKey, false);
                 return false;
             }
             const data = await response.json();
@@ -318,8 +301,7 @@ const Home: React.FC = () => {
                 setAllFaculties(facultiesResponse.data);
                 setActiveTenantFaculties(tenantFacultiesResponse.data);
 
-                // Aplicam filtrele initiale (care pot veni din URL via initialFilters)
-                applyFilters(fetchedApartments, filters); // Folosim starea 'filters' care e sincronizata cu URL-ul
+                applyFilters(fetchedApartments, filters);
             } catch (error) {
                 console.error("Eroare la preluarea datelor initiale:", error);
                 setApartments([]);
@@ -345,7 +327,7 @@ const Home: React.FC = () => {
                         api.get<Faculty[]>("/faculty/"),
                         api.get<TenantFacultyInfo[]>(
                             "/apartments/rentals/active-tenant-faculties-summary",
-                        ), // Ruta corectata
+                        ),
                     ]);
 
                 setApartments(apartmentsResponse.data);
@@ -353,11 +335,10 @@ const Home: React.FC = () => {
                 setActiveTenantFaculties(tenantFacultiesResponse.data);
 
                 if (filters.selectedUniversityId && universitySearchCity) {
-                    await handleSearchUniversitiesInCity(true); // true ca sa nu reseteze filtrele de universitate
+                    await handleSearchUniversitiesInCity(true);
                 }
             } catch (error) {
                 console.error("Eroare la preluarea datelor initiale:", error);
-                // Gestioneaza erorile corespunzator
             } finally {
                 setLoadingFaculties(false);
                 setLoadingTenantData(false);
@@ -369,18 +350,15 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         if (apartments.length > 0) {
-            // Aplica doar daca datele initiale s-au incarcat
             applyFilters(apartments, filters);
         } else if (apartments.length === 0) {
-            setFilteredApartments([]); // Daca nu sunt apartamente, lista filtrata e goala
+            setFilteredApartments([]);
         }
     }, [apartments, filters, activeTenantFaculties]);
 
-    // --- START: Updated Filter Application Logic ---
-    // Renamed to applyFilters to be clearer
     const applyFilters = async (apartmentsToFilter: Apartment[], currentFilters: Filters) => {
         setIsCheckingPois(true);
-        let filtered = [...apartmentsToFilter]; // Lucreaza pe o copie pentru a nu modifica originalul direct aici
+        let filtered = [...apartmentsToFilter];
 
         // 1. Filtru Locatie
         if (currentFilters.location.trim() !== "") {
@@ -396,7 +374,6 @@ const Home: React.FC = () => {
         }
         if (!isNaN(maxPrice) && maxPrice >= 0) {
             if (!isNaN(minPrice) && maxPrice < minPrice && currentFilters.minPrice.trim() !== "") {
-                // Afiseaza o avertizare sau gestioneaza cazul in UI, dar nu aplica filtrul maxPrice gresit
                 console.warn(
                     "Pretul maxim este mai mic decat pretul minim. Filtrul pentru pret maxim nu va fi aplicat.",
                 );
@@ -407,7 +384,7 @@ const Home: React.FC = () => {
 
         // 3. Filtru Numar Camere
         if (currentFilters.numberOfRooms && currentFilters.numberOfRooms !== "") {
-            const aptRooms = (apt: Apartment) => Number(apt.numberOfRooms); // Functie helper pentru a converti la numar
+            const aptRooms = (apt: Apartment) => Number(apt.numberOfRooms);
 
             if (currentFilters.numberOfRooms.endsWith("+")) {
                 const minRooms = parseInt(currentFilters.numberOfRooms.replace("+", ""), 10);
@@ -459,15 +436,6 @@ const Home: React.FC = () => {
             }
         }
 
-        // 6. Filtru Disponibilitate (daca il vei folosi)
-        // Momentan, currentFilters.available este un boolean, dar nu ai logica de filtrare pentru el.
-        // Va trebui sa adaugi un camp `isAvailable` sau similar in `Apartment`
-        // si sa filtrezi pe baza lui daca `currentFilters.available` este true.
-        // Exemplu (necesita campul `isAvailable` in `Apartment`):
-        // if (currentFilters.available) {
-        //     filtered = filtered.filter((apt) => apt.isAvailable === true);
-        // }
-
         // 7. Filtru Facilitati (dinamic)
         // Iteram peste toate optiunile de facilitati definite
         facilityOptions.forEach((facilityOption) => {
@@ -488,7 +456,6 @@ const Home: React.FC = () => {
             );
         }
         if (currentFilters.discounts.discount2) {
-            // Adauga si pentru celelalte daca ai checkbox-uri
             filtered = filtered.filter(
                 (apt) =>
                     apt.discounts &&
@@ -497,7 +464,6 @@ const Home: React.FC = () => {
             );
         }
         if (currentFilters.discounts.discount3) {
-            // Adauga si pentru celelalte
             filtered = filtered.filter(
                 (apt) =>
                     apt.discounts &&
@@ -509,9 +475,8 @@ const Home: React.FC = () => {
         // 9. Filtru An Constructie
         const minYear = parseInt(currentFilters.minConstructionYear, 10);
         if (!isNaN(minYear) && minYear > 0) {
-            // Verifica si > 0 pentru a evita anii negativi daca min e setat gresit
             filtered = filtered.filter((apt) => {
-                const constructionYear = Number(apt.constructionYear); // Asigura-te ca apt.constructionYear e numar
+                const constructionYear = Number(apt.constructionYear);
                 return !isNaN(constructionYear) && constructionYear >= minYear;
             });
         }
@@ -520,7 +485,6 @@ const Home: React.FC = () => {
         if (currentFilters.tenantFaculty.trim() !== "") {
             const searchFacultyLower = currentFilters.tenantFaculty.toLowerCase();
 
-            // Set de ID-uri ale apartamentelor care au cel putin un chirias de la facultatea cautata
             const apartmentsWithMatchingFacultyTenant = new Set<string>();
             activeTenantFaculties.forEach((tf) => {
                 if (tf.faculty.toLowerCase() === searchFacultyLower) {
@@ -528,13 +492,11 @@ const Home: React.FC = () => {
                 }
             });
 
-            // Set de ID-uri ale apartamentelor care au *orice* chirias activ/viitor
             const apartmentsWithAnyActiveTenant = new Set<string>(
                 activeTenantFaculties.map((tf) => tf.apartmentId),
             );
 
             if (loadingTenantData && apartmentsToFilter.length > 0) {
-                // Verifica si apartmentsToFilter pentru a nu filtra prematur
                 console.warn(
                     "Datele despre facultatile chiriasilor se incarca inca. Filtrul de facultate ar putea fi aplicat pe date incomplete.",
                 );
@@ -553,7 +515,7 @@ const Home: React.FC = () => {
             });
         }
 
-        // 11. FILTRU DISTANta FAta DE UNIVERSITATE (cu universitati dinamice)
+        // 11. filtru distanta fata de universitate
         if (currentFilters.selectedUniversityId && currentFilters.maxDistanceToUniversity) {
             const selectedUni = foundUniversities.find(
                 (uni) => uni._id === currentFilters.selectedUniversityId,
@@ -602,12 +564,12 @@ const Home: React.FC = () => {
                     const poiFilterData = currentFilters.proximityPois[poiOpt.id];
                     const maxDistKm = parseFloat(poiFilterData.maxDistance);
 
-                    if (isNaN(maxDistKm) || maxDistKm <= 0) continue; // Skip if distance is invalid
+                    if (isNaN(maxDistKm) || maxDistKm <= 0) continue;
 
                     const found = await checkPoiProximity(aptCoords, poiOpt.id, maxDistKm, apt._id);
                     if (!found) {
                         matchesAllPoi = false;
-                        break; // Daca un POI nu e gasit, apartamentul nu trece filtrul
+                        break;
                     }
                 }
                 return matchesAllPoi;
@@ -627,7 +589,7 @@ const Home: React.FC = () => {
         lat2: number,
         lon2: number,
     ): number => {
-        const R = 6371e3; // Raza Pamantului in metri
+        const R = 6371e3;
         const φ1 = (lat1 * Math.PI) / 180;
         const φ2 = (lat2 * Math.PI) / 180;
         const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -637,15 +599,12 @@ const Home: React.FC = () => {
             Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
             Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distanta in metri
+        return R * c;
     };
-    // Handler for explicit button click or Enter key
     const handleApplyFiltersAction = () => {
-        updateURLWithFilters(filters, sortCriteria); // Actualizeaza URL-ul cu filtrele curente
-        // applyFilters(apartments, filters);
+        updateURLWithFilters(filters, sortCriteria);
     };
 
-    // Function to update a specific filter value, supporting both top-level and facilities keys
     const handleFilterChange = (
         filterName:
             | keyof Omit<Filters, "facilities" | "discounts" | "proximityPois">
@@ -653,7 +612,7 @@ const Home: React.FC = () => {
             | DiscountKey
             | ProximityPoiType,
         value: string | boolean,
-        subKey?: "enabled" | "maxDistance", // Pentru proximityPois
+        subKey?: "enabled" | "maxDistance",
     ) => {
         setFilters((prevFilters) => {
             let newFilters = { ...prevFilters };
@@ -664,7 +623,6 @@ const Home: React.FC = () => {
             );
             const isPoiKey = poiOptions.some((opt) => opt.id === filterName);
 
-            // let newFilters;
             if (isFacilityKey) {
                 newFilters = {
                     ...prevFilters,
@@ -688,7 +646,6 @@ const Home: React.FC = () => {
                     [poiType]: {
                         ...prevFilters.proximityPois[poiType],
                         [subKey]: value,
-                        // Daca debifezi checkbox-ul, reseteaza si distanta
                         ...(subKey === "enabled" && value === false && { maxDistance: "" }),
                     },
                 };
@@ -699,16 +656,10 @@ const Home: React.FC = () => {
                 };
             }
 
-            // Daca se schimba selectedUniversityId, reseteaza maxDistanceToUniversity
             if (filterName === "selectedUniversityId" && value === "") {
-                // Daca se deselecteaza universitatea
                 newFilters.maxDistanceToUniversity = "";
             }
-            // Daca se schimba orasul de cautare pentru universitati (universitySearchCity),
-            // reseteaza universitatile gasite si filtrele asociate.
             if (filterName === "location" && prevFilters.location !== value) {
-                // Presupunand ca 'location' e si orasul de cautare pt uni
-                // setUniversitySearchCity(value as string); // Daca vrei sa legi direct
                 setFoundUniversities([]);
                 newFilters.selectedUniversityId = "";
                 newFilters.maxDistanceToUniversity = "";
@@ -718,15 +669,8 @@ const Home: React.FC = () => {
         });
     };
 
-    // Reset Filters Function
-    // const handleResetFilters = () => {
-
-    //     setFilters(initialFilters); // Resetam la valorile default absolute
-    //     setSearchParams({}, { replace: true }); // Curatam URL-ul
-    // };
     const handleResetFilters = () => {
         const defaultInitialFilters: Filters = {
-            // Filtrele default absolute
             location: "",
             minPrice: "",
             maxPrice: "",
@@ -750,9 +694,9 @@ const Home: React.FC = () => {
             }, {} as Record<ProximityPoiType, ProximityPoiFilter>),
         };
         setFilters(defaultInitialFilters);
-        setUniversitySearchCity(""); // Reseteaza si orasul de cautare
-        setFoundUniversities([]); // Reseteaza universitatile gasite
-        setSortCriteria("date_desc"); // Reseteaza si sortarea
+        setUniversitySearchCity("");
+        setFoundUniversities([]);
+        setSortCriteria("date_desc");
         setSearchParams({}, { replace: true });
         poiCheckCache.clear();
     };
@@ -761,7 +705,6 @@ const Home: React.FC = () => {
         navigate(`/apartment/${id}`);
     };
 
-    // --- Logica pentru Sortare ---
     const sortedAndFilteredApartments = useMemo(() => {
         let sortableArray = [...filteredApartments];
 
@@ -776,15 +719,11 @@ const Home: React.FC = () => {
             ) {
                 return apt.price * (1 - apt.discounts[discountField] / 100);
             }
-            return apt.price; // Sau un numar foarte mare daca vrei ca cele fara discount sa fie la sfarsit
+            return apt.price;
         };
 
-        // Functie pentru a determina daca un apartament este disponibil ACUM
-        // Aceasta este o simplificare. intr-o aplicatie reala, ai verifica chiriile active.
         const isApartmentAvailableNow = (apt: Apartment): boolean => {
-            // Placeholder: Trebuie sa implementezi logica reala aici
-            // De ex., verifici `activeTenantFaculties` sau un camp `apt.currentBookings`
-            const hasActiveBooking = activeTenantFaculties.some((tf) => tf.apartmentId === apt._id); // Simplificare grosolana
+            const hasActiveBooking = activeTenantFaculties.some((tf) => tf.apartmentId === apt._id);
             return !hasActiveBooking;
         };
 
@@ -795,7 +734,7 @@ const Home: React.FC = () => {
             case "price_desc":
                 sortableArray.sort((a, b) => b.price - a.price);
                 break;
-            case "d1_asc": // Pret cu discount categoria 1 (crescator)
+            case "d1_asc":
                 sortableArray.sort(
                     (a, b) =>
                         getDiscountedPrice(a, "discount1") - getDiscountedPrice(b, "discount1"),
@@ -831,12 +770,12 @@ const Home: React.FC = () => {
                         getDiscountedPrice(b, "discount3") - getDiscountedPrice(a, "discount3"),
                 );
                 break;
-            case "construction_desc": // Cele mai noi cladiri primele
+            case "construction_desc":
                 sortableArray.sort(
                     (a, b) => Number(b.constructionYear) - Number(a.constructionYear),
                 );
                 break;
-            case "construction_asc": // Cele mai vechi cladiri primele
+            case "construction_asc":
                 sortableArray.sort(
                     (a, b) => Number(a.constructionYear) - Number(b.constructionYear),
                 );
@@ -853,16 +792,16 @@ const Home: React.FC = () => {
             case "rooms_desc":
                 sortableArray.sort((a, b) => Number(b.numberOfRooms) - Number(a.numberOfRooms));
                 break;
-            case "availability": // Apartamentele disponibile primele
+            case "availability":
                 sortableArray.sort((a, b) => {
                     const availableA = isApartmentAvailableNow(a);
                     const availableB = isApartmentAvailableNow(b);
-                    if (availableA && !availableB) return -1; // A vine inaintea lui B
-                    if (!availableA && availableB) return 1; // B vine inaintea lui A
-                    return 0; // Ordinea nu se schimba daca ambele sunt la fel
+                    if (availableA && !availableB) return -1;
+                    if (!availableA && availableB) return 1;
+                    return 0;
                 });
                 break;
-            case "date_desc": // Cele mai noi adaugate (presupunand createdAt)
+            case "date_desc":
             default:
                 sortableArray.sort(
                     (a, b) =>
@@ -871,7 +810,7 @@ const Home: React.FC = () => {
                 break;
         }
         return sortableArray;
-    }, [filteredApartments, sortCriteria, activeTenantFaculties]); // Adaugam activeTenantFaculties pentru sortarea dupa disponibilitate
+    }, [filteredApartments, sortCriteria, activeTenantFaculties]);
 
     const handleSearchUniversitiesInCity = async (calledFromInitialLoad = false) => {
         const cityToSearch =
@@ -886,7 +825,6 @@ const Home: React.FC = () => {
 
         setLoadingFoundUniversities(true);
         if (!calledFromInitialLoad) {
-            // Nu reseta daca e apelat la incarcarea initiala cu un ID deja in URL
             setFoundUniversities([]);
             setFilters((prev) => ({
                 ...prev,
@@ -912,11 +850,10 @@ const Home: React.FC = () => {
             }
             const locationData = nominatimData[0];
             let searchAreaQueryPart: string;
-            if (locationData.boundingbox) { // in cazul in care datele despre oras contin limitele acestuia
+            if (locationData.boundingbox) {
                 const [s, n, w, e] = locationData.boundingbox.map(parseFloat);
                 searchAreaQueryPart = `(${s},${w},${n},${e})`;
             } else {
-                // in caz contrar, cautam pe o raza de 15km fata de centrul orasului
                 const cityLat = parseFloat(locationData.lat);
                 const cityLng = parseFloat(locationData.lon);
                 const searchRadiusForCity = 15000; // 15km
@@ -960,7 +897,6 @@ const Home: React.FC = () => {
     };
 
     if (loadingInitialData && apartments.length === 0) {
-        // Arata loading doar la incarcarea initiala majora
         return (
             <div className="loading-error-container">
                 <p>Se incarca datele...</p>
@@ -968,30 +904,22 @@ const Home: React.FC = () => {
         );
     }
 
-    // Render component (existing code structure)
     return (
         <div>
-            {/* Keep h1 commented out if desired */}
             <div className="home-container">
                 {" "}
-                {/* Keep your container */}
-                {/* === START: Enhanced Filters Sidebar JSX === */}
                 <aside className="filters-sidebar">
                     {" "}
                     <div className="filters-header">
                         <div className="sort-options-sidebar">
                             {" "}
-                            {/* Adauga o clasa specifica daca vrei stilizare diferita in sidebar */}
                             <h2>
                                 {" "}
-                                {/* Poti adauga un titlu si aici daca doresti */}
                                 <i className="fas fa-sort-amount-down"></i> Sorteaza Rezultatele
                             </h2>
                             <div className="filter-group">
                                 {" "}
-                                {/* Poti refolosi clasa .filter-group pentru consistenta vizuala */}
                                 <hr />
-                                {/* <hr className="line-divider short" /> */}
                                 <label htmlFor="sort-criteria-sidebar">Dupa: </label>
                                 <select
                                     id="sort-criteria-sidebar"
@@ -1149,7 +1077,6 @@ const Home: React.FC = () => {
                                         <option value="0.5">Sub 0.5 km</option>
                                         <option value="1">Sub 1 km</option>
                                         <option value="2">Sub 2 km</option>
-                                        {/* Poti adauga si alte optiuni */}
                                     </select>
                                 </div>
                             )}
@@ -1164,7 +1091,6 @@ const Home: React.FC = () => {
                             ? "Se verifica POI..."
                             : "Aplica Filtrele pentru punctele de interes"}
                     </button>
-                    {/* Location Filter */}
                     <div className="filter-group">
                         <label htmlFor="filter-location">
                             <i className="fas fa-map-marker-alt"></i> Locatie:
@@ -1176,15 +1102,13 @@ const Home: React.FC = () => {
                             value={filters.location}
                             onChange={(e) => handleFilterChange("location", e.target.value)}
                             onKeyDown={(e) => {
-                                // Keep your Enter key functionality
                                 if (e.key === "Enter") {
                                     e.preventDefault();
-                                    handleApplyFiltersAction(); // Call the apply function
+                                    handleApplyFiltersAction();
                                 }
                             }}
                         />
                     </div>
-                    {/* Price Range Filter */}
                     <div className="filter-group">
                         <label>
                             <i className="fas fa-dollar-sign"></i> Pret (RON/camera/noapte):
@@ -1244,25 +1168,21 @@ const Home: React.FC = () => {
                             </label>
                         </div>
                     </div>
-                    {/* Faculty Filter */}
                     <div className="filter-group">
                         <label htmlFor="filter-tenant-faculty">
                             <i className="fas fa-graduation-cap"></i> Facultate Chiriasi Act.:
                         </label>
                         <select
                             id="filter-tenant-faculty"
-                            value={filters.tenantFaculty} // Valoarea selectata
+                            value={filters.tenantFaculty}
                             onChange={(e) => handleFilterChange("tenantFaculty", e.target.value)}
-                            disabled={loadingFaculties} // Dezactiveaza cat timp se incarca facultatile
+                            disabled={loadingFaculties}
                         >
                             <option value="">Toate facultatile</option>{" "}
-                            {/* Optiune pentru a nu filtra */}
                             {loadingFaculties ? (
                                 <option disabled>Se incarca facultatile...</option>
                             ) : (
                                 allFaculties.map((faculty) => (
-                                    // Folosim fullName ca valoare si ca text afisat.
-                                    // Daca ai un ID si vrei sa-l folosesti, seteaza value={faculty._id}
                                     <option
                                         key={faculty._id || faculty.fullName}
                                         value={faculty.fullName}
@@ -1273,7 +1193,6 @@ const Home: React.FC = () => {
                             )}
                         </select>
                     </div>
-                    {/* Apartment Specs Group */}
                     <div className="filter-group spec-group">
                         <h4>
                             <i className="fas fa-ruler-combined"></i> Specificatii Apartament
@@ -1340,13 +1259,12 @@ const Home: React.FC = () => {
                             <label>An Constructie:</label>
                             <div className="year-inputs">
                                 {" "}
-                                {/* Poti folosi o clasa similara cu price-inputs/surface-inputs */}
                                 <input
                                     type="number"
                                     id="filter-min-construction-year"
                                     placeholder="Min An"
-                                    min="1800" // Un an minim rezonabil
-                                    max={new Date().getFullYear()} // Anul curent ca maxim
+                                    min="1800"
+                                    max={new Date().getFullYear()}
                                     value={filters.minConstructionYear}
                                     onChange={(e) =>
                                         handleFilterChange("minConstructionYear", e.target.value)
@@ -1355,7 +1273,6 @@ const Home: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    {/* Facilities Group - generat dinamic */}
                     <div className="filter-group check-group">
                         <h4>
                             <i className="fas fa-check"></i> Facilitati
@@ -1364,23 +1281,19 @@ const Home: React.FC = () => {
                             <label key={facility.id}>
                                 <input
                                     type="checkbox"
-                                    // Acceseaza valoarea checked din filters.facilities folosind id-ul facilitatii
                                     checked={filters.facilities[facility.id]}
-                                    // La schimbare, paseaza id-ul facilitatii si noua valoare booleana
                                     onChange={(e) =>
                                         handleFilterChange(facility.id, e.target.checked)
                                     }
                                 />
-                                {facility.label} {/* Afiseaza eticheta prietenoasa */}
+                                {facility.label}
                             </label>
                         ))}
                     </div>
-                    {/* Keep your original button, but have it call the apply function */}
                     <button onClick={handleApplyFiltersAction} className="refresh-button">
-                        Aplica Filtrele {/* Changed text slightly */}
+                        Aplica Filtrele
                     </button>
                 </aside>
-                {/* Apartments List Section (existing structure) */}
                 <section className="apartments-list">
                     {isCheckingPois && (
                         <div className="loading-inline">
@@ -1439,7 +1352,6 @@ const Home: React.FC = () => {
                 </section>
             </div>
 
-            {/* Modals (existing code) */}
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
             {selectedMapData && (
                 <MapModal

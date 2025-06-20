@@ -13,8 +13,6 @@ interface ReservationHistory {
     clientData: {
         fullName: string;
         email: string;
-
-        // alte campuri dupa nevoie
     };
     apartamentData: {
         location: string;

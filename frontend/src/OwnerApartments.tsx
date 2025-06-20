@@ -8,11 +8,11 @@ import "./OwnerApartments.css";
 const OwnerApartments: React.FC = () => {
     const { token, user } = useContext(AuthContext);
     const [apartments, setApartments] = useState<Apartment[]>([]);
-    const [loading, setLoading] = useState<boolean>(true); // Stare pentru incarcare
-    const [error, setError] = useState<string | null>(null); // Stare pentru erori
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
     useEffect(() => {
-        if (user?._id && token) { // Verifica user._id si token
+        if (user?._id && token) {
             setLoading(true);
             setError(null);
             api.get(`/apartments/by-id/${user._id}`, {
@@ -26,7 +26,7 @@ const OwnerApartments: React.FC = () => {
                 setLoading(false);
             });
         } else {
-            setLoading(false); // Opreste incarcarea daca nu exista user sau token
+            setLoading(false);
         }
     }, [user, token]);
 
@@ -40,11 +40,9 @@ const OwnerApartments: React.FC = () => {
 
     return (
         <div className="owner-apartments-container">
-            {/* <h1>Apartamentele tale</h1> */}
             <div className="apartments-owner-list">
                 {apartments.length > 0 ? (
                     apartments.map((apartment) => {
-                        // Verifica daca apartment.images exista si este un array cu cel putin un element
                         const imageUrl = apartment.images && apartment.images.length > 0
                             ? apartment.images[0] // Ia primul URL din array
                             : "/Poze_apartamente/placeholder.png"; // Un placeholder daca nu exista imagini
@@ -53,12 +51,12 @@ const OwnerApartments: React.FC = () => {
                             <div
                                 key={apartment._id}
                                 className="apartment-owner-card"
-                                style={{ cursor: "pointer" }}           // make it clear it’s clickable
-                                onClick={() => navigate(`/owner/apartments/${apartment._id}`)}  // ← navigate on click
+                                style={{ cursor: "pointer" }}
+                                onClick={() => navigate(`/owner/apartments/${apartment._id}`)}
                             >
                                 <img
                                     src={imageUrl} // Foloseste primul URL din Firebase Storage
-                                    alt={`Apartament in ${apartment.location}`} // Un alt text mai descriptiv
+                                    alt={`Apartament in ${apartment.location}`}
                                 />
                                 <p>
                                     <strong>Locatie: </strong>

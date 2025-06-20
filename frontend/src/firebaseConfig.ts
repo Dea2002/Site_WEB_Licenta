@@ -1,8 +1,6 @@
-// frontend/src/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-// import { getAuth } from "firebase/auth"; // Adauga si alte servicii daca le folosesti
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -10,7 +8,6 @@ const firebaseConfig = {
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    // measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
@@ -18,7 +15,6 @@ const app = initializeApp(firebaseConfig);
 
 // Obtine instante ale serviciilor
 const storage = getStorage(app);
-// const auth = getAuth(app); // Exemplu
 
 const uploadFileToStorage = (file: File, path: String): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -37,10 +33,9 @@ const uploadFileToStorage = (file: File, path: String): Promise<string> => {
                 console.error("Upload Error:", error);
             },
             () => {
-                // upload finalizat cu succes, obtine URL pentru download
                 getDownloadURL(uploadTask.snapshot.ref)
                     .then((downloadURL) => {
-                        resolve(downloadURL); // rezolva promise-ul cu URL-ul
+                        resolve(downloadURL);
                     })
                     .catch(reject);
             },
@@ -48,4 +43,4 @@ const uploadFileToStorage = (file: File, path: String): Promise<string> => {
     });
 };
 
-export { storage, uploadFileToStorage /*, auth  , alte servicii */ };
+export { storage, uploadFileToStorage };

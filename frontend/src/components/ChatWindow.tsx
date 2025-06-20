@@ -1,7 +1,7 @@
 import { FC, useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { api, socket } from '../api';
 import { format, parseISO } from 'date-fns';
-import './ChatWindow.css'; // <--- Adauga importul CSS
+import './ChatWindow.css';
 
 interface Message {
     _id: string;
@@ -44,7 +44,6 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
     }, [conversationId]);
 
     useEffect(() => {
-        // Scroll to bottom when new messages arrive or messages are loaded
         const messageContainer = document.querySelector('.chat-messages');
         if (messageContainer) {
             messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -55,7 +54,7 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
         const unknownIds = Array.from(new Set(
             newMsgs
                 .map(m => m.senderId)
-                .filter(id => id && !userNames[id]) // Adaugat check pentru id
+                .filter(id => id && !userNames[id])
         ));
         if (unknownIds.length === 0) return;
 
@@ -136,7 +135,6 @@ const ChatWindow: FC<ChatWindowProps> = ({ conversationId, userId }) => {
                     onKeyDown={onKeyDown}
                 />
                 <button className="send-button" onClick={send}>
-                    {/* Poti folosi un SVG icon aici pentru un look mai modern */}
                     Trimite
                 </button>
             </div>

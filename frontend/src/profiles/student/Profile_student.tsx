@@ -8,17 +8,14 @@ import CurrentRent from './CurrentRent_student';
 import RentHistory from './RentHistory_student';
 import ProfileSidebar from './ProfileSidebar_student';
 
-// Defineste tipurile posibile pentru sectiunea activa
 type ProfileSection = 'edit' | 'current-rent' | 'history';
 
 const Profile_student: React.FC = () => {
-    const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
-    const { user, logout, token } = useContext(AuthContext); // Preluam user-ul din context
+    const [activeSection, setActiveSection] = useState<ProfileSection>('edit');
+    const { user, logout, token } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // Daca nu exista user logat, poate redirectionam sau afisam un mesaj
     if (!user) {
-        // Poti adauga o redirectionare sau un placeholder aici
         return (
             <>
                 <div className="user-profile-container">
@@ -31,13 +28,13 @@ const Profile_student: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'edit':
-                return <EditProfile user={user} />; // Trimitem user-ul catre componenta
+                return <EditProfile user={user} />;
             case 'current-rent':
-                return <CurrentRent userId={user._id} />; // Trimitem ID-ul pentru fetch
+                return <CurrentRent userId={user._id} />;
             case 'history':
-                return <RentHistory userId={user._id} />; // Trimitem ID-ul pentru fetch
+                return <RentHistory userId={user._id} />;
             default:
-                return <EditProfile user={user} />; // Sau un mesaj default
+                return <EditProfile user={user} />;
         }
     };
 
@@ -62,7 +59,6 @@ const Profile_student: React.FC = () => {
         }
     };
 
-    // Functia care sterge contul studentului
     const deleteStudentAccountAPI = async (): Promise<boolean> => {
         if (!token || !studentId) {
             console.error("Token sau ID student lipseste pentru stergerea contului.");
@@ -71,8 +67,6 @@ const Profile_student: React.FC = () => {
         }
 
         try {
-            // Endpoint-ul tau pentru a sterge contul studentului
-            // Backend-ul va prelua ID-ul studentului din token
             await api.delete(`/users/account/delete`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -84,7 +78,6 @@ const Profile_student: React.FC = () => {
         }
     };
 
-    // Functia care orchestreaza procesul de stergere
     const handleInitiateDeleteAccount = async () => {
 
         // Pasul 1: Anuleaza toate cererile active/pending
@@ -104,18 +97,15 @@ const Profile_student: React.FC = () => {
     return (
         <>
             <div className="user-profile-page-container">
-                {/* Acest div reprezinta "dreptunghiul mare" */}
                 <div className="profile-content-box">
-                    {/* Coloana din stanga (Sidebar) */}
                     <div className="profile-sidebar-column">
                         <ProfileSidebar
                             activeSection={activeSection}
-                            onSectionChange={setActiveSection} // Trimitem functia de actualizare
+                            onSectionChange={setActiveSection}
                             onInitiateDeleteAccount={handleInitiateDeleteAccount}
                         />
                     </div>
 
-                    {/* Coloana din dreapta (Continutul dinamic) */}
                     <div className="profile-main-content-column">
                         {renderSection()}
                     </div>

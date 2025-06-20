@@ -1,14 +1,13 @@
 import React, { useState, useContext, useEffect } from "react";
 import { api } from './api';
 import { AuthContext } from "./AuthContext";
-import "./CreateApartment.css"; // Or './OwnerListNewApartment.css' if you create a new file
+import "./CreateApartment.css";
 import { useNavigate } from "react-router-dom";
 import { storage } from "./firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-// Importa imaginile ca module
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
@@ -20,7 +19,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: shadowUrl,
 });
 
-// 1. Defineste starea initiala a formularului
 const initialFormData = {
     numberOfRooms: "",
     numberOfBathrooms: "",
@@ -31,7 +29,7 @@ const initialFormData = {
     price: 0,
     totalSurface: "",
     constructionYear: "",
-    renovationYear: "", // Optional
+    renovationYear: "",
     discounts: {
         discount1: 0,
         discount2: 0,
@@ -70,13 +68,11 @@ const initialFormData = {
     },
 };
 
-// Definirea tipului pentru formData pentru o mai buna verificare a tipurilor
 type FormData = typeof initialFormData;
 type FacilityKey = keyof FormData['facilities'];
 type DiscountKey = keyof FormData['discounts'];
 type UtilityKey = keyof FormData['utilities'];
 
-// 2. Defineste optiunile pentru facilitati
 const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'parking', label: 'Parcare inclusa' },
     { id: 'videoSurveillance', label: 'Supraveghere video' },
@@ -102,7 +98,6 @@ const facilityOptions: { id: FacilityKey; label: string }[] = [
     { id: 'intercom', label: 'Interfon' },
 ];
 
-// Componenta pentru a centra harta cand markerul se schimba
 const ChangeView = ({ center, zoom }: { center: LatLngExpression, zoom: number }) => {
     const map = useMap();
     useEffect(() => {
@@ -117,10 +112,9 @@ const OwnerListNewApartment: React.FC = () => {
 
     const [formData, setFormData] = useState<FormData>(initialFormData);
     const [imageFiles, setImageFiles] = useState<File[]>([]);
-    const [documentFile, setDocumentFile] = useState<File | null>(null); // Optional, daca vrei sa adaugi un document
+    const [documentFile, setDocumentFile] = useState<File | null>(null);
     const [message, setMessage] = useState("");
 
-    // Stari pentru geocodare si harta
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [geocodingError, setGeocodingError] = useState("");
     const [showMapConfirmation, setShowMapConfirmation] = useState(false);
@@ -130,9 +124,8 @@ const OwnerListNewApartment: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, type, value } = e.target;
-        const checked = (e.target as HTMLInputElement).checked; // Specific pentru checkboxes
+        const checked = (e.target as HTMLInputElement).checked;
 
-        // Daca se modifica adresa, resetam coordonatele si ascundem harta
         if (name === "location") {
             setShowMapConfirmation(false);
             setMapMarkerPosition(null);
@@ -146,13 +139,12 @@ const OwnerListNewApartment: React.FC = () => {
             }));
         }
 
-        // Verifica daca `name` apartine unui sub-obiect (facilities, discounts, utilities)
         if (name in formData.facilities) {
             setFormData(prevData => ({
                 ...prevData,
                 facilities: {
                     ...prevData.facilities,
-                    [name as FacilityKey]: checked, // Doar pentru checkboxes
+                    [name as FacilityKey]: checked,
                 },
             }));
         } else if (name in formData.discounts) {
@@ -172,11 +164,10 @@ const OwnerListNewApartment: React.FC = () => {
                 },
             }));
         } else {
-            // Campuri de la primul nivel (numberOfRooms, location, price, etc.)
             setFormData(prevData => ({
                 ...prevData,
                 [name]: type === 'number' || e.target.type === 'number' || name === 'price' || name === 'totalSurface'
-                    ? parseFloat(value) || (type === 'number' ? 0 : "") // Asigura-te ca e numar sau string gol daca e cazul
+                    ? parseFloat(value) || (type === 'number' ? 0 : "")
                     : value,
             }));
         }
@@ -184,13 +175,11 @@ const OwnerListNewApartment: React.FC = () => {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
-        // multiple
         setImageFiles(Array.from(e.target.files));
     };
 
     const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
-        // multiple
         setDocumentFile(e.target.files[0] || null);
     };
 
@@ -222,7 +211,6 @@ const OwnerListNewApartment: React.FC = () => {
 
 
         try {
-            // Folosim Nominatim pentru geocodare
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(formData.location)}&format=json&limit=1&addressdetails=1&accept-language=ro`
             );
@@ -269,15 +257,13 @@ const OwnerListNewApartment: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setMessage(""); // Clear previous messages
+        setMessage("");
         setGeocodingError("");
 
 
-        // Validare obligatorie pentru adresa verificata
         if (!addressVerified || !formData.latitude || !formData.longitude) {
-            setMessage(""); // Sterge mesajul de succes anterior, daca exista
+            setMessage("");
             setGeocodingError("Adresa trebuie verificata pe harta inainte de a continua. Apasati 'Verifica Adresa pe Harta'.");
-            // Optional: scroll la campul de adresa sau la butonul de verificare
             const locationInput = document.getElementById('location');
             if (locationInput) locationInput.focus();
             else {
@@ -287,7 +273,6 @@ const OwnerListNewApartment: React.FC = () => {
             return;
         }
 
-        // Basic Validation Example (add more as needed)
         if (
             parseInt(formData.constructionYear) < 1800 ||
             parseInt(formData.constructionYear) > new Date().getFullYear()
@@ -307,11 +292,8 @@ const OwnerListNewApartment: React.FC = () => {
             setMessage("Pretul trebuie sa fie pozitiv.");
             return;
         }
-        // Add more specific validations here...
 
         try {
-
-            // upload toate imaginile in paralel
             const imageUrls = await Promise.all(imageFiles.map(f => uploadFile(f)));
 
             const documentUrl = await uploadFile(documentFile as File).catch(() => null);
@@ -341,13 +323,12 @@ const OwnerListNewApartment: React.FC = () => {
 
             setMessage("Apartament listat cu succes!");
 
-            setFormData(initialFormData); // Reset form data
-            setImageFiles([]); // Reset image files
+            setFormData(initialFormData);
+            setImageFiles([]);
             setShowMapConfirmation(false);
             setMapMarkerPosition(null);
-            setAddressVerified(false); // Reseteaza starea de verificare dupa submit
+            setAddressVerified(false);
             setGeocodingError("");
-            // navigate('/owner/dashboard'); // Example navigation
         } catch (error: any) {
             console.error("Eroare la listare apartament nou: ", error);
             setMessage(
@@ -379,7 +360,6 @@ const OwnerListNewApartment: React.FC = () => {
                     <div className="message message-error">{geocodingError}</div>
                 )}
 
-                {/* Form for listing a new apartment */}
                 <form onSubmit={handleSubmit} className="list-apartment-form">
                     <div className="form-group">
                         <label htmlFor="numberOfRooms">Numar camere:*</label>
@@ -411,7 +391,6 @@ const OwnerListNewApartment: React.FC = () => {
                             required
                         />
                     </div>
-                    {/* Locatie */}
                     <div className="form-group">
                         <label htmlFor="location">Adresa:*</label>
                         <input
@@ -424,21 +403,18 @@ const OwnerListNewApartment: React.FC = () => {
                         <button
                             type="button"
                             onClick={handleGeocodeAddress}
-                            // disabled={isGeocoding || !formData.location.trim()}
                             style={{ marginTop: '10px' }}
-                            className="geocode-button" // Adauga o clasa pentru stilizare
+                            className="geocode-button"
                         >
                             {isGeocoding ? "Se verifica..." : "Verifica Adresa pe Harta"}
                         </button>
                         {formData.location.trim() && !addressVerified && !geocodingError && !isGeocoding && (
-                            // Afiseaza acest mesaj doar daca adresa e completata, nu e verificata, nu e eroare si nu se geocodeaza
                             <small id="location-help" className="form-text text-warning" style={{ display: 'block', marginTop: '5px' }}>
                                 Va rugam sa verificati adresa pe harta.
                             </small>
                         )}
                     </div>
 
-                    {/* Afisare Harta de Confirmare */}
                     {showMapConfirmation && mapCenter && mapMarkerPosition && (
                         <div className="map-confirmation-container form-group">
                             <h3 style={{ marginBottom: '10px' }}>Confirmare Locatie pe Harta</h3>
@@ -460,7 +436,6 @@ const OwnerListNewApartment: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Campuri (optionale) pentru a afisa lat/lng - pot fi read-only */}
                     {formData.latitude && formData.longitude && addressVerified && (
                         <div className="coordinates-display form-group" style={{ display: "flex", gap: "20px" }}>
                             <div>
@@ -474,7 +449,6 @@ const OwnerListNewApartment: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Pret */}
                     <div className="form-group">
                         <label htmlFor="price">Pret chirie (RON/camera/noapte):*</label>
                         <input
@@ -485,7 +459,6 @@ const OwnerListNewApartment: React.FC = () => {
                             required
                         />
                     </div>
-                    {/* Suprafata totala */}
                     <div className="form-group">
                         <label htmlFor="totalSurface">Suprafata totala (mp):*</label>
                         <input
@@ -496,7 +469,6 @@ const OwnerListNewApartment: React.FC = () => {
                             required
                         />
                     </div>
-                    {/* Anul constructiei */}
                     <div className="form-group">
                         <label htmlFor="constructionYear">Anul constructiei:*</label>
                         <input
@@ -507,7 +479,6 @@ const OwnerListNewApartment: React.FC = () => {
                             required
                         />
                     </div>
-                    {/* Anul renovarii - optional */}
                     <div className="form-group">
                         <label htmlFor="renovationYear">Anul renovarii (optional):</label>
                         <input
@@ -517,10 +488,8 @@ const OwnerListNewApartment: React.FC = () => {
                             onChange={handleChange}
                         />
                     </div>
-                    {/* --- Costuri Utilitati --- */}
                     <h2 className="form-section-title">Costuri Utilitati Estimative</h2>
                     <div className="utility-cost-box">
-                        {/* Campurile legate de costuri (internetPrice, TVPrice, waterPrice, etc.) */}
                         <div className="form-group">
                             <label htmlFor="internetPrice">Pret internet (RON/luna):*</label>
                             <input
@@ -590,7 +559,6 @@ const OwnerListNewApartment: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Discount in functie de categorie de medie */}
                     <h2 className="form-section-title">Discount per categorie de medie:</h2>
                     <div className="utility-cost-box">
                         <div className="form-group">
@@ -640,7 +608,6 @@ const OwnerListNewApartment: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* --- Facilitati (generate dinamic) --- */}
                     <h2 className="form-section-title">Facilitati</h2>
                     <div className="form-group-checkbox-grid">
                         {facilityOptions.map(facility => (
@@ -648,7 +615,7 @@ const OwnerListNewApartment: React.FC = () => {
                                 <input
                                     type="checkbox"
                                     id={facility.id}
-                                    name={facility.id} // Numele este cheia din formData.facilities
+                                    name={facility.id}
                                     checked={formData.facilities[facility.id]}
                                     onChange={handleChange}
                                 />
@@ -657,7 +624,6 @@ const OwnerListNewApartment: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Imagini */}
                     <div className="form-group">
                         <h2 className="form-section-title">Imagini apartament:*</h2>
                         <input
@@ -673,7 +639,6 @@ const OwnerListNewApartment: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Document */}
                     <div className="form-group">
                         <h2 className="form-section-title">Document de proprietate:*</h2>
                         <input
@@ -689,18 +654,15 @@ const OwnerListNewApartment: React.FC = () => {
                     </div>
 
 
-                    {/* Buton de submit */}
                     <button type="submit" className="submit-apartment" disabled={isGeocoding || !addressVerified}>
                         Listeaza Apartamentul
                     </button>
                 </form>
-                {/* Optional: Link back to dashboard */}
                 <button onClick={() => navigate("/owner-dashboard")} className="back-button">
                     Inapoi la Dashboard
                 </button>
             </div>{" "}
-            {/* End form-card-container */}
-        </div> // End page-container
+        </div>
     );
 };
 

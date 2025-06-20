@@ -3,8 +3,6 @@ const router = express.Router();
 const { ObjectId } = require('mongodb');
 const authenticateToken = require('../middleware/authenticateToken');
 
-
-
 function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsCollection) {
     function safeGetObjectId(idString) {
         if (ObjectId.isValid(idString)) {
@@ -43,11 +41,10 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
             let updateData;
             if (stats.length > 0) {
                 updateData = {
-                    averageRating: Math.round(stats[0].averageRating * 10) / 10, // Rotunjit la o zecimala
+                    averageRating: Math.round(stats[0].averageRating * 10) / 10,
                     numberOfReviews: stats[0].numberOfReviews,
                 };
             } else {
-                // Daca nu mai sunt review-uri (ex: ultimul a fost sters sau nu au fost niciodata)
                 updateData = {
                     averageRating: 0,
                     numberOfReviews: 0,
@@ -59,7 +56,7 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
                 {
                     $set: {
                         ...updateData,
-                        updatedAt: new Date() // Actualizam si data modificarii apartamentului
+                        updatedAt: new Date()
                     }
                 }
             );
@@ -74,7 +71,7 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
         try {
             const { page: queryPage, limit: queryLimit, sort } = req.query;
             const page = Number(queryPage) || 1;
-            const limit = Number(queryLimit) || 20; // Default 20
+            const limit = Number(queryLimit) || 20;
             const skip = (page - 1) * limit;
 
             let mongoSort = { createdAt: -1 };
@@ -101,8 +98,6 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
         }
     });
 
-    // GET /apartment/:apartmentId - Preia toate review-urile pentru un apartament
-    // Am eliminat authenticateToken de aici, de obicei review-urile sunt publice
     router.get('/apartment/:apartmentId', async (req, res) => {
         const { apartmentId } = req.params;
         const { sort, rating: filterRating, page: queryPage, limit: queryLimit } = req.query;
@@ -192,8 +187,6 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
     //     }
     // });
 
-    // DELETE /:reviewId - Sterge un review specific
-    // Necesita autentificare. Ideal, doar autorul review-ului sau un admin ar trebui sa poata sterge.
     router.delete('/:reviewId', authenticateToken, async (req, res) => {
         const { reviewId } = req.params;
 
@@ -214,8 +207,6 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
                 return res.status(404).json({ message: 'Recenzia nu a fost gasita.' });
             }
 
-            // Verifica daca utilizatorul curent este autorul review-ului SAU este admin
-            // Presupunem ca req.user are o proprietate isAdmin: boolean
             const isAuthor = reviewToDelete.userId.equals(currentUserId);
             const isAdmin = req.user.isAdmin === true;
 
@@ -226,7 +217,6 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
             const result = await reviewsCollection.deleteOne({ _id: reviewObjectId });
 
             if (result.deletedCount === 1) {
-                // Dupa stergere, recalculeaza rating-ul mediu
                 await calculateAndUpdateAverageRating(reviewToDelete.apartmentId.toString());
                 return res.json({ message: 'Recenzia a fost stearsa cu succes.' });
             } else {
@@ -238,15 +228,13 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
         }
     });
 
-    // POST / - Creeaza un nou review
-    // Necesita autentificare
     router.post('/', authenticateToken, async (req, res) => {
         const { apartmentId, rating, comment } = req.body;
 
-        if (!req.user || !req.user._id) { // req.user._id ar trebui sa fie setat de authenticateToken
+        if (!req.user || !req.user._id) {
             return res.status(401).json({ message: 'Autentificare necesara' });
         }
-        const userId = new ObjectId(req.user._id); // Acesta ar trebui sa fie deja un ObjectId daca middleware-ul face asta
+        const userId = new ObjectId(req.user._id);
 
         if (!apartmentId || !rating || !comment) {
             return res.status(400).json({ message: 'Campurile apartmentId, rating si comment sunt obligatorii.' });
@@ -264,22 +252,10 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
                 return res.status(404).json({ message: 'Apartamentul nu a fost gasit' });
             }
 
-            // 2. (Optional dar recomandat) Verifica eligibilitatea utilizatorului
-            //    Exemplu simplist - de adaptat la logica ta de rezervari
-            //    const bookingsCollection = getDB().collection('bookings'); // Daca ai getDB()
-            //    const existingBooking = await bookingsCollection.findOne({ 
-            //        userId: userId, 
-            //        apartmentId: apartmentObjectId, 
-            //        status: 'completed' 
-            //    });
-            //    if (!existingBooking) {
-            //        return res.status(403).json({ message: 'Nu sunteti eligibil sa lasati un review.' });
-            //    }
-
             // 3. Verifica daca utilizatorul a lasat deja un review pentru acest apartament
             const existingReview = await reviewsCollection.findOne({
                 apartmentId: apartmentObjectId,
-                userId: userId // userId este deja ObjectId
+                userId: userId
             });
             if (existingReview) {
                 return res.status(400).json({ message: 'Ati lasat deja o recenzie pentru acest apartament' });
@@ -293,7 +269,7 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
             const newReview = {
                 apartmentId: apartmentObjectId,
                 userId: userId,
-                userName: user.fullName || 'Utilizator Anonim', // Fallback
+                userName: user.fullName || 'Utilizator Anonim',
                 rating: Number(rating),
                 comment: comment.trim(),
                 createdAt: new Date(),
@@ -303,7 +279,7 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
             const insertResult = await reviewsCollection.insertOne(newReview);
 
             if (insertResult.insertedId) {
-                await calculateAndUpdateAverageRating(apartmentId.toString()); // Paseaza string ID
+                await calculateAndUpdateAverageRating(apartmentId.toString());
 
                 const createdReview = await reviewsCollection.findOne({ _id: insertResult.insertedId });
                 return res.status(201).json(createdReview);
@@ -313,7 +289,7 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
 
         } catch (err) {
             console.error('Eroare la crearea review-ului:', err);
-            if (err.code === 11000) { // Cod de eroare pentru duplicat (din indexul unic)
+            if (err.code === 11000) {
                 return res.status(400).json({ message: 'Ati lasat deja o recenzie pentru acest apartament (eroare duplicat).' });
             }
             return res.status(500).json({ message: 'Eroare interna la server.' });
@@ -321,7 +297,6 @@ function createReviewsRoutes(reviewsCollection, usersCollection, apartmentsColle
     });
 
     return router;
-
 }
 
 module.exports = createReviewsRoutes;

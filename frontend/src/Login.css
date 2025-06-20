@@ -1,6 +1,5 @@
 .login-container {
     padding: 50px 20px 20px 20px;
-    /* padding-top pentru a evita suprapunerea cu navbar-ul fix */
     max-width: 1200px;
     margin: 0 auto;
     align-items: center;
@@ -21,7 +20,6 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* border: 3px solid #deaa79; */
 }
 
 .login-form div,
@@ -74,12 +72,10 @@
     font-size: 1.1em;
     margin-top: 20px;
     color: white;
-    /* color: #deaa79; */
 }
 
 .custom-link {
     color: #deaa79;
-    /* text-decoration: none; */
 }
 
 .custom-link:hover {

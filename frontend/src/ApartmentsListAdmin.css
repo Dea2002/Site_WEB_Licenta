@@ -1,8 +1,5 @@
-/* frontend/src/AdminApartmentsList.css */
-
 .admin-apartments-container {
     padding: 80px 20px 20px 20px;
-    /* padding-top pentru a evita suprapunerea cu navbar-ul fix */
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;

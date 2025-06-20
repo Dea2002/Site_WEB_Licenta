@@ -6,9 +6,8 @@ export const api = axios.create({
     baseURL: BACKEND_URL
 });
 
-// inainte de fiecare request, adauga header-ul automat
 api.interceptors.request.use(config => {
-    const token = localStorage.getItem('token');   // sau de unde ti-l tii
+    const token = localStorage.getItem('token');
     if (token) {
         config.headers = config.headers ?? {};
         config.headers.Authorization = `Bearer ${token}`;

@@ -1,9 +1,9 @@
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
-const bcrypt = require('bcryptjs'); // pentru criptarea parolelor
+const bcrypt = require('bcryptjs');
 const cors = require('cors');
-const jwt = require('jsonwebtoken'); // pentru creare si verificare token-uri JWT
+const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
 const { Server } = require('socket.io');
@@ -18,23 +18,22 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: [
-            'http://localhost:5173', // Frontend-ul de dezvoltare Vite
+            'http://localhost:5173',
             'http://localhost:3000',
             'https://studentrent.netlify.app/'
-        ],  // Frontend-ul servit de 'serve'
+        ],
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
+
 // --- CONFIGURARE CORS PENTRU EXPRESS ---
-// Este crucial sa fie printre primele!
+
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://studentrent.netlify.app', // Adresa ta de frontend Netlify
+    'https://studentrent.netlify.app',
     'https://studentrent.up.railway.app/'
-    // Adauga si domeniul Railway DACA frontend-ul ar fi servit si de acolo
-    // sau daca ai nevoie de comunicare directa browser -> Railway API (desi frontend-ul e pe Netlify)
 ];
 
 const corsOptions = {
@@ -45,15 +44,14 @@ const corsOptions = {
             callback(new Error('Not allowed by CORS'));
         }
     },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Asigura-te ca OPTIONS e aici
-    allowedHeaders: ['Content-Type', 'Authorization', /* alte headere custom pe care le folosesti */],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization',],
     credentials: true,
-    optionsSuccessStatus: 204 // Raspuns standard pentru preflight OK (sau 200)
+    optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
-
 
 // Rate limiter pentru rutele de autentificare
 const authLimiter = rateLimit({
@@ -62,7 +60,6 @@ const authLimiter = rateLimit({
     message: 'Prea multe cereri de la aceasta adresa IP, incearca mai tarziu.',
 });
 
-// Aplica rate limiter la rutele de autentificare
 app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
 
@@ -110,7 +107,6 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
     }
     console.log('CRON: Pornire actualizare statusuri rezervari...');
 
-    // Obtine colectiile direct din databaseInstance
     const reservationHistoryCollection = databaseInstance.collection("reservation_history");
     const reservationRequestsCollection = databaseInstance.collection("reservation_requests");
     const apartmentsCollection = databaseInstance.collection("apartments");
@@ -159,10 +155,8 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
         if (rentalsToActivate.length > 0) {
             console.log(`CRON: Se verifica ${rentalsToActivate.length} rezervari active pentru adaugarea in conversatii.`);
             for (const rental of rentalsToActivate) {
-                // Proceseaza doar daca chiriasul nu a fost deja adaugat in grupurile de chat.
-                // Acest flag previne rularea operatiunilor la fiecare executie a cron-ului.
                 if (rental.chatParticipantAdded) {
-                    continue; // Sari peste, deja procesat.
+                    continue;
                 }
 
                 const apartmentIdStr = rental.apartament.toString();
@@ -254,8 +248,7 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
                 // Pentru a fi corect, calculam diferenta intre checkout si data curenta (fara ore)
                 const diffTime = Math.abs(checkOutDate.getTime() - currentDateOnly.getTime());
                 const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                // Daca checkOutDate este chiar currentDateOnly, daysRemaining va fi 0, dar noi vrem sa afisam "azi" sau "1 zi"
-                // Mai corect:
+
                 let daysLeftString;
                 if (checkOutDate.getFullYear() === currentDateOnly.getFullYear() &&
                     checkOutDate.getMonth() === currentDateOnly.getMonth() &&
@@ -265,7 +258,6 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
                     const actualDaysLeft = Math.max(0, daysRemaining);
                     daysLeftString = `${actualDaysLeft} ${actualDaysLeft === 1 ? 'zi' : 'zile'}`;
                 }
-
 
                 let apartmentLocation = "locatie necunoscuta";
                 if (apartmentId) {
@@ -298,7 +290,6 @@ async function updateReservationStatusesScheduledTask(databaseInstance, notifica
     console.log('CRON: Actualizare statusuri rezervari finalizata.');
 }
 
-// Utility to generate dates between two dates (inclusive)
 function getDatesBetween(start, end) {
     const dates = [];
     const current = new Date(start);
@@ -311,12 +302,9 @@ function getDatesBetween(start, end) {
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
         const database = await connectDB();
         console.log("Conectat la MongoDB!");
 
-        // database and collections
-        // const database = client.db("inchiriere-apartamente");
         const usersCollection = database.collection("users");
         const facultiesCollection = database.collection("faculties");
         const apartmentsCollection = database.collection("apartments");
@@ -344,10 +332,9 @@ async function run() {
         // });
         // console.log("CRON: Job pentru actualizarea statusurilor rezervarilor a fost programat.");
 
-        // Set usersCollection in app.locals pentru acces in middleware-uri
         app.locals.usersCollection = usersCollection;
-        app.locals.facultiesCollection = facultiesCollection; // pentru a accesa colectia de facultati
-        app.locals.apartmentsCollection = apartmentsCollection; // pentru a accesa colectia de apartamente
+        app.locals.facultiesCollection = facultiesCollection;
+        app.locals.apartmentsCollection = apartmentsCollection;
         app.locals.reservationHistoryCollection = reservationHistoryCollection;
         app.locals.reservationRequestsCollection = reservationRequestsCollection;
         app.locals.notificationsCollection = notificationsCollection;
@@ -364,11 +351,11 @@ async function run() {
         const authRoutes = require('./routes/auth')(usersCollection, facultiesCollection, notificationService, notificationsCollection, markRequestsCollection, associationsRequestsCollection);
         app.use('/auth', authRoutes);
 
-        const createUsersRoutes = require('./routes/users'); // Importa rutele pentru utilizatori
+        const createUsersRoutes = require('./routes/users');
         const userRoutes = createUsersRoutes(usersCollection, notificationService, markRequestsCollection, facultiesCollection, reservationHistoryCollection, apartmentsCollection, reservationRequestsCollection, reviewsCollection, associationsRequestsCollection, messagesCollection, conversationsCollection);
-        app.use('/users', userRoutes); // toate requesturile vor avea prefixul /users
+        app.use('/users', userRoutes);
 
-        const createApartmentsRoutes = require('./routes/apartments'); // Importa rutele pentru utilizatori
+        const createApartmentsRoutes = require('./routes/apartments');
         const apartmentsRoutes = createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService);
         app.use('/apartments', apartmentsRoutes);
 
@@ -392,9 +379,8 @@ async function run() {
         const reviewsRoutes = createReviewsRoutes(reviewsCollection, usersCollection, apartmentsCollection);
         app.use('/reviews', reviewsRoutes);
 
-        //!! --- Structura veche ---
 
-        app.post('/create_reservation_request', authenticateToken, async (req, res) => { // 
+        app.post('/create_reservation_request', authenticateToken, async (req, res) => {
 
             if (req.user.role !== 'student' && req.user.role !== 'client') {
                 return res.status(403).json({ message: 'Doar clientii pot face cereri de rezervare' });
@@ -403,12 +389,10 @@ async function run() {
             const { clientId, apartmentId, numberOfRooms, checkIn, checkOut, priceRent, priceUtilities, discount, numberOfNights } = req.body;
             const clientObjectId = new ObjectId(clientId);
             const apartmentObjectId = new ObjectId(apartmentId);
-            const apartmentObject = await apartmentsCollection.findOne({ _id: apartmentObjectId }); // caut apartamentul in baza de date
+            const apartmentObject = await apartmentsCollection.findOne({ _id: apartmentObjectId });
 
             const newCheckIn = new Date(checkIn);
             const newCheckOut = new Date(checkOut);
-
-            const reservations = await reservationRequestsCollection.find({ client: clientObjectId }).toArray();
 
             const finalPrice = (priceRent * ((100 - discount) / 100) * numberOfRooms + priceUtilities) * numberOfNights;
             const newReservationRequest = {
@@ -567,7 +551,7 @@ async function run() {
                     { $unwind: "$apartamentData" },
                     {
                         $match: {
-                            'apartamentData.ownerId': new ObjectId(ownerId)  // Filtreaza dupa ownerId
+                            'apartamentData.ownerId': new ObjectId(ownerId)
                         }
                     },
 
@@ -742,7 +726,7 @@ async function run() {
 
                 // === PASUL 3: Combinarea si calculul final ===
                 const unavailableDates = [];
-                // Defineste un interval de date pe care vrei sa-l verifici, ex: Object.keys(usedRoomsMap) + datele din userBusyDates
+
                 const allRelevantDates = new Set([...Object.keys(usedRoomsMap), ...userBusyDates]);
 
                 allRelevantDates.forEach(day => {
@@ -754,7 +738,7 @@ async function run() {
                         unavailableDates.push(day);
                     }
                 });
-                res.json(unavailableDates.sort()); // Sortarea e o idee buna pentru consistenta
+                res.json(unavailableDates.sort());
 
             } catch (error) {
                 console.error("Eroare la preluarea rezervarilor:", error);
@@ -768,7 +752,7 @@ async function run() {
         });
     } catch (error) {
         console.error("!!!!!!!!!!!!!!!!! Eroare FATALa la pornire sau conectare DB:", error);
-        process.exit(1); // Opreste procesul daca nu se poate conecta la DB
+        process.exit(1);
     }
 }
 run();

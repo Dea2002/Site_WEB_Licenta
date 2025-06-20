@@ -2,20 +2,17 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
-// Hook-ul va returna starea de incarcare si functia pe care o putem apela
 export const useInitiatePrivateChat = () => {
     const [isLoadingPrivate, setIsLoadingPrivate] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    // Folosim useCallback pentru a ne asigura ca functia nu se recreeaza la fiecare render
-    // daca nu este necesar. Este o buna practica de performanta.
     const initiatePrivateChat = useCallback(async (recipientId: string) => {
 
         setIsLoadingPrivate(true);
         try {
             const response = await api.post('/conversations/initiatePrivate', {
 
-                recipientId: recipientId, // ID-ul utilizatorului cu care dorim sa incepem chat-ul
+                recipientId: recipientId,
 
             });
 

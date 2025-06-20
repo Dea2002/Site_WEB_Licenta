@@ -50,7 +50,6 @@ const OwnersListAdmin: React.FC = () => {
                         <p>
                             <strong>Telefon:</strong> {owner.phoneNumber}
                         </p>
-                        {/* Poti adauga mai multe detalii sau optiuni aici */}
                     </div>
                 ))}
             </div>

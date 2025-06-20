@@ -1,12 +1,11 @@
 import React from 'react';
-import './profile_student.css'; // Refolosim CSS sau cream unul dedicat
+import './profile_student.css';
 
-// Tipuri definite in parinte
 type ProfileSection = 'edit' | 'current-rent' | 'history';
 
 interface ProfileSidebarProps {
     activeSection: ProfileSection;
-    onSectionChange: (section: ProfileSection) => void; // Functie callback
+    onSectionChange: (section: ProfileSection) => void;
     onInitiateDeleteAccount: () => void;
 }
 
@@ -30,9 +29,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                 {menuItems.map((item) => (
                     <li key={item.id}>
                         <button
-                            // Aplicam clasa 'active' daca ID-ul itemului corespunde sectiunii active
                             className={`sidebar-button ${activeSection === item.id ? 'active' : ''}`}
-                            // La click, apelam functia din parinte cu ID-ul sectiunii
                             onClick={() => onSectionChange(item.id as ProfileSection)}
                         >
                             {item.label}
@@ -40,7 +37,6 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                     </li>
                 ))}
             </ul>
-            {/* NOU: Sectiune pentru stergerea contului */}
             <div className="sidebar-actions-dangerous">
                 <button
                     className="sidebar-button delete-account-button" // Foloseste aceeasi clasa sau una noua

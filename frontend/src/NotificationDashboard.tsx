@@ -8,9 +8,9 @@ interface Notification {
     _id: string;
     message: string;
     receiver: string;
-    sender: string;       // fie ObjectId string, fie 'system'
+    sender: string;
     isRead: boolean;
-    date: string;         // ISO string
+    date: string;
 }
 
 const NotificationDashboard: React.FC = () => {
@@ -18,7 +18,7 @@ const NotificationDashboard: React.FC = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [error, setError] = useState<string | null>(null);
 
-    const { refresh: refreshUnread } = useNotifications(); // refresh notifications
+    const { refresh: refreshUnread } = useNotifications();
 
     const fetchNotifications = async () => {
         if (!token) {
@@ -47,7 +47,6 @@ const NotificationDashboard: React.FC = () => {
         fetchNotifications();
     }, [token, user?._id, faculty?._id]);
 
-    // Mark as read handler
     const handleMarkAsRead = async (id: string) => {
         try {
             await api.put(
@@ -62,7 +61,6 @@ const NotificationDashboard: React.FC = () => {
         }
     };
 
-    // Delete handler
     const handleDelete = async (id: string) => {
         try {
             await api.delete(

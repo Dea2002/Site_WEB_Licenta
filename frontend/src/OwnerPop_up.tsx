@@ -7,7 +7,6 @@ interface OwnerPop_upProps {
     owneremail?: string;
     onClose: () => void;
 }
-// adaugam informatiile despre proprietar
 
 const OwnerPop_up: React.FC<OwnerPop_upProps> = ({
     ownername,

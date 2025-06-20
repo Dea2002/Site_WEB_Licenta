@@ -1,15 +1,12 @@
-/* frontend/src/DashboardAdmin.css */
-
 .dashboard-container {
     padding: 80px 20px 20px 20px;
-    /* padding-top pentru a evita suprapunerea cu navbar-ul fix */
+
     max-width: 1000px;
     margin: 0 auto;
     text-align: center;
 }
 
 .dashboard-container h1 {
-    /* color: #deaa79; */
     color: #64b29e;
     margin-bottom: 40px;
 }
@@ -23,7 +20,6 @@
 
 .card {
     background-color: rgba(255, 255, 255, 0.9);
-    /* Fundal semi-transparent */
     border: 1px solid #ccc;
     border-radius: 12px;
     width: 250px;
@@ -32,7 +28,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* box-shadow: 0 2px 3px #659287; */
     cursor: pointer;
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
@@ -50,7 +45,6 @@
 
 .card p {
     font-size: 2rem;
-    /* color: #deaa79; */
     color: #659287;
     font-weight: bold;
 }

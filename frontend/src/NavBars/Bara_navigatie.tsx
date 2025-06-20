@@ -39,8 +39,8 @@ function NavBar() {
                         {isAuthenticated && (<Nav.Link as={Link} to="/notifications">
                             Notificari
                             {unreadCount > 0
-                                ? <MdNotificationsActive size={20} color="#dba979" style={{ marginLeft: '4px' }} /> // cand am cel putin o notificare necitita
-                                : <IoIosNotifications size={20} color="#dba979" style={{ marginLeft: '4px' }} /> // cand nu am nicio notificare necitita
+                                ? <MdNotificationsActive size={20} color="#dba979" style={{ marginLeft: '4px' }} />
+                                : <IoIosNotifications size={20} color="#dba979" style={{ marginLeft: '4px' }} />
                             }
                             {unreadCount > 0 && (
                                 <Badge pill bg="danger" className="position-absolute translate-middle">

@@ -1,12 +1,11 @@
 import React from 'react';
-import './profile_owner.css'; // Refolosim CSS sau cream unul dedicat
+import './profile_owner.css';
 
-// Tipuri definite in parinte
 type ProfileSection = 'edit';
 
 interface ProfileSidebarProps {
     activeSection: ProfileSection;
-    onSectionChange: (section: ProfileSection) => void; // Functie callback
+    onSectionChange: (section: ProfileSection) => void;
     onInitiateDeleteAccount: () => void;
 }
 
@@ -16,7 +15,6 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
     ];
 
     const handleDeleteClick = () => {
-        // Adaugam o confirmare dubla pentru o actiune atat de distructiva
         if (window.confirm("ATENTIE! Esti pe cale sa iti stergi contul de proprietar. Aceasta actiune va duce la stergerea tuturor apartamentelor listate si anularea chiriilor asociate. Actiunea este ireversibila. Continui?")) {
             if (window.confirm("Confirmare finala: Sigur doresti sa stergi contul de proprietar si toate datele asociate?")) {
                 onInitiateDeleteAccount();
@@ -30,9 +28,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                 {menuItems.map((item) => (
                     <li key={item.id}>
                         <button
-                            // Aplicam clasa 'active' daca ID-ul itemului corespunde sectiunii active
                             className={`sidebar-button ${activeSection === item.id ? 'active' : ''}`}
-                            // La click, apelam functia din parinte cu ID-ul sectiunii
                             onClick={() => onSectionChange(item.id as ProfileSection)}
                         >
                             {item.label}
@@ -40,7 +36,6 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                     </li>
                 ))}
             </ul>
-            {/* NOU: Sectiune pentru stergerea contului */}
             <div className="sidebar-actions-dangerous">
                 <button
                     className="sidebar-button delete-account-button"

@@ -18,8 +18,7 @@
 }
 
 .review-form .error-message {
-    /* Stil pentru mesajele de eroare din formular */
-    color: #d9534f; /* Rosu pentru erori */
+    color: #d9534f;
     background-color: #f2dede;
     border: 1px solid #ebccd1;
     padding: 10px;
@@ -40,26 +39,25 @@
     font-size: 0.95em;
 }
 
-/* Stil pentru componenta StarRating, daca e folosita doar aici */
 .star-rating {
-    display: flex; /* Aliniaza stelele pe orizontala */
-    gap: 2px; /* Spatiu mic intre stele */
+    display: flex;
+    gap: 2px;
 }
 
 .star-rating .star-filled,
 .star-rating .star-empty {
     cursor: pointer;
-    font-size: 2.2em; /* Marimea stelelor in formular */
+    font-size: 2.2em;
     transition: color 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
 .star-rating .star-filled {
-    color: #ffd700; /* Galben pentru stele pline */
+    color: #ffd700;
 }
 .star-rating .star-empty {
-    color: #ccc; /* Gri pentru stele goale */
+    color: #ccc;
 }
 .star-rating span:hover {
-    transform: scale(1.1); /* Efect usor la hover */
+    transform: scale(1.1);
 }
 
 .review-form textarea {
@@ -69,22 +67,22 @@
     border-radius: 4px;
     font-size: 1em;
     line-height: 1.5;
-    min-height: 100px; /* Inaltime minima pentru textarea */
-    box-sizing: border-box; /* Asigura ca padding si border nu maresc latimea totala */
+    min-height: 100px;
+    box-sizing: border-box;
     transition: border-color 0.2s ease-in-out;
 }
 
 .review-form textarea:focus {
     outline: none;
-    border-color: #007bff; /* O culoare de accent la focus */
+    border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .review-form .form-actions {
     margin-top: 25px;
     display: flex;
-    gap: 10px; /* Spatiu intre butoane */
-    justify-content: flex-end; /* Aliniaza butoanele la dreapta */
+    gap: 10px;
+    justify-content: flex-end;
 }
 
 .review-form .button-primary,
@@ -99,7 +97,7 @@
 }
 
 .review-form .button-primary {
-    background-color: #007bff; /* Albastru pentru butonul principal */
+    background-color: #007bff;
     color: white;
 }
 .review-form .button-primary:hover {
@@ -112,7 +110,7 @@
 }
 
 .review-form .button-secondary {
-    background-color: #f0f0f0; /* Gri deschis pentru butonul secundar */
+    background-color: #f0f0f0;
     color: #333;
     border: 1px solid #ccc;
 }
@@ -125,9 +123,8 @@
     cursor: not-allowed;
 }
 
-/* Butonul de adaugare review din ApartmentDetails */
 .button-add-review {
-    background-color: #28a745; /* Verde */
+    background-color: #28a745;
     color: white;
     padding: 10px 18px;
     border: none;
@@ -135,7 +132,7 @@
     cursor: pointer;
     font-size: 1em;
     font-weight: 500;
-    margin-bottom: 20px; /* Spatiu sub buton */
+    margin-bottom: 20px;
     transition: background-color 0.2s;
 }
 .button-add-review:hover {

@@ -26,12 +26,10 @@ const DashboardOwner: React.FC = () => {
     }, [user, token]);
 
     const handleCardClick = () => {
-        // Navigam catre pagina cu lista apartamentelor
         navigate("/owner/apartments");
     };
 
     const listNewApartment = () => {
-        // Navigam catre pagina de listare a unui nou apartament
         navigate("/owner-dashboard/list_apartment");
     };
 
@@ -42,7 +40,6 @@ const DashboardOwner: React.FC = () => {
                     <div className="dashboard-header">
                         <h2>Dashboard</h2>
                     </div>
-                    {/* Card-ul dashboard-ului */}
                     <div className="dashboard-card" onClick={handleCardClick}>
                         <div className="card-icon-container">
                             <FaBuilding className="card-icon" />

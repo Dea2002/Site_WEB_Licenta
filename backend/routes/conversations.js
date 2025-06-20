@@ -21,7 +21,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         const participantsOids = [new ObjectId(userId), new ObjectId(recipientId)];
 
         try {
-            // Cautam o conversatie privata existenta intre cei doi utilizatori
             const existingConversation = await conversationsCollection.findOne({
                 type: 'private',
                 participants: { $all: participantsOids, $size: 2 }
@@ -31,7 +30,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
                 return res.json(existingConversation);
             }
 
-            // Daca nu exista, cream una noua
             const now = new Date();
             const newConversation = {
                 participants: participantsOids,
@@ -80,7 +78,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
             return res.status(400).json({ message: 'ID apartament invalid' });
         }
 
-        // build the filter so that we match exactly one of the two group-chats
         const filter = {
             apartment: apartmentId,
             type: 'group',
@@ -96,7 +93,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
 
     });
 
-    // GET /conversations/:userId → listeaza conversatiile in care e user-ul
     router.get('/:userId', async (req, res) => {
         const userOid = new ObjectId(req.params.userId);
 
@@ -121,8 +117,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
         res.json(result.flat());
     });
 
-    // POST /conversations → creeaza sau returneaza conversatia unu-la-unu
-    // body: { participants: [userId1, userId2] }
     router.post('/', async (req, res) => {
         try {
             let { participants } = req.body;
@@ -130,7 +124,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
                 return res.status(400).json({ message: 'Trebuie sa trimiti cel putin doi participanti.' });
             }
 
-            // Transformam in ObjectId
             const partOids = participants.map(id => {
                 if (!ObjectId.isValid(id)) throw new Error('ID invalid');
                 return new ObjectId(id);
@@ -138,7 +131,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
 
             const isGroup = partOids.length > 2;
 
-            // Cautam conversatie unu-la-unu existenta
             const existing = await conversationsCollection.findOne({
                 isGroup,
                 participants: { $size: partOids.length, $all: partOids }
@@ -149,7 +141,6 @@ function createConversationsRoutes(usersCollection, conversationsCollection) {
                 return res.json(existing);
             }
 
-            // Nu exista → cream una noua
             const now = new Date();
             const doc = {
                 participants: partOids,

@@ -1,12 +1,7 @@
-/* ApartmentDetails.css - FINAL COMPLETE VERSION */
-
-/* Base Page Style with Background */
 .apartment-details-page {
     margin: 0;
     padding: 0 0 50px 0;
     font-family: Arial, sans-serif;
-    /* Background Image */
-    /* background-image: url("/path/to/your/background-image.jpg"); /* !!! UPDATE THIS PATH !!! */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -14,19 +9,18 @@
     min-height: 100vh;
 }
 
-/* General container for loading/error messages */
 .loading-error-container {
     text-align: center;
     padding: 50px;
     font-size: 1.2em;
     color: #555;
-    background-color: rgba(255, 255, 255, 0.8); /* Make sure message is readable */
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 8px;
     max-width: 600px;
     margin: 40px auto;
 }
 .error {
-    color: #dc3545; /* Red color for errors */
+    color: #dc3545;
     font-weight: bold;
     margin-top: 10px;
 }
@@ -34,10 +28,9 @@
     font-size: 0.9em;
     text-align: center;
     margin-bottom: 10px;
-    padding: 0 15px; /* Add padding */
+    padding: 0 15px;
 }
 
-/* Main container for the two columns */
 .details-container {
     display: flex;
     flex-wrap: wrap;
@@ -49,7 +42,6 @@
     padding: 0 20px;
 }
 
-/* === Left Section (Image & Details) === */
 .left-section {
     flex: 1 1 600px;
     display: flex;
@@ -57,22 +49,20 @@
     gap: 25px;
 }
 
-/* --- STILURI NOI PENTRU CARUSEL --- */
 .image-carousel-container {
-    position: relative; /* Necesar pentru pozitionarea absoluta a butoanelor */
+    position: relative;
     background-color: #fff;
-    padding: 15px; /* Poti ajusta padding-ul */
+    padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    overflow: hidden; /* Ascunde partile imaginii care depasesc containerul */
-    display: flex; /* Ajuta la centrarea imaginii daca e mai mica */
+    overflow: hidden;
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 300px; /* O inaltime minima pentru placeholder */
+    min-height: 300px;
 }
 
 .image-carousel-container::before {
-    /* Pastram bordura interioara daca doresti */
     content: "";
     position: absolute;
     top: 10px;
@@ -82,18 +72,18 @@
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     pointer-events: none;
-    z-index: 1; /* Sa fie sub butoane */
+    z-index: 1;
 }
 
 .carousel-image {
     width: 100%;
-    max-width: 830px; /* Sau cat era inainte */
+    max-width: 830px;
     height: auto;
-    max-height: 500px; /* Limiteaza inaltimea maxima */
-    border-radius: 6px; /* Un pic de rotunjire pentru imaginea in sine */
-    object-fit: cover; /* Asigura ca imaginea acopera spatiul fara a se deforma */
+    max-height: 500px;
+    border-radius: 6px;
+    object-fit: cover;
     display: block;
-    z-index: 2; /* Peste ::before */
+    z-index: 2;
 }
 
 .no-image-placeholder {
@@ -104,7 +94,7 @@
     justify-content: center;
     color: #777;
     font-style: italic;
-    min-height: 200px; /* O inaltime pentru placeholder */
+    min-height: 200px;
 }
 
 .carousel-button {
@@ -114,16 +104,16 @@
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
-    border-radius: 50%; /* Butoane rotunde */
+    border-radius: 50%;
     width: 40px;
     height: 40px;
     font-size: 24px;
-    line-height: 40px; /* Centreaza textul vertical */
+    line-height: 40px;
     text-align: center;
     cursor: pointer;
-    z-index: 3; /* Peste imagine si ::before */
+    z-index: 3;
     transition: background-color 0.2s ease;
-    display: flex; /* Pentru centrare perfecta a sagetii */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -133,69 +123,12 @@
 }
 
 .carousel-button.prev {
-    left: 25px; /* Ajusteaza pozitia fata de marginea containerului caruselului (luand in calcul padding-ul containerului) */
+    left: 25px;
 }
 
 .carousel-button.next {
-    right: 25px; /* Ajusteaza pozitia */
+    right: 25px;
 }
-
-/* --- ELIMINa SAU COMENTEAZa STILURILE VECHI PENTRU .image-gallery --- */
-/*
-.image-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
-    margin-bottom: 16px;
-}
-.gallery-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 4px;
-    object-fit: cover;
-    transition: transform 0.2s;
-}
-.gallery-item img:hover {
-    transform: scale(1.05);
-}
-*/
-/* Vechiul .image-container a fost practic inlocuit de .image-carousel-container */
-/* Comenteaza sau sterge .image-container daca nu mai este folosit altundeva */
-/*
-.image-container {
-    text-align: center;
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
-    position: relative;
-}
-
-.image-container::before {
-    content: "";
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px; 
-    pointer-events: none;
-}
-
-.image-container img {
-    width: 100%;
-    max-width: 830px;
-    height: auto;
-    max-height: 500px;
-    border-radius: 8px;
-    object-fit: cover;
-    display: block;
-}
-*/
-
-/* Restul stilurilor raman neschimbate */
-/* ... (pastreaza celelalte stiluri de la .title-location-price in jos) ... */
 
 .title-location-price {
     background-color: rgba(255, 255, 255, 0.9);
@@ -215,7 +148,7 @@
     right: 10px;
     bottom: 10px;
     border: 2px solid #e0e0e0;
-    border-radius: 8px; /* Inner rounding */
+    border-radius: 8px;
     pointer-events: none;
 }
 
@@ -231,7 +164,6 @@
     margin: 0 0 15px 0;
 }
 
-/* --- Map Button Styling (Original) --- */
 .button-map {
     position: relative;
     background-color: #deaa79;
@@ -270,16 +202,15 @@
     opacity: 1;
 }
 
-/* Container for grouped details */
 .detail-group {
     background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 20px 25px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    position: relative; /* Needed for ::before */
+    position: relative;
 }
-/* Inner border for detail groups */
+
 .detail-group::before {
     content: "";
     position: absolute;
@@ -322,10 +253,10 @@
 }
 
 .right-section {
-    flex: 1 1 350px; /* Flex behavior */
-    position: sticky; /* Stick to top on scroll */
-    top: 20px; /* Offset from top */
-    align-self: flex-start; /* Required for sticky */
+    flex: 1 1 350px;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
 }
 
 .owner-booking-card {
@@ -333,7 +264,7 @@
     backdrop-filter: blur(15px);
     border-radius: 12px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-    overflow: hidden; /* Clip content/reserve button */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -341,7 +272,7 @@
 .owner-info-header {
     padding: 20px 25px;
     text-align: center;
-    background-color: rgba(248, 249, 250, 0.8); /* Light header background */
+    background-color: rgba(248, 249, 250, 0.8);
 }
 .owner-info-header h3 {
     margin: 0 0 8px 0;
@@ -358,10 +289,9 @@
 .owner-buttons {
     display: flex;
     justify-content: center;
-    gap: 10px; /* Space between buttons */
+    gap: 10px;
 }
 
-/* --- Owner Action Buttons (Detalii/Chat - Original Styles Restored) --- */
 .owner-section-button {
     padding: 8px 12px;
     background-color: #659287;
@@ -376,7 +306,7 @@
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     margin: 0 5px;
     text-align: center;
-    flex-grow: 0; /* Prevent growing */
+    flex-grow: 0;
     flex-shrink: 0;
 }
 .owner-section-button:hover {
@@ -384,10 +314,6 @@
     color: #659287;
     border-color: #659287;
 }
-/* .details-btn {
-}
-.chat-btn {
-} */
 
 .booking-section {
     padding: 20px 25px;
@@ -400,7 +326,7 @@
 }
 
 .selected-dates-info {
-    background-color: #e9ecef; /* Background for selected dates block */
+    background-color: #e9ecef;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 15px;
@@ -430,7 +356,6 @@
     border-top: 1px solid #ccc;
 }
 
-/* Button to open date selection popup initially */
 .select-interval-btn {
     background-color: #007bff;
     color: white;
@@ -447,13 +372,12 @@
     background-color: #0056b3;
 }
 
-/* --- Style for Modify Interval Button (Themed from Original Buttons) --- */
 .modify-interval-btn {
     background-color: transparent;
-    color: #659287; /* Original theme color */
-    border: 2px solid #659287; /* Original theme border */
+    color: #659287;
+    border: 2px solid #659287;
     padding: 6px 12px;
-    border-radius: 4px; /* Match original */
+    border-radius: 4px;
     cursor: pointer;
     font-size: 0.9em;
     width: 100%;
@@ -462,36 +386,35 @@
     font-weight: 600;
 }
 .modify-interval-btn:hover {
-    background-color: #659287; /* Fill on hover */
-    color: #e8efcf; /* Contrast text on hover */
+    background-color: #659287;
+    color: #e8efcf;
 }
 
-/* --- Reserve Button Styling (Original Restored) --- */
 .reserve-btn {
-    position: relative; /* For icon */
+    position: relative;
     width: 100%;
-    height: 45px; /* Original height */
-    background-color: #659287; /* Original background */
-    color: #e8efcf; /* Original text color */
-    border: none; /* Original: no border */
-    /* Original border radius - important for card look */
+    height: 45px;
+    background-color: #659287;
+    color: #e8efcf;
+    border: none;
+
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     cursor: pointer;
-    font-size: 1.2rem; /* Original font size */
+    font-size: 1.2rem;
     font-weight: bold;
-    transition: background-color 0.3s ease; /* Original transition */
+    transition: background-color 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Hide icon overflow */
+    overflow: hidden;
 }
 .reserve-btn:hover {
-    background-color: #4a716b; /* Original hover background */
+    background-color: #4a716b;
 }
-/* Original hover effect for text/icon */
+
 .reserve-btn:hover .reserve-btn-text {
     opacity: 0;
 }
@@ -499,13 +422,12 @@
     opacity: 1;
 }
 
-/* Icon positioning and styling within reserve button */
 .reserve-btn-icon {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0; /* Initially hidden for hover effect */
+    opacity: 0;
     transition: opacity 0.3s ease;
     display: flex;
     align-items: center;
@@ -520,45 +442,40 @@
     margin-right: 0;
 }
 
-/* Disabled state for Reserve Button */
 .reserve-btn:disabled {
-    background-color: #adb5bd; /* Neutral disabled color */
+    background-color: #adb5bd;
     cursor: not-allowed;
     opacity: 0.7;
 }
 .reserve-btn:disabled:hover {
-    background-color: #adb5bd; /* Prevent hover change when disabled */
+    background-color: #adb5bd;
 }
-/* Prevent icon/text swap when disabled */
+
 .reserve-btn:disabled .reserve-btn-icon {
     opacity: 0 !important;
 }
 .reserve-btn:disabled .reserve-btn-text {
-    opacity: 1 !important; /* Ensure text is visible */
+    opacity: 1 !important;
 }
-/* 3. Prevent any hover‐swap when disabled */
+
 .reserve-btn:disabled:hover .reserve-btn-icon {
-    /* inherit the non-hover state */
     opacity: 0 !important;
 }
 .reserve-btn:disabled:hover .reserve-btn-text {
-    /* inherit the non-hover state */
     opacity: inherit !important;
 }
 
-/* Warning text for non-authenticated users */
 .auth-warning {
     text-align: center;
     padding: 10px;
     font-size: 0.9em;
     color: #6c757d;
-    background-color: rgba(248, 249, 250, 0.8); /* Match card header background */
-    /* Apply bottom radius only if reserve button doesn't have it */
+    background-color: rgba(248, 249, 250, 0.8);
+
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
 
-/* General purpose divider lines */
 .line-divider {
     border: none;
     height: 1px;
@@ -578,9 +495,8 @@
     height: 2px;
     background-color: rgba(117, 118, 119, 0.8);
     margin: 0;
-} /* Thicker separator */
+}
 
-/* Hide old <hr> elements if they were based on classes */
 .line-image,
 .line-image-dates,
 .line-image-info {

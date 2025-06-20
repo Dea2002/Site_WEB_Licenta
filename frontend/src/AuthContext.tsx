@@ -13,7 +13,7 @@ export interface User {
     faculty_valid?: boolean;
     numar_matricol?: string;
     anUniversitar?: string;
-    medie_valid?: string;  // observa: string ISO
+    medie_valid?: string;
     medie?: string;
     iat: number;
     exp: number;
@@ -55,7 +55,6 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // citeste imediat din localStorage, sincron
     const [token, setToken] = useState<string | null>(() => {
         return localStorage.getItem("token");
     });
@@ -73,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return !!localStorage.getItem("token");
     });
 
-    // seteaza header-ul implicit de fiecare data cand tokenul se schimba
     useEffect(() => {
         if (token) {
             api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -82,7 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [token, isAuthenticated]);
 
-    // preia token de pe localStorage
     useEffect(() => {
         const t = localStorage.getItem("token");
         if (!t) return;

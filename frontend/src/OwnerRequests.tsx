@@ -21,7 +21,6 @@ interface ReservationRequest {
         faculty: string;
         medie: string;
         medie_valid: string;
-        // alte campuri dupa nevoie
     };
     apartamentData: {
         location: string;
@@ -32,7 +31,7 @@ interface DeclinePopupProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (reason: string) => void;
-    requestId: string | null; // Pentru a sti la ce cerere se refera
+    requestId: string | null;
     isSubmitting: boolean;
     error?: string | null;
 }
@@ -41,7 +40,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     const [reason, setReason] = useState("");
 
     useEffect(() => {
-        // Reseteaza motivul cand popup-ul se redeschide pentru o noua cerere
         if (isOpen) {
             setReason("");
         }
@@ -52,7 +50,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!reason.trim()) {
-            // Poti adauga o validare/eroare locala aici daca doresti
             alert("Va rugam introduceti un motiv pentru respingere.");
             return;
         }
@@ -89,10 +86,10 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
 
 const OwnerRequests: React.FC = () => {
     const { token, user } = useContext(AuthContext);
-    const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
+    const [successMessage, setSuccessMessage] = useState<string>("");
     const [requests, setRequests] = useState<ReservationRequest[]>([]);
-    const [loading, setLoading] = useState(true); // Adaugam o stare generala de incarcare
-    const [error, setError] = useState<string | null>(null); // Eroare generala
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const [showDeclinePopup, setShowDeclinePopup] = useState<boolean>(false);
     const [currentRequestIdForDecline, setCurrentRequestIdForDecline] = useState<string | null>(null);
@@ -141,11 +138,10 @@ const OwnerRequests: React.FC = () => {
 
     const handleDeclineClick = (id: string) => {
         setCurrentRequestIdForDecline(id);
-        setDeclineSubmitError(null); // Reseteaza eroarea anterioara
+        setDeclineSubmitError(null);
         setShowDeclinePopup(true);
     };
 
-    // NOU: Functie pentru a trimite motivul de respingere si a finaliza actiunea
     const submitDeclineReason = async (reason: string) => {
         if (!currentRequestIdForDecline) return;
 
@@ -165,7 +161,6 @@ const OwnerRequests: React.FC = () => {
         } catch (err: any) {
             console.error("Eroare la respingerea cererii:", err);
             setDeclineSubmitError(err.response?.data?.message || "Nu s-a putut respinge cererea.");
-            // Nu inchidem popup-ul la eroare, pentru ca utilizatorul sa poata reincerca sau corecta
         } finally {
             setIsSubmittingDecline(false);
         }

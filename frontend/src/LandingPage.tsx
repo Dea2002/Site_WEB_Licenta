@@ -8,17 +8,15 @@ const LandingPage: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Navigam catre pagina Home si trecem parametrul de query "location"
         navigate(`/home?location=${encodeURIComponent(search)}`);
     };
 
-    // Handler pentru butonul "Lista cu apartamentele" (navigheaza fara filtre)
     const handleListAll = () => {
         navigate("/home");
     };
 
     const handleLoginRedirect = () => {
-        navigate("/login"); // Navigate to your login route
+        navigate("/login");
     };
 
     return (
@@ -49,7 +47,6 @@ const LandingPage: React.FC = () => {
                     </h1>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    {/* <label htmlFor="location">Cauta dupa locatie:</label> */}
                     <div className="search-container">
                         <input
                             type="text"

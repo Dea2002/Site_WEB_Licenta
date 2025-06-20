@@ -51,7 +51,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 return res.status(404).json({ message: 'Utilizatorul nu a fost gasit.' });
             }
 
-            // detalii despre apartament
             const apartment = await apartmentsCollection.findOne({
                 _id: currentRent.apartament
             }, {
@@ -65,7 +64,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 }
             });
 
-            // trimite raspunsul
             return res.json({
                 _id: currentRent._id,
                 apartment: apartment || null,
@@ -93,44 +91,36 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
 
     router.patch('/edit_profile', authenticateToken, async (req, res) => {
         try {
-            const userId = req.user._id; // id-ul utilizatorului din token
+            const userId = req.user._id;
             const markEdited = req.body.markEdited;
             const updates = { ...req.body };
             const allowed = ['phoneNumber', 'numar_matricol', 'anUniversitar', 'medie'];
             const setFields = {};
 
-            // get facultyId from the req.user.faculty name
             const facultyName = req.user.faculty;
             const faculty = await facultiesCollection.findOne({ fullName: facultyName });
 
-            // hash parola daca a fost trimisa
             if (updates.password) {
                 const salt = await bcrypt.genSalt(10);
                 setFields.password = await bcrypt.hash(updates.password, salt);
             }
 
-            // copiaza campurile permise
             allowed.forEach((field) => {
                 if (updates[field] !== undefined) {
                     setFields[field] = updates[field];
                 }
             });
 
-            // ruleaza actualizarea
             await usersCollection.updateOne(
                 { _id: new ObjectId(userId) },
                 { $set: setFields }
             );
-            // recupereaza documentul actualizat
             const updated = await usersCollection.findOne({ _id: new ObjectId(userId) });
-            // creeaza un nou token pe baza datelor relevante
             const newToken = jwt.sign(updated, process.env.ACCESS_SECRET, { expiresIn: '1h' });
 
-            // send notification to faculty about the new grade
             if (markEdited == true) {
                 notificationService.createNotification(message = `Studentul ${req.user.fullName} doreste sa isi actualizeze media la ${updates['medie']}.`, receiver = faculty._id);
 
-                // cererea de actualizare a mediei
                 const newMarkRequest = {
                     numeStudent: req.user.fullName,
                     studentId: req.user._id,
@@ -147,7 +137,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 }
             }
 
-            // trimite tokenul nou
             return res.json({
                 message: 'Profil actualizat cu succes',
                 token: newToken
@@ -165,12 +154,9 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         const studentObjectId = new ObjectId(req.user._id); // Presupunem ca e deja ObjectId
 
         try {
-
-            // Anuleaza (sau sterge) toate cererile pending ale acestui student
-            // Aici, le actualizam statusul. Poti alege sa le stergi cu deleteMany.
             const result = await reservationRequestsCollection.deleteMany(
                 {
-                    client: studentObjectId, // Sau 'userId', depinde de schema ta
+                    client: studentObjectId,
                 }
             );
 
@@ -192,37 +178,28 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         const studentObjectId = new ObjectId(req.user._id);
 
         try {
-
-            // modificarea campului senderId in mesaje
             await messagesCollection.updateMany(
                 { senderId: studentObjectId },
                 { $set: { senderId: "utilizator Sters" } })
 
-            // stergerea cererilor de asociere
             await associationsRequestsCollection.deleteMany({ studentId: studentObjectId });
 
-            // stergerea cererilor de actualizare a mediei
             await markRequestsCollection.deleteMany({ studentId: studentObjectId });
-            // stergerea notificarilor pentru student
             await notificationService.deleteNotificationsByReceiver(studentObjectId);
 
-            // setarea pe inactiv a chiriilor active
             await reservationHistoryCollection.updateMany(
                 { client: studentObjectId, isActive: true },
                 { $set: { isActive: false } },
                 { $unset: { client: "", clientData: null } }
             );
 
-            // schimbarea numelui studentului in "utilizator Sters" in toate recenziile
             await reviewsCollection.updateMany(
                 { userId: studentObjectId },
-                { $set: { userId: "utilizator Sters", userName: "Utilizator sters" } } // $unset sterge campul userId
+                { $set: { userId: "utilizator Sters", userName: "Utilizator sters" } }
             );
 
-            // Sterge contul studentului
             await usersCollection.deleteOne({ _id: studentObjectId });
 
-            // Clientul va gestiona logout-ul si redirect-ul
             res.status(200).json({ message: "Contul studentului a fost sters cu succes." });
         } catch (err) {
             console.error("Eroare la stergerea contului studentului:", err);
@@ -235,7 +212,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
         const userId = req.user._id;
 
         try {
-            // Verifica daca cererea apartine utilizatorului
             const request = await reservationRequestsCollection.findOne({
                 _id: new ObjectId(requestId),
                 client: new ObjectId(userId)
@@ -245,7 +221,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                 return res.status(404).json({ message: 'Cererea nu a fost gasita sau nu apartine utilizatorului.' });
             }
 
-            // Sterge cererea
             await reservationRequestsCollection.deleteOne({ _id: new ObjectId(requestId) });
 
             return res.json({ message: 'Cererea a fost stearsa cu succes.' });
@@ -308,8 +283,7 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
 
 
             const history = await Promise.all(past.map(async r => {
-                let apartmentLocation = 'Apartament șters';
-                // Verifica daca `r.apartament` este un ObjectId valid inainte de a cauta
+                let apartmentLocation = 'Apartament sters';
                 if (r.apartament && ObjectId.isValid(r.apartament)) {
                     const apt = await apartmentsCollection.findOne(
                         { _id: new ObjectId(r.apartament) },
@@ -319,7 +293,6 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
                         apartmentLocation = apt.location;
                     }
                 } else if (typeof r.apartament === 'string') {
-                    // Cazul in care e deja setat "apartament sters"
                     apartmentLocation = r.apartament;
                 }
 
@@ -539,18 +512,13 @@ function createUserRoutes(usersCollection, notificationService, markRequestsColl
     });
 
 
-    // DELETE /owners/account/delete
     router.delete('/owner_account/delete', authenticateToken, async (req, res) => {
-        if (!req.user || !req.user._id /* || req.user.role !== 'owner' */) {
+        if (!req.user || !req.user._id) {
             console.error("Utilizatorul nu este autentificat sau nu are ID valid.");
             return res.status(401).json({ message: "Autentificare necesara ca proprietar." });
         }
         const ownerObjectId = new ObjectId(req.user._id);
         try {
-
-            // Sau: const ownersCollection = getDB().collection('owners');
-
-            // Se presupune ca actiunile pregatitoare (stergerea apartamentelor etc.) au fost deja facute
             const result = await usersCollection.deleteOne({ _id: ownerObjectId });
             if (result.deletedCount === 0) {
                 return res.status(404).json({ message: "Contul proprietarului nu a fost gasit." });

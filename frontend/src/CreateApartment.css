@@ -1,57 +1,46 @@
-/* General page styling */
 body {
     margin: 0;
     font-family: sans-serif;
-    background-color: #f4f7f6; /* Light background for contrast */
+    background-color: #f4f7f6;
 }
 
-/* Container to manage overall page layout if needed */
-/* .page-container { */
-/* If Bara_nav_OwnerDashboard has a fixed height, you might need padding-top here */
-/* padding-top: 60px; /* Example if navbar is 60px high */
-/* } */
-
-/* Centering container for the form card */
 .form-card-container {
     display: flex;
-    flex-direction: column; /* Stack title, form, message */
-    align-items: center; /* Center items horizontally */
-    justify-content: center; /* Center vertically */
-    min-height: calc(100vh - 80px); /* Adjust 80px based on potential navbar height */
-    padding: 20px; /* Add some padding around the card */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+    padding: 20px;
     box-sizing: border-box;
 }
 
-/* The main form card */
 .list-apartment-form {
     background-color: #ffffff;
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 700px; /* Max width of the form card */
-    box-sizing: border-box; /* Include padding in width calculation */
-    margin-top: 20px; /* Space below the title */
-    margin-bottom: 20px; /* Space above the back button */
+    max-width: 700px;
+    box-sizing: border-box;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-/* Form Title */
 .form-card-container h1 {
     color: #fac67a;
-    margin-bottom: 15px; /* Space below title */
+    margin-bottom: 15px;
     text-align: center;
     font-size: 1.8em;
     font-weight: 600;
 }
 
-/* Form Section Titles (e.g., Utilitati, Facilitati) */
 .form-section-title {
     margin-top: 35px;
     margin-bottom: 25px;
     padding-bottom: 8px;
-    /* Change this line */
-    border-bottom: 2px solid #bbb; /* <<< CHANGED color to a medium-dark grey */
-    /* Previously was: border-bottom: 2px solid #eef2f7; */
+
+    border-bottom: 2px solid #bbb;
+
     color: #34495e;
     font-size: 1.4em;
     font-weight: 500;
@@ -61,90 +50,81 @@ body {
     margin-top: 0;
     margin-bottom: 25px;
     padding-bottom: 10px;
-    /* Change this line for consistency and visibility */
-    border-bottom: 2px solid #bbb; /* <<< CHANGED color and thickness */
-    /* Previously was: border-bottom: 1px solid #eee; */
+
+    border-bottom: 2px solid #bbb;
+
     font-size: 1.3em;
     color: #444;
 }
 
-/* Styling for each form group */
 .form-group {
-    margin-bottom: 20px; /* Space between form fields */
+    margin-bottom: 20px;
     display: flex;
-    flex-direction: column; /* Label above input */
+    flex-direction: column;
 }
 
-/* Styling for labels */
 .form-group label {
-    display: block; /* Ensure it takes its own line */
-    margin-bottom: 8px; /* Space between label and input */
+    display: block;
+    margin-bottom: 8px;
     color: #444;
     font-weight: 600;
     font-size: 0.95em;
 }
 
-/* General styling for text, number, email, password inputs */
 .form-group input[type="text"],
-  .form-group input[type="number"],
-  .form-group input[type="email"],
-  .form-group input[type="password"],
-  .form-group input[type="file"], /* Added file input */
-  .form-group select {
-    /* If you add select elements */
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="file"],
+.form-group select {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    box-sizing: border-box; /* Important for width calculation */
+    box-sizing: border-box;
     font-size: 1em;
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-/* Style inputs on focus */
 .form-group input[type="text"]:focus,
 .form-group input[type="number"]:focus,
 .form-group input[type="email"]:focus,
 .form-group input[type="password"]:focus,
 .form-group input[type="file"]:focus,
 .form-group select:focus {
-    border-color: #deaa79; /* Highlight color on focus */
+    border-color: #deaa79;
     box-shadow: 0 0 0 3px #fac67a;
-    outline: none; /* Remove default outline */
+    outline: none;
 }
 
-/* Specific styling for checkbox groups */
 .form-group-checkbox-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
-    gap: 15px; /* Spacing between checkboxes */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
     margin-bottom: 20px;
 }
 
-/* Individual checkbox + label alignment */
 .form-group-checkbox {
     display: flex;
-    flex-direction: row; /* Align checkbox and label horizontally */
-    align-items: center; /* Vertically center checkbox and label */
-    margin-bottom: 0; /* Remove default bottom margin */
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 0;
 }
 
 .form-group-checkbox input[type="checkbox"] {
-    width: auto; /* Override default input width */
-    /* Optional: Custom checkbox appearance */
-    accent-color: #fac67a; /* Modern way to color checkboxes */
+    width: auto;
+    accent-color: #fac67a;
     width: 18px;
     height: 18px;
     cursor: pointer;
 }
 
 .form-group-checkbox label {
-    margin-bottom: 0; /* Remove label bottom margin */
-    font-weight: 500; /* Slightly lighter weight for checkbox labels */
+    margin-bottom: 0;
+    font-weight: 500;
     cursor: pointer;
 }
 
-/* Styling for the submit button */
 .submit-apartment {
     width: 100%;
     padding: 12px 20px;
@@ -170,30 +150,28 @@ body {
     transform: translateY(0);
 }
 
-/* Styling for the back button */
 .back-button {
-    width: auto; /* Don't make it full width */
+    width: auto;
     padding: 10px 20px;
-    background-color: #6c757d; /* Grey color */
+    background-color: #6c757d;
     color: white;
     border: none;
     border-radius: 6px;
     font-size: 1em;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    margin-top: 15px; /* Space below the form */
+    margin-top: 15px;
 }
 
 .back-button:hover {
-    background-color: #5a6268; /* Darker grey on hover */
+    background-color: #5a6268;
 }
 
-/* Message Styling */
 .message {
     width: 100%;
-    max-width: 700px; /* Match form max-width */
+    max-width: 700px;
     padding: 12px 15px;
-    margin-bottom: 20px; /* Space below message */
+    margin-bottom: 20px;
     border-radius: 6px;
     text-align: center;
     font-weight: 500;
@@ -201,27 +179,26 @@ body {
 }
 
 .message-success {
-    background-color: #d4edda; /* Light green */
-    color: #155724; /* Dark green */
+    background-color: #d4edda;
+    color: #155724;
     border: 1px solid #c3e6cb;
 }
 
 .message-error {
-    background-color: #f8d7da; /* Light red */
-    color: #721c24; /* Dark red */
+    background-color: #f8d7da;
+    color: #721c24;
     border: 1px solid #f5c6cb;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .form-card-container {
         padding: 15px;
-        min-height: auto; /* Allow content to determine height on small screens */
+        min-height: auto;
     }
 
     .list-apartment-form {
         padding: 20px 25px;
-        max-width: 95%; /* Allow slightly more width */
+        max-width: 95%;
     }
 
     .form-card-container h1 {
@@ -256,18 +233,16 @@ body {
         font-size: 0.95em;
     }
 
-    /* Adjust checkbox grid for smaller screens if needed */
     .form-group-checkbox-grid {
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Smaller minimum width */
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
         gap: 10px;
     }
 }
 
-/* Stiluri pentru containerul sectiunii Costuri Utilitati Estimative */
 .utility-cost-box {
-    border: 1px solid #ccc; /* margine subtire */
-    padding: 20px; /* spatiu interior */
-    border-radius: 8px; /* colturi rotunjite */
-    background-color: #fafafa; /* fundal usor diferit */
-    margin-bottom: 30px; /* spatiu sub sectiune */
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fafafa;
+    margin-bottom: 30px;
 }

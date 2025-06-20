@@ -3,8 +3,6 @@ import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./FacultyAssociations.css";
 
-
-
 interface DeclinePopupProps {
     isOpen: boolean;
     onClose: () => void;
@@ -81,7 +79,6 @@ const FacultyAssociations: React.FC = () => {
     const [isSubmittingDecline, setIsSubmittingDecline] = useState<boolean>(false);
     const [declineSubmitError, setDeclineSubmitError] = useState<string | null>(null);
 
-    // Functie pentru a formata data (optional)
     const formatDate = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleDateString("ro-RO", {
@@ -92,7 +89,6 @@ const FacultyAssociations: React.FC = () => {
         }
     };
 
-    // functie pentru a face fetch la cereri
     const fetchAssociationRequests = async () => {
         if (!token || !faculty?._id) {
             setError("Utilizator neautentificat sau date lipsa.");
@@ -135,7 +131,7 @@ const FacultyAssociations: React.FC = () => {
 
     const handleDeclineClick = (id: string) => {
         setCurrentRequestIdForDecline(id);
-        setDeclineSubmitError(null); // Reseteaza eroarea anterioara
+        setDeclineSubmitError(null);
         setShowDeclinePopup(true);
     };
 
@@ -209,7 +205,7 @@ const FacultyAssociations: React.FC = () => {
                         onClose={() => {
                             setShowDeclinePopup(false);
                             setCurrentRequestIdForDecline(null);
-                            setDeclineSubmitError(null); // Sterge eroarea la inchiderea manuala
+                            setDeclineSubmitError(null);
                         }}
                         onSubmit={submitDeclineReason}
                         requestId={currentRequestIdForDecline}

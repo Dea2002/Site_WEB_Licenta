@@ -20,7 +20,7 @@ const OwnerApartmentDetails: React.FC = () => {
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState<Record<string, boolean>>({}); // Pentru stari de salvare per sectiune
+    const [isSaving, setIsSaving] = useState<Record<string, boolean>>({});
 
     // stari pentru pretul principal
     const [editableMainPrice, setEditableMainPrice] = useState<string>("");
@@ -44,7 +44,7 @@ const OwnerApartmentDetails: React.FC = () => {
     const [editableWaterPrice, setEditableWaterPrice] = useState<string>("");
     const [editableGasPrice, setEditableGasPrice] = useState<string>("");
     const [editableElectricityPrice, setEditableElectricityPrice] = useState<string>("");
-    const [isEditingUtilityPrices, setIsEditingUtilityPrices] = useState<boolean>(false); // O singura stare pentru a deschide sectiunea de editare utilitati
+    const [isEditingUtilityPrices, setIsEditingUtilityPrices] = useState<boolean>(false);
 
 
     // stari pentru an renovare
@@ -68,9 +68,9 @@ const OwnerApartmentDetails: React.FC = () => {
 
     const parseNumericField = (value: any): string => {
         if (value === null || value === undefined || value === "") return "";
-        const num = Number(value); // incearca sa convertesti la numar
-        if (isNaN(num)) return String(value); // Daca nu e numar valid, returneaza stringul original
-        return String(num); // Returneaza ca string pentru input
+        const num = Number(value);
+        if (isNaN(num)) return String(value);
+        return String(num);
     };
 
     const parseFloatOrNull = (value: string): number | null => {
@@ -112,7 +112,6 @@ const OwnerApartmentDetails: React.FC = () => {
                 setEditableDiscount3("");
             }
 
-            // Initializare facilitati bazate pe obiectul aptData.facilities
             const initialFacilitiesLabels: string[] = [];
             if (aptData.facilities) { // Verifica daca obiectul facilities exista
                 ALL_POSSIBLE_FACILITIES_MAP.forEach(facilityMapItem => {
@@ -123,14 +122,14 @@ const OwnerApartmentDetails: React.FC = () => {
             }
             setSelectedFacilities(initialFacilitiesLabels);
 
-            if (aptData.utilities) { // Verifica daca utilities exista
+            if (aptData.utilities) {
                 setEditableInternetPrice(parseNumericField(aptData.utilities.internetPrice));
                 setEditableTVPrice(parseNumericField(aptData.utilities.TVPrice));
                 setEditableWaterPrice(parseNumericField(aptData.utilities.waterPrice));
                 setEditableGasPrice(parseNumericField(aptData.utilities.gasPrice));
                 setEditableElectricityPrice(parseNumericField(aptData.utilities.electricityPrice));
             } else {
-                // Seteaza valori default daca utilities lipseste
+
                 setEditableInternetPrice("");
                 setEditableTVPrice("");
                 setEditableWaterPrice("");
@@ -183,7 +182,7 @@ const OwnerApartmentDetails: React.FC = () => {
         if (!currentApartmentId || !token) return;
 
         try {
-            const response = await api.post( // Ajusteaza tipul raspunsului
+            const response = await api.post(
                 `/conversations/apartment/${currentApartmentId}?includeOwner=true`,
             );
 
@@ -192,7 +191,6 @@ const OwnerApartmentDetails: React.FC = () => {
         } catch (err: any) {
             console.error("Eroare la preluarea ID-ului conversatiei:", err);
             if (err.response && err.response.status === 404) {
-                // Poate ca e normal ca un apartament sa nu aiba inca o conversatie
                 setConversationId(null);
             } else {
                 console.error(err.response?.data?.message || "Nu s-a putut incarca ID-ul conversatiei.");
@@ -205,18 +203,12 @@ const OwnerApartmentDetails: React.FC = () => {
         setLoadingReviews(true);
         setReviewError(null);
         try {
-            // Presupunem ca vrem toate review-urile pentru afisare, deci un limit mare
-            // Daca API-ul returneaza un obiect cu paginare, tipul este PaginatedResponse<Review>
-            // Daca API-ul returneaza direct un array, tipul este Review[]
             const response = await api.get<PaginatedResponse<Review>>(`/reviews/apartment/${apartmentId}?sort=createdAt_desc&limit=1000`, {
-                // Proprietarul nu are nevoie de token pentru a vedea review-urile,
-                // dar daca ruta e protejata, adauga header-ul:
-                // headers: { Authorization: `Bearer ${token}` }
             });
             if (response.data && Array.isArray(response.data.reviews)) {
                 setReviews(response.data.reviews);
-            } else if (Array.isArray(response.data)) { // Fallback daca API-ul returneaza direct array
-                setReviews(response.data as any); // 'as any' e un mic hack aici, ideal ar fi tipare mai stricta
+            } else if (Array.isArray(response.data)) {
+                setReviews(response.data as any);
             }
             else {
                 console.warn("Format neasteptat pentru review-uri de la API in OwnerApartmentDetails:", response.data);
@@ -246,16 +238,13 @@ const OwnerApartmentDetails: React.FC = () => {
 
     const handleReviewDeleted = (deletedReviewId: string) => {
         setReviews(prevReviews => prevReviews.filter(review => review._id !== deletedReviewId));
-        // Re-fetch apartment data pentru a actualiza averageRating si numberOfReviews
-        // Daca backend-ul actualizeaza automat aceste campuri la stergerea unui review.
         fetchApartmentData();
     };
 
-    // --- GENERIC SAVE FUNCTION ---
     const handleSaveSection = async (
-        fieldsToUpdate: Partial<Apartment>, // Permite actualizarea mai multor campuri odata
+        fieldsToUpdate: Partial<Apartment>,
         sectionKey: string,
-        editModeSetter?: React.Dispatch<React.SetStateAction<boolean>> // editModeSetter devine optional
+        editModeSetter?: React.Dispatch<React.SetStateAction<boolean>>
     ) => {
         if (!apartment) return;
         setIsSaving(prev => ({ ...prev, [sectionKey]: true }));
@@ -266,9 +255,8 @@ const OwnerApartmentDetails: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const newAptData = response.data;
-            setApartment(newAptData); // Actualizeaza tot obiectul apartment
+            setApartment(newAptData);
 
-            // Resetam starile editabile pe baza datelor noi primite
             setEditableMainPrice(parseNumericField(newAptData.price));
             setEditableDiscount1(parseNumericField(newAptData.discounts.discount1));
             setEditableDiscount2(parseNumericField(newAptData.discounts.discount2));
@@ -282,7 +270,7 @@ const OwnerApartmentDetails: React.FC = () => {
                     }
                 });
             }
-            setSelectedFacilities(updatedFacilitiesLabels); // Updated selected facilities based on response
+            setSelectedFacilities(updatedFacilitiesLabels);
             setEditableInternetPrice(parseNumericField(newAptData.utilities.internetPrice));
             setEditableTVPrice(parseNumericField(newAptData.utilities.TVPrice));
             setEditableWaterPrice(parseNumericField(newAptData.utilities.waterPrice));
@@ -313,7 +301,6 @@ const OwnerApartmentDetails: React.FC = () => {
         setError(null);
     };
 
-    // pret principal
     const resetMainPrice = () => apartment && setEditableMainPrice(parseNumericField(apartment.price));
     const saveMainPrice = () => {
         if (editableMainPrice !== "" && (isNaN(parseFloat(editableMainPrice)) || parseFloat(editableMainPrice) < 0)) {
@@ -346,14 +333,13 @@ const OwnerApartmentDetails: React.FC = () => {
         }
 
         const discountsPayload: Apartment['discounts'] = {
-            discount1: d1 as number, // Backend-ul ar trebui sa accepte null sau numar
+            discount1: d1 as number,
             discount2: d2 as number,
             discount3: d3 as number,
         };
         handleSaveSection({ discounts: discountsPayload }, 'Discounturi', setIsEditingDiscounts);
     }
 
-    // --- IMAGES ---
     const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const filesArray = Array.from(e.target.files);
@@ -367,16 +353,13 @@ const OwnerApartmentDetails: React.FC = () => {
         setImageFiles(prev => prev.filter((_, i) => i !== index));
         setImagePreviews(prev => {
             const newPreviews = prev.filter((_, i) => i !== index);
-            newPreviews.forEach(url => { if (imagePreviews.includes(url)) URL.revokeObjectURL(url) }); // Clean up old preview
+            newPreviews.forEach(url => { if (imagePreviews.includes(url)) URL.revokeObjectURL(url) });
             return newPreviews;
         });
     };
 
     const uploadSingleFileToFirebase = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
-            // Creeaza o cale unica pentru fiecare imagine, poate include si ID-ul apartamentului daca e disponibil
-            // si daca vrei sa organizezi fisierele pe apartament.
-            // Pentru moment, folosim o cale simpla cu timestamp.
             const filePath = `apartments/${Date.now()}_${file.name}`;
             const storageRef = ref(storage, filePath);
             const uploadTask = uploadBytesResumable(storageRef, file);
@@ -385,7 +368,6 @@ const OwnerApartmentDetails: React.FC = () => {
                 "state_changed",
                 () => { },
                 (error) => {
-                    // Gestioneaza erorile de upload Firebase aici
                     console.error("Eroare Firebase la upload fisier:", error);
                     switch (error.code) {
                         case 'storage/unauthorized':
@@ -401,7 +383,6 @@ const OwnerApartmentDetails: React.FC = () => {
                     }
                 },
                 async () => {
-                    // Upload-ul s-a finalizat cu succes
                     try {
                         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                         resolve(downloadURL);
@@ -426,30 +407,21 @@ const OwnerApartmentDetails: React.FC = () => {
         let newImageUrls: string[] = [];
 
         try {
-            // Pasul 1: incarca toate fisierele selectate in Firebase Storage
-            // si colecteaza URL-urile lor.
-            // `Promise.all` asteapta ca toate promisiunile de upload sa se rezolve.
             const uploadPromises = imageFiles.map(file => uploadSingleFileToFirebase(file));
             newImageUrls = await Promise.all(uploadPromises);
 
             if (newImageUrls.length === 0) {
-                // Acest caz nu ar trebui sa se intample daca imageFiles avea elemente
-                // si nu au fost erori la upload-ul individual.
                 throw new Error("Niciun URL de imagine nu a fost generat.");
             }
 
-            // Pasul 2: Trimite URL-urile noi catre backend pentru a fi adaugate in MongoDB.
-            // Backend-ul ar trebui sa combine aceste URL-uri noi cu cele existente.
-            // Presupunem un endpoint PUT care accepta un array de URL-uri noi.
             const response = await api.put<Apartment>(
-                `/apartments/${apartment._id}/add-images`, // Endpoint nou sau ajusteaza cel existent
-                { newImageUrlsToAdd: newImageUrls }, // Trimitem array-ul de URL-uri
+                `/apartments/${apartment._id}/add-images`,
+                { newImageUrlsToAdd: newImageUrls },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            setApartment(response.data); // Backend-ul returneaza apartamentul actualizat
+            setApartment(response.data);
 
-            // Curata starea fisierelor si preview-urilor locale
             imagePreviews.forEach(url => URL.revokeObjectURL(url));
             setImageFiles([]);
             setImagePreviews([]);
@@ -458,27 +430,18 @@ const OwnerApartmentDetails: React.FC = () => {
 
         } catch (err: any) {
             console.error("Eroare in procesul de incarcare a imaginilor:", err);
-            // Daca eroarea vine de la backend (are `err.response`)
             if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);
             }
-            // Daca eroarea vine de la `uploadSingleFileToFirebase` (este deja un Error object)
             else if (err instanceof Error) {
                 setError(err.message);
             }
-            // Fallback
             else {
                 setError("Eroare la incarcarea imaginilor. Va rugam incercati din nou.");
             }
 
-            // IMPORTANT: Daca unele imagini s-au incarcat in Firebase dar request-ul la backend a esuat,
-            // acele imagini vor ramane in Firebase Storage fara a fi referentiate in MongoDB.
-            // Ai putea adauga o logica de cleanup aici, desi e complexa.
-            // De ex., ai putea incerca sa stergi `newImageUrls` din Firebase daca pasul 2 esueaza.
-            // Sau sa ai un sistem de curatare a fisierelor orfane.
-            if (newImageUrls.length > 0 && err.response) { // Daca avem URL-uri dar backend-ul a esuat
+            if (newImageUrls.length > 0 && err.response) {
                 console.warn("Imagini incarcate in Firebase, dar eroare la salvarea referintelor in DB:", newImageUrls);
-                // Aici ai putea implementa o logica de rollback/stergere din Firebase
             }
 
         } finally {
@@ -489,39 +452,28 @@ const OwnerApartmentDetails: React.FC = () => {
     const deleteExistingImage = async (imageUrl: string) => {
         if (!apartment || !window.confirm("Sigur doriti sa stergeti aceasta imagine si din spatiul de stocare? Aceasta actiune este ireversibila.")) return;
 
-        // Seteaza o cheie de salvare specifica pentru aceasta operatiune
         const savingKey = `deleteImage_${imageUrl}`;
         setIsSaving(prev => ({ ...prev, [savingKey]: true }));
         setError(null);
 
         try {
 
-            // --- Pasul 1: sterge din Firebase Storage (Client-side) ---
-            // Extrage referinta la fisier din URL.
-            // Firebase Storage URL-urile pot fi parsate direct de functia ref.
-            const imageRef = ref(storage, imageUrl); // imageUrl ar trebui sa fie URL-ul complet gs:// sau https://
+            const imageRef = ref(storage, imageUrl);
 
             await deleteObject(imageRef);
-            // Noul endpoint pe backend: DELETE /api/apartments/:apartmentId/images
-            // Trimitem URL-ul imaginii in corpul request-ului sau ca query param
-            // Aici folosim corpul request-ului
-            const response = await api.put<{ apartment: Apartment }>( // Sau un endpoint DELETE dedicat
-                `/apartments/${apartment._id}/remove-image-reference`, // Endpoint nou/ajustat
-                { imageUrlToDelete: imageUrl }, // Trimitem URL-ul in corpul request-ului
+            const response = await api.put<{ apartment: Apartment }>(
+                `/apartments/${apartment._id}/remove-image-reference`,
+                { imageUrlToDelete: imageUrl },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            setApartment(response.data.apartment); // Presupunand ca backend-ul returneaza apartamentul actualizat
+            setApartment(response.data.apartment);
             alert("Imaginea a fost stearsa cu succes!");
 
         } catch (error: any) {
             console.error("Eroare la stergerea imaginii:", error);
             if (error.code === 'storage/object-not-found') {
-                // Daca fisierul nu a fost gasit in Storage, s-ar putea sa vrem totusi
-                // sa incercam sa stergem referinta din DB.
                 console.warn("Imaginea nu a fost gasita in Firebase Storage, se incearca stergerea referintei din DB.");
-                // Poti re-incerca doar pasul 2 aici sau sa gestionezi altfel.
-                // Pentru simplitate, vom afisa o eroare generala.
                 setError("Imaginea nu a fost gasita in spatiul de stocare, dar referinta ar putea fi inca in baza de date.");
             } else {
                 setError(error.response?.data?.message || error.message || "Nu s-a putut sterge imaginea.");
@@ -531,16 +483,15 @@ const OwnerApartmentDetails: React.FC = () => {
         }
     };
 
-    useEffect(() => { // Cleanup pentru previews la unmount
+    useEffect(() => {
         return () => {
             imagePreviews.forEach(url => URL.revokeObjectURL(url));
         };
     }, [imagePreviews]);
 
-    // --- FACILITIES ---
     const resetFacilities = () => {
-        if (!apartment || !apartment.facilities) { // Verifica si apartment.facilities
-            setSelectedFacilities([]); // Sau o alta valoare default
+        if (!apartment || !apartment.facilities) {
+            setSelectedFacilities([]);
             return;
         }
         const initialFacilitiesLabels: string[] = [];
@@ -559,20 +510,15 @@ const OwnerApartmentDetails: React.FC = () => {
     };
 
     const saveFacilities = () => {
-        // Construieste obiectul `facilities` pentru payload
-        const facilitiesPayload: Partial<Apartment['facilities']> = {}; // Folosim Partial pentru a nu fi obligati sa trimitem toate cheile
+        const facilitiesPayload: Partial<Apartment['facilities']> = {};
 
         ALL_POSSIBLE_FACILITIES_MAP.forEach(facilityMapItem => {
-            // Setam cheia pe true daca eticheta corespunzatoare este in selectedFacilities (cele bifate)
-            // Altfel, o setam pe false (cele nebifate)
             facilitiesPayload[facilityMapItem.key] = selectedFacilities.includes(facilityMapItem.label);
         });
 
-        // Trimitem doar obiectul facilities
         handleSaveSection({ facilities: facilitiesPayload as Apartment['facilities'] }, 'Facilitati', setIsEditingFacilities);
     };
 
-    // --- UTILITY PRICES ---
     const resetUtilityPrices = () => {
         if (apartment && apartment.utilities) {
             setEditableInternetPrice(parseNumericField(apartment.utilities.internetPrice));
@@ -593,9 +539,8 @@ const OwnerApartmentDetails: React.FC = () => {
         const gasP = parseFloatOrNull(editableGasPrice);
         const electricityP = parseFloatOrNull(editableElectricityPrice);
 
-        // Adauga validari daca e necesar (ex: preturi pozitive)
         const utilitiesPayload: Apartment['utilities'] = {
-            internetPrice: internetP as number, // Backend-ul sa accepte null sau numar
+            internetPrice: internetP as number,
             TVPrice: tvP as number,
             waterPrice: waterP as number,
             gasPrice: gasP as number,
@@ -604,7 +549,6 @@ const OwnerApartmentDetails: React.FC = () => {
         handleSaveSection({ utilities: utilitiesPayload }, 'Preturi Utilitati', setIsEditingUtilityPrices);
     };
 
-    // --- RENOVATION YEAR ---
     const resetRenovationYear = () => apartment && setEditableRenovationYear(parseNumericField(apartment.renovationYear));
     const saveRenovationYear = () => {
         const yearValue = parseIntOrNull(editableRenovationYear);
@@ -614,18 +558,16 @@ const OwnerApartmentDetails: React.FC = () => {
         handleSaveSection({ renovationYear: yearValue as number }, 'An Renovare', setIsEditingRenovationYear);
     }
 
-    // --- RENTALS ACTIONS ---
     const handleCancelRental = async (rentalId: string) => {
         if (!window.confirm("Sunteti sigur ca doriti sa anulati aceasta chirie?")) return;
         setIsSaving(prev => ({ ...prev, cancelRental: true }));
         try {
-            // Presupunem un endpoint PATCH pentru anulare
             await api.patch(`/rentals/${rentalId}/cancel-by-owner`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("Chiria a fost anulata.");
-            fetchCurrentRentals(); // Reincarca lista de chirii actuale
-            fetchRentalHistory(rentalHistoryPage); // Reincarca si istoricul
+            fetchCurrentRentals();
+            fetchRentalHistory(rentalHistoryPage);
         } catch (err: any) {
             console.error("Eroare la anularea chiriei:", err);
             setError(err.response?.data?.message || "Nu s-a putut anula chiria.");
@@ -634,7 +576,6 @@ const OwnerApartmentDetails: React.FC = () => {
         }
     };
 
-    // --- DELETE APARTMENT ---
     const handleDeleteApartment = async () => {
         if (!apartment || !window.confirm("ATENtIE! Sigur doriti sa stergeti definitiv acest apartament si toate datele asociate (chirii, etc.)? Aceasta actiune este ireversibila!")) return;
         setIsSaving(prev => ({ ...prev, deleteApartment: true }));
@@ -656,7 +597,6 @@ const OwnerApartmentDetails: React.FC = () => {
     };
 
 
-    // --- RENDER LOGIC ---
     if (loading && !apartment) return <div className="owner-apartment-details-container"><p>Se incarca detaliile...</p></div>;
     if (!apartment) return <div className="owner-apartment-details-container"><p className="error-message">{error || "Apartamentul nu a fost gasit."}</p></div>;
 
@@ -667,7 +607,7 @@ const OwnerApartmentDetails: React.FC = () => {
             </button>
             {conversationId && (
                 <button
-                    onClick={() => navigate(`/chat/${conversationId}`)} // Exemplu de navigare
+                    onClick={() => navigate(`/chat/${conversationId}`)}
                     className="general-button"
                 >
                     Vezi Conversatia
@@ -676,7 +616,6 @@ const OwnerApartmentDetails: React.FC = () => {
             <h1>Editare Apartament: {apartment.location}</h1>
             {error && <p className="error-message global-error-details">{error}</p>}
 
-            {/* --- General Info (Non-editable here, except price) --- */}
             <section className="details-section">
                 <h2>Informatii Generale</h2>
                 <p><strong>Locatie:</strong> {apartment.location || "N/A"}</p>
@@ -687,7 +626,6 @@ const OwnerApartmentDetails: React.FC = () => {
                 <p><strong>An constructie:</strong> {apartment.constructionYear || "N/A"}</p>
             </section>
 
-            {/* --- Discounts Section --- */}
             <section className="details-section">
                 <h2>Preturi si discounturi</h2>
                 <div className="editable-field">
@@ -741,7 +679,6 @@ const OwnerApartmentDetails: React.FC = () => {
 
             </section >
 
-            {/* --- Images Section --- */}
             < section className="details-section" >
                 <h2>Imagini</h2>
                 <div className="image-gallery-manage">
@@ -771,24 +708,21 @@ const OwnerApartmentDetails: React.FC = () => {
                 </div>
             </section >
 
-            {/* --- Facilities Section --- */}
             < section className="details-section" >
                 <h2>Facilitati</h2>
                 {
                     isEditingFacilities ? (
                         <div className="edit-mode-form">
                             <div className="facilities-checkbox-grid">
-                                {ALL_POSSIBLE_FACILITIES_MAP.map(facilityMapItem => ( // Iteram peste MAP
+                                {ALL_POSSIBLE_FACILITIES_MAP.map(facilityMapItem => (
                                     <label key={facilityMapItem.key} className="facility-checkbox-label">
                                         <input
                                             type="checkbox"
-                                            // Verificam daca `label`-ul este in `selectedFacilities`
                                             checked={selectedFacilities.includes(facilityMapItem.label)}
-                                            // La schimbare, folosim `label`-ul
                                             onChange={() => handleFacilityToggle(facilityMapItem.label)}
                                             disabled={isSaving.Facilitati}
                                         />
-                                        {facilityMapItem.label} {/* Afisam `label`-ul */}
+                                        {facilityMapItem.label}
                                     </label>
                                 ))}
                             </div>
@@ -799,7 +733,6 @@ const OwnerApartmentDetails: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Afisam facilitatile active (cele din selectedFacilities) */}
                             {selectedFacilities.length > 0 ? (
                                 <ul className="facilities-list-display">{selectedFacilities.map(label => <li key={label}>{label}</li>)}</ul>
                             ) : <p>Nicio facilitate selectata.</p>}
@@ -809,7 +742,6 @@ const OwnerApartmentDetails: React.FC = () => {
                 }
             </section >
 
-            {/* --- Utility Prices Section --- */}
             <section className="details-section">
                 <h2>Preturi Utilitati (RON/luna)</h2>
                 {isEditingUtilityPrices ? (
@@ -851,7 +783,6 @@ const OwnerApartmentDetails: React.FC = () => {
                 )}
             </section>
 
-            {/* --- Renovation Year Section --- */}
             < section className="details-section" >
                 <h2>An Renovare</h2>
                 <div className="editable-field">
@@ -870,7 +801,6 @@ const OwnerApartmentDetails: React.FC = () => {
                 </div>
             </section >
 
-            {/* --- Rentals Section --- */}
             < div className="rentals-section-container" >
                 <section className="details-section current-rentals">
                     <h2>Chiriasi Actuali & Urmatori</h2>
@@ -928,20 +858,19 @@ const OwnerApartmentDetails: React.FC = () => {
                 </section>
             </div>
 
-            <section className="details-section reviews-owner-dashboard"> {/* Adauga o clasa specifica daca vrei stilizare diferita */}
+            <section className="details-section reviews-owner-dashboard">
                 <h2>Recenzii Primite ({reviews.length})</h2>
                 {loadingReviews && <p>Se incarca recenziile...</p>}
                 {reviewError && <p className="error-message">{reviewError}</p>}
                 {!loadingReviews && !reviewError && apartmentId && (
                     <ReviewList
                         reviews={reviews}
-                        currentUserId={user?._id || null} // ID-ul proprietarului (pentru eventuala stergere daca e admin)
+                        currentUserId={user?._id || null}
                         onReviewDeleted={handleReviewDeleted}
                     />
                 )}
             </section>
 
-            {/* --- Delete Apartment Section --- */}
             < section className="details-section delete-apartment-section" >
                 <h2>Sterge Listarea Apartamentului</h2>
                 <p className="warning-text">Aceasta actiune este ireversibila si va sterge toate datele asociate cu acest apartament.</p>

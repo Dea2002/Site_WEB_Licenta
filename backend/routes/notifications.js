@@ -7,7 +7,6 @@ const authenticateToken = require('../middleware/authenticateToken');
 function createNotificationsRoutes(notificationsCollection, notificationService) {
 
     router.get('/', authenticateToken, async (req, res) => {
-        // get all notifications for the specified user
         try {
             const userId = req.user._id;
             const docs = await notificationsCollection

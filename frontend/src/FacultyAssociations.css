@@ -21,7 +21,7 @@
 }
 
 .error-message {
-    color: #d9534f; /* Red for errors */
+    color: #d9534f;
     background-color: #f2dede;
     border: 1px solid #ebccd1;
     border-radius: 4px;
@@ -64,15 +64,15 @@
 }
 
 .status-badge.pending {
-    background-color: #f0ad4e; /* Orange */
+    background-color: #f0ad4e;
 }
 
 .status-badge.approved {
-    background-color: #5cb85c; /* Green */
+    background-color: #5cb85c;
 }
 
 .status-badge.rejected {
-    background-color: #d9534f; /* Red */
+    background-color: #d9534f;
 }
 
 .action-buttons button {
@@ -91,29 +91,25 @@
 }
 
 .approve-button {
-    background-color: #5cb85c; /* Green */
+    background-color: #5cb85c;
     color: white;
 }
 .approve-button:hover:not(:disabled) {
     background-color: #4cae4c;
 }
 
-
 .reject-button {
-    background-color: #d9534f; /* Red */
+    background-color: #d9534f;
     color: white;
 }
- .reject-button:hover:not(:disabled) {
+.reject-button:hover:not(:disabled) {
     background-color: #c9302c;
 }
 
-/* Optional: Add styles for different row statuses */
 .requests-list tr.status-approved td {
-    /* background-color: #e9f5e9; */
-    opacity: 0.7; /* Make approved/rejected less prominent */
+    opacity: 0.7;
 }
- .requests-list tr.status-rejected td {
-    /* background-color: #f8eaea; */
-     opacity: 0.7;
-     text-decoration: line-through; /* Example */
+.requests-list tr.status-rejected td {
+    opacity: 0.7;
+    text-decoration: line-through;
 }

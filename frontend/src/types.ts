@@ -1,7 +1,7 @@
 import { User } from "./AuthContext";
 
 export interface Apartment {
-    _id: string; // keep this
+    _id: string;
     numberOfRooms: number;
     numberOfBathrooms: number;
     floorNumber: number;
@@ -66,11 +66,10 @@ export interface Apartment {
 export interface Rental {
     _id: string;
     apartmentId: string;
-    // Am adaptat la ce ai folosit in mapare: rental.clientData.fullName etc.
-    clientData: User; // Sau tenant: TenantInfo daca asa e structura
-    checkIn: string; // Sau startDate
-    checkOut: string; // Sau endDate
-    finalPrice: number; // Sau totalPriceAgreed
+    clientData: User;
+    checkIn: string;
+    checkOut: string;
+    finalPrice: number;
     derivedStatus:
         | "active"
         | "upcoming"
@@ -78,8 +77,7 @@ export interface Rental {
         | "cancelled_by_owner"
         | "cancelled_by_tenant"
         | "pending_approval"
-        | string; // Fa statusul mai flexibil sau defineste toate variantele
-    // Adauga tenant daca e diferit de clientData
+        | string;
     tenant?: {
         _id: string;
         name: string;
@@ -95,8 +93,8 @@ export interface PaginatedRentals {
 }
 
 interface FacilityMap {
-    key: keyof Apartment["facilities"]; // 'wifi' | 'parking' | ...
-    label: string; // "Wi-Fi", "Parcare Gratuita"
+    key: keyof Apartment["facilities"];
+    label: string;
 }
 
 export const ALL_POSSIBLE_FACILITIES_MAP: FacilityMap[] = [
@@ -125,7 +123,7 @@ export const ALL_POSSIBLE_FACILITIES_MAP: FacilityMap[] = [
 
 export interface University {
     _id: string;
-    name: string; // Sau fullName
+    name: string;
     latitude: number;
     longitude: number;
 }
@@ -134,18 +132,18 @@ export interface Review {
     _id: string;
     apartmentId: string;
     userId: string;
-    userName?: string; // Numele utilizatorului, poate fi optional sau populat
+    userName?: string;
     rating: number;
     comment: string;
-    createdAt: string; // Sau Date, daca o convertesti la fetch
-    updatedAt?: string; // Sau Date
+    createdAt: string;
+    updatedAt?: string;
 }
 
 export interface PaginatedResponse<T> {
-    reviews: T[]; // Array-ul de date (in cazul tau, Review[])
+    reviews: T[];
     page: number;
-    pages: number; // Numarul total de pagini
-    totalReviews: number; // Numarul total de elemente care corespund filtrului
+    pages: number;
+    totalReviews: number;
 }
 
 export interface Conversation {
@@ -166,7 +164,6 @@ export interface Message {
     createdAt: string;
 }
 
-// Tipuri specifice pentru raspunsurile API
 export interface InitiateChatResponse {
     conversationId: string;
 }

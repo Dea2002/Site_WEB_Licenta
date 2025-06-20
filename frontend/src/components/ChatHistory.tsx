@@ -26,7 +26,6 @@ const ChatHistory: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [userNames, setUserNames] = useState<Record<string, string>>({});
 
-    // 1) Load user's conversations
     useEffect(() => {
         if (!user?._id || !token) return;
         setLoading(true);
@@ -40,9 +39,7 @@ const ChatHistory: React.FC = () => {
             .finally(() => setLoading(false));
     }, [user, token]);
 
-    // 2) Whenever conversations change, batch-fetch any unknown participant names
     useEffect(() => {
-        // collect all participant IDs except current user
         const otherIds = Array.from(
             new Set(
                 conversations
@@ -50,7 +47,6 @@ const ChatHistory: React.FC = () => {
                     .filter(id => id !== user!._id)
             )
         );
-        // filter out those we already know
         const unknown = otherIds.filter(id => !userNames[id]);
         if (unknown.length === 0) return;
 
@@ -81,7 +77,6 @@ const ChatHistory: React.FC = () => {
             ) : (
                 <ul className="chats-list">
                     {conversations.map(conv => {
-                        // daca nu exista titlu custom, compunem din ceilalti participanti
                         const title =
                             conv.title ||
                             conv.participants

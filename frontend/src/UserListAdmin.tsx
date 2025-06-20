@@ -12,7 +12,6 @@ interface User {
     faculty: string;
     gender: string;
     createdAt: Date;
-    // pot sa pun si alte detalii despre useri
 }
 
 interface NewUserFormState {
@@ -30,8 +29,8 @@ const UserListAdmin: React.FC = () => {
     const { token } = useContext(AuthContext);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>(""); // Pentru a gestiona erorile
-    const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
+    const [error, setError] = useState<string>("");
+    const [successMessage, setSuccessMessage] = useState<string>("");
     const [newUserForm, setNewUserForm] = useState<NewUserFormState>({
         email: "",
         fullName: "",
@@ -88,7 +87,7 @@ const UserListAdmin: React.FC = () => {
         }));
     };
 
-    // Pentru adaugarea de useri
+
     const handleAddUser = (e: React.FormEvent) => {
         e.preventDefault();
         api
@@ -99,9 +98,9 @@ const UserListAdmin: React.FC = () => {
             })
             .then((response) => {
                 setSuccessMessage("Utilizatorul a fost adaugat cu succes.");
-                // Adauga noul utilizator in starea users
+
                 setUsers((prevUsers) => [...prevUsers, response.data]);
-                // Reseteaza formularul
+
                 setNewUserForm({
                     email: "",
                     fullName: "",
@@ -130,7 +129,7 @@ const UserListAdmin: React.FC = () => {
             {error && <div className="error-message">{error}</div>}
             {successMessage && <div className="success-message">{successMessage}</div>}
 
-            {/* Formular pentru adaugarea unui nou utilizator */}
+
             <div className="add-user-form">
                 <h2>Adauga un nou utilizator</h2>
                 <form onSubmit={handleAddUser}>
@@ -220,7 +219,7 @@ const UserListAdmin: React.FC = () => {
                             <h2>{user.fullName}</h2>
                         </div>
                         <div className="user-info">
-                            {/* <h2>{user.fullName}</h2> */}
+
                             <p>
                                 <strong>Email:</strong> {user.email}
                             </p>

@@ -8,7 +8,7 @@ import "./ReviewList.css"
 interface ReviewItemProps {
     review: Review;
     currentUserId: string | null;
-    onReviewDeleted: (reviewId: string) => void; // Callback pentru a notifica parintele
+    onReviewDeleted: (reviewId: string) => void;
 }
 
 const ReviewItem: React.FC<ReviewItemProps> = ({ review, currentUserId, onReviewDeleted }) => {
@@ -37,7 +37,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review, currentUserId, onReview
             await api.delete(`/reviews/${review._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            onReviewDeleted(review._id); // Notifica componenta parinte
+            onReviewDeleted(review._id);
         } catch (err: any) {
             console.error("Eroare la stergerea review-ului:", err);
             setDeleteError(err.response?.data?.message || "Nu s-a putut sterge recenzia.");
@@ -60,10 +60,10 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review, currentUserId, onReview
                         <button
                             onClick={handleDeleteReview}
                             disabled={isDeleting}
-                            className="delete-review-button" // Adauga o clasa pentru stilizare
+                            className="delete-review-button"
                             title="Sterge recenzia"
                         >
-                            {isDeleting ? "Se sterge..." : <i className="fas fa-trash-alt"></i> /* Sau text "Sterge" */}
+                            {isDeleting ? "Se sterge..." : <i className="fas fa-trash-alt"></i>}
                         </button>
                     )}
                 </div>
@@ -87,7 +87,6 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
     const [sortBy, setSortBy] = useState<string>('createdAt_desc');
     const [filterRating, setFilterRating] = useState<number>(0);
 
-    // --- Sortare/Filtrare Client-Side ---
     const sortedAndFilteredReviews = useMemo(() => {
         let tempReviews = [...initialReviews];
 
@@ -95,13 +94,11 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
             tempReviews = tempReviews.filter(r => r.rating === filterRating);
         }
 
-        // Sortare
         switch (sortBy) {
             case 'createdAt_asc':
                 tempReviews.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
                 break;
             case 'rating_desc':
-                // Sorteaza descrescator dupa rating. Daca rating-urile sunt egale, sorteaza descrescator dupa data (cele mai noi primele).
                 tempReviews.sort((a, b) => {
                     if (b.rating !== a.rating) {
                         return b.rating - a.rating;
@@ -110,7 +107,6 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                 });
                 break;
             case 'rating_asc':
-                // Sorteaza crescator dupa rating. Daca rating-urile sunt egale, sorteaza descrescator dupa data.
                 tempReviews.sort((a, b) => {
                     if (a.rating !== b.rating) {
                         return a.rating - b.rating;
@@ -167,7 +163,6 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews: initialReviews, curren
                 <p>Nu exista recenzii care sa corespunda notei selectate.</p>
             )}
 
-            {/* Iteram direct peste sortedAndFilteredReviews */}
             {hasAnyReviewsInitially && sortedAndFilteredReviews.length > 0 && (
                 sortedAndFilteredReviews.map(review => (
                     <ReviewItem

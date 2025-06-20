@@ -7,18 +7,16 @@ function initNotificationService(notificationsCollection) {
     }
 
     async function deleteNotificationsByReceiver(receiverId) {
-        // Validare inputuri
         if (!receiverId) {
             throw new Error("ID-ul destinatarului este obligatoriu pentru stergerea notificarilor.");
         }
         let finalReceiverId;
         try {
-            finalReceiverId = new ObjectId(receiverId); // Converteste si valideaza ID-ul
+            finalReceiverId = new ObjectId(receiverId);
         }
         catch (e) {
             throw new Error(`ID destinatar invalid: ${receiverId}`);
         }
-        // Stergere
         try {
             const deleteResult = await notificationsCollection.deleteMany({ receiver: finalReceiverId });
 
@@ -30,19 +28,17 @@ function initNotificationService(notificationsCollection) {
     }
 
     async function createNotification(message, receiver, sender = "system") {
-        // Validare inputuri
         if (!message || !receiver) {
             throw new Error("Mesajul si ID-ul destinatarului sunt obligatorii pentru notificare.");
         }
 
         let finalReceiverId;
         try {
-            finalReceiverId = new ObjectId(receiver); // Converteste si valideaza ID-ul
+            finalReceiverId = new ObjectId(receiver);
         } catch (e) {
             throw new Error(`ID destinatar invalid: ${receiver}`);
         }
 
-        // Construieste documentul
         const notificationDoc = {
             message: message,
             receiver: finalReceiverId,
@@ -51,7 +47,6 @@ function initNotificationService(notificationsCollection) {
             date: new Date(),
         };
 
-        // Inserare
         try {
             const insertResult = await notificationsCollection.insertOne(notificationDoc);
             if (!insertResult.insertedId) {
@@ -68,6 +63,5 @@ function initNotificationService(notificationsCollection) {
         createNotification, deleteNotificationsByReceiver
     };
 }
-
 
 module.exports = initNotificationService;

@@ -28,7 +28,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         }
     }
 
-    // endpoint pentru inregistrare facultate
     router.post('/register_faculty', [
         body('fullName').notEmpty().withMessage('Denumirea completa este necesara'),
         body('numeRector').notEmpty().withMessage('Nume Rector este necesar'),
@@ -45,7 +44,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
 
         try {
 
-            // Verifica daca facultatea exista deja
             const existingFaculty = await facultiesCollection.findOne({
                 $or: [{ emailSecretariat: emailSecretariat }]
             });
@@ -54,11 +52,9 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 return res.status(400).json({ message: 'Email deja utilizat' });
             }
 
-            // Cripteaza parola
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            // Creeaza noua facultate
             const newFaculty = {
                 fullName,
                 abreviere,
@@ -74,10 +70,8 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 createdAt: new Date(),
             };
 
-            // Insereaza facultatea in baza de date
             const result = await facultiesCollection.insertOne(newFaculty);
 
-            // Generare token JWT
             const token = jwt.sign({ userId: result.insertedId, role: role, email: emailSecretariat },
                 process.env.ACCESS_SECRET, { expiresIn: '1h' }
             );
@@ -90,7 +84,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         }
     });
 
-    // endpoint pentru inregistrare proprietar
     router.post('/register_owner', [
         body('email').isEmail().withMessage('Email invalid'),
         body('fullName').notEmpty().withMessage('Numele complet este necesar'),
@@ -104,7 +97,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         const { email, fullName, password, role } = req.body;
 
         try {
-            // Verifica daca utilizatorul exista deja
             const existingUser = await usersCollection.findOne({
                 $or: [{ email: email }]
             });
@@ -113,11 +105,9 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 return res.status(400).json({ message: 'Email deja utilizat' });
             }
 
-            // Cripteaza parola
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            // Creeaza noul proprietar
             const newUser = {
                 email,
                 fullName,
@@ -126,10 +116,8 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 createdAt: new Date(),
             };
 
-            // Insereaza utilizatorul in baza de date
             const result = await usersCollection.insertOne(newUser);
 
-            // Generare token JWT
             const token = jwt.sign({ userId: result.insertedId, role: role, email: email },
                 process.env.ACCESS_SECRET, { expiresIn: '1h' }
             );
@@ -142,7 +130,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         }
     });
 
-    // Endpoint pentru inregistrare student
     router.post('/register_student', [
         body('email').isEmail().withMessage('Email invalid'),
         body('fullName').notEmpty().withMessage('Numele complet este necesar'),
@@ -159,10 +146,9 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { email, fullName, phoneNumber, gender, password, faculty, numar_matricol, anUniversitar, medie, role } = req.body; /* ce primesc de la frontend catre backend */
+        const { email, fullName, phoneNumber, gender, password, faculty, numar_matricol, anUniversitar, medie, role } = req.body;
 
         try {
-            // Verifica daca utilizatorul exista deja
             const existingUser = await usersCollection.findOne({
                 $or: [{ email: email }]
             });
@@ -171,11 +157,9 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 return res.status(400).json({ message: 'Email deja utilizat' });
             }
 
-            // Cripteaza parola
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            // Creeaza noul utilizator
             const newUser = {
                 email,
                 fullName,
@@ -192,7 +176,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
                 createdAt: new Date(),
             };
 
-            // Insereaza utilizatorul in baza de date
             const result = await usersCollection.insertOne(newUser);
 
             if (result.insertedId) {
@@ -233,7 +216,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
 
                 // notificarile
                 notificationService.createNotification(message = `Studentul ${fullName} doreste sa isi asocieze contul cu facultatea dumneavoastra.`, receiver = facultyId);
-
                 notificationService.createNotification(message = `Studentul ${fullName} doreste sa isi actualizeze media.`, receiver = facultyId);
             }
 
@@ -249,7 +231,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         }
     });
 
-    // Endpoint pentru Autentificare
     router.post('/login', [
         body('email').isEmail().withMessage('Email invalid'),
         body('password').notEmpty().withMessage('Parola este necesara'),
@@ -263,8 +244,6 @@ module.exports = (usersCollection, facultiesCollection, notificationService, not
         const { email, password } = req.body;
 
         try {
-            // Gaseste utilizatorul dupa email
-
             const user = await usersCollection.findOne({ email: email });
             if (user != null) {
                 // Compara parolele

@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { api } from "./api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
-import { uploadFileToStorage } from "./firebaseConfig"; // Import Firebase storage if needed
+import { uploadFileToStorage } from "./firebaseConfig";
 
-// Interface for Student form
 interface RegisterFormState {
     email: string;
     fullName: string;
@@ -12,7 +11,7 @@ interface RegisterFormState {
     gender: string;
     password: string;
     confirmPassword: string;
-    faculty: string; // Specific to student
+    faculty: string;
     numar_matricol: string;
     anUniversitar: string;
     medie: string;
@@ -22,8 +21,8 @@ interface FacultyFormState {
     fullName: string;
     abreviere: string;
     aniStudiu: number | "";
-    logo: File | null; // Store the File object
-    documentOficial: File | null; // Store the File object
+    logo: File | null;
+    documentOficial: File | null;
     numeRector: string;
     emailSecretariat: string;
     phoneNumber: string;
@@ -40,20 +39,20 @@ interface OwnerFormState {
 }
 
 interface FacultyInfo {
-    _id?: string; // Optional, but good practice if backend sends it
+    _id?: string;
     fullName: string;
     abreviere: string;
-    aniStudiu: number; // Total years of study
+    aniStudiu: number;
 }
 
-// Define possible roles
+
 type Role = "student" | "proprietar" | "facultate" | null;
 
 const getYearOptions = (totalYears: number | undefined | null): string[] => {
     if (!totalYears || totalYears <= 0) {
-        return ["1"]; // Fallback la minim 1 an daca datele sunt invalide sau lipsesc
+        return ["1"];
     }
-    // Creeaza un array de la 1 la totalYears
+
     return Array.from({ length: totalYears }, (_, i) => (i + 1).toString());
 };
 
@@ -64,7 +63,6 @@ const Register: React.FC = () => {
     const navigate = useNavigate();
     const [facultiesList, setFacultiesList] = useState<FacultyInfo[]>([]);
 
-    // State for Student form
     const [formState, setFormState] = useState<RegisterFormState>({
         email: "",
         fullName: "",
@@ -122,7 +120,7 @@ const Register: React.FC = () => {
         if (name === "faculty") {
             setFormState((prevState) => ({
                 ...prevState,
-                anUniversitar: "", // Reset year selection
+                anUniversitar: "",
             }));
         }
 
@@ -137,7 +135,7 @@ const Register: React.FC = () => {
         if (type === "file") {
             setFacultyFormState((prevState) => ({
                 ...prevState,
-                [name]: files ? files[0] : null, // Get the first file selected
+                [name]: files ? files[0] : null,
             }));
         } else {
             setFacultyFormState((prevState) => ({
@@ -145,7 +143,7 @@ const Register: React.FC = () => {
                 [name]: value,
             }));
         }
-        setError(""); // Clear errors on change
+        setError("");
     };
 
     const handleStudentSubmit = async (e: React.FormEvent) => {
@@ -240,7 +238,7 @@ const Register: React.FC = () => {
         }
     };
 
-    // --- START: Submit handler for Faculty form ---
+
     const handleFacultySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -260,7 +258,7 @@ const Register: React.FC = () => {
             confirmPassword,
         } = facultyFormState;
 
-        // Client-side Validation
+
         if (password !== confirmPassword) {
             setError("Parolele nu se potrivesc");
             return;
@@ -341,7 +339,7 @@ const Register: React.FC = () => {
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, [success]);
 
-    // --- END: Submit handler for Faculty form ---
+
 
     const handleOwnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -349,7 +347,7 @@ const Register: React.FC = () => {
             ...prevState,
             [name]: value,
         }));
-        setError(""); // Clear errors on change
+        setError("");
     };
 
     const handleOwnerSubmit = async (e: React.FormEvent) => {
@@ -358,7 +356,7 @@ const Register: React.FC = () => {
         setSuccess("");
         const { email, fullName, password, confirmPassword } = ownerFormState;
 
-        // Client-side Validation
+
         if (password !== confirmPassword) {
             setError("Parolele nu se potrivesc");
             return;
@@ -394,7 +392,7 @@ const Register: React.FC = () => {
             console.error("Owner Registration Error:", err);
         }
     };
-    // Function to render content based on role
+
     const renderContent = () => {
         if (!selectedRole) {
             return (
@@ -430,14 +428,14 @@ const Register: React.FC = () => {
             );
             const studyYearsForSelectedFaculty = selectedFacultyObject?.aniStudiu;
 
-            // Genereaza optiunile de an pe baza `aniStudiu` ale facultatii selectate
+
             const currentYearOptions = getYearOptions(studyYearsForSelectedFaculty);
 
             return (
                 <div className="register-container student-form">
                     <h1>Inregistrare Student</h1>
                     <form onSubmit={handleStudentSubmit} className="register-form">
-                        {/* Student Form Fields... */}
+
                         <div>
                             <label>Email:*</label>
                             <input
@@ -502,7 +500,7 @@ const Register: React.FC = () => {
                                         value={faculty.fullName}
                                     >
                                         {faculty.fullName} ({faculty.abreviere}){" "}
-                                        {/* afiseaza numele si abrevierea */}
+
                                     </option>
                                 ))}
                             </select>
@@ -524,10 +522,10 @@ const Register: React.FC = () => {
                             <select
                                 id="anUniversitar"
                                 name="anUniversitar"
-                                value={formState.anUniversitar} // Use the state value
+                                value={formState.anUniversitar}
                                 onChange={handleChange}
                                 required
-                                // Disable if no faculty is selected OR if options are empty
+
                                 disabled={
                                     !formState.faculty ||
                                     currentYearOptions.length === 0 ||
@@ -547,7 +545,7 @@ const Register: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            {/* Use conditional rendering for the label text */}
+
                             <label htmlFor="medie">
                                 {formState.anUniversitar === "1" ? "Medie admitere:*" : "Media:*"}
                             </label>
@@ -733,7 +731,7 @@ const Register: React.FC = () => {
                                 required
                                 accept="image/*"
                             />
-                            {/* Optional: Preview logo */}
+
                             {facultyFormState.logo && (
                                 <img
                                     src={URL.createObjectURL(facultyFormState.logo)}
@@ -843,9 +841,9 @@ const Register: React.FC = () => {
                 </div>
             );
         }
-        // --- END: JSX for Faculty Form ---
 
-        return null; // Fallback
+
+        return null;
     };
 
     return (

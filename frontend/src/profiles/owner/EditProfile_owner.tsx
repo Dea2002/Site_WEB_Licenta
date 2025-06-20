@@ -1,11 +1,11 @@
 import React, { useState, useContext, useRef } from 'react';
-import { AuthContext, User } from '../../AuthContext'; // Importam User
-import { api } from '../../api';// Pentru request PATCH/PUT
-import './profile_owner.css'; // Stiluri
+import { AuthContext, User } from '../../AuthContext';
+import { api } from '../../api';
+import './profile_owner.css';
 import jwt_decode from 'jwt-decode';
 
 interface EditProfileProps {
-    user: User; // Primim datele curente ale userului
+    user: User;
 }
 
 interface ProfileFormState {
@@ -21,7 +21,6 @@ interface ProfileFormState {
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
-    // Stari pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: user.fullName,
         email: user.email,
@@ -35,13 +34,11 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     });
     const initialFormStateRef = useRef<ProfileFormState>(profileFormState);
 
-    // Adauga alte campuri pe care vrei sa le permiti editarii (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request si login pt update context
+    const { token, login } = useContext(AuthContext);
 
-    // Functie pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -54,10 +51,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         };
 
         try {
-            // Presupunem un endpoint /users/me sau /users/:id pentru update
-            // Folosim PATCH pentru actualizari partiale
             const response = await api.patch(
-                `/users/me`, // Sau `/users/${user.userId}`
+                `/users/me`,
                 updatedData,
                 {
                     headers: {
@@ -66,17 +61,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                 }
             );
 
-            // Daca backend-ul returneaza noul token (optional, dar bun daca se schimba ceva in payload)
             if (response.data.token) {
                 const { token } = response.data;
                 const decoded = jwt_decode<User & { iat: number; exp: number }>(token);
-                login(response.data.token, decoded); // Actualizeaza contextul cu noul token/user data
+                login(response.data.token, decoded);
                 setMessage('Profil actualizat cu succes!');
             } else {
-                // Daca nu vine token nou, ar trebui sa re-fetch user data sau sa actualizam manual contextul
-                // Aici doar afisam mesaj, dar ideal ar fi sa actualizam si user-ul din context
                 setMessage('Profil actualizat. Reimprospatati pagina pentru a vedea toate modificarile.');
-                // TODO: Implementeaza o modalitate de a actualiza user-ul din context fara token nou
             }
 
         } catch (err: any) {
@@ -97,11 +88,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setError("");
     }
 
-
-    // compara camp cu camp
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
-            // @ts-ignore – ca sa poţi indexa generic
+            // @ts-ignore – ca sa poti indexa generic
             value !== initialFormStateRef.current[key]
     );
     return (
@@ -116,9 +105,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         name="email"
                         value={profileFormState.email}
                         onChange={handleChange}
-                    // disabled
                     />
-                    {/* <small>Emailul nu poate fi modificat.</small> */}
                 </div>
                 <div className="form-group">
                     <label htmlFor="fullName">Nume complet:</label>
@@ -129,7 +116,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         value={profileFormState.fullName}
                         onChange={handleChange}
                         required
-                    // disabled
                     />
                 </div>
                 <div className="form-group">

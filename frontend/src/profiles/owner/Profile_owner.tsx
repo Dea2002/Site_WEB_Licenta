@@ -6,12 +6,11 @@ import { useNavigate, Link } from "react-router-dom";
 import ProfileSidebar from './ProfileSidebar_owner';
 import { api } from "../../api"
 
-// Defineste tipurile posibile pentru sectiunea activa
 type ProfileSection = 'edit';
 
 const Profile_owner: React.FC = () => {
-    const [activeSection, setActiveSection] = useState<ProfileSection>('edit'); // Default: 'edit'
-    const { user, token, logout } = useContext(AuthContext); // Preluam user-ul din context
+    const [activeSection, setActiveSection] = useState<ProfileSection>('edit');
+    const { user, token, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [isDeletingAccount, setIsDeletingAccount] = useState(false);
@@ -20,7 +19,6 @@ const Profile_owner: React.FC = () => {
 
     const ownerId = user?._id;
 
-    // Functia care gestioneaza apartamentele si chiriile inainte de stergerea contului
     const handlePreparatoryActionsForOwnerDeletion = async (): Promise<boolean> => {
         if (!token || !ownerId) {
             console.error("Token sau ID proprietar lipseste pentru actiunile pregatitoare.");
@@ -38,7 +36,6 @@ const Profile_owner: React.FC = () => {
         }
     };
 
-    // Functia care sterge efectiv contul proprietarului
     const deleteOwnerAccountAPI = async (): Promise<boolean> => {
         if (!token || !ownerId) {
             console.error("Token sau ID proprietar lipseste pentru stergerea contului.");
@@ -47,8 +44,6 @@ const Profile_owner: React.FC = () => {
         }
         setDeleteError(null);
         try {
-            // Endpoint-ul tau pentru a sterge contul proprietarului
-            // Backend-ul va prelua ID-ul proprietarului din token
             await api.delete(`/users/owner_account/delete`);
             return true;
         } catch (err: any) {
@@ -58,16 +53,13 @@ const Profile_owner: React.FC = () => {
         }
     };
 
-    // Functia care orchestreaza procesul de stergere
     const handleInitiateDeleteAccount = async () => {
         setIsDeletingAccount(true);
         setDeleteError(null);
         setDeleteSuccessMessage(null);
 
-        // Pasul 1: Actiuni pregatitoare (anulare chirii, stergere apartamente etc.)
         const preparatoryActionsCompleted = await handlePreparatoryActionsForOwnerDeletion();
         if (preparatoryActionsCompleted) {
-            // Pasul 2: Daca actiunile pregatitoare au reusit, sterge contul proprietarului
             const accountDeleted = await deleteOwnerAccountAPI();
             if (accountDeleted) {
                 setDeleteSuccessMessage("Contul de proprietar si toate datele asociate au fost sterse. Veti fi deconectat.");
@@ -90,17 +82,15 @@ const Profile_owner: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'edit':
-                return <EditProfile user={user} />; // Trimitem user-ul catre componenta
+                return <EditProfile user={user} />;
             default:
-                return <EditProfile user={user} />; // Sau un mesaj default
+                return <EditProfile user={user} />;
         }
     };
 
     return (
         <div className="user-profile-page-container">
-            {/* Acest div reprezinta "dreptunghiul mare" */}
             <div className="profile-content-box">
-                {/* Coloana din stanga (Sidebar) */}
                 <div className="profile-sidebar-column">
                     <ProfileSidebar
                         activeSection={activeSection}
@@ -109,7 +99,6 @@ const Profile_owner: React.FC = () => {
                     />
                 </div>
 
-                {/* Coloana din dreapta (Continutul dinamic) */}
                 <div className="profile-main-content-column">
                     {isDeletingAccount && <p className="loading-message">Se proceseaza stergerea contului si a datelor asociate...</p>}
                     {deleteError && <p className="error-message">{deleteError}</p>}

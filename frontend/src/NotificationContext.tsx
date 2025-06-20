@@ -16,9 +16,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     const { token, isAuthenticated } = useContext(AuthContext);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchUnread = useCallback(async () => { // Folosim useCallback pentru stabilitate
-        if (!isAuthenticated || !token) { // Verificam si token explicit
-            setUnreadCount(0); // Resetam explicit daca nu e autentificat sau nu are token
+    const fetchUnread = useCallback(async () => {
+        if (!isAuthenticated || !token) {
+            setUnreadCount(0);
             return;
         }
         try {
@@ -29,22 +29,19 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             setUnreadCount(data.unread);
         } catch (error) {
             console.error("Failed to fetch unread count:", error);
-            // setUnreadCount(0);
         }
     }, [isAuthenticated, token]);
 
-    // la mount si cand tokenul se schimba
     useEffect(() => {
         if (isAuthenticated && token) {
             fetchUnread();
-            // eventual polling la 60s:
+
             const id = setInterval(fetchUnread, 60000);
             return () => clearInterval(id);
         }
-        setUnreadCount(0); // Resetam la 0 daca nu e autentificat
+        setUnreadCount(0);
     }, [isAuthenticated, token, fetchUnread]);
 
-    // Functia refresh poate fi simplificata pentru a refolosi fetchUnread
     const refresh = useCallback(() => {
         fetchUnread();
     }, [fetchUnread]);

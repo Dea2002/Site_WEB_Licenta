@@ -3,12 +3,11 @@ import { api } from './api';
 import { AuthContext } from "./AuthContext";
 import "./FacultyMarks.css";
 
-
 interface DeclinePopupProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (reason: string) => void;
-    requestId: string | null; // Pentru a sti la ce cerere se refera
+    requestId: string | null;
     isSubmitting: boolean;
     error?: string | null;
 }
@@ -17,7 +16,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     const [reason, setReason] = useState("");
 
     useEffect(() => {
-        // Reseteaza motivul cand popup-ul se redeschide pentru o noua cerere
         if (isOpen) {
             setReason("");
         }
@@ -28,7 +26,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!reason.trim()) {
-            // Poti adauga o validare/eroare locala aici daca doresti
             alert("Va rugam introduceti un motiv pentru respingere.");
             return;
         }
@@ -63,7 +60,6 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     );
 };
 
-
 interface StudentInfo {
     fullName: string;
     email: string;
@@ -90,13 +86,12 @@ const FacultyMarks: React.FC = () => {
     const [requests, setRequests] = useState<MarkRequest[]>([]);
     const { faculty, token } = useContext(AuthContext);
     const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string>(""); // Pentru mesaje de succes
+    const [successMessage, setSuccessMessage] = useState<string>("");
     const [showDeclinePopup, setShowDeclinePopup] = useState<boolean>(false);
     const [currentRequestIdForDecline, setCurrentRequestIdForDecline] = useState<string | null>(null);
     const [isSubmittingDecline, setIsSubmittingDecline] = useState<boolean>(false);
     const [declineSubmitError, setDeclineSubmitError] = useState<string | null>(null);
 
-    // Functie pentru a formata data (optional)
     const formatDate = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleDateString("ro-RO", {
@@ -107,7 +102,6 @@ const FacultyMarks: React.FC = () => {
         }
     };
 
-    // functie pentru a face fetch la cereri
     const fetchMarkRequests = async () => {
         if (!token || !faculty?._id) {
             setError("Utilizator neautentificat sau date lipsa.");
@@ -147,7 +141,7 @@ const FacultyMarks: React.FC = () => {
 
     const handleDeclineClick = (id: string) => {
         setCurrentRequestIdForDecline(id);
-        setDeclineSubmitError(null); // Reseteaza eroarea anterioara
+        setDeclineSubmitError(null);
         setShowDeclinePopup(true);
     };
 
@@ -224,7 +218,7 @@ const FacultyMarks: React.FC = () => {
                         onClose={() => {
                             setShowDeclinePopup(false);
                             setCurrentRequestIdForDecline(null);
-                            setDeclineSubmitError(null); // Sterge eroarea la inchiderea manuala
+                            setDeclineSubmitError(null);
                         }}
                         onSubmit={submitDeclineReason}
                         requestId={currentRequestIdForDecline}

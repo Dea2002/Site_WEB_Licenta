@@ -25,11 +25,10 @@ function NavBar() {
                     <img
                         src={faculty.logoUrl}
                         alt={`${faculty.fullName || 'Faculty'} Logo`}
-                        className="faculty-logo-image" // Clasa pentru stilizare
+                        className="faculty-logo-image"
                     />
                 </Navbar.Brand>
             )}
-            {/* Daca nu e logo, poti afisa numele facultatii ca text brand, sau nimic */}
             {isAuthenticated && !faculty?.logoUrl && faculty?.fullName && (
                 <Navbar.Brand as={Link} to="/faculty_dashboard">
                     {faculty.fullName}
@@ -59,8 +58,8 @@ function NavBar() {
                     {isAuthenticated && (<Nav.Link as={Link} to="/notifications">
                         Notificari
                         {unreadCount > 0
-                            ? <MdNotificationsActive size={20} color="#dba979" style={{ marginLeft: '4px' }} /> // cand am cel putin o notificare necitita
-                            : <IoIosNotifications size={20} color="#dba979" style={{ marginLeft: '4px' }} /> // cand nu am nicio notificare necitita
+                            ? <MdNotificationsActive size={20} color="#dba979" style={{ marginLeft: '4px' }} />
+                            : <IoIosNotifications size={20} color="#dba979" style={{ marginLeft: '4px' }} />
                         }
                         {unreadCount > 0 && (
                             <Badge pill bg="danger" className="position-absolute translate-middle">

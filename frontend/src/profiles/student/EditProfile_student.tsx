@@ -1,13 +1,13 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
-import { AuthContext, User } from "../../AuthContext"; // Importam User
+import { AuthContext, User } from "../../AuthContext";
 import { api } from "../../api";
-import "./profile_student.css"; // Stiluri
+import "./profile_student.css";
 import jwt_decode from "jwt-decode";
 import { parseISO, isAfter, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
 interface EditProfileProps {
-    user: User; // Primim datele curente ale userului
+    user: User;
 }
 
 interface ProfileFormState {
@@ -26,7 +26,6 @@ interface ProfileFormState {
 }
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
-    // Stari pentru campurile formularului, initializate cu datele userului
     const [profileFormState, setProfilFormState] = useState<ProfileFormState>({
         fullName: user.fullName,
         email: user.email,
@@ -45,15 +44,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     const initialMatricol = initialFormStateRef.current.numar_matricol;
     const initialMedie = initialFormStateRef.current.medie;
 
-    // Adauga alte campuri pe care vrei sa le permiti editarii (ex: email - desi e mai complicat)
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-    const { token, login } = useContext(AuthContext); // Avem nevoie de token pt request si login pt update context
+    const { token, login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Cand "user" din context se schimba (dupa login), reconstruim formData
         if (!user) return;
         const newState: ProfileFormState = {
             fullName: user.fullName,
@@ -73,14 +70,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         initialFormStateRef.current = newState;
     }, [user]);
 
-    // Functie pentru submiterea formularului
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage("");
         setError("");
         let markEdited = false;
         let medieRange = "";
-        // validarea mediei introduse
         if (profileFormState.medie !== initialMedie) {
             const medieNum = parseFloat(profileFormState.medie!.replace(",", "."));
             if (isNaN(medieNum) || medieNum < 5.0 || medieNum > 10.0) {
@@ -105,7 +100,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             }
         }
 
-        // Daca user a completat vreun camp de parola, atunci trebuie sa le validezi
         const { currentPassword, newPassword, confirmNewPassword, ...rest } = profileFormState;
         const wantsToChangePassword = currentPassword || newPassword || confirmNewPassword;
 
@@ -127,7 +121,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setIsLoading(true);
         let updatedData = {};
         // 1. Construiesti payload-ul exact din form state
-        // const updatedData: ProfileFormState = { ...profileFormState };
         if (profileFormState.medie !== initialMedie) {
             updatedData = {
                 ...rest,
@@ -155,8 +148,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
             login(newToken, decoded);
             setMessage("Profil actualizat cu succes!");
 
-            // resetam „dirty” pentru a putea detecta viitoare schimbari
-            // initialFormStateRef.current = { ...profileFormState };
             setTimeout(() => navigate("/home"), 3000);
         } catch (err: any) {
             console.error("Eroare la actualizare:", err);
@@ -178,7 +169,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
     const isDirty = Object.entries(profileFormState).some(
         ([key, value]) =>
-            // @ts-ignore – ca sa poţi indexa generic
+            // @ts-ignore – ca sa poti indexa generic
             value !== initialFormStateRef.current[key],
     );
     const validUntil = parseISO(profileFormState.medie_valid!);
@@ -276,7 +267,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         name="medie"
                         value={profileFormState.medie}
                         onChange={handleChange}
-                        disabled={!canEditMedie} // daca nu e valabila, nu poate fi editata
+                        disabled={!canEditMedie}
                     />
                     {!canEditMedie && (
                         <small>Medie valabila pana la {format(validUntil, "dd/MM/yyyy")}</small>

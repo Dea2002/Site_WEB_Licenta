@@ -1,4 +1,3 @@
-// db.js
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 
@@ -16,16 +15,12 @@ const client = new MongoClient(uri, {
 
 let isConnected = false;
 
-/**
- * Conecteaza clientul (o singura data) si returneaza instanta de database.
- */
 async function connectDB() {
     if (!isConnected) {
         await client.connect();
         isConnected = true;
         console.log('MongoDB connected');
     }
-    // a doua data pur si simplu returneaza database
     return client.db(process.env.DB_NAME || 'inchiriere-apartamente');
 }
 

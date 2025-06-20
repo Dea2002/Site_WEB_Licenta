@@ -5,7 +5,6 @@
 }
 
 .review-list-container h2 {
-    /* Daca ai un titlu in ApartmentDetails pentru sectiunea de review-uri */
     margin-bottom: 20px;
     font-size: 1.8em;
     color: #333;
@@ -13,8 +12,8 @@
 
 .review-controls {
     display: flex;
-    flex-wrap: wrap; /* Permite trecerea pe randul urmator pe ecrane mici */
-    gap: 20px; /* Spatiu intre grupuri de control */
+    flex-wrap: wrap;
+    gap: 20px;
     margin-bottom: 25px;
     padding: 15px;
     background-color: #f9f9f9;
@@ -25,7 +24,7 @@
 .review-controls > div {
     display: flex;
     align-items: center;
-    gap: 8px; /* Spatiu intre label si select */
+    gap: 8px;
 }
 
 .review-controls label {
@@ -40,36 +39,34 @@
     border-radius: 4px;
     background-color: #fff;
     font-size: 0.9em;
-    min-width: 150px; /* Latime minima pentru select */
+    min-width: 150px;
     cursor: pointer;
     transition: border-color 0.2s ease-in-out;
 }
 
 .review-controls select:focus {
     outline: none;
-    border-color: #007bff; /* O culoare de accent la focus */
+    border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .review-controls p {
-    /* Pentru mesajul "Se actualizeaza..." */
     margin: 0;
     color: #007bff;
     font-style: italic;
 }
 
-/* Stiluri pentru ReviewItem (poate fi in acelasi fisier sau separat) */
 .review-item {
-    background-color: #fff; /* Fundal usor diferit daca e necesar */
+    background-color: #fff;
     padding: 15px;
-    margin-bottom: 15px; /* Spatiu sub fiecare review item */
-    border: 1px solid #e7e7e7; /* O bordura mai subtila */
+    margin-bottom: 15px;
+    border: 1px solid #e7e7e7;
     border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* O umbra foarte usoara */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .review-item:last-child {
-    border-bottom: 1px solid #e7e7e7; /* Elimina border-bottom de la ultimul element daca era din inline style */
+    border-bottom: 1px solid #e7e7e7;
     margin-bottom: 0;
 }
 
@@ -77,17 +74,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px; /* Spatiu mai mare sub header */
+    margin-bottom: 8px;
 }
 
 .review-user-name {
     font-weight: 600;
-    color: #2c3e50; /* O culoare mai inchisa pentru nume */
+    color: #2c3e50;
     font-size: 1.05em;
 }
 
 .review-date {
-    font-size: 0.85em; /* Data putin mai mica */
+    font-size: 0.85em;
     color: #888;
 }
 
@@ -98,8 +95,7 @@
 }
 
 .review-rating .star-display span {
-    /* Daca vrei sa stilizezi stelele din ReviewItem separat */
-    font-size: 1.3em; /* Ajusteaza marimea stelelor in lista */
+    font-size: 1.3em;
     margin-right: 1px;
 }
 
@@ -107,11 +103,10 @@
     margin: 0;
     line-height: 1.6;
     color: #454545;
-    white-space: pre-wrap; /* Pastreaza spatiile si liniile noi */
+    white-space: pre-wrap;
     font-size: 0.95em;
 }
 
-/* Mesaj cand nu sunt review-uri */
 .review-list-container > p {
     padding: 20px;
     text-align: center;
@@ -121,18 +116,17 @@
     border: 1px dashed #ddd;
 }
 
-/* Responsive pentru controale */
 @media (max-width: 600px) {
     .review-controls {
-        flex-direction: column; /* Controalele una sub alta pe ecrane mici */
-        align-items: stretch; /* Label si select pe toata latimea */
+        flex-direction: column;
+        align-items: stretch;
     }
     .review-controls > div {
-        width: 100%; /* Ocupa toata latimea */
-        justify-content: space-between; /* Aliniaza label la stanga, select la dreapta */
+        width: 100%;
+        justify-content: space-between;
     }
     .review-controls select {
-        flex-grow: 1; /* Permite select-ului sa se extinda */
+        flex-grow: 1;
     }
 }
 
@@ -144,31 +138,29 @@
 .delete-review-button {
     background: none;
     border: none;
-    color: #dc3545; /* Rosu pentru stergere */
+    color: #dc3545;
     cursor: pointer;
-    padding: 2px 5px; /* Padding mic */
-    font-size: 0.9em; /* Marime icon/text */
+    padding: 2px 5px;
+    font-size: 0.9em;
     line-height: 1;
     transition: color 0.2s ease-in-out, transform 0.1s ease;
 }
 
 .delete-review-button:hover {
-    color: #c82333; /* Rosu mai inchis la hover */
+    color: #c82333;
     transform: scale(1.1);
 }
 
 .delete-review-button:disabled {
-    color: #6c757d; /* Gri cand e dezactivat */
+    color: #6c757d;
     cursor: not-allowed;
     transform: none;
 }
 
 .delete-review-button .fas.fa-trash-alt {
-    /* Daca folosesti FontAwesome */
-    pointer-events: none; /* Asigura ca click-ul merge pe buton */
+    pointer-events: none;
 }
 
-/* Stil pentru mesajul de eroare la stergere in ReviewItem */
 .review-item .error-message {
     color: #721c24;
     background-color: #f8d7da;

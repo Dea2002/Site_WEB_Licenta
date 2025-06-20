@@ -1,40 +1,28 @@
-/* navbar.css */
-
-/* Stilizarea containerului navbar */
-
 .custom-navbar-faculty {
     background-color: #60b5ff;
-    /* o culoare de baza (albastru Bootstrap, de exemplu) */
+
     padding: 1rem 2rem;
     background: #4a102a;
 }
 
-/* Stilizarea link-urilor din navbar */
-
 .custom-navbar-faculty .nav-link {
     color: #f5c45e !important;
-    /* foloseste !important daca vrei sa suprascrii stilurile Bootstrap */
+
     font-size: 1.2rem;
-    /* font-weight: 350; */
+
     transition: color 0.2s ease;
 }
 
 .custom-navbar-faculty .nav-link:hover {
     color: #e8efcf !important;
-    /* DE AICI SE SCHIMBA DIMENSIUNEA ICONITELOR LA CLICK */
-    /* de exemplu, o nuanta de galben la hover */
 }
 
-/* Stilizarea meniului dropdown */
-
 .custom-navbar-faculty .dropdown-menu {
-    /* background-color: #FCF259; */
     background-color: #e9f5be;
     font-size: 1.2rem;
     border: none;
 }
 
-/* culoarea textului din dropdown */
 .custom-navbar-faculty .dropdown-item {
     color: #85193c;
     font-size: 1.1rem;
@@ -45,19 +33,15 @@
     -o-transition: background-color 0.2s ease;
 }
 
-/* culoarea textului din dropdown la hover */
 .custom-navbar-faculty .dropdown-item:hover {
     background-color: #e4d7b0;
-    /* color: #7a73d1; */
+
     color: #704264;
 }
-
-/* Stilizarea iconitelor daca doresti sa le modifici dimensiunea sau culoarea */
 
 .custom-navbar-faculty i {
     color: #e78b48;
     font-size: 1.2rem;
-    /* poti ajusta dimensiunea dupa preferinta */
     transition: transform 0.2s ease;
 }
 
@@ -92,7 +76,6 @@
 }
 
 .error-message {
-    /* Stil general pentru erori */
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
@@ -101,13 +84,9 @@
     margin-bottom: 20px;
     text-align: center;
 }
-/* .error-message.global-error { */
-/* O clasa specifica daca vrei sa diferentiezi erorile globale */
-/* Poti adauga stiluri specifice aici */
-/* } */
 
 .students-table-container {
-    overflow-x: auto; /* Permite scroll orizontal pe ecrane mici */
+    overflow-x: auto;
 }
 
 table {
@@ -128,31 +107,29 @@ td {
 }
 
 th {
-    background-color: #7e204c; /* O culoare de accent pentru header */
+    background-color: #7e204c;
     color: #f5c45e;
     font-weight: 600;
-    white-space: nowrap; /* Impiedica ruperea textului din header */
+    white-space: nowrap;
 }
 
 tr:nth-child(even) {
-    background-color: #f8f9fa; /* Culoare alternanta pentru randuri */
+    background-color: #f8f9fa;
 }
 
 tr:hover {
-    background-color: #e9ecef; /* Efect la hover */
+    background-color: #e9ecef;
 }
 
 .student-invalidated td {
-    /* Stil pentru randurile cu studenti invalidati */
-    color: #6c757d; /* Text mai deschis */
-    /* background-color: #ffe0e0;  Optional: un fundal usor rosiatic */
+    color: #6c757d;
 }
 .student-invalidated .status-invalid {
     font-weight: bold;
 }
 
 .status-valid {
-    color: #28a745; /* Verde */
+    color: #28a745;
     font-weight: bold;
     padding: 3px 6px;
     background-color: #d4edda;
@@ -161,7 +138,7 @@ tr:hover {
 }
 
 .status-invalid {
-    color: #dc3545; /* Rosu */
+    color: #dc3545;
     font-weight: bold;
     padding: 3px 6px;
     background-color: #f8d7da;
@@ -170,8 +147,8 @@ tr:hover {
 }
 
 .button-invalidate {
-    background-color: #ffc107; /* Galben pentru avertisment/actiune importanta */
-    color: #212529; /* Text inchis pentru contrast bun pe galben */
+    background-color: #ffc107;
+    color: #212529;
     border: none;
     padding: 6px 10px;
     border-radius: 4px;
@@ -181,7 +158,7 @@ tr:hover {
 }
 
 .button-invalidate:hover {
-    background-color: #e0a800; /* Galben mai inchis la hover */
+    background-color: #e0a800;
 }
 
 .button-invalidate:disabled {

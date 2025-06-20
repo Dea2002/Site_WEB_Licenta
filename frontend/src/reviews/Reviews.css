@@ -1,33 +1,31 @@
-/* === Stiluri Generale pentru Sectiunea de Recenzii === */
 .reviews-wrapper-card {
-    background-color: #fff; /* Fundal alb pentru chenar */
-    padding: 25px 30px; /* Spatiere interioara generoasa, similar cu .review-form */
-    margin-top: 40px; /* Pastreaza spatiul de sus initial al .reviews-section */
-    margin-bottom: 30px; /* Adauga spatiu sub chenarul de recenzii */
-    border-radius: 8px; /* Colturi rotunjite pentru un aspect modern */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* O umbra pentru efect de "card" */
-    border: 1px solid #e9ecef; /* O bordura subtila, similar cu .review-item */
+    background-color: #fff;
+    padding: 25px 30px;
+    margin-top: 40px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
 }
 
-/* Ajustari pentru .reviews-section si h2-ul sau cand sunt in interiorul wrapper-ului */
 .reviews-wrapper-card .reviews-section {
-    margin-top: 0; /* Margin-top este acum pe wrapper */
-    padding-top: 0; /* Padding-ul superior este gestionat de wrapper */
-    border-top: none; /* Bordura de sus nu mai este necesara aici, chenarul o defineste */
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
 }
 
 .reviews-wrapper-card .reviews-section h2 {
     font-size: 1.75rem;
-    color: #343a40; /* !!! IMPORTANT: Schimbat din 'white' in culoare inchisa pentru lizibilitate pe fundal alb !!! */
+    color: #343a40;
     margin-bottom: 25px;
     padding-bottom: 10px;
     border-bottom: 2px solid #007bff;
     display: inline-block;
-    margin-top: 0; /* Asigura-te ca nu exista un margin-top suplimentar pe h2 in acest context */
+    margin-top: 0;
 }
 
 .button-add-review {
-    background-color: #28a745; /* Verde pentru actiuni pozitive */
+    background-color: #28a745;
     color: white;
     padding: 10px 18px;
     border: none;
@@ -48,7 +46,6 @@
     transform: translateY(0);
 }
 
-/* === Stiluri pentru ReviewList.tsx === */
 .review-list-container {
     margin-top: 15px;
 }
@@ -56,10 +53,10 @@
 .review-controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px; /* Spatiu intre grupuri de control */
+    gap: 15px;
     margin-bottom: 30px;
     padding: 15px 20px;
-    background-color: #f8f9fa; /* Fundal usor gri pentru controale */
+    background-color: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #dee2e6;
 }
@@ -72,7 +69,7 @@
 
 .review-controls label {
     font-weight: 500;
-    color: #495057; /* Culoare text label */
+    color: #495057;
     font-size: 0.9rem;
 }
 
@@ -89,38 +86,34 @@
 
 .review-controls select:focus {
     outline: none;
-    border-color: #80bdff; /* Albastru mai deschis pentru focus */
+    border-color: #80bdff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .review-controls p {
-    /* Pentru mesajul "Se actualizeaza..." */
     margin: 0;
     color: #007bff;
     font-style: italic;
     font-size: 0.9rem;
 }
 
-/* Mesaj cand nu sunt review-uri */
 .review-list-container > p {
-    /* Selector mai specific */
     padding: 25px;
     text-align: center;
-    color: #6c757d; /* Gri mai inchis pentru text */
+    color: #6c757d;
     background-color: #f8f9fa;
     border-radius: 6px;
     border: 1px dashed #ced4da;
     font-style: italic;
 }
 
-/* === Stiluri pentru ReviewItem.tsx === */
 .review-item {
     background-color: #fff;
     padding: 20px;
     margin-bottom: 20px;
     border: 1px solid #e9ecef;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Umbra subtila pentru efect de card */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: box-shadow 0.2s ease-in-out;
 }
 
@@ -135,40 +128,38 @@
 .review-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Aliniaza la inceput pentru nume lungi */
+    align-items: flex-start;
     margin-bottom: 10px;
-    flex-wrap: wrap; /* Permite trecerea pe randul urmator daca numele e prea lung */
-    gap: 5px; /* Spatiu intre nume si data pe randuri separate */
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .review-user-name {
     font-weight: 600;
-    color: #212529; /* Text aproape negru */
+    color: #212529;
     font-size: 1.1rem;
 }
 
 .review-date {
     font-size: 0.8rem;
-    color: #6c757d; /* Gri mai deschis pentru data */
-    white-space: nowrap; /* Impiedica data sa se rupa pe mai multe randuri */
+    color: #6c757d;
+    white-space: nowrap;
 }
 
 .review-rating {
     margin-bottom: 12px;
-    display: flex; /* Pentru a alinia stelele si textul rating-ului */
+    display: flex;
     align-items: center;
-    gap: 8px; /* Spatiu intre stele si textul (x/5) */
+    gap: 8px;
 }
 
 .review-rating span[style*="color: #FFD700"],
 .review-rating span[style*="color: #e0e0e0"] {
-    /* Selector mai specific pentru stelele din item */
-    font-size: 1.25em; /* Marime stele in item */
-    line-height: 1; /* Previne spatiu vertical suplimentar */
+    font-size: 1.25em;
+    line-height: 1;
 }
 
 .review-rating-text {
-    /* Clasa aditionala daca vrei sa o pui pe textul (x/5) */
     font-size: 0.9rem;
     color: #495057;
     font-weight: 500;
@@ -176,14 +167,13 @@
 
 .review-comment {
     margin: 0;
-    line-height: 1.65; /* Inaltime de rand mai mare pentru lizibilitate */
-    color: #495057; /* Culoare text comentariu */
+    line-height: 1.65;
+    color: #495057;
     white-space: pre-wrap;
     font-size: 0.95rem;
-    word-break: break-word; /* Pentru comentarii lungi fara spatii */
+    word-break: break-word;
 }
 
-/* === Stiluri pentru ReviewForm.tsx === */
 .review-form {
     background-color: #ffffff;
     padding: 25px 30px;
@@ -204,9 +194,9 @@
 }
 
 .review-form .error-message {
-    color: #721c24; /* Rosu mai inchis pentru textul erorii */
-    background-color: #f8d7da; /* Fundal roz deschis */
-    border: 1px solid #f5c6cb; /* Bordura roz */
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
     padding: 12px 15px;
     border-radius: 4px;
     margin-bottom: 20px;
@@ -226,37 +216,34 @@
 }
 
 .star-rating {
-    /* Aplicabil si in ReviewItem daca nu suprascrii acolo */
-    display: inline-flex; /* Pentru a nu ocupa toata latimea daca e singur */
+    display: inline-flex;
     gap: 3px;
 }
 
 .star-rating span {
-    /* Stil general pentru stele, poate fi suprascris */
     cursor: pointer;
-    font-size: 2.2em; /* Stele mai mari in formular */
+    font-size: 2.2em;
     transition: color 0.15s ease-in-out, transform 0.1s ease-in-out;
 }
 .star-rating .star-filled {
     color: #ffc107;
-} /* Galben bootstrap-like */
+}
 .star-rating .star-empty {
     color: #ced4da;
-} /* Gri deschis bootstrap-like */
+}
 
 .star-rating span:hover,
 .star-rating span:focus {
-    /* Adaugat si focus pentru accesibilitate */
     transform: scale(1.15);
-    outline: none; /* Elimina outline default la focus pe span daca doresti */
+    outline: none;
 }
-/* Poti adauga un stil specific pentru steaua pe care se face hover */
+
 .star-rating:hover .star-empty:hover ~ .star-empty {
-    color: #ced4da; /* Reseteaza culoarea stelelor goale urmatoare */
+    color: #ced4da;
 }
 .star-rating:hover span:hover,
 .star-rating:hover span:hover ~ span {
-    color: #ffc107; /* Coloreaza steaua si cele din stanga ei la hover */
+    color: #ffc107;
 }
 
 .review-form textarea {
@@ -269,7 +256,7 @@
     min-height: 120px;
     box-sizing: border-box;
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    resize: vertical; /* Permite redimensionarea pe verticala */
+    resize: vertical;
 }
 
 .review-form textarea:focus {
@@ -287,13 +274,13 @@
 
 .review-form .button-primary,
 .review-form .button-secondary {
-    padding: 10px 22px; /* Padding putin mai mare */
-    border-radius: 5px; /* Rotunjire mai accentuata */
+    padding: 10px 22px;
+    border-radius: 5px;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    letter-spacing: 0.5px; /* Spatiere usoara a literelor */
+    letter-spacing: 0.5px;
 }
 
 .review-form .button-primary {
@@ -332,9 +319,7 @@
     transform: none;
 }
 
-/* Responsive pentru controalele din ReviewList */
 @media (max-width: 768px) {
-    /* Ajustat breakpoint-ul */
     .review-controls {
         flex-direction: column;
         align-items: stretch;
@@ -344,10 +329,10 @@
         justify-content: space-between;
     }
     .review-form .form-actions {
-        flex-direction: column; /* Butoanele una sub alta pe mobil */
+        flex-direction: column;
     }
     .review-form .button-primary,
     .review-form .button-secondary {
-        width: 100%; /* Butoanele ocupa toata latimea */
+        width: 100%;
     }
 }

@@ -3,7 +3,6 @@ import "./DashboardFaculty.css";
 import { api } from "./api";
 import { AuthContext } from "./AuthContext";
 
-// Interfata pentru obiectul Student (ajusteaza conform structurii tale reale)
 interface Student {
     _id: string;
     fullName: string;
@@ -16,13 +15,12 @@ interface Student {
 }
 
 const DashboardFaculty: React.FC = () => {
-    // const { id } = useParams<{ id: string }>(); // ID-ul facultatii, daca e necesar
     const { token } = useContext(AuthContext);
 
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [updatingStudentId, setUpdatingStudentId] = useState<string | null>(null); // Pentru feedback la update
+    const [updatingStudentId, setUpdatingStudentId] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const fetchStudents = () => {
@@ -48,7 +46,7 @@ const DashboardFaculty: React.FC = () => {
 
     useEffect(() => {
         fetchStudents();
-    }, [token]); // Ruleaza cand se schimba token-ul (la login/logout)
+    }, [token]);
 
     const handleInvalidateFaculty = async (studentId: string) => {
         if (!token) {
@@ -64,13 +62,10 @@ const DashboardFaculty: React.FC = () => {
         setSuccessMessage(null);
 
         try {
-            // Presupunem un endpoint PATCH pentru a actualiza doar campul faculty_valid
-            // Body-ul poate fi gol sau poate contine { faculty_valid: false }
             await api.patch(`/faculty/students/${studentId}/invalidate`, {}, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            // Actualizeaza starea locala a studentului
             setStudents(prevStudents =>
                 prevStudents.map(student =>
                     student._id === studentId ? { ...student, faculty_valid: false } : student
@@ -92,7 +87,6 @@ const DashboardFaculty: React.FC = () => {
         return <div className="dashboard-faculty-container"><p>Se incarca lista de studenti...</p></div>;
     }
 
-    // Daca eroarea apare si nu sunt studenti, afiseaza doar eroarea
     if (error && students.length === 0) {
         return <div className="dashboard-faculty-container"><p className="error-message">{error}</p></div>;
     }
@@ -101,7 +95,6 @@ const DashboardFaculty: React.FC = () => {
         <div className="dashboard-faculty-container">
             <h1>Panou de Control Facultate - Lista Studenti</h1>
             {successMessage && <div className="success-message">{successMessage}</div>}
-            {/* Afiseaza eroarea generala daca a aparut, chiar daca sunt studenti (eroare la update de ex.) */}
             {error && <p className="error-message global-error">{error}</p>}
 
             {students.length > 0 ? (
@@ -133,7 +126,7 @@ const DashboardFaculty: React.FC = () => {
                                         }
                                     </td>
                                     <td>
-                                        {student.faculty_valid && ( // Afiseaza butonul doar daca facultatea e inca valida
+                                        {student.faculty_valid && (
                                             <button
                                                 onClick={() => handleInvalidateFaculty(student._id)}
                                                 disabled={updatingStudentId === student._id}
@@ -143,7 +136,7 @@ const DashboardFaculty: React.FC = () => {
                                             </button>
                                         )}
                                         {!student.faculty_valid && (
-                                            <span>-</span> // Sau un mesaj ca e deja invalidata
+                                            <span>-</span>
                                         )}
                                     </td>
                                 </tr>
@@ -152,7 +145,6 @@ const DashboardFaculty: React.FC = () => {
                     </table>
                 </div>
             ) : (
-                // Daca nu sunt studenti dar nici eroare la fetch, afiseaza mesajul
                 !error && <p>Nu s-au gasit studenti inregistrati pentru aceasta facultate.</p>
             )}
         </div>

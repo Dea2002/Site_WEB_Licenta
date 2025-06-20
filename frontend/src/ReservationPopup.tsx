@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./ReservationPopup.css";
 import { subDays, addYears, setMonth, getMonth, getYear, startOfMonth, endOfMonth, addDays, format } from "date-fns";
 import { AuthContext } from "./AuthContext";
+
 interface ReservationPopupProps {
     onClose: () => void;
     onDatesSelected?: (checkIn: Date, checkOut: Date, rooms: number) => void;
@@ -29,7 +30,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
     const [unavailableIntervals, setUnavailableIntervals] = useState<DateInterval[]>([]);
     const [roomsCount, setRoomsCount] = useState<number>(0);
-    // const [selectedRooms, setSelectedRooms] = useState<number>(1);
     const [selectedRooms, setSelectedRooms] = useState<number | "">("");
     const { token, user } = useContext(AuthContext);
 
@@ -56,22 +56,19 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         const dates = dateStrings.map(s => new Date(s)).sort((a, b) => a.getTime() - b.getTime());
 
         const intervals: DateInterval[] = [];
-        if (dates.length === 0) return intervals; // Adaugat pentru siguranta
+        if (dates.length === 0) return intervals;
         let start = dates[0];
         let prev = dates[0];
 
         for (let i = 1; i < dates.length; i++) {
             const cur = dates[i];
-            // cate ms are o zi?
             const oneDay = 1000 * 60 * 60 * 24;
-            // daca nu sunt consecutive, incheiem intervalul curent
             if (cur.getTime() - prev.getTime() > oneDay) {
                 intervals.push({ start, end: prev });
                 start = cur;
             }
             prev = cur;
         }
-        // adaugam ultimul interval
         intervals.push({ start, end: prev });
         return intervals;
     }
@@ -129,7 +126,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     useEffect(() => {
         if (!user || !user.anUniversitar || !token) {
             // Daca nu avem datele studentului sau facultatii, permitem selectia fara restrictia de studentie
-            setStudentMaxSelectableDate(null); // Sau o data foarte indepartata
+            setStudentMaxSelectableDate(null);
             return;
         }
 
@@ -145,12 +142,12 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 const facultyDetails = response.data;
                 if (!facultyDetails || typeof facultyDetails.aniStudiu !== 'string') {
                     console.warn("Nu s-au putut prelua anii de studiu pentru facultate.");
-                    setStudentMaxSelectableDate(null); // Permite selectia
+                    setStudentMaxSelectableDate(null);
                     return;
                 }
 
-                const anUniversitarCurent = Number(user.anUniversitar); // ex: 1, 2, 3...
-                const aniStudiuTotal = facultyDetails.aniStudiu; // ex: 3 pentru licenta, 2 pentru master
+                const anUniversitarCurent = Number(user.anUniversitar);
+                const aniStudiuTotal = facultyDetails.aniStudiu;
 
                 let maxDateForStudent: Date | null = null;
                 const today = new Date();
@@ -177,9 +174,9 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                     maxDateForStudent = addYears(endCurrentAcademicYear, (aniStudiuTotal - anUniversitarCurent));
                 }
 
-                // Deoarece maxDate in DatePicker este inclusiva, daca vrem "pana la 1 Sept",
-                // inseamna ca ultima zi selectabila este 31 August.
-                // Deci, daca maxDateForStudent este 1 Sept, max selectabil e 31 Aug.
+
+
+
                 if (maxDateForStudent) {
                     setStudentMaxSelectableDate(subDays(maxDateForStudent, 1));
                 } else {
@@ -189,7 +186,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             })
             .catch(err => {
                 console.error("Eroare la preluarea detaliilor facultatii pentru validare student:", err);
-                setStudentMaxSelectableDate(null); // Permite selectia in caz de eroare
+                setStudentMaxSelectableDate(null);
             })
             .finally(() => {
                 setLoadingStudentValidation(false);
@@ -218,14 +215,14 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 </button>
                 <h2>Selecteaza datele</h2>
                 <form onSubmit={handleSubmit}>
-                    {/* Select camere mai intai */}
+
                     <div className="rooms-selector">
                         <label>Doresc:</label>
                         <select
                             value={selectedRooms}
                             onChange={(e) => {
                                 setSelectedRooms(e.target.value === "" ? "" : Number(e.target.value));
-                                // Reseteaza datele selectate cand se schimba nr de camere
+
                                 setCheckInDate(null);
                                 setCheckOutDate(null);
                             }
@@ -243,7 +240,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                         </select>
                     </div>
 
-                    {/* Date pickers afisate doar dupa selectarea camerelor */}
+
                     {selectedRooms !== "" && !loadingStudentValidation && (
                         <>
                             <div className="date-picker-container">
@@ -278,8 +275,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                                     locale="ro"
                                     dateFormat="dd/MM/yyyy"
                                     placeholderText="Selecteaza check-out"
-                                    minDate={checkInDate ? addDays(checkInDate, 0) : new Date()} // Cel putin data de check-in
-                                    // maxDate combina restrictia apartamentului cu cea a studentului
+                                    minDate={checkInDate ? addDays(checkInDate, 0) : new Date()}
+
                                     maxDate={finalMaxCheckOutDate}
                                     excludeDateIntervals={unavailableIntervals.map((interval) => ({
                                         start: interval.start,

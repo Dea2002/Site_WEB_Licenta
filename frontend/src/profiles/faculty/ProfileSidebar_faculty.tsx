@@ -1,7 +1,6 @@
 import React from 'react';
-import './profile_faculty.css'; // Refolosim CSS sau cream unul dedicat
+import './profile_faculty.css';
 
-// Tipuri definite in parinte
 type ProfileSection = 'edit';
 
 interface ProfileSidebarProps {
@@ -18,7 +17,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
     const handleDeleteClick = () => {
         if (window.confirm("ATENTIE! Sunteti pe cale sa initiati procesul de stergere a contului facultatii. Aceasta actiune va invalida toti studentii asociati si este ireversibila. Continuati?")) {
             if (window.confirm("Confirmare finala: Sigur doriti sa stergeti contul facultatii?")) {
-                onInitiateDeleteAccount(); // Apeleaza functia din parinte
+                onInitiateDeleteAccount();
             }
         }
     };
@@ -29,9 +28,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeSection, onSectio
                 {menuItems.map((item) => (
                     <li key={item.id}>
                         <button
-                            // Aplicam clasa 'active' daca ID-ul itemului corespunde sectiunii active
                             className={`sidebar-button ${activeSection === item.id ? 'active' : ''}`}
-                            // La click, apelam functia din parinte cu ID-ul sectiunii
                             onClick={() => onSectionChange(item.id as ProfileSection)}
                         >
                             {item.label}

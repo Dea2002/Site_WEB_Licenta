@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { api } from '../api';
 import { AuthContext } from '../AuthContext';
-import { Review } from '../types'; // Asigura-te ca tipul e corect
+import { Review } from '../types';
 
 interface ReviewFormProps {
     apartmentId: string;
@@ -54,14 +54,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ apartmentId, onReviewSubmitted,
         try {
             const response = await api.post<Review>('/reviews', {
                 apartmentId,
-                // userId, // Trimite userId daca backend-ul o cere explicit, altfel se bazeaza pe token
                 rating,
                 comment,
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            onReviewSubmitted(response.data); // Paseaza review-ul nou creat componentei parinte
-            // Reset form
+            onReviewSubmitted(response.data);
             setRating(0);
             setComment("");
         } catch (err: any) {

@@ -5,7 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 import jwt_decode from 'jwt-decode';
 const Login: React.FC = () => {
-    const [email, setEmail] = useState(""); // Schimbat de la 'username' la 'email'
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const { login, loginFaculty } = useContext(AuthContext);
@@ -19,7 +19,6 @@ const Login: React.FC = () => {
 
             const { token } = response.data;
 
-            // stochez token-ul si user-ul in context
             const decoded: any = jwt_decode<{ iat: number; exp: number }>(token);
             if (decoded.role === "facultate") {
                 loginFaculty(token, decoded);
@@ -27,7 +26,6 @@ const Login: React.FC = () => {
                 login(token, decoded);
             }
 
-            // redirect in functie de rol
             if (decoded.role === "admin") {
                 navigate("/admin/dashboard");
             } else if (decoded.role === "proprietar") {
@@ -44,14 +42,13 @@ const Login: React.FC = () => {
 
     return (
         <>
-            {/* <Bara_navigatie /> */}
             <div className="login-container">
                 <h1> Autentificare</h1>
                 <form onSubmit={handleSubmit} className="login-form">
                     <div>
-                        <label>Email:</label> {/* Schimbat de la 'Username' la 'Email' */}
+                        <label>Email:</label>
                         <input
-                            type="email" // Schimbat tipul la 'email' pentru a facilita validarea
+                            type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required

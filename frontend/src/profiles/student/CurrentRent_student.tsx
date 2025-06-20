@@ -87,7 +87,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         fetchCurrentRent();
     }, [userId, token]);
 
-    // cand avem rentData, incarcam colegii activi
     useEffect(() => {
         const fetchActiveRenters = async () => {
             if (!rentData) return;
@@ -138,7 +137,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
         }
     };
 
-    // === Render logic la inceput, ca sa fie clar ===
     if (isLoading || error || !rentData) {
         return (
             <div className="profile-section-content">
@@ -160,7 +158,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
     const nights = differenceInCalendarDays(checkOutDate, checkInDate);
     const totalNights = nights + 1;
     const totalPrice = pricePerRoom * totalNights * numberOfRooms;
-    // Daca e mai mult de 30 nopti, pregateste si o estimare pentru 30 nopti (o luna)
     const showMonthlyEstimate = totalNights > 30;
     const monthlyEstimate = pricePerRoom * 30 * numberOfRooms;
 
@@ -199,19 +196,14 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                     <strong>Pret: </strong>{rentData.finalPrice} RON
                 </p>
 
-                {/* --- Butoane actiuni --- */}
-
                 <div className="rent-actions">
                     <button onClick={handleCancel} className="btn-cancel">Anuleaza chiria</button>
                     <button onClick={handleCleaningRequest} className="btn-cleaning">Cerere firma curatatorie</button>
                 </div>
 
-                {/* --- Sectiunea de chat --- */}
-
                 <div className="chat-section">
                     <h3>Chat</h3>
 
-                    {/* Chat cu proprietarul */}
                     <button
                         className="btn-chat-owner"
                         onClick={() => initiatePrivateChat(rentData!.apartment.ownerId)}
@@ -244,7 +236,6 @@ const CurrentRent: React.FC<CurrentRentProps> = ({ userId }) => {
                         }
                     </div>
 
-                    {/* butonul de grup chat */}
                     <button
                         className="btn-chat-group"
                         onClick={() => initiateGroupChat(rentData!.apartment._id, true)}
