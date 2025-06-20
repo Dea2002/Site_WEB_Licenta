@@ -1,13 +1,10 @@
 .register-page-container {
-    min-height: calc(100vh - 60px); 
+    min-height: calc(100vh - 60px);
     padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    
-    
 }
-
 
 .role-selection-container {
     background-color: rgba(255, 255, 255, 0.9);
@@ -31,23 +28,22 @@
 
 .role-buttons {
     display: flex;
-    flex-direction: column; 
-    gap: 15px; 
-    align-items: center; 
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
 }
 
 .role-button {
     padding: 12px 25px;
     border: none;
-    border-radius: 25px; 
+    border-radius: 25px;
     font-size: 1.1em;
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-    width: 80%; 
+    width: 80%;
     max-width: 250px;
 }
-
 
 .role-button.student {
     background-color: #40a578;
@@ -59,7 +55,7 @@
 }
 
 .role-button.proprietar {
-    background-color: #9dde8b; 
+    background-color: #9dde8b;
     color: white;
 }
 .role-button.proprietar:hover {
@@ -68,7 +64,7 @@
 }
 
 .role-button.facultate {
-    background-color: #006769; 
+    background-color: #006769;
     color: white;
 }
 .role-button.facultate:hover {
@@ -76,35 +72,20 @@
     box-shadow: 0 0 15px #ff9b17;
 }
 
-
 .register-container {
-     
     padding: 30px 40px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     margin-top: 3rem;
     width: 100%;
     max-width: 600px;
-    border: 1px solid #333; 
-     
-
-    
-
-    
+    border: 1px solid #333;
     background-color: #9dde8b;
-    /* background-image: linear-gradient(20deg, #006769 30%, transparent 45%),
-        linear-gradient(-60deg, #40a578 50%, transparent 60%); */
     background-image: linear-gradient(20deg, #006769 17%, transparent 55%),
         linear-gradient(-60deg, #40a578 35%, transparent 70%);
-
-    
     background-size: 100% 100%;
     background-repeat: no-repeat;
-
-    
-
-    
-    color: #ffffff; 
+    color: #ffffff;
 }
 
 .register-container h1 {
@@ -113,11 +94,10 @@
     color: #333;
 }
 
-
 .register-form {
     display: flex;
     flex-direction: column;
-    gap: 10px; 
+    gap: 10px;
 }
 .register-form div {
     display: flex;
@@ -149,7 +129,7 @@
 }
 .register-form button[type="submit"] {
     padding: 12px 20px;
-    background-color: #007bff; 
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -162,7 +142,6 @@
 .register-form button[type="submit"]:hover {
     background-color: #0056b3;
 }
-
 
 .error {
     color: #dc3545;
@@ -183,11 +162,10 @@
     text-align: center;
 }
 
-
 .back-button {
     margin-top: 1.5rem;
     padding: 8px 15px;
-    background-color: #6c757d; 
+    background-color: #6c757d;
     color: white;
     border: none;
     border-radius: 4px;
@@ -199,14 +177,12 @@
     background-color: #5a6268;
 }
 
-
 .login-link-text {
     margin-top: 2rem;
     text-align: center;
-    color: #333; 
+    color: #333;
 }
 .login-link-text .custom-link {
-    
     color: #007bff;
     font-weight: bold;
     text-decoration: none;
@@ -215,22 +191,17 @@
     text-decoration: underline;
 }
 
-/* --- START: Styles for Animation --- * /
-
 .content-area {
-    width: 100%; 
-    max-width: 600px; 
-    display: flex; 
+    width: 100%;
+    max-width: 600px;
+    display: flex;
     justify-content: center;
-    
-    animation: fadeIn 0.4s ease-out forwards; 
+    animation: fadeIn 0.4s ease-out forwards;
 }
-
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        
         transform: translateY(10px);
     }
     to {
@@ -239,10 +210,9 @@
     }
 }
 
-
 .role-selection-container,
 .register-container {
-    width: 100%; 
+    width: 100%;
 }
 
 .student-form h1 {
@@ -265,7 +235,6 @@
     color: #6c757d;
 }
 
-
 .register-form small {
     font-size: 0.8em;
     color: #6c757d;
@@ -273,11 +242,10 @@
     display: block;
 }
 
-
 .register-form input[type="file"] {
-    padding: 8px; 
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 0.95rem; 
-    background-color: #f8f9fa; 
+    font-size: 0.95rem;
+    background-color: #f8f9fa;
 }
