@@ -21,8 +21,6 @@ npm install
 npm run dev
 ```
 
----
+## Lansarea aplicatiei
 
-<br>
-
-In urma acestor pasi, pentru accesarea site-ului cautam in bara de navigatie a browser-ului adresa `http://localhost:5173/`.
+Pentru accesarea site-ului cautam in bara de navigatie a browser-ului adresa `http://localhost:5173/`.
