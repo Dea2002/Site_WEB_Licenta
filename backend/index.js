@@ -356,7 +356,7 @@ async function run() {
         app.use('/users', userRoutes);
 
         const createApartmentsRoutes = require('./routes/apartments');
-        const apartmentsRoutes = createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService);
+        const apartmentsRoutes = createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService, conversationsCollection);
         app.use('/apartments', apartmentsRoutes);
 
         const createFacultyRoutes = require('./routes/faculty');

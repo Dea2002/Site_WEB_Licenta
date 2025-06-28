@@ -562,12 +562,12 @@ const OwnerApartmentDetails: React.FC = () => {
         if (!window.confirm("Sunteti sigur ca doriti sa anulati aceasta chirie?")) return;
         setIsSaving(prev => ({ ...prev, cancelRental: true }));
         try {
-            await api.patch(`/rentals/${rentalId}/cancel-by-owner`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+            await api.patch(`/apartments/rentals/${rentalId}/cancel-by-owner`, {}, {
             });
             alert("Chiria a fost anulata.");
             fetchCurrentRentals();
             fetchRentalHistory(rentalHistoryPage);
+            window.location.reload();
         } catch (err: any) {
             console.error("Eroare la anularea chiriei:", err);
             setError(err.response?.data?.message || "Nu s-a putut anula chiria.");
@@ -584,7 +584,7 @@ const OwnerApartmentDetails: React.FC = () => {
                 deleteExistingImage(img);
             });
             await api.delete(`/apartments/${apartment._id}`, {
-                headers: { Authorization: `Bearer ${token}` }
+
             });
             alert("Apartamentul a fost sters cu succes.");
             navigate("/owner/apartments");

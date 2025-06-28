@@ -1350,18 +1350,20 @@ const Home: React.FC = () => {
                         <p>Nu s-au gasit apartamente care sa corespunda filtrelor selectate.</p>
                     )}
                 </section>
-            </div>
+            </div >
 
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-            {selectedMapData && (
-                <MapModal
-                    lat={selectedMapData.lat}
-                    lng={selectedMapData.lng}
-                    address={selectedMapData.address}
-                    onClose={() => setSelectedMapData(null)}
-                />
-            )}
-        </div>
+            {
+                selectedMapData && (
+                    <MapModal
+                        lat={selectedMapData.lat}
+                        lng={selectedMapData.lng}
+                        address={selectedMapData.address}
+                        onClose={() => setSelectedMapData(null)}
+                    />
+                )
+            }
+        </div >
     );
 };
 

@@ -5,7 +5,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 const { bucket, getBucket } = require('../config/firebaseAdmin');
 const { check } = require('express-validator');
 
-function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService) {
+function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollection, usersCollection, notificationService, conversationsCollection) {
 
     router.get('/', async (req, res) => {
         const result = await apartmentsCollection.find().toArray();
@@ -177,7 +177,7 @@ function createApartmentsRoutes(apartmentsCollection, reservationHistoryCollecti
             if (!rental) {
                 return res.status(404).json({ message: "Chiria nu a fost gasita." });
             }
-            if (rental.apartament.ownerId.toString() !== userId.toString()) {
+            if (rental.apartamentData.ownerId.toString() !== userId.toString()) {
                 return res.status(403).json({ message: "Neautorizat. Nu sunteti proprietarul acestui apartament." });
             }
 
