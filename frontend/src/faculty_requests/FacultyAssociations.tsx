@@ -12,8 +12,9 @@ interface DeclinePopupProps {
     error?: string | null;
 }
 
+// componenta pentru pop-up-ul de respingere a cererii
 const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSubmit, requestId, isSubmitting, error }) => {
-    const [reason, setReason] = useState("");
+    const [reason, setReason] = useState(""); // stare cu motivul respingerii
 
     useEffect(() => {
         if (isOpen) {
@@ -21,7 +22,7 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
         }
     }, [isOpen, requestId]);
 
-    if (!isOpen || !requestId) return null;
+    if (!isOpen || !requestId) return null; // daca nu vreau sa afisez pop-up-ul sau daca nu am motiv, nu afisez
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,12 +30,13 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
             alert("Va rugam introduceti un motiv pentru respingere.");
             return;
         }
-        onSubmit(reason);
+        onSubmit(reason); // apelez functia din componenta parinte pentru a trimite motivul respingerii
     };
 
     return (
         <div className="popup-overlay">
             <div className="popup-content decline-popup">
+                {/* titlul pop-up-ului */}
                 <h3>Motivul Respingerii Cererii</h3>
                 {error && <p className="error-message popup-error">{error}</p>}
                 <form onSubmit={handleSubmit}>
@@ -47,8 +49,9 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
                         disabled={isSubmitting}
                     />
                     <div className="popup-actions">
-                        <button type="submit" disabled={isSubmitting || !reason.trim()} className="popup-button-submit">
-                            {isSubmitting ? "Se trimite..." : "Trimite Motiv"}
+                        {/* butonul de trimitere */}
+                        <button type="submit" disabled={isSubmitting || !reason.trim()} className="popup-button-submit"> {/* dezactivez daca nu am motiv introdus sau daca s-a trimis submit */}
+                            {isSubmitting ? "Se trimite..." : "Trimite Motiv"} {/* textul butonului */}
                         </button>
                         <button type="button" onClick={onClose} disabled={isSubmitting} className="popup-button-cancel">
                             Anuleaza
@@ -90,7 +93,7 @@ const FacultyAssociations: React.FC = () => {
     };
 
     const fetchAssociationRequests = async () => {
-        if (!token || !faculty?._id) {
+        if (!token || !faculty?._id) { // verific daca sunt autentificat
             setError("Utilizator neautentificat sau date lipsa.");
             return;
         }
@@ -104,15 +107,15 @@ const FacultyAssociations: React.FC = () => {
                     },
                 }
             );
-            setRequests(response.data);
+            setRequests(response.data); // stochez cererile primite de la backend
         } catch (err: any) {
             console.error("Eroare la fetch cereri de asociere:", err);
         }
     };
 
-    useState(() => {
+    useEffect(() => {
         fetchAssociationRequests();
-    }), [];
+    }, []);
 
     const handleApprove = async (requestId: string) => {
         if (!token) return;
@@ -130,13 +133,13 @@ const FacultyAssociations: React.FC = () => {
     };
 
     const handleDeclineClick = (id: string) => {
-        setCurrentRequestIdForDecline(id);
+        setCurrentRequestIdForDecline(id); // seteaza id-ul cererii curente pentru respingere
         setDeclineSubmitError(null);
-        setShowDeclinePopup(true);
+        setShowDeclinePopup(true); // afiseaza pop-up-ul pentru respingere
     };
 
     const submitDeclineReason = async (reason: string) => {
-        if (!currentRequestIdForDecline) return;
+        if (!currentRequestIdForDecline) return; // daca nu am id-ul cererii, nu pot respinge
 
         setIsSubmittingDecline(true);
         setDeclineSubmitError(null);
@@ -147,10 +150,12 @@ const FacultyAssociations: React.FC = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setSuccessMessage("Cererea a fost respinsa cu succes!");
+
+            // actualizez lista de cereri, fara a da refresh la pagina
             setRequests(prevRequests => prevRequests.filter((request) => request._id !== currentRequestIdForDecline));
-            setShowDeclinePopup(false);
-            setCurrentRequestIdForDecline(null);
-            setTimeout(() => setSuccessMessage(""), 3000);
+            setShowDeclinePopup(false); // inchid pop-up-ul
+            setCurrentRequestIdForDecline(null); // resetez id-ul curent pentru respingere
+            setTimeout(() => setSuccessMessage(""), 3000); // sterg mesajul de succes dupa 3 secunde
         } catch (err: any) {
             console.error("Eroare la respingerea cererii:", err);
             setDeclineSubmitError(err.response?.data?.message || "Nu s-a putut respinge cererea.");

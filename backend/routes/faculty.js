@@ -114,8 +114,8 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     });
 
     router.post('/association/:id/reject', async (req, res) => {
-        const { id } = req.params;
-        const reason = req.body.reason;
+        const { id } = req.params; // extrag id din link-ul cererii
+        const reason = req.body.reason; // extrag motivul din corpul cererii
 
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: "ID request invalid" });
@@ -130,7 +130,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 return res.status(404).json({ message: 'Cererea de asociere nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
             }
 
-            const { studentId } = associationRequest;
+            const { studentId } = associationRequest; // extrag id-ul studentului din cerere
 
             const deleteRequest = await associationsRequestsCollection.deleteOne({ _id: associationRequestId });
             if (deleteRequest.deletedCount === 0) {
@@ -162,12 +162,12 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             const pipeline = [
                 // 1. Filtram dupa facultate
                 {
-                    $match: { facultyId }
+                    $match: { facultyId } // filtram cererile dupa id-ul facultatii
                 },
 
                 {
                     $addFields: {
-                        studentObjId: {
+                        studentObjId: { // adaugam un camp nou studentObjId care este ObjectId-ul studentului
                             $toObjectId: '$studentId'
                         }
                     }
@@ -175,19 +175,19 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
 
                 {
                     $lookup: {
-                        from: 'users',
-                        localField: 'studentObjId',
-                        foreignField: '_id',
-                        as: 'studentInfo'
+                        from: 'users', // din colectia users
+                        localField: 'studentObjId', // folosim campul studentObjId din cerere
+                        foreignField: '_id', // cautam dupa campul _id din users
+                        as: 'studentInfo' // rezultatul va fi in campul studentInfo
                     }
                 },
 
                 {
-                    $unwind: '$studentInfo'
+                    $unwind: '$studentInfo' // desfacem array-ul studentInfo pentru a avea un singur document per student
                 },
 
                 {
-                    $project: {
+                    $project: { // selectam campurile pe care vrem sa le returnam
                         _id: 1,
                         requestDate: 1,
                         faculty: 1,
@@ -203,7 +203,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             ];
 
             const results = await markRequestsCollection
-                .aggregate(pipeline)
+                .aggregate(pipeline) // folosim agregarea definita mai sus
                 .toArray();
 
             return res.json(results);
@@ -216,7 +216,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     });
 
     router.put('/mark/:id/approve', async (req, res) => {
-        const { id } = req.params;
+        const { id } = req.params; //extrag id din link-ul cererii
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: "ID request invalid" });
         }
@@ -226,11 +226,10 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
             const markRequest = await markRequestsCollection.findOne({ _id: markRequestId });
             if (!markRequest) return res.status(404).json({ message: 'Cererea de actualizare medii nu a fost gasita sau nu mai este pending.' });
 
-
             const student = await usersCollection.findOne({ _id: new ObjectId(markRequest.studentId) });
             if (!student) return res.status(404).json({ message: 'Studentul nu a fost gasit.' });
 
-
+            // cauta facultatea asociata cererii
             const facultyDoc = await facultiesCollection.findOne({ _id: new ObjectId(markRequest.facultyId) });
 
             if (!facultyDoc) return res.status(404).json({ message: 'Facultatea asociata nu a fost gasita.' });
@@ -258,10 +257,10 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
     });
 
     router.post('/mark/:id/reject', async (req, res) => {
-        const { id } = req.params;
-        const reason = req.body.reason;
+        const { id } = req.params; // extrag id din link-ul cererii
+        const reason = req.body.reason; // extrag motivul din corpul cererii
 
-        if (!ObjectId.isValid(id)) {
+        if (!ObjectId.isValid(id)) { // verific formatul id-ului sa fie valid
             return res.status(400).json({ message: "ID request invalid" });
         }
 
@@ -274,7 +273,7 @@ function createFacultyRoutes(usersCollection, facultiesCollection, notificationS
                 return res.status(404).json({ message: 'Cererea de actualizare de medie nu a fost gasita, este deja procesata sau nu apartine acestei facultati.' });
             }
 
-            const { studentId } = markRequest;
+            const { studentId } = markRequest; // extrag id-ul studentului din cerere
 
             const deleteRequest = await markRequestsCollection.deleteOne({ _id: markRequestId });
             if (deleteRequest.deletedCount === 0) {
