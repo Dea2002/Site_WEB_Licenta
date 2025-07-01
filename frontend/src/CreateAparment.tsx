@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { api } from './api';
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 import "./CreateApartment.css";
 import { useNavigate } from "react-router-dom";
 import { storage } from "./firebaseConfig";

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../authenticate/AuthContext";
 import Bara_navigatie from "./Bara_navigatie";
 import Bara_nav_OwnerDashboard from "./Bara_nav_OwnerDashboard";
 import Bara_navigatie_facultate from "./Bara_navigatie_facultate";

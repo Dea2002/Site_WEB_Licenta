@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
-import { api } from './api';
+import { api } from '../api';
 
 export interface User {
     _id: string;

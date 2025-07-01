@@ -3,7 +3,7 @@ import { Review } from '../types';
 import { api } from '../api';
 import { format } from 'date-fns';
 import { ro } from 'date-fns/locale';
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../authenticate/AuthContext';
 import "./ReviewList.css"
 interface ReviewItemProps {
     review: Review;

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { api } from './api';
-import { AuthContext } from './AuthContext';
+import { AuthContext } from './authenticate/AuthContext';
 
 interface NotificationsContextType {
     unreadCount: number;

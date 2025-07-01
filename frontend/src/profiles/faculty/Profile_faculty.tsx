@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../../AuthContext";
+import { AuthContext } from "../../authenticate/AuthContext";
 import "./profile_faculty.css";
 import { useNavigate } from "react-router-dom";
 import EditProfile from './EditProfile_faculty';

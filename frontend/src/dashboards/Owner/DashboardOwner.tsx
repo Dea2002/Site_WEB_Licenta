@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { api } from './api';
-import { AuthContext } from "./AuthContext";
+import { api } from '../../api';
+import { AuthContext } from "../../authenticate/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { FaBuilding } from "react-icons/fa";
 import "./DashboardOwner.css";

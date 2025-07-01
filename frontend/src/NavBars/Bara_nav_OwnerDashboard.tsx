@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Navbar, Container, Nav, NavDropdown, Badge } from "react-bootstrap";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../authenticate/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import "./navbar_dashboard_owner.css";
 import { useNotifications } from "../NotificationContext";

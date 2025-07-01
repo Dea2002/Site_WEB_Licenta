@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "./api";
 import { Apartment } from "./types";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 import OwnerPop_up from "./OwnerPop_up";
 import ReservationPopup from "./ReservationPopup";
 import { format, parseISO } from "date-fns";

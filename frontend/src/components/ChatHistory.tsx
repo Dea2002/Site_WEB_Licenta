@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../authenticate/AuthContext';
 import { api } from '../api';
 import './ChatHistory.css';
 import { formatDistanceToNow } from 'date-fns';

@@ -5,7 +5,7 @@ import { ro } from 'date-fns/locale';
 import "react-datepicker/dist/react-datepicker.css";
 import "./ReservationPopup.css";
 import { subDays, addYears, setMonth, getMonth, getYear, startOfMonth, endOfMonth, addDays, format } from "date-fns";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 
 interface ReservationPopupProps {
     onClose: () => void;

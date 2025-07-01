@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { api } from './api';
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 import { isAfter, parseISO } from "date-fns";
 import "./OwnerRequests.css";
 

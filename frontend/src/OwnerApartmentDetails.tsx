@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback, ChangeEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from './api';
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 import { ref, deleteObject, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "./firebaseConfig";
 import { Apartment, PaginatedRentals, Rental, ALL_POSSIBLE_FACILITIES_MAP, Review, PaginatedResponse } from "./types";

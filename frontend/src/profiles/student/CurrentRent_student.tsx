@@ -1,7 +1,7 @@
 import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import React, { useState, useEffect, useContext } from 'react';
 import { useInitiatePrivateChat, useInitiateGroupChat } from "../../hooks/useInitiateChat";
-import { AuthContext } from '../../AuthContext';
+import { AuthContext } from '../../authenticate/AuthContext';
 import './profile_student.css';
 import { api } from '../../api';
 

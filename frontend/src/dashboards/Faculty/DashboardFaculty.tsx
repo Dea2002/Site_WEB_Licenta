@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import "./DashboardFaculty.css";
-import { api } from "./api";
-import { AuthContext } from "./AuthContext";
+import { api } from "../../api";
+import { AuthContext } from "../../authenticate/AuthContext";
 
 interface Student {
     _id: string;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { api } from './api';
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 import { parseISO, format } from 'date-fns';
 import "./NotificationDashboard.css";
 import { useNotifications } from './NotificationContext';

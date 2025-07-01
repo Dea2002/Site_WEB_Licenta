@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { AuthContext, Faculty } from '../../AuthContext';
+import { AuthContext, Faculty } from '../../authenticate/AuthContext';
 import { api } from '../../api';
 import './profile_faculty.css';
 import jwt_decode from 'jwt-decode';

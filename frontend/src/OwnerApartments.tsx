@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from './api';
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./authenticate/AuthContext";
 import { Apartment } from "./types";
 import "./OwnerApartments.css";
 

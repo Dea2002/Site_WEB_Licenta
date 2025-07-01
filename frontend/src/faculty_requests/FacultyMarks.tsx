@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
-import { api } from './api';
-import { AuthContext } from "./AuthContext";
-import "./FacultyAssociations.css";
+import { api } from '../api';
+import { AuthContext } from "../authenticate/AuthContext";
+import "./FacultyMarks.css";
 
 interface DeclinePopupProps {
     isOpen: boolean;
@@ -60,17 +60,30 @@ const DeclineReasonPopup: React.FC<DeclinePopupProps> = ({ isOpen, onClose, onSu
     );
 };
 
-interface AssociationRequest {
+interface StudentInfo {
+    fullName: string;
+    email: string;
+    numar_matricol: string;
+    anUniversitar: string;
+    medie: string;
+}
+interface MarkRequest {
     _id: string;
     numeStudent: string;
     emailStudent: string;
+    anUniversitar: string;
     numar_matricol: string;
+    studentId: string;
+    medie: string;
+    faculty: string;
+    facultyId: string;
     requestDate: string;
+    studentInfo: StudentInfo;
 }
 
-const FacultyAssociations: React.FC = () => {
+const FacultyMarks: React.FC = () => {
 
-    const [requests, setRequests] = useState<AssociationRequest[]>([]);
+    const [requests, setRequests] = useState<MarkRequest[]>([]);
     const { faculty, token } = useContext(AuthContext);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string>("");
@@ -89,21 +102,17 @@ const FacultyAssociations: React.FC = () => {
         }
     };
 
-    const fetchAssociationRequests = async () => {
+    const fetchMarkRequests = async () => {
         if (!token || !faculty?._id) {
             setError("Utilizator neautentificat sau date lipsa.");
             return;
         }
 
         try {
-            const response = await api.get<AssociationRequest[]>(
-                `/faculty/get_association_requests/${faculty!._id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+            const response = await api.get<MarkRequest[]>(
+                `/faculty/get_mark_requests/${faculty!._id}`
             );
+
             setRequests(response.data);
         } catch (err: any) {
             console.error("Eroare la fetch cereri de asociere:", err);
@@ -111,14 +120,15 @@ const FacultyAssociations: React.FC = () => {
     };
 
     useState(() => {
-        fetchAssociationRequests();
+        fetchMarkRequests();
     }), [];
 
     const handleApprove = async (requestId: string) => {
         if (!token) return;
         try {
+
             await api.put(
-                `/faculty/association/${requestId}/approve`,
+                `/faculty/mark/${requestId}/approve`,
                 { header: { Authorization: `Bearer ${token}` } }
             );
 
@@ -142,7 +152,7 @@ const FacultyAssociations: React.FC = () => {
         setDeclineSubmitError(null);
         try {
             await api.post(
-                `/faculty/association/${currentRequestIdForDecline}/reject`,
+                `/faculty/mark/${currentRequestIdForDecline}/reject`,
                 { reason: reason },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -160,38 +170,41 @@ const FacultyAssociations: React.FC = () => {
     };
 
     return (
-        <div className="faculty-associations-container">
-            <h1>Cereri de Asociere Studenti</h1>
+        <div className="faculty-marks-container">
+            <h1>Cereri de Actualizare Medii Studenti</h1>
             {successMessage && <div className="success-message">{successMessage}</div>}
-
-            {error && !showDeclinePopup && <p className="error-message">{error}</p>}
+            {error && <p className="error-message">{error}</p>}
 
             {!error && (
                 <div className="requests-list">
                     {requests.length === 0 ? (
-                        !error && <p>Nu exista cereri de asociere in asteptare.</p>
+                        <p>Nu exista cereri de validare a mediei in asteptare.</p>
                     ) : (
                         <table>
                             <thead>
                                 <tr>
                                     <th>Nume Student</th>
                                     <th>Email Student</th>
-                                    <th>Data Cererii</th>
                                     <th>Numar Matricol</th>
+                                    <th>Anul Universitar</th>
+                                    <th>Medie</th>
+                                    <th>Data Cererii</th>
                                     <th>Actiuni</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {requests.map((request) => (
                                     <tr key={request._id}>
-                                        <td>{request.numeStudent}</td>
-                                        <td>{request.emailStudent}</td>
+                                        <td>{request.studentInfo.fullName}</td>
+                                        <td>{request.studentInfo.email}</td>
+                                        <td>{request.studentInfo.numar_matricol ? request.studentInfo.numar_matricol : "Neinregistrat"}</td>
+                                        <td>{request.studentInfo.anUniversitar}</td>
+                                        <td>{request.studentInfo.medie}</td>
                                         <td>{formatDate(request.requestDate)}</td>
-                                        <td>{request.numar_matricol}</td>
                                         <td>
-                                            <div className="request-item-actions">
-                                                <button onClick={() => handleApprove(request._id)} className="button-accept"> Aproba </button>
-                                                <button onClick={() => handleDeclineClick(request._id)} className="button-decline"> Respinge </button>
+                                            <div className="action-buttons">
+                                                <button onClick={() => handleApprove(request._id)} className="approve-button"> Aproba </button>
+                                                <button onClick={() => handleDeclineClick(request._id)} className="reject-button"> Respinge </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -218,4 +231,4 @@ const FacultyAssociations: React.FC = () => {
     );
 };
 
-export default FacultyAssociations;
+export default FacultyMarks;

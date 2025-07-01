@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { api } from "./api";
+import { api } from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
-import { uploadFileToStorage } from "./firebaseConfig";
+import { uploadFileToStorage } from "../firebaseConfig";
 
 interface RegisterFormState {
     email: string;

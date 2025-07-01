@@ -1,7 +1,7 @@
 import { FC, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import ChatWindow from './ChatWindow';
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../authenticate/AuthContext';
 
 interface Params {
     [key: string]: string | undefined;

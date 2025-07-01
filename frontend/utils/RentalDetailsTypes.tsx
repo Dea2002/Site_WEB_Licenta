@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { parseISO, differenceInCalendarDays, isAfter } from "date-fns";
 import { Apartment } from "../src/types";
-import { AuthContext } from "../src/AuthContext";
+import { AuthContext } from "../src/authenticate/AuthContext";
 
 export interface SelectedDates {
     checkIn: Date;

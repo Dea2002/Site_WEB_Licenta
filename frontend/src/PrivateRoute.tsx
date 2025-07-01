@@ -1,8 +1,7 @@
 import React from "react";
 import { useContext } from "react";
-import { AuthContext } from "./AuthContext";
 import { Navigate, Outlet } from "react-router-dom";
-import { User } from "./AuthContext";
+import { User, AuthContext } from "./authenticate/AuthContext";
 
 interface Props {
     allowedRoles?: User["role"][];

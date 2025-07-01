@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { api } from '../api';
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../authenticate/AuthContext';
 import { Review } from '../types';
 
 interface ReviewFormProps {
