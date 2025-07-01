@@ -5,7 +5,7 @@ import LoginModal from "./LoginModal";
 import { Apartment } from "./types";
 import "./style.css";
 import MapModal from "./MapModal";
-import { Faculty } from "./AuthContext";
+import { Faculty } from "./authenticate/AuthContext";
 import { University } from "./types";
 
 interface ProximityPoiFilter {

@@ -1,4 +1,4 @@
-import { User } from "./AuthContext";
+import { User } from "./authenticate/AuthContext";
 
 export interface Apartment {
     _id: string;

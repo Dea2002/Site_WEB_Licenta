@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../authenticate/AuthContext";
 import { Navigate, Outlet } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
