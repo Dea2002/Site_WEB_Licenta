@@ -77,9 +77,10 @@ const ChatHistory: React.FC = () => {
             ) : (
                 <ul className="chats-list">
                     {conversations.map(conv => {
+                        const participantsArray = Array.isArray(conv.participants) ? conv.participants : [];
                         const title =
                             conv.title ||
-                            conv.participants
+                            participantsArray
                                 .filter(id => id !== user!._id)
                                 .map(id => userNames[id] || '…')
                                 .join(', ');
